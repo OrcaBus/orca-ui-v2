@@ -1,0 +1,20 @@
+# Dependencies and build output
+node_modules
+dist
+dist-ssr
+build
+build/stats.html
+*.local
+
+# Lock files
+pnpm-lock.yaml
+package-lock.json
+bun.lockb
+
+# Generated/cache
+.cache
+coverage
+
+# Editor and OS
+.DS_Store
+*.sw?

@@ -1,0 +1,88 @@
+{
+  "name": "Orcabus LIMS Web UI",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "bash -c 'source start.sh'",
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "build:analyze": "tsc -b && ANALYZE=1 vite build",
+    "preview": "vite preview",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "type-check": "tsc --noEmit",
+    "prettier-fix": "prettier --write .",
+    "pre-commit": "pnpm lint && pnpm format:check"
+  },
+  "keywords": [
+    "UMCCR",
+    "LIMS",
+    "Portal",
+    "Web",
+    "UI",
+    "Design"
+  ],
+  "author": {
+    "name": "University of Melbourne Centre for Cancer Research",
+    "organization": true
+  },
+  "packageManager": "pnpm@10.33.0+sha512.10568bb4a6afb58c9eb3630da90cc9516417abebd3fabbe6739f0ae795728da1491e9db5a544c76ad8eb7570f5c4bb3d6c637b2cb41bfdcdb47fa823c8649319",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@swc/core",
+      "msw"
+    ]
+  },
+  "dependencies": {
+    "@headlessui/react": "^2.2.9",
+    "@hookform/resolvers": "^5.2.2",
+    "@tanstack/react-query": "^5.91.2",
+    "@xyflow/react": "^12.10.0",
+    "aws-amplify": "^6.16.3",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "dayjs": "^1.11.20",
+    "lucide-react": "^0.575.0",
+    "msw": "^2.7.0",
+    "openapi-fetch": "^0.17.0",
+    "openapi-react-query": "^0.5.4",
+    "openapi-typescript": "^7.13.0",
+    "react": "^19.2.4",
+    "react-day-picker": "^9.13.2",
+    "react-dom": "^19.2.4",
+    "react-error-boundary": "^6.1.1",
+    "react-hook-form": "^7.71.2",
+    "react-loading-skeleton": "^3.5.0",
+    "react-router": "^7.13.1",
+    "react-router-dom": "^7.13.1",
+    "sonner": "^2.0.7",
+    "tailwind-merge": "^3.5.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@tailwindcss/vite": "^4.2.1",
+    "@types/node": "^25.3.1",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "eslint": "^10.0.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
+    "globals": "^17.4.0",
+    "prettier": "^3.4.2",
+    "prettier-plugin-tailwindcss": "^0.6.11",
+    "rollup-plugin-visualizer": "^7.0.1",
+    "tailwindcss": "^4.2.1",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.56.1",
+    "vite": "^8.0.3",
+    "vite-plugin-checker": "^0.12.0",
+    "vitest": "^4.1.2"
+  }
+}
