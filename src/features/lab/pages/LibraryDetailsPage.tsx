@@ -56,11 +56,13 @@ function buildMockLibraryHistory(library: (typeof mockLibraries)[0]): LibraryHis
 }
 
 export function LibraryDetailsPage() {
-  const { libraryId } = useParams<{ libraryId: string }>();
+  const { orcabusId } = useParams<{ orcabusId: string }>();
   const navigate = useNavigate();
   const { activeTab, setActiveTab } = useLibraryDetailTab();
 
-  const library = mockLibraries.find((lib) => lib.id === libraryId) ?? mockLibraries[0];
+  const library =
+    mockLibraries.find((lib) => lib.orcabusId === orcabusId || lib.id === orcabusId) ??
+    mockLibraries[0];
 
   if (!library) {
     return (

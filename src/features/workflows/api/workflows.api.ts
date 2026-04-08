@@ -18,17 +18,27 @@ const workflowApi = new ApiClient<paths>({
   baseUrl: config.apiEndpoint.workflow,
   getPath: (path) => getVersionedPath(path, apiVersion),
 });
+export type ExecutionEngineEnum = components['schemas']['ExecutionEngineEnum'];
 
 // export component types for consumers
 export type WorkflowModel = components['schemas']['Workflow'];
 export type WorkflowListModel = components['schemas']['WorkflowList'];
+export type WorkflowHistoryModel = components['schemas']['WorkflowHistory'];
+export type ValidationStateEnum = components['schemas']['ValidationStateEnum'];
+
 export type WorkflowRunModel = components['schemas']['WorkflowRunDetail'];
-export type AnalysisRunModel = components['schemas']['AnalysisRunDetail'];
-export type AnalysisModel = components['schemas']['Analysis'];
-export type ComputeContextModel = components['schemas']['AnalysisContext'];
-export type StorageContextModel = components['schemas']['AnalysisContext'];
+export type WorkflowRunListModel = components['schemas']['WorkflowRun'];
 export type WorkflowRunPaginatedModel = components['schemas']['PaginatedWorkflowRunList'];
 export type WorkflowRunRerunValidMapDataModel = components['schemas']['AllowedRerunWorkflow'];
+export type AnalysisRunModel = components['schemas']['AnalysisRunDetail'];
+export type AnalysisRunListModel = components['schemas']['AnalysisRun'];
+
+export type AnalysisModel = components['schemas']['Analysis'];
+export type AnalysisListModel = components['schemas']['AnalysisMin'];
+export type ComputeContextModel = components['schemas']['AnalysisContext'];
+export type StorageContextModel = components['schemas']['AnalysisContext'];
+export type StatusEnum = components['schemas']['StatusEnum'];
+export type UsecaseEnum = components['schemas']['UsecaseEnum'];
 
 export type ListWorkflowModel = operations['workflowList']['parameters']['query'];
 export type ListWorkflowRunModel = operations['workflowrunList']['parameters']['query'];

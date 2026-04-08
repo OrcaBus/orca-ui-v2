@@ -12,10 +12,15 @@ import {
   type LibraryDetailType,
   type QualityEnum,
 } from '../api/lab.api';
+import type { SortDirection } from '@/hooks/useQueryParams';
 import { useLabQueryParams } from '../hooks/useLabQueryParams';
 import { downloadTableAsCsv } from '@/utils/csv';
 import { Download } from 'lucide-react';
 import { toast } from 'sonner';
+
+function orderByParam(direction: SortDirection, field: string): string {
+  return direction === 'desc' ? `-${field}` : field;
+}
 
 export function LibrariesTable() {
   const navigate = useNavigate();
@@ -24,8 +29,8 @@ export function LibrariesTable() {
     pagination,
     setPage,
     setRowsPerPage,
-    getSortDirection,
-    setOrdering,
+    getOrderDirection,
+    setOrderBy,
   } = useLabQueryParams();
   const {
     isFetching,
@@ -45,9 +50,9 @@ export function LibrariesTable() {
       key: 'libraryId',
       header: 'Library ID',
       sortable: true,
-      sortDirection: getSortDirection('library_id'),
+      sortDirection: getOrderDirection('library_id'),
       defaultSortDirection: 'desc',
-      onSort: (nextDirection) => setOrdering(nextDirection, 'library_id'),
+      onSort: (nextDirection) => setOrderBy(orderByParam(nextDirection, 'library_id')),
       render: (lib) => (
         <button
           onClick={(e) => {
@@ -64,9 +69,9 @@ export function LibrariesTable() {
       key: 'phenotype',
       header: 'Phenotype',
       sortable: true,
-      sortDirection: getSortDirection('phenotype'),
+      sortDirection: getOrderDirection('phenotype'),
       defaultSortDirection: 'desc',
-      onSort: (nextDirection) => setOrdering(nextDirection, 'phenotype'),
+      onSort: (nextDirection) => setOrderBy(orderByParam(nextDirection, 'phenotype')),
       render: (lib) => (
         <span className='text-neutral-700 dark:text-[#9dabb9]'>{lib.phenotype || '-'}</span>
       ),
@@ -75,9 +80,9 @@ export function LibrariesTable() {
       key: 'workflow',
       header: 'Workflow',
       sortable: true,
-      sortDirection: getSortDirection('workflow'),
+      sortDirection: getOrderDirection('workflow'),
       defaultSortDirection: 'desc',
-      onSort: (nextDirection) => setOrdering(nextDirection, 'workflow'),
+      onSort: (nextDirection) => setOrderBy(orderByParam(nextDirection, 'workflow')),
       render: (lib) => (
         <span className='text-sm text-neutral-600 dark:text-[#9dabb9]'>{lib.workflow || '-'}</span>
       ),
@@ -86,9 +91,9 @@ export function LibrariesTable() {
       key: 'quality',
       header: 'Quality',
       sortable: true,
-      sortDirection: getSortDirection('quality'),
+      sortDirection: getOrderDirection('quality'),
       defaultSortDirection: 'desc',
-      onSort: (nextDirection) => setOrdering(nextDirection, 'quality'),
+      onSort: (nextDirection) => setOrderBy(orderByParam(nextDirection, 'quality')),
       render: (lib) => {
         const mapQualityToVariant: Record<QualityEnum, PillTagVariant> = {
           'very-poor': 'red',
@@ -109,9 +114,9 @@ export function LibrariesTable() {
       key: 'type',
       header: 'Type',
       sortable: true,
-      sortDirection: getSortDirection('type'),
+      sortDirection: getOrderDirection('type'),
       defaultSortDirection: 'desc',
-      onSort: (nextDirection) => setOrdering(nextDirection, 'type'),
+      onSort: (nextDirection) => setOrderBy(orderByParam(nextDirection, 'type')),
       render: (lib) => (
         <span className='truncate text-sm text-neutral-700 dark:text-[#9dabb9]'>
           {lib.type || '-'}
@@ -122,9 +127,9 @@ export function LibrariesTable() {
       key: 'assay',
       header: 'Assay',
       sortable: true,
-      sortDirection: getSortDirection('assay'),
+      sortDirection: getOrderDirection('assay'),
       defaultSortDirection: 'desc',
-      onSort: (nextDirection) => setOrdering(nextDirection, 'assay'),
+      onSort: (nextDirection) => setOrderBy(orderByParam(nextDirection, 'assay')),
       render: (lib) => (
         <span className='truncate text-sm text-neutral-700 dark:text-[#9dabb9]'>
           {lib.assay || '-'}
@@ -135,9 +140,9 @@ export function LibrariesTable() {
       key: 'coverage',
       header: 'Coverage',
       sortable: true,
-      sortDirection: getSortDirection('coverage'),
+      sortDirection: getOrderDirection('coverage'),
       defaultSortDirection: 'desc',
-      onSort: (nextDirection) => setOrdering(nextDirection, 'coverage'),
+      onSort: (nextDirection) => setOrderBy(orderByParam(nextDirection, 'coverage')),
       render: (lib) => (
         <span className='text-sm text-neutral-900 dark:text-slate-100'>{lib.coverage ?? '-'}</span>
       ),
@@ -146,9 +151,9 @@ export function LibrariesTable() {
       key: 'overrideCycles',
       header: 'Override Cycles',
       sortable: true,
-      sortDirection: getSortDirection('override_cycles'),
+      sortDirection: getOrderDirection('override_cycles'),
       defaultSortDirection: 'desc',
-      onSort: (nextDirection) => setOrdering(nextDirection, 'override_cycles'),
+      onSort: (nextDirection) => setOrderBy(orderByParam(nextDirection, 'override_cycles')),
       render: (lib) => (
         <span className='font-mono text-xs text-neutral-600 dark:text-[#9dabb9]'>
           {lib.overrideCycles ?? '-'}

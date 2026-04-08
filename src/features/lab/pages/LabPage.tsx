@@ -10,7 +10,7 @@ import { SpinnerWithText } from '@/components/ui/Spinner';
 import { DetailedErrorBoundary } from '@/components/ui/DetailedErrorBoundary';
 
 export function LabPage() {
-  const { searchQuery, setSearchQuery, filterValues, setFilterValues, clearAllFilters } =
+  const { search, setSearchQuery, filterValues, setFilterValues, clearAllFilters } =
     useLabQueryParams();
 
   const [showSyncModal, setShowSyncModal] = useState(false);
@@ -19,12 +19,12 @@ export function LabPage() {
     () =>
       buildLabActiveFilterBadges({
         filterFields: LAB_FILTER_FIELDS,
-        searchQuery,
+        search,
         setSearchQuery,
         filterValues,
         setFilterValues,
       }),
-    [searchQuery, filterValues, setSearchQuery, setFilterValues]
+    [search, filterValues, setSearchQuery, setFilterValues]
   );
 
   const handleOpenSyncModal = () => {
@@ -50,15 +50,16 @@ export function LabPage() {
       />
 
       <AdvancedFilterBar
-        searchValue={searchQuery}
-        onSearchChange={setSearchQuery}
+        searchValue={search}
+        onSearchChange={(search) => setSearchQuery(search)}
         searchPlaceholder='Search by Library ID, project...'
         filterFields={LAB_FILTER_FIELDS}
         filterValues={filterValues}
-        onFiltersChange={setFilterValues}
+        onFiltersChange={(values) => setFilterValues(values)}
         activeFilterBadges={activeFilterBadges}
         onClearAll={clearAllFilters}
       />
+
       <DetailedErrorBoundary errorTitle='Unable to load libraries'>
         <Suspense fallback={<SpinnerWithText text='Loading libraries...' />}>
           <LibrariesTable />

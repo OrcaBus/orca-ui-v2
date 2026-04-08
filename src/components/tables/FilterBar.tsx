@@ -1,3 +1,4 @@
+import { ReactNode } from 'react';
 import { Search, X } from 'lucide-react';
 import { PillTag } from '../ui/PillTag';
 
@@ -21,8 +22,8 @@ interface FilterBarProps {
   searchValue: string;
   onSearchChange: (value: string) => void;
   placeholder?: string;
-  filters?: React.ReactNode;
-  actions?: React.ReactNode;
+  filters?: ReactNode;
+  actions?: ReactNode;
   showBadgesSection?: boolean;
   activeFilterBadges?: FilterBadge[];
   onClearAll?: () => void;
