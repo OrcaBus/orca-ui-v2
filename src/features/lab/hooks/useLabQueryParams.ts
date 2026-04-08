@@ -1,11 +1,10 @@
 import { useMemo, useCallback } from 'react';
 import { useQueryParams } from '@/hooks/useQueryParams';
 import type { LibraryListQueryParams } from '../api/lab.api';
+import { PARAM_ORDER_BY, PARAM_SEARCH } from '@/utils/constants';
 
 type LibraryListQuery = NonNullable<LibraryListQueryParams>;
-type SortDirection = 'asc' | 'desc';
 
-const PARAM_SEARCH = 'search';
 const PARAM_ORCABUS_ID = 'orcabusId';
 const PARAM_LIBRARY_ID = 'libraryId';
 const PARAM_ASSAY = 'assay';
@@ -17,7 +16,6 @@ const PARAM_TYPE = 'type';
 const PARAM_WORKFLOW = 'workflow';
 const PARAM_COVERAGE_MIN = 'coverageMin';
 const PARAM_COVERAGE_MAX = 'coverageMax';
-const PARAM_ORDERING = 'ordering';
 
 export const LAB_FILTER_KEYS = [
   PARAM_ORCABUS_ID,
@@ -54,18 +52,92 @@ function toFirstString(value: string | string[] | undefined): string {
   return Array.isArray(value) ? (value[0] ?? '') : value;
 }
 
-function toFirstCsvValue(value: string): string | undefined {
-  const first = value
-    .split(',')
+function parseCsvValues(value: string | string[] | undefined): string[] {
+  if (value == null) return [];
+  const values = Array.isArray(value) ? value : [value];
+  return values
+    .flatMap((entry) => entry.split(','))
     .map((v) => v.trim())
-    .filter(Boolean)[0];
+    .filter(Boolean);
+}
+
+function toCsvString(value: string | string[] | undefined): string {
+  return parseCsvValues(value).join(',');
+}
+
+function toQueryParamValue(value: string | string[] | undefined): string | string[] | undefined {
+  const values = parseCsvValues(value);
+  if (values.length === 0) return undefined;
+  if (values.length === 1) return values[0];
+  return values;
+}
+
+function toFirstCsvValue(value: string | string[] | undefined): string | undefined {
+  const first = parseCsvValues(value)[0];
   return first || undefined;
 }
 
-function toNumber(value: string): number | undefined {
-  if (!value.trim()) return undefined;
-  const number = Number(value);
+function toNumberArray(value: string | string[] | undefined): number[] | undefined {
+  const numbers = parseCsvValues(value)
+    .map((v) => Number(v))
+    .filter((n) => Number.isFinite(n));
+  return numbers.length ? numbers : undefined;
+}
+
+function toNumber(value: string | string[] | undefined): number | undefined {
+  const first = toFirstCsvValue(value);
+  if (!first?.trim()) return undefined;
+  const number = Number(first);
   return Number.isFinite(number) ? number : undefined;
+}
+
+function toStringOrArray(values: string[]): string | string[] | undefined {
+  if (values.length === 0) return undefined;
+  if (values.length === 1) return values[0];
+  return values;
+}
+
+function toSearchQueryValue(value: string): string | string[] | undefined {
+  return toQueryParamValue(value);
+}
+
+function toFilterQueryValue(value: string | string[] | undefined): string | string[] | undefined {
+  return toQueryParamValue(value);
+}
+
+function toCsvList(value: string | string[] | undefined): string[] {
+  return parseCsvValues(value);
+}
+
+function toSearchDisplayValue(value: string | string[] | undefined): string {
+  return toCsvString(value);
+}
+
+function toFilterDisplayValue(value: string | string[] | undefined): string {
+  return toCsvString(value);
+}
+
+function toCoverageValue(value: string | string[] | undefined): string {
+  return toFirstString(value);
+}
+
+function toProjectIdQueryValue(
+  value: string | string[] | undefined
+): number | number[] | undefined {
+  const values = toNumberArray(value);
+  if (!values?.length) return undefined;
+  if (values.length === 1) return values[0];
+  return values;
+}
+
+function toSearchApiQueryValue(value: string): string | string[] | undefined {
+  const values = toCsvList(value);
+  return toStringOrArray(values);
+}
+
+function toApiCsvQueryValue(value: string): string | string[] | undefined {
+  const values = toCsvList(value);
+  return toStringOrArray(values);
 }
 
 /**
@@ -73,119 +145,116 @@ function toNumber(value: string): number | undefined {
  * Params: search, filters, and server-side pagination.
  */
 export function useLabQueryParams() {
-  const { params, getParam, setParams, pagination } = useQueryParams();
+  const {
+    params,
+    setParams,
+    pagination,
+    orderBy,
+    setPage,
+    setRowsPerPage,
+    setOrderBy,
+    getOrderDirection,
+  } = useQueryParams();
 
-  const searchQuery = getParam(PARAM_SEARCH) ?? '';
-  const ordering = getParam(PARAM_ORDERING) ?? '';
+  const search = useMemo(
+    () => toSearchDisplayValue(params[PARAM_SEARCH] as string | string[] | undefined),
+    [params]
+  );
+
+  const setSearchQuery = useCallback(
+    (value: string) => setParams({ [PARAM_SEARCH]: toSearchQueryValue(value) }),
+    [setParams]
+  );
+
   const filterValues = useMemo<Record<string, string>>(
     () => ({
       ...DEFAULT_FILTER_VALUES,
-      [PARAM_ORCABUS_ID]: toFirstString(params[PARAM_ORCABUS_ID] as string | string[] | undefined),
-      [PARAM_LIBRARY_ID]: toFirstString(params[PARAM_LIBRARY_ID] as string | string[] | undefined),
-      [PARAM_ASSAY]: toFirstString(params[PARAM_ASSAY] as string | string[] | undefined),
-      [PARAM_INDIVIDUAL_ID]: toFirstString(
+      [PARAM_ORCABUS_ID]: toFilterDisplayValue(
+        params[PARAM_ORCABUS_ID] as string | string[] | undefined
+      ),
+      [PARAM_LIBRARY_ID]: toFilterDisplayValue(
+        params[PARAM_LIBRARY_ID] as string | string[] | undefined
+      ),
+      [PARAM_ASSAY]: toFilterDisplayValue(params[PARAM_ASSAY] as string | string[] | undefined),
+      [PARAM_INDIVIDUAL_ID]: toFilterDisplayValue(
         params[PARAM_INDIVIDUAL_ID] as string | string[] | undefined
       ),
-      [PARAM_PROJECT_ID]: toFirstString(params[PARAM_PROJECT_ID] as string | string[] | undefined),
-      [PARAM_PHENOTYPE]: toFirstString(params[PARAM_PHENOTYPE] as string | string[] | undefined),
-      [PARAM_QUALITY]: toFirstString(params[PARAM_QUALITY] as string | string[] | undefined),
-      [PARAM_TYPE]: toFirstString(params[PARAM_TYPE] as string | string[] | undefined),
-      [PARAM_WORKFLOW]: toFirstString(params[PARAM_WORKFLOW] as string | string[] | undefined),
-      [PARAM_COVERAGE_MIN]: toFirstString(
+      [PARAM_PROJECT_ID]: toFilterDisplayValue(
+        params[PARAM_PROJECT_ID] as string | string[] | undefined
+      ),
+      [PARAM_PHENOTYPE]: toFilterDisplayValue(
+        params[PARAM_PHENOTYPE] as string | string[] | undefined
+      ),
+      [PARAM_QUALITY]: toFilterDisplayValue(params[PARAM_QUALITY] as string | string[] | undefined),
+      [PARAM_TYPE]: toFilterDisplayValue(params[PARAM_TYPE] as string | string[] | undefined),
+      [PARAM_WORKFLOW]: toFilterDisplayValue(
+        params[PARAM_WORKFLOW] as string | string[] | undefined
+      ),
+      [PARAM_COVERAGE_MIN]: toCoverageValue(
         params[PARAM_COVERAGE_MIN] as string | string[] | undefined
       ),
-      [PARAM_COVERAGE_MAX]: toFirstString(
+      [PARAM_COVERAGE_MAX]: toCoverageValue(
         params[PARAM_COVERAGE_MAX] as string | string[] | undefined
       ),
     }),
     [params]
   );
 
-  const setSearchQuery = useCallback(
-    (value: string) => setParams({ [PARAM_SEARCH]: value || undefined }),
-    [setParams]
-  );
-  const setOrdering = useCallback(
-    (direction: SortDirection, field: string) =>
-      setParams({
-        [PARAM_ORDERING]: direction === 'desc' ? `-${field}` : field || undefined,
-        page: 1,
-      }),
-    [setParams]
-  );
-
-  const getSortDirection = useCallback(
-    (field: string): SortDirection | undefined => {
-      if (!ordering) return undefined;
-      const normalized = ordering.startsWith('-') ? ordering.slice(1) : ordering;
-      if (normalized !== field) return undefined;
-      return ordering.startsWith('-') ? 'desc' : 'asc';
-    },
-    [ordering]
-  );
-
   const setFilterValues = useCallback(
     (values: Record<string, string | string[]>) => {
-      const str = (v: string | string[] | undefined): string =>
-        v == null ? '' : Array.isArray(v) ? (v[0] ?? '') : v;
       setParams({
-        [PARAM_ORCABUS_ID]: str(values.orcabusId) || undefined,
-        [PARAM_LIBRARY_ID]: str(values.libraryId) || undefined,
-        [PARAM_ASSAY]: str(values.assay) || undefined,
-        [PARAM_INDIVIDUAL_ID]: str(values.individualId) || undefined,
-        [PARAM_PROJECT_ID]: str(values.projectId) || undefined,
-        [PARAM_PHENOTYPE]: str(values.phenotype) || undefined,
-        [PARAM_QUALITY]: str(values.quality) || undefined,
-        [PARAM_TYPE]: str(values.type) || undefined,
-        [PARAM_WORKFLOW]: str(values.workflow) || undefined,
-        [PARAM_COVERAGE_MIN]: str(values.coverageMin) || undefined,
-        [PARAM_COVERAGE_MAX]: str(values.coverageMax) || undefined,
+        [PARAM_ORCABUS_ID]: toFilterQueryValue(values.orcabusId),
+        [PARAM_LIBRARY_ID]: toFilterQueryValue(values.libraryId),
+        [PARAM_ASSAY]: toFilterQueryValue(values.assay),
+        [PARAM_INDIVIDUAL_ID]: toFilterQueryValue(values.individualId),
+        [PARAM_PROJECT_ID]: toFilterQueryValue(values.projectId),
+        [PARAM_PHENOTYPE]: toFilterQueryValue(values.phenotype),
+        [PARAM_QUALITY]: toFilterQueryValue(values.quality),
+        [PARAM_TYPE]: toFilterQueryValue(values.type),
+        [PARAM_WORKFLOW]: toFilterQueryValue(values.workflow),
+        [PARAM_COVERAGE_MIN]: toCoverageValue(values.coverageMin) || undefined,
+        [PARAM_COVERAGE_MAX]: toCoverageValue(values.coverageMax) || undefined,
       });
     },
     [setParams]
   );
 
   const libraryListQueryParams = useMemo<LibraryListQueryParams>(() => {
-    return {
+    const query = {
       page: pagination.page,
       rowsPerPage: pagination.rowsPerPage,
-      search: searchQuery || undefined,
-      ordering: ordering || undefined,
-      orcabusId: filterValues.orcabusId || undefined,
-      libraryId: filterValues.libraryId || undefined,
-      assay: filterValues.assay || undefined,
-      individualId: filterValues.individualId || undefined,
-      projectId: toNumber(filterValues.projectId),
-      phenotype: toFirstCsvValue(filterValues.phenotype) as LibraryListQuery['phenotype'],
-      quality: toFirstCsvValue(filterValues.quality) as LibraryListQuery['quality'],
-      type: toFirstCsvValue(filterValues.type) as LibraryListQuery['type'],
-      workflow: toFirstCsvValue(filterValues.workflow) as LibraryListQuery['workflow'],
+      search: toSearchApiQueryValue(search),
+      ordering: orderBy || undefined,
+      orcabusId: toApiCsvQueryValue(filterValues.orcabusId),
+      libraryId: toApiCsvQueryValue(filterValues.libraryId),
+      assay: toApiCsvQueryValue(filterValues.assay),
+      individualId: toApiCsvQueryValue(filterValues.individualId),
+      projectId: toProjectIdQueryValue(filterValues.projectId),
+      phenotype: toApiCsvQueryValue(filterValues.phenotype) as LibraryListQuery['phenotype'],
+      quality: toApiCsvQueryValue(filterValues.quality) as LibraryListQuery['quality'],
+      type: toApiCsvQueryValue(filterValues.type) as LibraryListQuery['type'],
+      workflow: toApiCsvQueryValue(filterValues.workflow) as LibraryListQuery['workflow'],
       'coverage[gte]': toNumber(filterValues.coverageMin),
       'coverage[lte]': toNumber(filterValues.coverageMax),
     };
-  }, [filterValues, pagination.page, pagination.rowsPerPage, searchQuery, ordering]);
-
-  const setPage = useCallback((page: number) => setParams({ page }), [setParams]);
-  const setRowsPerPage = useCallback(
-    (rowsPerPage: number) => setParams({ rowsPerPage, page: 1 }),
-    [setParams]
-  );
+    return query as LibraryListQueryParams;
+  }, [filterValues, pagination.page, pagination.rowsPerPage, search, orderBy]);
 
   /** Clear search and all filters (for "Clear all" in AdvancedFilterBar). */
   const clearAllFilters = useCallback(() => {
     setParams({
       [PARAM_SEARCH]: undefined,
-      [PARAM_ORDERING]: undefined,
+      [PARAM_ORDER_BY]: undefined,
       ...Object.fromEntries(LAB_FILTER_KEYS.map((k) => [k, undefined])),
     });
   }, [setParams]);
 
   return {
-    searchQuery,
+    search,
+    orderBy,
     setSearchQuery,
-    ordering,
-    setOrdering,
-    getSortDirection,
+    setOrderBy,
+    getOrderDirection,
     filterValues,
     setFilterValues,
     libraryListQueryParams,

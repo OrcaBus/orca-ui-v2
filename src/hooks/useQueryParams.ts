@@ -1,6 +1,14 @@
 import { useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { DEFAULT_PAGE_SIZE } from '../utils/constants';
+import {
+  DEFAULT_PAGE_SIZE,
+  PARAM_ORDER_BY,
+  PARAM_PAGE,
+  PARAM_ROWS_PER_PAGE,
+  PARAM_SEARCH,
+} from '../utils/constants';
+
+export type SortDirection = 'asc' | 'desc';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -66,7 +74,10 @@ function serializeParams(params: Record<string, ParamValue>): Record<string, str
 // ---------------------------------------------------------------------------
 
 export function useQueryParams(options: UseQueryParamsOptions = {}) {
-  const { defaultPageSize = DEFAULT_PAGE_SIZE, paginationKeys = ['page', 'rowsPerPage'] } = options;
+  const {
+    defaultPageSize = DEFAULT_PAGE_SIZE,
+    paginationKeys = [PARAM_PAGE, PARAM_ROWS_PER_PAGE],
+  } = options;
 
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -187,10 +198,45 @@ export function useQueryParams(options: UseQueryParamsOptions = {}) {
   /** Pagination state derived from current query params. */
   const pagination = useMemo<PaginationState>(
     () => ({
-      page: Number(searchParams.get('page')) || 1,
-      rowsPerPage: Number(searchParams.get('rowsPerPage')) || defaultPageSize,
+      page: Number(searchParams.get(PARAM_PAGE)) || 1,
+      rowsPerPage: Number(searchParams.get(PARAM_ROWS_PER_PAGE)) || defaultPageSize,
     }),
     [searchParams, defaultPageSize]
+  );
+
+  const setPage = useCallback((page: number) => setParams({ [PARAM_PAGE]: page }), [setParams]);
+  const setRowsPerPage = useCallback(
+    (rowsPerPage: number) => setParams({ [PARAM_ROWS_PER_PAGE]: rowsPerPage, [PARAM_PAGE]: 1 }),
+    [setParams]
+  );
+
+  const setSearchQuery = useCallback(
+    (value: string) => setParams({ [PARAM_SEARCH]: value || undefined }),
+    [setParams]
+  );
+
+  /**
+   * Set sort order as a raw API-style string: `field` = asc, `-field` = desc (e.g. `timestamp`, `-timestamp`).
+   * Resets page to 1.
+   */
+  const setOrderBy = useCallback(
+    (value: string) =>
+      setParams({
+        [PARAM_ORDER_BY]: value || undefined,
+        [PARAM_PAGE]: 1,
+      }),
+    [setParams]
+  );
+
+  const getOrderDirection = useCallback(
+    (field: string): SortDirection | undefined => {
+      const orderBy = getParam(PARAM_ORDER_BY) ?? '';
+      if (!orderBy) return undefined;
+      const normalized = orderBy.startsWith('-') ? orderBy.slice(1) : orderBy;
+      if (normalized !== field) return undefined;
+      return orderBy.startsWith('-') ? 'desc' : 'asc';
+    },
+    [getParam]
   );
 
   return {
@@ -198,13 +244,35 @@ export function useQueryParams(options: UseQueryParamsOptions = {}) {
     params,
     /** Raw URLSearchParams instance */
     rawParams: searchParams,
+    /** Merge (or replace) query params. */
     setParams,
+    /** Remove specific params by key. */
     removeParams,
+    /** Clear all params. Optionally provide keys to keep. */
     clearParams,
+    /** Get a single string value (first value if multi-value). */
     getParam,
+    /** Get a param as a string array (always returns an array). */
     getArrayParam,
+    /** Get a param as a number. Returns `fallback` when absent or NaN. */
     getNumericParam,
+    /** Get a param as a boolean (`'true'` / `'1'` -> true). */
     getBooleanParam,
+    /** Pagination state derived from current query params. */
     pagination,
+    /** Set the page number. */
+    setPage,
+    /** Set the rows per page. */
+    setRowsPerPage,
+    /** Get the search query param (`PARAM_SEARCH`). */
+    search: getParam(PARAM_SEARCH) ?? '',
+    /** Set the search query param (`PARAM_SEARCH`). */
+    setSearchQuery,
+    /** Get the search query param (`PARAM_SEARCH`). */
+    orderBy: getParam(PARAM_ORDER_BY) ?? '',
+    /** Set sort as `field` (asc) or `-field` (desc). Resets page to 1. */
+    setOrderBy,
+    /** Direction for `field` if the current `PARAM_ORDER_BY` value targets that field. */
+    getOrderDirection,
   } as const;
 }

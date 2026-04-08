@@ -1,6 +1,8 @@
 import { X, Search, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { AnalysisType, mockAnalysisContexts, mockWorkflowDetails } from '../../data/mockData';
+import { getExecutionEnginePillVariant } from '@/features/workflows/shared/utils/executionEnginePill';
+import { PillTag } from '../ui/PillTag';
 
 interface AnalysisTypeEditModalProps {
   analysisType: AnalysisType;
@@ -177,7 +179,7 @@ export function AnalysisTypeEditModal({
                               </div>
                             </div>
                             <span
-                              className={`flex-shrink-0 rounded px-2 py-0.5 text-xs font-medium ${
+                              className={`shrink-0 rounded px-2 py-0.5 text-xs font-medium ${
                                 ctx.status === 'ACTIVE'
                                   ? 'bg-green-100 text-green-700'
                                   : 'bg-neutral-100 text-neutral-600'
@@ -219,7 +221,7 @@ export function AnalysisTypeEditModal({
                           </div>
                           <div className='flex items-center gap-3'>
                             <span
-                              className={`flex-shrink-0 rounded px-2 py-0.5 text-xs font-medium ${
+                              className={`shrink-0 rounded px-2 py-0.5 text-xs font-medium ${
                                 context.status === 'ACTIVE'
                                   ? 'bg-green-100 text-green-700'
                                   : 'bg-neutral-100 text-neutral-600'
@@ -297,25 +299,12 @@ export function AnalysisTypeEditModal({
                               </div>
                             </div>
                             <div className='flex flex-col items-end gap-1'>
-                              <span
-                                className={`flex-shrink-0 rounded px-2 py-0.5 text-xs font-medium ${
-                                  wf.executionEngine === 'ICA'
-                                    ? 'bg-blue-100 text-blue-700'
-                                    : wf.executionEngine === 'SEQERA'
-                                      ? 'bg-purple-100 text-purple-700'
-                                      : wf.executionEngine === 'AWS_BATCH'
-                                        ? 'bg-green-100 text-green-700'
-                                        : wf.executionEngine === 'AWS_ECS'
-                                          ? 'bg-amber-100 text-amber-700'
-                                          : wf.executionEngine === 'AWS_EKS'
-                                            ? 'bg-green-100 text-green-700'
-                                            : 'bg-neutral-100 text-neutral-600'
-                                }`}
-                              >
+                              <PillTag variant={getExecutionEnginePillVariant(wf.executionEngine)}>
                                 {wf.executionEngine}
-                              </span>
+                              </PillTag>
+
                               <span
-                                className={`flex-shrink-0 rounded px-2 py-0.5 text-xs font-medium ${
+                                className={`shrink-0 rounded px-2 py-0.5 text-xs font-medium ${
                                   wf.validationState === 'validated'
                                     ? 'bg-green-100 text-green-700'
                                     : wf.validationState === 'unvalidated'
@@ -364,25 +353,13 @@ export function AnalysisTypeEditModal({
                             </div>
                           </div>
                           <div className='flex items-center gap-3'>
-                            <span
-                              className={`flex-shrink-0 rounded px-2 py-0.5 text-xs font-medium ${
-                                workflow.executionEngine === 'ICA'
-                                  ? 'bg-blue-100 text-blue-700'
-                                  : workflow.executionEngine === 'SEQERA'
-                                    ? 'bg-purple-100 text-purple-700'
-                                    : workflow.executionEngine === 'AWS_BATCH'
-                                      ? 'bg-green-100 text-green-700'
-                                      : workflow.executionEngine === 'AWS_ECS'
-                                        ? 'bg-amber-100 text-amber-700'
-                                        : workflow.executionEngine === 'AWS_EKS'
-                                          ? 'bg-green-100 text-green-700'
-                                          : 'bg-neutral-100 text-neutral-600'
-                              }`}
+                            <PillTag
+                              variant={getExecutionEnginePillVariant(workflow.executionEngine)}
                             >
                               {workflow.executionEngine}
-                            </span>
+                            </PillTag>
                             <span
-                              className={`flex-shrink-0 rounded px-2 py-0.5 text-xs font-medium ${
+                              className={`shrink-0 rounded px-2 py-0.5 text-xs font-medium ${
                                 workflow.validationState === 'validated'
                                   ? 'bg-green-100 text-green-700'
                                   : workflow.validationState === 'unvalidated'

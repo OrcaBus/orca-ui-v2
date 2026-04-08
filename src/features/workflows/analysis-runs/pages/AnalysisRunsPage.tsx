@@ -1,17 +1,15 @@
 import { useCallback, useMemo } from 'react';
-import { useNavigate } from 'react-router';
-import { mockAnalysisRuns, AnalysisRun } from '@/data/mockData';
+import { mockAnalysisRuns } from '@/data/mockData';
 import { FilterBar } from '@/components/tables/FilterBar';
-import { Select } from '@/components/ui/Select';
-import { DataTable, Column } from '@/components/tables/DataTable';
-import { StatusBadge } from '@/components/ui/StatusBadge';
+// import { MultiSelect } from '@/components/ui/MultiSelect';
 import { StatusCard } from '@/components/ui/StatusCard';
-import { getStatusIcon } from '../../shared/utils/statusIcons';
-import { useQueryParams } from '@/hooks/useQueryParams';
+import { getRunsStatusIcon } from '../../shared/utils/statusIcons';
 import {
   useAnalysisRunsQueryParams,
   type AnalysisRunStatus,
 } from '../hooks/useAnalysisRunsQueryParams';
+import { buildAnalysisRunsFilterBadges } from '../utils/buildAnalysisRunsFilterBadges';
+import AnalysisRunsTable from '../components/AnalysisRunsTable';
 
 const AR_STATUS_CARDS: Array<{
   label: string;
@@ -23,112 +21,54 @@ const AR_STATUS_CARDS: Array<{
   { label: 'Aborted', status: 'aborted', variant: 'neutral' },
   { label: 'Resolved', status: 'resolved', variant: 'info' },
   { label: 'Deprecated', status: 'deprecated', variant: 'neutral' },
-  { label: 'Ongoing', status: 'ongoing', variant: 'warning' },
+  { label: 'Running', status: 'running', variant: 'warning' },
 ];
 
 export function AnalysisRunsPage() {
-  const navigate = useNavigate();
-  const { pagination, setParams } = useQueryParams({
-    paginationKeys: ['page', 'rowsPerPage'],
-  });
   const {
     search,
-    setSearch,
+    setSearchQuery,
+    filterValues,
+    setFilterValues,
     status,
     setStatus,
-    typeValue,
-    setTypeValue,
+    dateFrom,
+    setDateFrom,
+    dateTo,
+    setDateTo,
     clearAllFilters,
-    activeFilterBadges,
-    filteredAnalysisRuns,
-    analysisTypeOptions,
-  } = useAnalysisRunsQueryParams({ analysisRuns: mockAnalysisRuns });
+  } = useAnalysisRunsQueryParams();
+
+  const activeFilterBadges = useMemo(
+    () =>
+      buildAnalysisRunsFilterBadges({
+        search,
+        setSearchQuery,
+        filterValues,
+        setFilterValues,
+      }),
+    [search, filterValues, setSearchQuery, setFilterValues]
+  );
 
   const handleStatusCardClick = useCallback(
     (s: AnalysisRunStatus) => setStatus(status === s ? 'all' : s),
     [status, setStatus]
   );
 
-  const columns: Column<AnalysisRun>[] = useMemo(
-    () => [
-      {
-        key: 'name',
-        header: 'Analysis Run Name',
-        sortable: true,
-        render: (ar) => (
-          <button
-            onClick={() => {
-              void navigate(`/workflows/analysisrun/${ar.id}`);
-            }}
-            className='text-left text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline dark:text-blue-400 dark:hover:text-blue-300'
-          >
-            {ar.name}
-          </button>
-        ),
-      },
-      {
-        key: 'analysisType',
-        header: 'Analysis Type',
-        sortable: true,
-        render: (ar) => (
-          <div>
-            <div className='text-sm font-medium text-neutral-900 dark:text-neutral-100'>
-              {ar.analysisName}
-            </div>
-            <div className='font-mono text-xs text-neutral-500'>{ar.analysisVersion}</div>
-          </div>
-        ),
-      },
-      {
-        key: 'status',
-        header: 'State',
-        sortable: true,
-        render: (ar) => <StatusBadge status={ar.status} />,
-      },
-      {
-        key: 'libraryCount',
-        header: 'Libraries',
-        sortable: true,
-        render: (ar) => (
-          <div className='text-sm text-neutral-900 dark:text-neutral-100'>{ar.libraryCount}</div>
-        ),
-      },
-      {
-        key: 'contextCount',
-        header: 'Context',
-        sortable: true,
-        render: (ar) => (
-          <div className='text-sm text-neutral-900 dark:text-neutral-100'>{ar.contextCount}</div>
-        ),
-      },
-      {
-        key: 'readsetCount',
-        header: 'Readsets',
-        sortable: true,
-        render: (ar) => (
-          <div className='text-sm text-neutral-900 dark:text-neutral-100'>{ar.readsetCount}</div>
-        ),
-      },
-    ],
-    [navigate]
-  );
-
   return (
     <div>
       <div className='mb-6 grid grid-cols-6 gap-4'>
         {AR_STATUS_CARDS.map((card) => {
-          const count = filteredAnalysisRuns.filter((ar) => ar.status === card.status).length;
+          const count = mockAnalysisRuns.filter((ar) => ar.status === card.status).length;
           const percentage =
-            filteredAnalysisRuns.length > 0
-              ? Math.round((count / filteredAnalysisRuns.length) * 100)
-              : 0;
+            mockAnalysisRuns.length > 0 ? Math.round((count / mockAnalysisRuns.length) * 100) : 0;
           return (
             <StatusCard
               key={card.status}
               label={card.label}
               value={count}
               percentage={percentage}
-              icon={getStatusIcon(card.status)}
+              icon={getRunsStatusIcon(card.status)}
               variant={card.variant}
               selected={status === card.status}
               onClick={() => handleStatusCardClick(card.status)}
@@ -139,33 +79,46 @@ export function AnalysisRunsPage() {
 
       <FilterBar
         searchValue={search}
-        onSearchChange={setSearch}
+        onSearchChange={setSearchQuery}
         placeholder='Search by analysis run name, analysis run ID, attributes…'
         filters={
-          <Select
-            value={typeValue}
-            onChange={setTypeValue}
-            options={[
-              { value: 'all', label: 'All Analysis Types' },
-              ...analysisTypeOptions.map((type) => ({ value: type, label: type })),
-            ]}
-          />
+          <>
+            <div className='flex items-center gap-2'>
+              <label className='text-sm whitespace-nowrap text-neutral-600 dark:text-neutral-400'>
+                From:
+              </label>
+              <input
+                type='date'
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+                className='rounded-md border border-neutral-300 px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100'
+              />
+            </div>
+            <div className='flex items-center gap-2'>
+              <label className='text-sm whitespace-nowrap text-neutral-600 dark:text-neutral-400'>
+                To:
+              </label>
+              <input
+                type='date'
+                value={dateTo}
+                onChange={(e) => setDateTo(e.target.value)}
+                className='rounded-md border border-neutral-300 px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100'
+              />
+            </div>
+            {/* <MultiSelect
+              values={typeValues}
+              onChange={setTypeValues}
+              options={analysisTypeOptions}
+              placeholder='All Analysis Types'
+              className='min-w-[220px]'
+            /> */}
+          </>
         }
         activeFilterBadges={activeFilterBadges}
         onClearAll={activeFilterBadges.length > 0 ? clearAllFilters : undefined}
       />
 
-      <DataTable
-        data={filteredAnalysisRuns}
-        columns={columns}
-        paginationProps={{
-          page: pagination.page,
-          pageSize: pagination.rowsPerPage,
-          onPageChange: (p) => setParams({ page: p === 1 ? undefined : p }),
-          onPageSizeChange: (size) => setParams({ rowsPerPage: size, page: undefined }),
-          totalItems: filteredAnalysisRuns.length,
-        }}
-      />
+      <AnalysisRunsTable />
     </div>
   );
 }

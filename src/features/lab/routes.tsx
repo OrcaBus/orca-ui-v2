@@ -16,7 +16,11 @@ const Routes: RouteObject = {
     },
     {
       path: ':orcabusId',
-      element: <LibraryDetailsPage />,
+      element: <Outlet />,
+      children: [
+        { index: true, element: <LibraryDetailsPage /> },
+        { path: ':tab', element: <LibraryDetailsPage /> },
+      ],
     },
   ],
 };

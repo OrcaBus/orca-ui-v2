@@ -1,7 +1,6 @@
-import { useCallback, useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import { useQueryParams } from '@/hooks/useQueryParams';
-import type { FilterBadge } from '@/components/tables/FilterBar';
-import type { AnalysisRun } from '@/data/mockData';
+import { PARAM_ORDER_BY, PARAM_SEARCH } from '@/utils/constants';
 
 export type AnalysisRunStatus =
   | 'succeeded'
@@ -9,113 +8,173 @@ export type AnalysisRunStatus =
   | 'aborted'
   | 'resolved'
   | 'deprecated'
-  | 'ongoing';
+  | 'running';
 
-const PARAM_SEARCH = 'arSearch';
 const PARAM_STATUS = 'arStatus';
 const PARAM_TYPE = 'arType';
+const PARAM_FROM = 'arFrom';
+const PARAM_TO = 'arTo';
 
-export interface UseAnalysisRunsQueryParamsOptions {
-  analysisRuns: AnalysisRun[];
+export const ANALYSIS_RUNS_FILTER_KEYS = [PARAM_STATUS, PARAM_TYPE, PARAM_FROM, PARAM_TO] as const;
+
+export type AnalysisRunsFilterKey = (typeof ANALYSIS_RUNS_FILTER_KEYS)[number];
+
+const DEFAULT_FILTER_VALUES: Record<AnalysisRunsFilterKey, string> = {
+  [PARAM_STATUS]: '',
+  [PARAM_TYPE]: '',
+  [PARAM_FROM]: '',
+  [PARAM_TO]: '',
+};
+
+export type AnalysisRunsFilterPatch = Partial<{
+  arStatus: string | string[];
+  arType: string | string[];
+  arFrom: string | string[];
+  arTo: string | string[];
+}>;
+
+function toFirstString(value: string | string[] | undefined): string {
+  if (value == null) return '';
+  return Array.isArray(value) ? (value[0] ?? '') : value;
+}
+
+function splitTypes(arType: string): string[] {
+  return arType
+    .split(',')
+    .map((t) => t.trim())
+    .filter(Boolean);
 }
 
 /**
  * Analysis runs list page state driven by URL query params.
- * Params: arSearch, arStatus, arType.
+ * Filter params: arStatus, arType, arFrom, arTo. Shared: search, orderBy, pagination.
  */
-export function useAnalysisRunsQueryParams({ analysisRuns }: UseAnalysisRunsQueryParamsOptions) {
-  const { getParam, setParams } = useQueryParams({ paginationKeys: [] });
+export function useAnalysisRunsQueryParams() {
+  const {
+    params,
+    getArrayParam,
+    setParams,
+    pagination,
+    search,
+    orderBy,
+    setPage,
+    setRowsPerPage,
+    setSearchQuery,
+    setOrderBy,
+    getOrderDirection,
+  } = useQueryParams();
 
-  const search = getParam(PARAM_SEARCH) ?? '';
-  const status = (getParam(PARAM_STATUS) ?? 'all') as AnalysisRunStatus | 'all';
-  const typeValue = getParam(PARAM_TYPE) ?? 'all';
+  const filterValues = useMemo(() => {
+    const typeParts = getArrayParam(PARAM_TYPE);
+    return {
+      ...DEFAULT_FILTER_VALUES,
+      [PARAM_STATUS]: toFirstString(params[PARAM_STATUS] as string | string[] | undefined),
+      [PARAM_TYPE]: typeParts.join(','),
+      [PARAM_FROM]: toFirstString(params[PARAM_FROM] as string | string[] | undefined),
+      [PARAM_TO]: toFirstString(params[PARAM_TO] as string | string[] | undefined),
+    };
+  }, [params, getArrayParam]);
 
-  const setSearch = useCallback(
-    (v: string) => setParams({ [PARAM_SEARCH]: v || undefined }),
-    [setParams]
-  );
-  const setStatus = useCallback(
-    (v: AnalysisRunStatus | 'all') => setParams({ [PARAM_STATUS]: v === 'all' ? undefined : v }),
-    [setParams]
-  );
-  const setTypeValue = useCallback(
-    (v: string) => setParams({ [PARAM_TYPE]: v === 'all' ? undefined : v }),
-    [setParams]
-  );
+  const setFilterValues = useCallback(
+    (patch: AnalysisRunsFilterPatch) => {
+      const str = (v: string | string[] | undefined): string =>
+        v == null ? '' : Array.isArray(v) ? (v[0] ?? '') : v;
 
-  const clearAllFilters = useCallback(
-    () =>
+      const nextStatus =
+        patch.arStatus !== undefined ? str(patch.arStatus) : filterValues[PARAM_STATUS];
+      const nextFrom = patch.arFrom !== undefined ? str(patch.arFrom) : filterValues[PARAM_FROM];
+      const nextTo = patch.arTo !== undefined ? str(patch.arTo) : filterValues[PARAM_TO];
+
+      let nextTypes: string[];
+      if (patch.arType !== undefined) {
+        nextTypes = Array.isArray(patch.arType)
+          ? patch.arType.map((t) => t.trim()).filter(Boolean)
+          : splitTypes(str(patch.arType));
+      } else {
+        nextTypes = splitTypes(filterValues[PARAM_TYPE]);
+      }
+
       setParams({
-        [PARAM_SEARCH]: undefined,
-        [PARAM_STATUS]: undefined,
-        [PARAM_TYPE]: undefined,
-      }),
-    [setParams]
+        [PARAM_STATUS]: nextStatus || undefined,
+        [PARAM_TYPE]: nextTypes.length ? nextTypes : undefined,
+        [PARAM_FROM]: nextFrom || undefined,
+        [PARAM_TO]: nextTo || undefined,
+      });
+    },
+    [setParams, filterValues]
   );
 
-  const activeFilterBadges = useMemo((): FilterBadge[] => {
-    const badges: FilterBadge[] = [];
-    if (search) {
-      badges.push({
-        id: PARAM_SEARCH,
-        type: 'search',
-        label: 'Search',
-        value: search,
-        onRemove: () => setSearch(''),
-      });
-    }
-    if (status !== 'all') {
-      badges.push({
-        id: PARAM_STATUS,
-        type: 'filter',
-        label: 'Status',
-        value: status.charAt(0).toUpperCase() + status.slice(1),
-        onRemove: () => setStatus('all'),
-      });
-    }
-    if (typeValue !== 'all') {
-      badges.push({
-        id: PARAM_TYPE,
-        type: 'filter',
-        label: 'Type',
-        value: typeValue,
-        onRemove: () => setTypeValue('all'),
-      });
-    }
-    return badges;
-  }, [search, status, typeValue, setSearch, setStatus, setTypeValue]);
+  const analysisRunListQueryParams = useMemo(() => {
+    const typeValues = splitTypes(filterValues[PARAM_TYPE]);
+    const statusRaw = filterValues[PARAM_STATUS];
+    const statusForApi =
+      !statusRaw || statusRaw === 'all' ? undefined : (statusRaw as AnalysisRunStatus);
 
-  const filteredAnalysisRuns = useMemo(
-    () =>
-      analysisRuns.filter((ar) => {
-        const matchesSearch =
-          ar.name.toLowerCase().includes(search.toLowerCase()) ||
-          ar.analysisId.toLowerCase().includes(search.toLowerCase()) ||
-          ar.analysisType.toLowerCase().includes(search.toLowerCase()) ||
-          ar.analysisName.toLowerCase().includes(search.toLowerCase());
-        const matchesStatus = status === 'all' || ar.status === status;
-        const matchesType =
-          typeValue === 'all' || `${ar.analysisName} ${ar.analysisVersion}` === typeValue;
-        return matchesSearch && matchesStatus && matchesType;
-      }),
-    [analysisRuns, search, status, typeValue]
+    return {
+      page: pagination.page,
+      rowsPerPage: pagination.rowsPerPage,
+      search: search || undefined,
+      analysis: typeValues.length ? typeValues.join(',') : undefined,
+      status: statusForApi,
+      is_ongoing: statusRaw === 'ongoing' ? true : undefined,
+      start_time: filterValues[PARAM_FROM] || undefined,
+      end_time: filterValues[PARAM_TO] || undefined,
+      // order_by: orderBy || '-timestamp',
+    };
+  }, [filterValues, pagination.page, pagination.rowsPerPage, search]);
+
+  const clearAllFilters = useCallback(() => {
+    setParams({
+      [PARAM_SEARCH]: undefined,
+      [PARAM_ORDER_BY]: undefined,
+      ...Object.fromEntries(ANALYSIS_RUNS_FILTER_KEYS.map((k) => [k, undefined])),
+    });
+  }, [setParams]);
+
+  const status = (
+    !filterValues[PARAM_STATUS] || filterValues[PARAM_STATUS] === 'all'
+      ? 'all'
+      : filterValues[PARAM_STATUS]
+  ) as AnalysisRunStatus | 'all';
+
+  const typeValues = useMemo(() => splitTypes(filterValues[PARAM_TYPE]), [filterValues]);
+
+  const setStatus = useCallback(
+    (v: AnalysisRunStatus | 'all') => setFilterValues({ arStatus: v === 'all' ? '' : v }),
+    [setFilterValues]
   );
 
-  const analysisTypeOptions = useMemo(
-    () => Array.from(new Set(analysisRuns.map((ar) => `${ar.analysisName} ${ar.analysisVersion}`))),
-    [analysisRuns]
+  const setTypeValues = useCallback(
+    (v: string[]) => setFilterValues({ arType: v }),
+    [setFilterValues]
   );
+
+  const setDateFrom = useCallback((v: string) => setFilterValues({ arFrom: v }), [setFilterValues]);
+
+  const setDateTo = useCallback((v: string) => setFilterValues({ arTo: v }), [setFilterValues]);
 
   return {
     search,
-    setSearch,
+    orderBy,
+    setSearchQuery,
+    setOrderBy,
+    getOrderDirection,
+    filterValues,
+    setFilterValues,
+    analysisRunListQueryParams,
+    pagination,
+    page: pagination.page,
+    rowsPerPage: pagination.rowsPerPage,
+    setPage,
+    setRowsPerPage,
+    clearAllFilters,
     status,
     setStatus,
-    typeValue,
-    setTypeValue,
-    clearAllFilters,
-    activeFilterBadges,
-    filteredAnalysisRuns,
-    analysisTypeOptions,
+    typeValues,
+    setTypeValues,
+    dateFrom: filterValues[PARAM_FROM],
+    setDateFrom,
+    dateTo: filterValues[PARAM_TO],
+    setDateTo,
   };
 }

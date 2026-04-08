@@ -9,7 +9,7 @@ function isRangeField(
 
 export interface BuildLabFilterBadgesParams {
   filterFields: FilterFieldConfig[];
-  searchQuery: string;
+  search: string;
   setSearchQuery: (value: string) => void;
   filterValues: Record<string, string>;
   setFilterValues: (values: Record<string, string>) => void;
@@ -21,19 +21,19 @@ export interface BuildLabFilterBadgesParams {
  */
 export function buildLabActiveFilterBadges({
   filterFields,
-  searchQuery,
+  search,
   setSearchQuery,
   filterValues,
   setFilterValues,
 }: BuildLabFilterBadgesParams): FilterBadge[] {
   const badges: FilterBadge[] = [];
 
-  if (searchQuery.trim()) {
+  if (search && search !== '') {
     badges.push({
       id: 'search',
       type: 'search',
       label: 'Search',
-      value: searchQuery,
+      value: search,
       onRemove: () => setSearchQuery(''),
     });
   }
