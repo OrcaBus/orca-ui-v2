@@ -13,6 +13,8 @@
 # USAGE:
 # Typically (recommended) use in conjunction with pnpm:
 #     pnpm start
+# Optional: set PORT before sourcing (defaults to 3000), e.g. `PORT=3001 pnpm start`
+# or use Make: `make start PORT=3001` / `make start-3001`
 #
 # Otherwise source it standalone itself by:
 #     source start.sh
@@ -74,4 +76,4 @@ export VITE_OAUTH_REDIRECT_OUT=$oauth_redirect_out_local
 
 env | grep VITE
 
-pnpm exec vite
+pnpm exec vite --port "${PORT:-3000}"
