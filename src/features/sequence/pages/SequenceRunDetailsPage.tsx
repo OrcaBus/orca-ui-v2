@@ -17,7 +17,25 @@ import {
   UploadSampleSheetModal,
 } from '../components';
 import { useSequenceRunDetailTab } from '../hooks/useSequenceRunDetailTab';
-import { groupByInstrumentRun, getStatusBadgeStatus } from '../utils/groupByInstrumentRun';
+import { groupByInstrumentRun, type InstrumentRunStatus } from '../utils/groupByInstrumentRun';
+
+type BadgeStatus = 'running' | 'completed' | 'failed' | 'pending';
+
+function getStatusBadgeStatus(status: InstrumentRunStatus): BadgeStatus {
+  switch (status) {
+    case 'SUCCEEDED':
+      return 'completed';
+    case 'FAILED':
+    case 'ABORTED':
+      return 'failed';
+    case 'STARTED':
+      return 'running';
+    case 'RESOLVED':
+    case 'DEPRECATED':
+    default:
+      return 'pending';
+  }
+}
 
 export function SequenceRunDetailsPage() {
   const { runId } = useParams<{ runId: string }>();
@@ -94,7 +112,7 @@ export function SequenceRunDetailsPage() {
     alert('Sample sheet uploaded successfully!');
   };
 
-  const isWorkflowsAvailable = status === 'succeeded' || status === 'resolved';
+  const isWorkflowsAvailable = status === 'SUCCEEDED' || status === 'RESOLVED';
 
   return (
     <div className='p-6'>

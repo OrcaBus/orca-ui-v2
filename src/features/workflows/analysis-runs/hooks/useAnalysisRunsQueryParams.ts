@@ -1,6 +1,7 @@
 import { useMemo, useCallback } from 'react';
 import { useQueryParams } from '@/hooks/useQueryParams';
 import { PARAM_ORDER_BY, PARAM_SEARCH } from '@/utils/constants';
+import { toUtcStartOfDay } from '@/utils/timeFormat';
 
 export type AnalysisRunStatus =
   | 'succeeded'
@@ -117,8 +118,8 @@ export function useAnalysisRunsQueryParams() {
       analysis: typeValues.length ? typeValues.join(',') : undefined,
       status: statusForApi,
       is_ongoing: statusRaw === 'ongoing' ? true : undefined,
-      start_time: filterValues[PARAM_FROM] || undefined,
-      end_time: filterValues[PARAM_TO] || undefined,
+      start_time: toUtcStartOfDay(filterValues[PARAM_FROM]),
+      end_time: toUtcStartOfDay(filterValues[PARAM_TO]),
       // order_by: orderBy || '-timestamp',
     };
   }, [filterValues, pagination.page, pagination.rowsPerPage, search]);

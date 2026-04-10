@@ -1,7 +1,8 @@
-import { useState, ReactNode } from 'react';
+import { useEffect, useRef, useState, ReactNode } from 'react';
 import { Search, X, SlidersHorizontal, ChevronUp, Filter } from 'lucide-react';
 import { PillTag } from '../ui/PillTag';
 import { MultiSelect } from '../ui/MultiSelect';
+import { useDebounce } from '@/hooks/useDebounce';
 
 interface TextFilterField {
   type?: 'text' | 'number';
@@ -72,6 +73,8 @@ export type FilterFieldConfig =
 interface AdvancedFilterBarProps {
   searchValue: string;
   onSearchChange: (value: string) => void;
+  /** Debounce delay for search input in ms. Default 400. */
+  searchDebounceMs?: number;
   searchPlaceholder?: string;
   filterFields: FilterFieldConfig[];
   /** Committed filter values (from parent state / URL). Used as initial draft when panel opens. */
@@ -99,6 +102,7 @@ function getAllKeys(fields: FilterFieldConfig[]): string[] {
 export function AdvancedFilterBar({
   searchValue,
   onSearchChange,
+  searchDebounceMs = 400,
   searchPlaceholder = 'Search...',
   filterFields,
   filterValues,
@@ -109,8 +113,27 @@ export function AdvancedFilterBar({
   columns = 6,
 }: AdvancedFilterBarProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [localSearchValue, setLocalSearchValue] = useState(searchValue);
+  const debouncedSearchValue = useDebounce(localSearchValue, searchDebounceMs);
+  const prevDebouncedRef = useRef(debouncedSearchValue);
   // Draft state for the expandable panel: edits apply only on "Apply", so we don't commit every keystroke to parent/URL.
   const [tempValues, setTempValues] = useState<Record<string, string>>(() => ({ ...filterValues }));
+
+  // Keep local input synced when parent search changes externally (URL/nav/clear all).
+  useEffect(() => {
+    setLocalSearchValue(searchValue);
+  }, [searchValue]);
+
+  // Only push to parent when the debounce timer actually fired (debouncedSearchValue
+  // changed). A ref guards against re-running when other deps like searchValue change
+  // in the same effect cycle — which would see stale localSearchValue and re-apply
+  // the old query before the sync effect's setState has flushed.
+  useEffect(() => {
+    if (debouncedSearchValue === prevDebouncedRef.current) return;
+    prevDebouncedRef.current = debouncedSearchValue;
+    if (debouncedSearchValue === searchValue) return;
+    onSearchChange(debouncedSearchValue);
+  }, [debouncedSearchValue, searchValue, onSearchChange]);
 
   // Sync draft from committed values when opening the panel.
   const handleToggleOpen = () => {
@@ -138,6 +161,7 @@ export function AdvancedFilterBar({
 
   const handleClearAll = () => {
     handleReset();
+    setLocalSearchValue('');
     onSearchChange('');
     onClearAll?.();
   };
@@ -162,13 +186,17 @@ export function AdvancedFilterBar({
             id='advanced-filter-search'
             type='text'
             placeholder={searchPlaceholder}
-            value={searchValue}
-            onChange={(e) => onSearchChange(e.target.value)}
+            value={localSearchValue}
+            onChange={(e) => setLocalSearchValue(e.target.value)}
             className='w-full rounded-md border border-slate-200 bg-slate-50 py-2 pr-10 pl-10 text-sm text-neutral-900 placeholder-neutral-400 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-100 dark:placeholder-[#9dabb9] dark:focus:ring-[#137fec]'
           />
-          {searchValue && (
+          {localSearchValue && (
             <button
-              onClick={() => onSearchChange('')}
+              type='button'
+              onClick={() => {
+                setLocalSearchValue('');
+                onSearchChange('');
+              }}
               className='absolute top-1/2 right-3 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 dark:text-[#9dabb9] dark:hover:text-white'
               aria-label='Clear search'
             >

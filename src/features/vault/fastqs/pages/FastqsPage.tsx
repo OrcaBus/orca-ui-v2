@@ -157,7 +157,7 @@ export function FastqsPage() {
       <FilterBar
         searchValue={search}
         onSearchChange={setSearch}
-        placeholder='Search FASTQ files by name, S3 key, Portal Run ID…'
+        searchPlaceholder='Search FASTQ files by name, S3 key, Portal Run ID…'
         searchId='fastqs-search'
         filters={
           <Select

@@ -8,24 +8,27 @@ import { AuthProvider } from '@/context/AmplifyAuthContext';
 import { ReactQueryClientProvider } from '@/context/QueryClientContext';
 import { EnvironmentProvider } from '@/context/EnvironmentContext';
 import { NotificationProvider } from '@/context/NotificationContext';
+import { SkeletonTheme } from 'react-loading-skeleton';
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <ReactQueryClientProvider>
-          <EnvironmentProvider>
-            <NotificationProvider>
-              <Suspense
-                fallback={<SpinnerWithText className='min-h-screen' text='Loading page…' />}
-              >
-                <RouterProvider router={router} />
-              </Suspense>
-            </NotificationProvider>
-          </EnvironmentProvider>
-        </ReactQueryClientProvider>
-      </AuthProvider>
-      <Toaster position='top-right' richColors />
-    </ThemeProvider>
+    <SkeletonTheme baseColor='var(--color-slate-100)' highlightColor='var(--color-slate-200)'>
+      <ThemeProvider>
+        <AuthProvider>
+          <ReactQueryClientProvider>
+            <EnvironmentProvider>
+              <NotificationProvider>
+                <Suspense
+                  fallback={<SpinnerWithText className='min-h-screen' text='Loading page…' />}
+                >
+                  <RouterProvider router={router} />
+                </Suspense>
+              </NotificationProvider>
+            </EnvironmentProvider>
+          </ReactQueryClientProvider>
+        </AuthProvider>
+        <Toaster position='top-right' richColors />
+      </ThemeProvider>
+    </SkeletonTheme>
   );
 }

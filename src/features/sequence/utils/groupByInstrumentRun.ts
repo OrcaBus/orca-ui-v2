@@ -1,12 +1,7 @@
 import type { SequenceRun } from '../../../data/mockData';
+import type { SequenceRunStatusEnum } from '../api/sequence.api';
 
-export type InstrumentRunStatus =
-  | 'succeeded'
-  | 'failed'
-  | 'started'
-  | 'aborted'
-  | 'resolved'
-  | 'deprecated';
+export type InstrumentRunStatus = SequenceRunStatusEnum;
 
 export interface InstrumentRun {
   instrumentRunId: string;
@@ -14,24 +9,6 @@ export interface InstrumentRun {
   startTime: string;
   endTime: string | null;
   sequenceRuns: SequenceRun[];
-}
-
-export function getStatusBadgeStatus(
-  status: InstrumentRunStatus
-): 'running' | 'completed' | 'failed' | 'pending' {
-  switch (status) {
-    case 'succeeded':
-      return 'completed';
-    case 'failed':
-    case 'aborted':
-      return 'failed';
-    case 'started':
-      return 'running';
-    case 'resolved':
-    case 'deprecated':
-    default:
-      return 'pending';
-  }
 }
 
 export function groupByInstrumentRun(runs: SequenceRun[]): InstrumentRun[] {
@@ -52,15 +29,15 @@ export function groupByInstrumentRun(runs: SequenceRun[]): InstrumentRun[] {
 
     let status: InstrumentRunStatus;
     if (hasRunning) {
-      status = 'started';
+      status = 'STARTED';
     } else if (hasFailed && allCompleted) {
-      status = 'resolved';
+      status = 'RESOLVED';
     } else if (hasFailed) {
-      status = 'failed';
+      status = 'FAILED';
     } else if (allCompleted) {
-      status = 'succeeded';
+      status = 'SUCCEEDED';
     } else {
-      status = 'started';
+      status = 'STARTED';
     }
 
     const startTime = sequenceRuns.reduce(

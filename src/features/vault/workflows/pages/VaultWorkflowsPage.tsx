@@ -188,7 +188,7 @@ export function VaultWorkflowsPage() {
       <FilterBar
         searchValue={search}
         onSearchChange={setSearch}
-        placeholder='Search workflows by name, type, ID…'
+        searchPlaceholder='Search workflows by name, type, ID…'
         searchId='vault-workflows-search'
         filters={
           <>

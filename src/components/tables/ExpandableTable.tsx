@@ -1,6 +1,22 @@
-import { useState, useRef, useEffect, ReactNode } from 'react';
-import { ChevronDown, ChevronRight, Rows3, Rows4, Settings2 } from 'lucide-react';
+import { useState, useRef, Fragment, ReactNode } from 'react';
+import {
+  ChevronDown,
+  ChevronRight,
+  ChevronUp,
+  ChevronsUpDown,
+  Rows3,
+  Rows4,
+  Settings2,
+  RefreshCw,
+  Loader2,
+} from 'lucide-react';
+import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
+import Skeleton from 'react-loading-skeleton';
 import { Pagination } from './Pagination';
+import { usePaginationDefaults, type OptionalPaginationProps } from './useTablePagination';
+import { toast } from 'sonner';
+
+export type ExpandableTablePaginationProps = OptionalPaginationProps;
 
 export interface ExpandableColumn<T> {
   key: string;
@@ -17,6 +33,14 @@ export interface SubRowColumn<T> {
   width?: string;
 }
 
+export interface ExpandableTableToolbarAction<T> {
+  id: string;
+  label: string;
+  onClick: (data: T[]) => void | Promise<void>;
+  disabled?: boolean | ((data: T[]) => boolean);
+  icon?: ReactNode;
+}
+
 interface ExpandableTableProps<T, S> {
   data: T[];
   columns: ExpandableColumn<T>[];
@@ -26,7 +50,19 @@ interface ExpandableTableProps<T, S> {
   subKeyExtractor: (item: S) => string;
   onRowClick?: (item: T) => void;
   expandable?: boolean;
-  defaultPageSize?: number;
+  /** External pagination state. When provided, pagination bar is shown and page/pageSize are controlled externally. When absent, all rows are displayed. */
+  paginationProps?: ExpandableTablePaginationProps;
+  emptyMessage?: string;
+  isLoading?: boolean;
+  loadingRows?: number;
+  /** Show toolbar (row count, density, column chooser). Default true. */
+  showToolbar?: boolean;
+  /** When set, shows a refresh control in the toolbar that invokes this handler. */
+  onRefresh?: () => void | Promise<void>;
+  toolbarActions?: ExpandableTableToolbarAction<T>[];
+  toolbarActionsLabel?: string;
+  /** Remove rounded border and outer padding so table fits inside drawer/card. */
+  inCard?: boolean;
 }
 
 export function ExpandableTable<T, S>({
@@ -38,44 +74,41 @@ export function ExpandableTable<T, S>({
   subKeyExtractor,
   onRowClick,
   expandable = true,
-  defaultPageSize = 10,
+  paginationProps,
+  emptyMessage,
+  isLoading = false,
+  loadingRows = 8,
+  showToolbar = true,
+  onRefresh,
+  toolbarActions,
+  toolbarActionsLabel = 'Actions',
+  inCard = false,
 }: ExpandableTableProps<T, S>) {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [sortKey, setSortKey] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(defaultPageSize);
+
+  const { page, pageSize, onPageChange, onPageSizeChange, totalItemsProp } =
+    usePaginationDefaults(paginationProps);
   const [visibleColumns, setVisibleColumns] = useState<Set<string>>(
     new Set(columns.map((col) => col.key))
   );
   const [showColumnMenu, setShowColumnMenu] = useState(false);
   const [density, setDensity] = useState<'comfortable' | 'compact'>('comfortable');
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [pendingActionId, setPendingActionId] = useState<string | null>(null);
   const columnMenuRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (columnMenuRef.current && !columnMenuRef.current.contains(event.target as Node)) {
-        setShowColumnMenu(false);
-      }
-    };
-
-    if (showColumnMenu) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showColumnMenu]);
-
   const toggleRow = (key: string) => {
-    const newExpanded = new Set(expandedRows);
-    if (newExpanded.has(key)) {
-      newExpanded.delete(key);
-    } else {
-      newExpanded.add(key);
-    }
-    setExpandedRows(newExpanded);
+    setExpandedRows((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
   };
 
   const handleSort = (key: string) => {
@@ -87,270 +120,430 @@ export function ExpandableTable<T, S>({
     }
   };
 
-  const toggleColumnVisibility = (columnKey: string) => {
-    const newVisible = new Set(visibleColumns);
-    if (newVisible.has(columnKey)) {
-      if (newVisible.size > 1) {
-        newVisible.delete(columnKey);
-      }
-    } else {
-      newVisible.add(columnKey);
+  const getSortIcon = (columnKey: string) => {
+    if (sortKey === columnKey) {
+      return sortDirection === 'asc' ? (
+        <ChevronUp className='h-3.5 w-3.5 text-blue-600 dark:text-[#137fec]' />
+      ) : (
+        <ChevronDown className='h-3.5 w-3.5 text-blue-600 dark:text-[#137fec]' />
+      );
     }
-    setVisibleColumns(newVisible);
+    return <ChevronsUpDown className='h-3.5 w-3.5 text-neutral-400 dark:text-[#9dabb9]' />;
+  };
+
+  const toggleColumnVisibility = (columnKey: string) => {
+    setVisibleColumns((prev) => {
+      const next = new Set(prev);
+      if (next.has(columnKey)) {
+        if (next.size > 1) next.delete(columnKey);
+      } else {
+        next.add(columnKey);
+      }
+      return next;
+    });
+  };
+
+  const handleRefreshClick = () => {
+    if (!onRefresh || isRefreshing) return;
+    const result = onRefresh();
+    if (result instanceof Promise) {
+      setIsRefreshing(true);
+      void result.finally(() => setIsRefreshing(false));
+    }
+  };
+
+  const isActionDisabled = (action: ExpandableTableToolbarAction<T>): boolean => {
+    if (typeof action.disabled === 'function') return action.disabled(data);
+    return action.disabled === true;
+  };
+
+  const handleToolbarActionClick = (action: ExpandableTableToolbarAction<T>) => {
+    if (isActionDisabled(action) || pendingActionId !== null) return;
+
+    const result = action.onClick(data);
+    if (result instanceof Promise) {
+      setPendingActionId(action.id);
+      void result
+        .catch((err) => {
+          const message = err instanceof Error ? err.message : `Failed to run "${action.label}"`;
+          toast.error(message);
+        })
+        .finally(() => setPendingActionId(null));
+    }
   };
 
   const sortedData = data.toSorted((a, b) => {
     if (!sortKey) return 0;
-
     const aVal = (a as Record<string, string | number>)[sortKey];
     const bVal = (b as Record<string, string | number>)[sortKey];
-
     if (aVal === bVal) return 0;
-
     const comparison = aVal < bVal ? -1 : 1;
     return sortDirection === 'asc' ? comparison : -comparison;
   });
 
-  // Pagination
-  const totalPages = Math.ceil(sortedData.length / pageSize);
-  const paginatedData = sortedData.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const totalItems = totalItemsProp ?? data.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+  const clampedPage = Math.min(Math.max(1, page), totalPages);
 
-  const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
-  };
+  const isClientSidePaging = totalItemsProp === undefined;
+  const paginatedData = paginationProps
+    ? isClientSidePaging
+      ? sortedData.slice((clampedPage - 1) * pageSize, clampedPage * pageSize)
+      : data
+    : sortedData;
 
   const handlePageSizeChange = (newPageSize: number) => {
-    setPageSize(newPageSize);
-    setCurrentPage(1);
+    onPageSizeChange(newPageSize);
   };
 
   const visibleColumnsArray = columns.filter((col) => visibleColumns.has(col.key));
+  const totalColSpan = visibleColumnsArray.length + (expandable ? 1 : 0);
 
-  const cellPaddingY = density === 'compact' ? 'py-2' : 'py-3';
-  const subCellPaddingY = density === 'compact' ? 'py-1.5' : 'py-2';
+  const densityPadding = density === 'comfortable' ? 'px-4 py-3' : 'px-3 py-2';
+  const headerDensityPadding = density === 'comfortable' ? 'px-4 py-3' : 'px-3 py-2';
+  const subCellPadding = density === 'compact' ? 'py-1.5' : 'py-2';
 
-  const renderRows = () => {
-    const rows: ReactNode[] = [];
-
-    paginatedData.forEach((item) => {
-      const key = keyExtractor(item);
-      const isExpanded = expandedRows.has(key);
-      const subRows = subRowsExtractor(item);
-      const hasSubRows = subRows.length > 0;
-
-      // Main Row
-      rows.push(
-        <tr
-          key={key}
-          className={`border-b border-neutral-200 dark:border-[#2d3540] ${
-            onRowClick ? 'cursor-pointer hover:bg-neutral-50 dark:hover:bg-[#1e252e]/50' : ''
-          } transition-colors`}
-          onClick={() => onRowClick?.(item)}
-        >
-          {expandable && (
-            <td className={`px-4 ${cellPaddingY}`}>
-              {hasSubRows && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleRow(key);
-                  }}
-                  className='rounded p-1 transition-colors hover:bg-neutral-200 dark:hover:bg-[#1e252e]'
-                >
-                  {isExpanded ? (
-                    <ChevronDown className='h-4 w-4 text-neutral-600 dark:text-[#9dabb9]' />
-                  ) : (
-                    <ChevronRight className='h-4 w-4 text-neutral-600 dark:text-[#9dabb9]' />
-                  )}
-                </button>
-              )}
-            </td>
-          )}
-          {visibleColumnsArray.map((column) => (
-            <td
-              key={column.key}
-              className={`px-4 ${cellPaddingY} text-sm text-neutral-900 dark:text-slate-200`}
-            >
-              {column.render
-                ? column.render(item)
-                : ((item as Record<string, unknown>)[column.key] as ReactNode)}
-            </td>
-          ))}
-        </tr>
-      );
-
-      // Sub Rows
-      if (isExpanded && hasSubRows) {
-        // Sub Header
-        rows.push(
-          <tr key={`${key}-subheader`} className='bg-neutral-50 dark:bg-[#1e252e]/50'>
-            {expandable && <td className={`px-4 ${subCellPaddingY}`}></td>}
-            <td colSpan={visibleColumnsArray.length} className={`px-4 ${subCellPaddingY}`}>
-              <div className='flex gap-4'>
-                {subColumns.map((subCol) => (
-                  <div
-                    key={subCol.key}
-                    className={`text-xs font-medium text-neutral-600 dark:text-[#9dabb9] ${
-                      subCol.width || 'flex-1'
-                    }`}
-                  >
-                    {subCol.header}
-                  </div>
-                ))}
-              </div>
-            </td>
-          </tr>
-        );
-
-        // Sub Data Rows
-        subRows.forEach((subItem) => {
-          rows.push(
-            <tr
-              key={`${key}-${subKeyExtractor(subItem)}`}
-              className='border-b border-neutral-100 bg-blue-50/30 transition-colors hover:bg-blue-50/50 dark:border-[#2d3540] dark:bg-[#137fec]/5 dark:hover:bg-[#137fec]/10'
-            >
-              {expandable && <td className={`px-4 ${subCellPaddingY}`}></td>}
-              <td colSpan={visibleColumnsArray.length} className={`px-4 ${subCellPaddingY}`}>
-                <div className='flex gap-4 border-l-2 border-blue-300 pl-6 dark:border-[#137fec]/40'>
-                  {subColumns.map((subCol) => (
-                    <div
-                      key={subCol.key}
-                      className={`text-sm text-neutral-900 dark:text-slate-200 ${
-                        subCol.width || 'flex-1'
-                      }`}
-                    >
-                      {subCol.render
-                        ? subCol.render(subItem)
-                        : ((subItem as Record<string, unknown>)[subCol.key] as ReactNode)}
-                    </div>
-                  ))}
-                </div>
-              </td>
-            </tr>
-          );
-        });
-      }
-    });
-
-    return rows;
-  };
+  const wrapperClass = inCard
+    ? 'overflow-hidden border-0 bg-transparent dark:bg-transparent'
+    : 'overflow-hidden rounded-lg border border-neutral-200 bg-white dark:border-[#2d3540] dark:bg-[#111418]';
 
   return (
-    <div className='overflow-hidden rounded-lg border border-neutral-200 bg-white dark:border-[#2d3540] dark:bg-[#111418]'>
-      {/* Header */}
-      <div className='flex items-center justify-between border-b border-neutral-200 px-4 py-3 dark:border-[#2d3540]'>
-        <div className='text-sm text-neutral-600 dark:text-[#9dabb9]'>{sortedData.length} rows</div>
-        <div className='flex items-center gap-2'>
-          {/* Density Toggle */}
-          <div className='flex items-center overflow-hidden rounded-md border border-neutral-300 dark:border-[#2d3540]'>
-            <button
-              onClick={() => setDensity('comfortable')}
-              className={`p-1.5 transition-colors ${
-                density === 'comfortable'
-                  ? 'bg-neutral-200 text-neutral-900 dark:bg-[#1e252e] dark:text-white'
-                  : 'text-neutral-500 hover:bg-neutral-100 dark:text-[#9dabb9] dark:hover:bg-[#1e252e]/50'
-              }`}
-              title='Comfortable density'
-              aria-label='Comfortable density'
-              aria-pressed={density === 'comfortable'}
-            >
-              <Rows3 className='h-4 w-4' aria-hidden='true' />
-            </button>
-            <button
-              onClick={() => setDensity('compact')}
-              className={`p-1.5 transition-colors ${
-                density === 'compact'
-                  ? 'bg-neutral-200 text-neutral-900 dark:bg-[#1e252e] dark:text-white'
-                  : 'text-neutral-500 hover:bg-neutral-100 dark:text-[#9dabb9] dark:hover:bg-[#1e252e]/50'
-              }`}
-              title='Compact density'
-              aria-label='Compact density'
-              aria-pressed={density === 'compact'}
-            >
-              <Rows4 className='h-4 w-4' aria-hidden='true' />
-            </button>
+    <div className={wrapperClass}>
+      {/* Toolbar */}
+      {showToolbar && (
+        <div className='flex items-center justify-between border-b border-neutral-200 px-4 py-2 dark:border-[#2d3540]'>
+          <div className='text-xs text-neutral-600 dark:text-[#9dabb9]'>
+            {totalItems} {totalItems === 1 ? 'item' : 'items'}
           </div>
+          <div className='flex items-center gap-2'>
+            {/* Refresh */}
+            {onRefresh && (
+              <button
+                type='button'
+                onClick={handleRefreshClick}
+                disabled={isRefreshing}
+                className='flex cursor-pointer items-center rounded-md border border-neutral-300 p-1.5 text-neutral-700 transition-colors hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-[#2d3540] dark:text-[#9dabb9] dark:hover:bg-[#1e252e]'
+                title='Refresh'
+                aria-label='Refresh'
+              >
+                <RefreshCw
+                  className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`}
+                  aria-hidden='true'
+                />
+              </button>
+            )}
 
-          {/* Columns Menu */}
-          <div className='relative' ref={columnMenuRef}>
-            <button
-              onClick={() => setShowColumnMenu(!showColumnMenu)}
-              className='flex items-center gap-2 rounded-md border border-neutral-300 px-3 py-1.5 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-[#2d3540] dark:text-[#9dabb9] dark:hover:bg-[#1e252e]'
-            >
-              <Settings2 className='h-4 w-4' />
-              Columns
-            </button>
+            {/* Density Toggle */}
+            <div className='flex items-center overflow-hidden rounded-md border border-neutral-300 dark:border-[#2d3540]'>
+              <button
+                type='button'
+                onClick={() => setDensity('comfortable')}
+                className={`cursor-pointer p-1.5 transition-colors ${
+                  density === 'comfortable'
+                    ? 'bg-neutral-200 text-neutral-900 dark:bg-[#1e252e] dark:text-white'
+                    : 'text-neutral-500 hover:bg-neutral-100 dark:text-[#9dabb9] dark:hover:bg-[#1e252e]/50'
+                }`}
+                title='Comfortable density'
+                aria-label='Comfortable density'
+                aria-pressed={density === 'comfortable'}
+              >
+                <Rows3 className='h-4 w-4' aria-hidden='true' />
+              </button>
+              <button
+                type='button'
+                onClick={() => setDensity('compact')}
+                className={`cursor-pointer p-1.5 transition-colors ${
+                  density === 'compact'
+                    ? 'bg-neutral-200 text-neutral-900 dark:bg-[#1e252e] dark:text-white'
+                    : 'text-neutral-500 hover:bg-neutral-100 dark:text-[#9dabb9] dark:hover:bg-[#1e252e]/50'
+                }`}
+                title='Compact density'
+                aria-label='Compact density'
+                aria-pressed={density === 'compact'}
+              >
+                <Rows4 className='h-4 w-4' aria-hidden='true' />
+              </button>
+            </div>
 
-            {showColumnMenu && (
-              <div className='absolute top-full right-0 z-10 mt-1 w-56 rounded-lg border border-neutral-200 bg-white py-2 shadow-lg dark:border-[#2d3540] dark:bg-[#111418] dark:shadow-black/40'>
-                <div className='px-3 py-2 text-xs font-medium text-neutral-500 uppercase dark:text-[#9dabb9]'>
-                  Toggle Columns
-                </div>
-                {columns.map((column) => (
-                  <label
-                    key={column.key}
-                    className='flex cursor-pointer items-center gap-2 px-3 py-2 hover:bg-neutral-50 dark:hover:bg-[#1e252e]'
-                  >
-                    <input
-                      type='checkbox'
-                      checked={visibleColumns.has(column.key)}
-                      onChange={() => toggleColumnVisibility(column.key)}
-                      className='h-4 w-4 rounded border-neutral-300 text-blue-600 focus:ring-blue-500 dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-[#137fec] dark:focus:ring-[#137fec]'
-                    />
-                    <span className='text-sm text-neutral-700 dark:text-slate-200'>
-                      {column.header}
-                    </span>
-                  </label>
-                ))}
-              </div>
+            {/* Column Chooser */}
+            <div className='relative' ref={columnMenuRef}>
+              <button
+                type='button'
+                onClick={() => setShowColumnMenu(!showColumnMenu)}
+                className='flex cursor-pointer items-center gap-2 rounded-md border border-neutral-300 p-1.5 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-[#2d3540] dark:text-[#9dabb9] dark:hover:bg-[#1e252e]'
+                title='Toggle columns'
+                aria-label='Toggle columns'
+                aria-pressed={showColumnMenu}
+              >
+                <Settings2 className='h-4 w-4' aria-hidden='true' />
+              </button>
+
+              {showColumnMenu && (
+                <>
+                  <div className='fixed inset-0 z-10' onClick={() => setShowColumnMenu(false)} />
+                  <div className='absolute top-full right-0 z-20 mt-1 w-56 rounded-lg border border-neutral-200 bg-white py-2 shadow-lg dark:border-[#2d3540] dark:bg-[#111418] dark:shadow-black/40'>
+                    <div className='px-3 py-2 text-xs font-medium text-neutral-500 uppercase dark:text-[#9dabb9]'>
+                      Toggle Columns
+                    </div>
+                    <div className='max-h-64 overflow-y-auto'>
+                      {columns.map((col) => (
+                        <label
+                          key={col.key}
+                          className='flex cursor-pointer items-center gap-2 px-3 py-2 hover:bg-neutral-50 dark:hover:bg-[#1e252e]'
+                        >
+                          <input
+                            type='checkbox'
+                            checked={visibleColumns.has(col.key)}
+                            onChange={() => toggleColumnVisibility(col.key)}
+                            className='h-4 w-4 rounded border-neutral-300 text-blue-600 focus:ring-2 focus:ring-blue-500 dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-[#137fec] dark:focus:ring-[#137fec]'
+                          />
+                          <span className='text-sm text-neutral-900 dark:text-slate-200'>
+                            {col.header}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Toolbar Actions Dropdown */}
+            {toolbarActions && toolbarActions.length > 0 && (
+              <Menu as='div' className='relative'>
+                <MenuButton
+                  className='flex cursor-pointer items-center gap-1 rounded-md border border-neutral-300 px-2 py-1 text-xs leading-none font-medium whitespace-nowrap text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-[#2d3540] dark:text-[#9dabb9] dark:hover:bg-[#1e252e]'
+                  aria-label={toolbarActionsLabel}
+                >
+                  <span className='text-sm font-medium text-neutral-700 dark:text-[#9dabb9]'>
+                    {toolbarActionsLabel}
+                  </span>
+                  <ChevronDown
+                    className='h-5 w-5 text-neutral-500 dark:text-[#9dabb9]'
+                    aria-hidden='true'
+                  />
+                </MenuButton>
+
+                <MenuItems
+                  anchor='bottom end'
+                  transition
+                  className='z-50 mt-1 w-56 origin-top-right overflow-hidden rounded-lg border border-neutral-200 bg-white py-1 shadow-lg focus:outline-none dark:border-[#2d3540] dark:bg-[#111418] dark:shadow-black/40'
+                >
+                  {toolbarActions.map((action) => {
+                    const isPending = pendingActionId === action.id;
+                    const disabled = isActionDisabled(action) || pendingActionId !== null;
+
+                    return (
+                      <MenuItem key={action.id}>
+                        {({ active }) => (
+                          <button
+                            type='button'
+                            onClick={() => handleToolbarActionClick(action)}
+                            disabled={disabled}
+                            className={[
+                              'flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-neutral-700',
+                              'data-focus:bg-neutral-100 dark:text-neutral-300 dark:data-focus:bg-[#1e252e]',
+                              active ? 'bg-neutral-100 dark:bg-[#1e252e]' : '',
+                              disabled ? 'cursor-not-allowed opacity-60' : '',
+                            ].join(' ')}
+                          >
+                            {action.icon && (
+                              <span className='flex h-4 w-4 items-center justify-center text-neutral-600 dark:text-neutral-300'>
+                                {action.icon}
+                              </span>
+                            )}
+                            <span className='flex-1 truncate'>{action.label}</span>
+                            {isPending && (
+                              <Loader2 className='h-4 w-4 animate-spin' aria-hidden='true' />
+                            )}
+                          </button>
+                        )}
+                      </MenuItem>
+                    );
+                  })}
+                </MenuItems>
+              </Menu>
             )}
           </div>
         </div>
-      </div>
+      )}
 
       {/* Table */}
-      <div className='overflow-x-auto'>
+      <div className='scrollbar-thin max-h-[600px] overflow-x-auto overflow-y-auto'>
         <table className='w-full'>
-          <thead className='border-b border-neutral-200 bg-neutral-50 dark:border-[#2d3540] dark:bg-[#111418]'>
+          <thead className='sticky top-0 z-10 border-b border-neutral-200 bg-neutral-50 dark:border-[#2d3540] dark:bg-[#111418]'>
             <tr>
-              {expandable && <th className='w-10'></th>}
+              {expandable && <th className={`w-10 ${headerDensityPadding}`} />}
               {visibleColumnsArray.map((column) => (
                 <th
                   key={column.key}
-                  className={`px-4 ${cellPaddingY} text-left text-xs font-medium text-neutral-700 dark:text-[#9dabb9] ${
+                  className={`text-left text-xs font-medium whitespace-nowrap text-neutral-700 dark:text-[#9dabb9] ${headerDensityPadding} ${
                     column.sortable
                       ? 'cursor-pointer select-none hover:bg-neutral-100 dark:hover:bg-[#1e252e]'
                       : ''
                   } ${column.width || ''}`}
                   onClick={() => column.sortable && handleSort(column.key)}
                 >
-                  <div className='flex items-center gap-1'>
+                  <div className='flex items-center gap-2'>
                     {column.header}
-                    {column.sortable && sortKey === column.key && (
-                      <span className='text-blue-600 dark:text-[#137fec]'>
-                        {sortDirection === 'asc' ? '↑' : '↓'}
-                      </span>
-                    )}
+                    {column.sortable && getSortIcon(column.key)}
                   </div>
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody>{renderRows()}</tbody>
+          <tbody className='divide-y divide-neutral-200 dark:divide-[#2d3540]'>
+            {isLoading ? (
+              Array.from({ length: loadingRows }).map((_, rowIdx) => (
+                <tr key={`skeleton-${rowIdx}`}>
+                  {expandable && (
+                    <td className={`w-10 ${densityPadding}`}>
+                      <Skeleton width={24} height={24} borderRadius={6} />
+                    </td>
+                  )}
+                  {visibleColumnsArray.map((col) => (
+                    <td key={col.key} className={densityPadding}>
+                      <Skeleton
+                        height={14}
+                        borderRadius={4}
+                        style={{ width: `${55 + Math.random() * 35}%` }}
+                      />
+                    </td>
+                  ))}
+                </tr>
+              ))
+            ) : paginatedData.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={totalColSpan}
+                  className='px-4 py-12 text-center text-sm text-neutral-500 dark:text-[#9dabb9]'
+                >
+                  {emptyMessage ?? 'No data to display'}
+                </td>
+              </tr>
+            ) : (
+              paginatedData.flatMap((item) => {
+                const key = keyExtractor(item);
+                const isExpanded = expandedRows.has(key);
+                const subRows = subRowsExtractor(item);
+                const hasSubRows = subRows.length > 0;
+
+                return (
+                  <Fragment key={key}>
+                    {/* Main row */}
+                    <tr
+                      className={[
+                        'transition-colors',
+                        onRowClick
+                          ? 'cursor-pointer hover:bg-neutral-50 dark:hover:bg-[#1e252e]/50'
+                          : '',
+                      ].join(' ')}
+                      onClick={() => onRowClick?.(item)}
+                    >
+                      {expandable && (
+                        <td className={`w-10 ${densityPadding}`}>
+                          {hasSubRows && (
+                            <button
+                              type='button'
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleRow(key);
+                              }}
+                              className='cursor-pointer rounded p-1 transition-colors hover:bg-neutral-200 dark:hover:bg-[#1e252e]'
+                              aria-label={isExpanded ? 'Collapse row' : 'Expand row'}
+                              aria-expanded={isExpanded}
+                            >
+                              {isExpanded ? (
+                                <ChevronDown className='h-4 w-4 text-neutral-600 dark:text-[#9dabb9]' />
+                              ) : (
+                                <ChevronRight className='h-4 w-4 text-neutral-600 dark:text-[#9dabb9]' />
+                              )}
+                            </button>
+                          )}
+                        </td>
+                      )}
+                      {visibleColumnsArray.map((column) => (
+                        <td
+                          key={column.key}
+                          className={`text-sm whitespace-nowrap text-neutral-900 dark:text-slate-200 ${densityPadding}`}
+                        >
+                          {column.render
+                            ? column.render(item)
+                            : ((item as Record<string, unknown>)[column.key] as ReactNode)}
+                        </td>
+                      ))}
+                    </tr>
+
+                    {/* Sub-row header + sub-rows */}
+                    {isExpanded && hasSubRows && (
+                      <>
+                        <tr className='bg-neutral-50 dark:bg-[#1e252e]/50'>
+                          {expandable && <td className={`px-4 ${subCellPadding}`} />}
+                          <td
+                            colSpan={visibleColumnsArray.length}
+                            className={`px-4 ${subCellPadding}`}
+                          >
+                            <div className='flex gap-4 border-l-2 border-blue-300 pl-2 dark:border-[#137fec]/40'>
+                              {subColumns.map((subCol) => (
+                                <div
+                                  key={subCol.key}
+                                  className={`text-xs font-medium text-neutral-600 dark:text-[#9dabb9] ${subCol.width || 'flex-1'}`}
+                                >
+                                  {subCol.header}
+                                </div>
+                              ))}
+                            </div>
+                          </td>
+                        </tr>
+
+                        {subRows.map((subItem) => (
+                          <tr
+                            key={`${key}-${subKeyExtractor(subItem)}`}
+                            className='border-b border-neutral-100 bg-blue-50/30 transition-colors hover:bg-blue-50/50 dark:border-[#2d3540] dark:bg-[#137fec]/5 dark:hover:bg-[#137fec]/10'
+                          >
+                            {expandable && <td className={`px-4 ${subCellPadding}`} />}
+                            <td
+                              colSpan={visibleColumnsArray.length}
+                              className={`px-4 ${subCellPadding}`}
+                            >
+                              <div className='flex items-center gap-4 border-l-2 border-blue-300 pl-2 dark:border-[#137fec]/40'>
+                                {subColumns.map((subCol) => (
+                                  <div
+                                    key={subCol.key}
+                                    className={`text-xs text-neutral-900 dark:text-slate-200 ${subCol.width || 'flex-1'}`}
+                                  >
+                                    {subCol.render
+                                      ? subCol.render(subItem)
+                                      : ((subItem as Record<string, unknown>)[
+                                          subCol.key
+                                        ] as ReactNode)}
+                                  </div>
+                                ))}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </>
+                    )}
+                  </Fragment>
+                );
+              })
+            )}
+          </tbody>
         </table>
       </div>
 
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        pageSize={pageSize}
-        totalItems={sortedData.length}
-        onPageChange={handlePageChange}
-        onPageSizeChange={handlePageSizeChange}
-        pageSizeOptions={[5, 10, 20, 50, 100]}
-      />
+      {/* Pagination - only when paginationProps is provided */}
+      {paginationProps && (
+        <Pagination
+          currentPage={clampedPage}
+          totalPages={totalPages}
+          pageSize={pageSize}
+          totalItems={totalItems}
+          onPageChange={onPageChange}
+          onPageSizeChange={handlePageSizeChange}
+        />
+      )}
     </div>
   );
 }

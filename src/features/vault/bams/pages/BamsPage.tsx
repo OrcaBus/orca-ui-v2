@@ -154,7 +154,7 @@ export function BamsPage() {
       <FilterBar
         searchValue={search}
         onSearchChange={setSearch}
-        placeholder='Search BAM files by name, S3 key, Portal Run ID…'
+        searchPlaceholder='Search BAM files by name, S3 key, Portal Run ID…'
         searchId='bams-search'
         filters={
           <Select

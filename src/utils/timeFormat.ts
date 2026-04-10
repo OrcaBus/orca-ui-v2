@@ -57,6 +57,17 @@ export function formatBackendDate(date: Date): string {
 }
 
 /**
+ * Convert a date-only string (YYYY-MM-DD) to UTC start-of-day format for API query params.
+ * @returns e.g. "2025-11-06T00:00:00+00:00", or undefined when input is empty/invalid.
+ */
+export function toUtcStartOfDay(dateString: string | null | undefined): string | undefined {
+  if (!dateString) return undefined;
+  const d = dayjs.utc(dateString);
+  if (!d.isValid()) return undefined;
+  return d.startOf('day').format('YYYY-MM-DDTHH:mm:ssZ');
+}
+
+/**
  * Get relative time description (e.g., "2h ago", "just now")
  * Useful for timestamps that need human-friendly relative formatting
  */
