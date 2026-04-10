@@ -1,8 +1,10 @@
-import { useCallback, useMemo } from 'react';
+import { Suspense, useCallback, useMemo } from 'react';
 import { mockAnalysisRuns } from '@/data/mockData';
 import { FilterBar } from '@/components/tables/FilterBar';
 // import { MultiSelect } from '@/components/ui/MultiSelect';
 import { StatusCard } from '@/components/ui/StatusCard';
+import { DetailedErrorBoundary } from '@/components/ui/DetailedErrorBoundary';
+import { SpinnerWithText } from '@/components/ui/Spinner';
 import { getRunsStatusIcon } from '../../shared/utils/statusIcons';
 import {
   useAnalysisRunsQueryParams,
@@ -80,7 +82,7 @@ export function AnalysisRunsPage() {
       <FilterBar
         searchValue={search}
         onSearchChange={setSearchQuery}
-        placeholder='Search by analysis run name, analysis run ID, attributes…'
+        searchPlaceholder='Search by analysis run name, analysis run ID, attributes…'
         filters={
           <>
             <div className='flex items-center gap-2'>
@@ -118,7 +120,11 @@ export function AnalysisRunsPage() {
         onClearAll={activeFilterBadges.length > 0 ? clearAllFilters : undefined}
       />
 
-      <AnalysisRunsTable />
+      <DetailedErrorBoundary errorTitle='Unable to load analysis runs'>
+        <Suspense fallback={<SpinnerWithText text='Loading analysis runs...' />}>
+          <AnalysisRunsTable />
+        </Suspense>
+      </DetailedErrorBoundary>
     </div>
   );
 }

@@ -14,7 +14,6 @@ import {
 } from 'lucide-react';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 import Skeleton from 'react-loading-skeleton';
-import 'react-loading-skeleton/dist/skeleton.css';
 import { Pagination } from './Pagination';
 import { usePaginationDefaults, type OptionalPaginationProps } from './useTablePagination';
 import { toast } from 'sonner';

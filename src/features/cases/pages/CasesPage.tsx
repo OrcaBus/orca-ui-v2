@@ -160,7 +160,7 @@ export function CasesPage() {
       <FilterBar
         searchValue={searchQuery}
         onSearchChange={setSearchQuery}
-        placeholder='Search by case title, alias, or library ID...'
+        searchPlaceholder='Search by case title, alias, or library ID...'
         searchLabel='Search cases'
         searchId='cases-filter-search'
         filters={

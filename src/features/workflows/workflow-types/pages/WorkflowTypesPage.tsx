@@ -1,5 +1,8 @@
 import { FilterBar } from '@/components/tables/FilterBar';
 import { StatusCard } from '@/components/ui/StatusCard';
+import { DetailedErrorBoundary } from '@/components/ui/DetailedErrorBoundary';
+import { SpinnerWithText } from '@/components/ui/Spinner';
+import { Suspense } from 'react';
 import { getValidationStateIcon } from '../../shared/utils/statusIcons';
 import {
   useWorkflowTypesQueryParams,
@@ -58,12 +61,16 @@ export function WorkflowTypesPage() {
       <FilterBar
         searchValue={search}
         onSearchChange={setSearchQuery}
-        placeholder='Search by workflow name, ID, version…'
+        searchPlaceholder='Search by workflow name, ID, version…'
         activeFilterBadges={activeFilterBadges}
         onClearAll={activeFilterBadges.length > 0 ? clearAllFilters : undefined}
       />
 
-      <WorkflowTypesTable />
+      <DetailedErrorBoundary errorTitle='Unable to load workflow types'>
+        <Suspense fallback={<SpinnerWithText text='Loading workflow types...' />}>
+          <WorkflowTypesTable />
+        </Suspense>
+      </DetailedErrorBoundary>
     </div>
   );
 }

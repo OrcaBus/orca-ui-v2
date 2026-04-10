@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import Skeleton from 'react-loading-skeleton';
 
 interface StatusCardProps {
   label: string;
@@ -8,6 +9,7 @@ interface StatusCardProps {
   variant?: 'success' | 'error' | 'warning' | 'neutral' | 'info';
   selected?: boolean;
   onClick?: () => void;
+  isLoading?: boolean;
 }
 
 export function StatusCard({
@@ -18,6 +20,7 @@ export function StatusCard({
   variant = 'neutral',
   selected = false,
   onClick,
+  isLoading = false,
 }: StatusCardProps) {
   const variantClasses = {
     success: selected
@@ -52,6 +55,21 @@ export function StatusCard({
     neutral: 'text-neutral-500 bg-neutral-100 dark:text-[#9dabb9] dark:bg-[#1e252e]',
     info: 'text-blue-600 bg-blue-50 dark:text-[#137fec] dark:bg-[#137fec]/10',
   };
+
+  if (isLoading) {
+    return (
+      <div className='flex h-[96px] flex-col justify-between rounded-lg border border-neutral-200 bg-white p-3 dark:border-[#2d3540] dark:bg-[#111418]'>
+        <div className='mb-3 flex items-center justify-between'>
+          <Skeleton width={64} height={8} borderRadius={4} />
+          <Skeleton width={16} height={16} circle />
+        </div>
+        <div className='flex items-end justify-between'>
+          <Skeleton width={32} height={28} borderRadius={4} />
+          <Skeleton width={28} height={12} borderRadius={4} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <button

@@ -1,8 +1,10 @@
-import { useCallback } from 'react';
+import { Suspense, useCallback } from 'react';
 import { mockAnalysisTypes } from '@/data/mockData';
 import { FilterBar } from '@/components/tables/FilterBar';
 import { Select } from '@/components/ui/Select';
 import { StatusCard } from '@/components/ui/StatusCard';
+import { DetailedErrorBoundary } from '@/components/ui/DetailedErrorBoundary';
+import { SpinnerWithText } from '@/components/ui/Spinner';
 import { getAnalysisTypeIcon } from '../../shared/utils/statusIcons';
 import {
   useAnalysisTypesQueryParams,
@@ -56,7 +58,7 @@ export function AnalysisTypesPage() {
       <FilterBar
         searchValue={search}
         onSearchChange={setSearchQuery}
-        placeholder='Search by analysis name, analysis ID, version, description…'
+        searchPlaceholder='Search by analysis name, analysis ID, version, description…'
         filters={
           <Select
             value={status}
@@ -72,7 +74,11 @@ export function AnalysisTypesPage() {
         onClearAll={activeFilterBadges.length > 0 ? clearAllFilters : undefined}
       />
 
-      <AnalysisTypesTable />
+      <DetailedErrorBoundary errorTitle='Unable to load analysis types'>
+        <Suspense fallback={<SpinnerWithText text='Loading analysis types...' />}>
+          <AnalysisTypesTable />
+        </Suspense>
+      </DetailedErrorBoundary>
     </div>
   );
 }

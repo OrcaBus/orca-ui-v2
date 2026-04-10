@@ -165,7 +165,7 @@ export function LimsPage() {
       <FilterBar
         searchValue={search}
         onSearchChange={setSearch}
-        placeholder='Search by Library ID, Sample ID…'
+        searchPlaceholder='Search by Library ID, Sample ID…'
         searchId='lims-search'
         filters={
           <Select value={typeFilter} onChange={setTypeFilter} options={LIBRARY_TYPE_OPTIONS} />

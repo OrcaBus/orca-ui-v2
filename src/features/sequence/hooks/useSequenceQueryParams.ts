@@ -1,111 +1,145 @@
 import { useMemo, useCallback } from 'react';
-import { useQueryParams } from '../../../hooks/useQueryParams';
-import type { SequenceRun } from '../../../data/mockData';
-import {
-  groupByInstrumentRun,
-  type InstrumentRun,
-  type InstrumentRunStatus,
-} from '../utils/groupByInstrumentRun';
+import { useQueryParams } from '@/hooks/useQueryParams';
+import { PARAM_ORDER_BY, PARAM_SEARCH } from '@/utils/constants';
+import { toUtcStartOfDayQueryParam } from '@/utils/timeFormat';
+import type { SequenceRunStatusEnum } from '../api/sequence.api';
 
-const PARAM_SEARCH = 'search';
-const PARAM_STATUS = 'status';
-const PARAM_START_FROM = 'startTimeFrom';
-const PARAM_START_TO = 'startTimeTo';
+export type SequenceStatus = SequenceRunStatusEnum;
 
-const STATUS_ALL = 'all';
+const PARAM_STATUS = 'seqStatus';
+const PARAM_FROM = 'seqFrom';
+const PARAM_TO = 'seqTo';
 
-interface UseSequenceQueryParamsOptions {
-  sequenceRuns: SequenceRun[];
+export const SEQUENCE_FILTER_KEYS = [PARAM_STATUS, PARAM_FROM, PARAM_TO] as const;
+
+export type SequenceFilterKey = (typeof SEQUENCE_FILTER_KEYS)[number];
+
+const DEFAULT_FILTER_VALUES: Record<SequenceFilterKey, string> = {
+  [PARAM_STATUS]: '',
+  [PARAM_FROM]: '',
+  [PARAM_TO]: '',
+};
+
+export type SequenceFilterPatch = Partial<{
+  seqStatus: string | string[];
+  seqFrom: string | string[];
+  seqTo: string | string[];
+}>;
+
+function toFirstString(value: string | string[] | undefined): string {
+  if (value == null) return '';
+  return Array.isArray(value) ? (value[0] ?? '') : value;
 }
 
 /**
  * Sequence list page state driven by URL query params.
- * Params: search, status (instrument run status), startTimeFrom, startTimeTo.
+ * Filter params: seqStatus, seqFrom, seqTo. Shared: search, orderBy, pagination.
  */
-export function useSequenceQueryParams({ sequenceRuns }: UseSequenceQueryParamsOptions) {
-  const { getParam, setParams } = useQueryParams({ paginationKeys: [] });
+export function useSequenceQueryParams() {
+  const {
+    params,
+    setParams,
+    pagination,
+    search,
+    orderBy,
+    setPage,
+    setRowsPerPage,
+    setSearchQuery,
+    setOrderBy,
+    getOrderDirection,
+  } = useQueryParams();
 
-  const searchQuery = getParam(PARAM_SEARCH) ?? '';
-  const statusFilterRaw = getParam(PARAM_STATUS) ?? STATUS_ALL;
-  const startTimeFrom = getParam(PARAM_START_FROM) ?? '';
-  const startTimeTo = getParam(PARAM_START_TO) ?? '';
-
-  const statusFilter: InstrumentRunStatus | typeof STATUS_ALL =
-    statusFilterRaw === '' ? STATUS_ALL : (statusFilterRaw as InstrumentRunStatus);
-
-  const setSearchQuery = useCallback(
-    (value: string) => setParams({ [PARAM_SEARCH]: value || undefined }),
-    [setParams]
-  );
-  const setStatusFilter = useCallback(
-    (value: InstrumentRunStatus | typeof STATUS_ALL) =>
-      setParams({ [PARAM_STATUS]: value === STATUS_ALL ? undefined : value }),
-    [setParams]
-  );
-  const setStartTimeFrom = useCallback(
-    (value: string) => setParams({ [PARAM_START_FROM]: value || undefined }),
-    [setParams]
-  );
-  const setStartTimeTo = useCallback(
-    (value: string) => setParams({ [PARAM_START_TO]: value || undefined }),
-    [setParams]
+  const filterValues = useMemo(
+    () => ({
+      ...DEFAULT_FILTER_VALUES,
+      [PARAM_STATUS]: toFirstString(params[PARAM_STATUS] as string | string[] | undefined),
+      [PARAM_FROM]: toFirstString(params[PARAM_FROM] as string | string[] | undefined),
+      [PARAM_TO]: toFirstString(params[PARAM_TO] as string | string[] | undefined),
+    }),
+    [params]
   );
 
-  const clearAllFilters = useCallback(
-    () =>
+  const setFilterValues = useCallback(
+    (patch: SequenceFilterPatch) => {
+      const str = (v: string | string[] | undefined): string =>
+        v == null ? '' : Array.isArray(v) ? (v[0] ?? '') : v;
+
+      const nextStatus =
+        patch.seqStatus !== undefined ? str(patch.seqStatus) : filterValues[PARAM_STATUS];
+      const nextFrom = patch.seqFrom !== undefined ? str(patch.seqFrom) : filterValues[PARAM_FROM];
+      const nextTo = patch.seqTo !== undefined ? str(patch.seqTo) : filterValues[PARAM_TO];
+
       setParams({
-        [PARAM_SEARCH]: undefined,
-        [PARAM_STATUS]: undefined,
-        [PARAM_START_FROM]: undefined,
-        [PARAM_START_TO]: undefined,
-      }),
-    [setParams]
+        [PARAM_STATUS]: nextStatus || undefined,
+        [PARAM_FROM]: nextFrom || undefined,
+        [PARAM_TO]: nextTo || undefined,
+      });
+    },
+    [setParams, filterValues]
   );
 
-  const allInstrumentRuns = useMemo(() => groupByInstrumentRun(sequenceRuns), [sequenceRuns]);
+  const sequenceListQueryParams = useMemo(() => {
+    const statusRaw = filterValues[PARAM_STATUS];
+    const statusForApi =
+      !statusRaw || statusRaw === 'all' ? undefined : (statusRaw as SequenceStatus);
 
-  const filteredInstrumentRuns = useMemo(() => {
-    return allInstrumentRuns.filter((instrumentRun) => {
-      const matchesSearch =
-        !searchQuery ||
-        instrumentRun.instrumentRunId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        instrumentRun.sequenceRuns.some(
-          (run) =>
-            run.runId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            run.flowcellId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            run.instrument.toLowerCase().includes(searchQuery.toLowerCase())
-        );
+    return {
+      page: pagination.page,
+      rowsPerPage: pagination.rowsPerPage,
+      search: search || undefined,
+      status: statusForApi,
+      start_time: toUtcStartOfDayQueryParam(filterValues[PARAM_FROM]),
+      end_time: toUtcStartOfDayQueryParam(filterValues[PARAM_TO]),
+      ordering: orderBy || '-start_time',
+    };
+  }, [filterValues, pagination.page, pagination.rowsPerPage, search, orderBy]);
 
-      const matchesStatus = statusFilter === STATUS_ALL || instrumentRun.status === statusFilter;
-
-      let matchesTimeRange = true;
-      if (startTimeFrom || startTimeTo) {
-        const runDate = new Date(instrumentRun.startTime);
-        if (startTimeFrom) {
-          matchesTimeRange = matchesTimeRange && runDate >= new Date(startTimeFrom);
-        }
-        if (startTimeTo) {
-          matchesTimeRange = matchesTimeRange && runDate <= new Date(startTimeTo);
-        }
-      }
-
-      return matchesSearch && matchesStatus && matchesTimeRange;
+  const clearAllFilters = useCallback(() => {
+    setParams({
+      [PARAM_SEARCH]: undefined,
+      [PARAM_ORDER_BY]: undefined,
+      ...Object.fromEntries(SEQUENCE_FILTER_KEYS.map((k) => [k, undefined])),
     });
-  }, [allInstrumentRuns, searchQuery, statusFilter, startTimeFrom, startTimeTo]);
+  }, [setParams]);
+
+  const status = (
+    !filterValues[PARAM_STATUS] || filterValues[PARAM_STATUS] === 'all'
+      ? 'all'
+      : filterValues[PARAM_STATUS]
+  ) as SequenceStatus | 'all';
+
+  const setStatus = useCallback(
+    (v: SequenceStatus | 'all') => setFilterValues({ seqStatus: v === 'all' ? '' : v }),
+    [setFilterValues]
+  );
+
+  const setDateFrom = useCallback(
+    (v: string) => setFilterValues({ seqFrom: v }),
+    [setFilterValues]
+  );
+
+  const setDateTo = useCallback((v: string) => setFilterValues({ seqTo: v }), [setFilterValues]);
 
   return {
-    searchQuery,
+    search,
+    orderBy,
     setSearchQuery,
-    statusFilter,
-    setStatusFilter,
-    startTimeFrom,
-    setStartTimeFrom,
-    startTimeTo,
-    setStartTimeTo,
+    setOrderBy,
+    getOrderDirection,
+    filterValues,
+    setFilterValues,
+    sequenceListQueryParams,
+    pagination,
+    page: pagination.page,
+    rowsPerPage: pagination.rowsPerPage,
+    setPage,
+    setRowsPerPage,
     clearAllFilters,
-    allInstrumentRuns,
-    filteredInstrumentRuns,
+    status,
+    setStatus,
+    dateFrom: filterValues[PARAM_FROM],
+    setDateFrom,
+    dateTo: filterValues[PARAM_TO],
+    setDateTo,
   };
 }
-
-export type { InstrumentRun, InstrumentRunStatus };

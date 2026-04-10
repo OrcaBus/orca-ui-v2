@@ -1,28 +1,14 @@
-import { useCallback, useMemo } from 'react';
-import { mockWorkflowRuns } from '@/data/mockData';
+import { Suspense, useCallback, useMemo } from 'react';
 import { FilterBar } from '@/components/tables/FilterBar';
-import { StatusCard } from '@/components/ui/StatusCard';
-import { getRunsStatusIcon } from '../../shared/utils/statusIcons';
+import { DetailedErrorBoundary } from '@/components/ui/DetailedErrorBoundary';
+import { SpinnerWithText } from '@/components/ui/Spinner';
 import {
   useWorkflowRunsQueryParams,
   type WorkflowRunStatus,
 } from '../hooks/useWorkflowRunsQueryParams';
 import WorkflowRunsTable from '../components/WorkflowRunsTable';
 import { buildWorkflowRunsFilterBadges } from '../utils/buildWorkflowRunsFilterBadges';
-
-const WF_STATUS_CARDS: Array<{
-  label: string;
-  status: WorkflowRunStatus;
-  variant: 'success' | 'error' | 'warning' | 'neutral' | 'info';
-}> = [
-  { label: 'Succeeded', status: 'succeeded', variant: 'success' },
-  { label: 'Failed', status: 'failed', variant: 'error' },
-  { label: 'Aborted', status: 'aborted', variant: 'neutral' },
-  { label: 'Resolved', status: 'resolved', variant: 'info' },
-  { label: 'Deprecated', status: 'deprecated', variant: 'neutral' },
-  { label: 'Draft', status: 'draft', variant: 'info' },
-  { label: 'Ongoing', status: 'ongoing', variant: 'warning' },
-];
+import { WorkflowRunsStatusCards } from '../components/WorkflowRunsStatusCards';
 
 export function WorkflowRunsPage() {
   const {
@@ -57,30 +43,12 @@ export function WorkflowRunsPage() {
 
   return (
     <div>
-      <div className='mb-6 grid grid-cols-7 gap-4'>
-        {WF_STATUS_CARDS.map((card) => {
-          const count = mockWorkflowRuns.filter((wf) => wf.status === card.status).length;
-          const percentage =
-            mockWorkflowRuns.length > 0 ? Math.round((count / mockWorkflowRuns.length) * 100) : 0;
-          return (
-            <StatusCard
-              key={card.status}
-              label={card.label}
-              value={count}
-              percentage={percentage}
-              icon={getRunsStatusIcon(card.status)}
-              variant={card.variant}
-              selected={status === card.status}
-              onClick={() => handleStatusCardClick(card.status)}
-            />
-          );
-        })}
-      </div>
+      <WorkflowRunsStatusCards status={status} onStatusCardClick={handleStatusCardClick} />
 
       <FilterBar
         searchValue={search}
         onSearchChange={setSearchQuery}
-        placeholder='Search by workflow run name, portal run ID, execution ID…'
+        searchPlaceholder='Search by workflow run name, portal run ID, execution ID…'
         filters={
           <>
             <div className='flex items-center gap-2'>
@@ -116,7 +84,11 @@ export function WorkflowRunsPage() {
         activeFilterBadges={activeFilterBadges}
         onClearAll={activeFilterBadges.length > 0 ? clearAllFilters : undefined}
       />
-      <WorkflowRunsTable />
+      <DetailedErrorBoundary errorTitle='Unable to load workflow runs'>
+        <Suspense fallback={<SpinnerWithText text='Loading workflow runs...' />}>
+          <WorkflowRunsTable />
+        </Suspense>
+      </DetailedErrorBoundary>
     </div>
   );
 }

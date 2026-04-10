@@ -46,6 +46,9 @@ export type ListAnalysisRunModel = operations['analysisrunList']['parameters']['
 export type ListAnalysisModel = operations['analysisList']['parameters']['query'];
 export type DatasetEnum = components['schemas']['DatasetEnum'];
 
+export type WorkflowRunStatsCountByStatusModel =
+  operations['workflowrunStatsCountByStatusRetrieve']['responses']['200']['content']['application/json'];
+
 // workflow model
 export const useWorkflowModel = createQueryHook(workflowApi, '/api/v1/workflow/');
 export const useWorkflowDetailModel = createQueryHook(workflowApi, '/api/v1/workflow/{orcabusId}/');
