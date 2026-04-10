@@ -1,6 +1,6 @@
 import { Link } from 'react-router';
 import { PageHeader } from '@/components/layout/PageHeader';
-import { Settings, FileText, Workflow, ExternalLink, ArrowRight } from 'lucide-react';
+import { Settings, FileText, Workflow, ArrowRight } from 'lucide-react';
 
 export function ToolsPage() {
   const tools = [
@@ -50,7 +50,7 @@ export function ToolsPage() {
               {/* Tool Header */}
               <div className='mb-4 flex items-start gap-4'>
                 <div
-                  className={`p-3 ${tool.iconBg} dark:${tool.iconBg} flex-shrink-0 rounded-lg transition-transform group-hover:scale-110`}
+                  className={`p-3 ${tool.iconBg} dark:${tool.iconBg} shrink-0 rounded-lg transition-transform group-hover:scale-110`}
                 >
                   <Icon className={`h-6 w-6 ${tool.iconColor}`} />
                 </div>
@@ -85,13 +85,14 @@ export function ToolsPage() {
                   Open
                   <ArrowRight className='h-4 w-4 transition-transform group-hover/button:translate-x-0.5' />
                 </Link>
-                <a
+                {/* external link */}
+                {/* <a
                   href={tool.learnMoreUrl}
                   className='flex items-center gap-1 rounded-md border border-neutral-300 px-4 py-2.5 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-neutral-600 dark:text-neutral-300 dark:hover:bg-neutral-800'
                 >
                   Learn more
                   <ExternalLink className='h-3.5 w-3.5' />
-                </a>
+                </a> */}
               </div>
             </div>
           );
@@ -103,12 +104,17 @@ export function ToolsPage() {
         <div className='flex items-start gap-3'>
           <Settings className='mt-0.5 h-5 w-5 shrink-0 text-blue-600 dark:text-blue-400' />
           <div>
-            <h4 className='mb-1 text-sm font-medium text-blue-900 dark:text-blue-100'>
+            <h4 className='mb-2 text-sm font-medium text-blue-900 dark:text-blue-100'>
               Getting Started with Tools
             </h4>
             <p className='text-sm text-blue-700 dark:text-blue-300'>
               These utilities help you validate inputs before workflow execution and explore
-              available workflow patterns. Select a tool card above to launch the interface.
+              available workflow patterns. No interaction with our systems data. Select a tool card
+              above to launch the interface.
+            </p>
+            <p className='mt-2 text-sm text-blue-700 dark:text-blue-300'>
+              More tools coming soon! If you have suggestions for useful utilities, please reach out
+              to the team.
             </p>
           </div>
         </div>

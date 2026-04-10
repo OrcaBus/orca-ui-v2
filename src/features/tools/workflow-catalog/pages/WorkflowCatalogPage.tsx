@@ -1,24 +1,31 @@
-import { useState, useCallback, useMemo } from 'react';
-import { Link } from 'react-router';
-import { ArrowLeft, Search, X, Plus } from 'lucide-react';
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import { Link, useParams } from 'react-router';
+import { ArrowLeft, Search, X, Plus, ChevronDown, Layers } from 'lucide-react';
 import { ReactFlowProvider } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
 import type { WorkflowNodeData, EventDef, EdgeDef } from '../types/workflow-catalog.types';
+import type { WorkflowFormData } from '../types/workflow-catalog.types';
 import {
-  ANALYSIS_LIST,
+  GROUP_LIST,
   WORKFLOW_CATALOG,
   CATALOG_EDGES,
   NODE_POSITIONS,
   ENGINE_COLORS,
+  DIAGRAM_LIST,
 } from '../data';
 import {
   WorkflowModal,
   DeleteConfirmDialog,
   DiagramInner,
   WorkflowDrawer,
-  type WorkflowFormData,
+  DiagramDetailsModal,
 } from '../components';
+import {
+  buildParentEdges,
+  parseWorkflowConfigJson,
+  workflowNodeToFormData,
+} from '../utils/workflowForm';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -34,9 +41,13 @@ const ENGINE_OPTIONS = Object.keys(ENGINE_COLORS);
 // ─── Main Page Component ───────────────────────────────────────────────────
 
 function WorkflowCatalogContent() {
-  const [selectedAnalysis, setSelectedAnalysis] = useState('ALL');
+  const { diagramId } = useParams<{ diagramId: string }>();
+  const diagram = useMemo(() => DIAGRAM_LIST.find((d) => d.diagramId === diagramId), [diagramId]);
+
+  const [selectedGroup, setSelectedGroup] = useState('ALL');
   const [selectedWorkflowId, setSelectedWorkflowId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
   // Mutable catalog state
   const [workflows, setWorkflows] = useState<Record<string, WorkflowNodeData>>(() => ({
@@ -52,20 +63,17 @@ function WorkflowCatalogContent() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
-  const activeAnalysis = ANALYSIS_LIST.find((a) => a.id === selectedAnalysis);
+  const activeGroup = GROUP_LIST.find((g) => g.id === selectedGroup);
 
-  const allWorkflowIds = useMemo(() => Object.keys(workflows), [workflows]);
-  const allWorkflowLabels = useMemo(
-    () => Object.fromEntries(Object.entries(workflows).map(([id, w]) => [id, w.label])),
+  const allWorkflows = useMemo(
+    () =>
+      Object.fromEntries(
+        Object.entries(workflows).map(([id, workflow]) => [
+          id,
+          { label: workflow.label, engine: workflow.engine },
+        ])
+      ),
     [workflows]
-  );
-
-  const getParentIdsForWorkflow = useCallback(
-    (workflowId: string) =>
-      catalogEdges
-        .filter((e) => e.target === workflowId && e.edgeType !== 'input_dependency')
-        .map((e) => e.source),
-    [catalogEdges]
   );
 
   const emptyFormData: WorkflowFormData = useMemo(
@@ -73,25 +81,18 @@ function WorkflowCatalogContent() {
       name: '',
       version: '',
       engine: ENGINE_OPTIONS[0],
-      analysisId: '',
-      parentNodeIds: [],
+      groupId: '',
+      parentLinks: [],
       description: '',
+      configJson: '{}',
     }),
     []
   );
 
   const modalInitialData = useMemo<WorkflowFormData>(() => {
     if (!editingId || !workflows[editingId]) return emptyFormData;
-    const w = workflows[editingId];
-    return {
-      name: w.label,
-      version: w.version,
-      engine: w.engine,
-      analysisId: w.analysisIds[0] ?? '',
-      parentNodeIds: getParentIdsForWorkflow(editingId),
-      description: w.description,
-    };
-  }, [editingId, workflows, getParentIdsForWorkflow, emptyFormData]);
+    return workflowNodeToFormData(editingId, workflows[editingId], catalogEdges);
+  }, [editingId, workflows, catalogEdges, emptyFormData]);
 
   // ── CRUD Handlers ──────────────────────────────────────────────────────
 
@@ -112,22 +113,25 @@ function WorkflowCatalogContent() {
 
   const handleCreateWorkflow = useCallback(
     (id: string, formData: WorkflowFormData) => {
+      const tags = parseWorkflowConfigJson(formData.configJson) ?? {};
       const newWorkflow: WorkflowNodeData = {
         label: formData.name,
         version: formData.version || 'v0.1.0',
         engine: formData.engine,
         description: formData.description,
-        analysisIds: formData.analysisId ? [formData.analysisId] : [],
+        groupIds: formData.groupId ? [formData.groupId] : [],
         inputEvents: [],
         outputEvents: [],
-        config: { maxRetries: 1, timeout: '1h', computeQueue: 'default' },
+        tags,
       };
 
       // Calculate position: to the right of the rightmost parent, or a default
       let newX = 100;
       let newY = 500;
-      if (formData.parentNodeIds.length > 0) {
-        const parentPositions = formData.parentNodeIds.map((pid) => positions[pid]).filter(Boolean);
+      if (formData.parentLinks.length > 0) {
+        const parentPositions = formData.parentLinks
+          .map((parentLink) => positions[parentLink.workflowId])
+          .filter(Boolean);
         if (parentPositions.length > 0) {
           newX = Math.max(...parentPositions.map((p) => p.x)) + 320;
           newY = parentPositions.reduce((sum, p) => sum + p.y, 0) / parentPositions.length;
@@ -140,12 +144,7 @@ function WorkflowCatalogContent() {
         }
       }
 
-      const newEdges: EdgeDef[] = formData.parentNodeIds.map((parentId) => ({
-        id: `e-${parentId}-${id}`,
-        source: parentId,
-        target: id,
-        edgeType: 'trigger_input' as const,
-      }));
+      const newEdges = buildParentEdges(id, formData.parentLinks);
 
       setWorkflows((prev) => ({ ...prev, [id]: newWorkflow }));
       setPositions((prev) => ({ ...prev, [id]: { x: newX, y: newY } }));
@@ -156,6 +155,8 @@ function WorkflowCatalogContent() {
   );
 
   const handleUpdateWorkflow = useCallback((id: string, formData: WorkflowFormData) => {
+    const tags = parseWorkflowConfigJson(formData.configJson) ?? {};
+
     setWorkflows((prev) => ({
       ...prev,
       [id]: {
@@ -164,20 +165,14 @@ function WorkflowCatalogContent() {
         version: formData.version || prev[id].version,
         engine: formData.engine,
         description: formData.description,
-        analysisIds: formData.analysisId ? [formData.analysisId] : prev[id].analysisIds,
+        groupIds: formData.groupId ? [formData.groupId] : prev[id].groupIds,
+        tags,
       },
     }));
 
-    // Reconcile edges: remove old trigger/trigger_input edges targeting this node,
-    // then add the new parent edges
     setCatalogEdges((prev) => {
-      const kept = prev.filter((e) => !(e.target === id && e.edgeType !== 'input_dependency'));
-      const newEdges: EdgeDef[] = formData.parentNodeIds.map((parentId) => ({
-        id: `e-${parentId}-${id}`,
-        source: parentId,
-        target: id,
-        edgeType: 'trigger_input' as const,
-      }));
+      const kept = prev.filter((edge) => edge.target !== id);
+      const newEdges = buildParentEdges(id, formData.parentLinks, prev);
       return [...kept, ...newEdges];
     });
   }, []);
@@ -241,222 +236,239 @@ function WorkflowCatalogContent() {
     []
   );
 
+  // Toolbar dropdown state
+  const [isGroupDropdownOpen, setIsGroupDropdownOpen] = useState(false);
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+  const groupDropdownRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Close group dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (groupDropdownRef.current && !groupDropdownRef.current.contains(e.target as Node)) {
+        setIsGroupDropdownOpen(false);
+      }
+    }
+    if (isGroupDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isGroupDropdownOpen]);
+
+  // Auto-focus search input when expanded
+  useEffect(() => {
+    if (isSearchExpanded && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [isSearchExpanded]);
+
   return (
     <div
-      className='flex overflow-hidden bg-slate-50 dark:bg-[#101922]'
+      className='relative overflow-hidden bg-slate-50 dark:bg-[#101922]'
       style={{ height: 'calc(100vh - 56px)' }}
     >
-      {/* ── Left Panel: Analysis List ──────────────────────────────── */}
-      <div className='flex w-56 shrink-0 flex-col overflow-hidden border-r border-slate-200 bg-white dark:border-[#2d3540] dark:bg-[#111418]'>
-        {/* Back link + title */}
-        <div className='border-b border-slate-100 px-4 pt-5 pb-4 dark:border-[#2d3540]'>
+      {/* ── Floating Toolbar ──────────────────────────────────────── */}
+      <div className='pointer-events-none absolute inset-x-0 top-0 z-20 flex justify-center px-4 pt-3'>
+        <div className='pointer-events-auto flex items-center gap-1.5 rounded-xl border border-slate-200/80 bg-white/95 px-2.5 py-1.5 shadow-lg shadow-slate-200/50 backdrop-blur-sm dark:border-[#2d3540]/80 dark:bg-[#111418]/95 dark:shadow-black/20'>
+          {/* Back button */}
           <Link
-            to='/tools'
-            className='mb-3 inline-flex items-center gap-1.5 text-xs text-slate-400 transition-colors hover:text-slate-600 dark:text-[#9dabb9] dark:hover:text-white'
+            to='/tools/workflow-catalog'
+            className='flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:text-[#6b7a8d] dark:hover:bg-[#1e252e] dark:hover:text-white'
+            title='Back to Diagrams'
           >
-            <ArrowLeft className='h-3 w-3' />
-            Back to Tools
+            <ArrowLeft className='h-4 w-4' />
           </Link>
-          <h1 className='text-sm font-bold text-slate-900 dark:text-white'>Analysis Type</h1>
-        </div>
 
-        {/* Analysis items */}
-        <nav className='flex-1 overflow-y-auto py-2'>
-          {ANALYSIS_LIST.map((analysis) => {
-            const isActive = selectedAnalysis === analysis.id;
-            return (
-              <button
-                key={analysis.id}
-                type='button'
-                onClick={() => setSelectedAnalysis(analysis.id)}
-                className='group flex w-full items-center justify-between px-4 py-2.5 text-sm transition-all'
-                style={
-                  isActive
-                    ? {
-                        background: `${analysis.color}12`,
-                        color: analysis.color,
-                        fontWeight: 600,
-                      }
-                    : {}
-                }
-              >
-                <span
-                  className={
-                    isActive
-                      ? 'text-[13px]'
-                      : 'text-[13px] text-slate-600 group-hover:text-slate-900 dark:text-[#9dabb9] dark:group-hover:text-white'
-                  }
-                >
-                  {analysis.label}
-                </span>
-                <span
-                  className={`min-w-[24px] rounded-full px-1.5 py-0.5 text-center text-xs font-semibold ${
-                    isActive
-                      ? ''
-                      : 'bg-slate-100 text-slate-500 dark:bg-[#1e252e] dark:text-[#9dabb9]'
-                  }`}
-                  style={
-                    isActive
-                      ? { background: `${analysis.color}20`, color: analysis.color }
-                      : undefined
-                  }
-                >
-                  {analysis.count}
-                </span>
-              </button>
-            );
-          })}
-        </nav>
-
-        {/* + New Workflow button */}
-        <div className='px-4 pb-3'>
-          <button
-            type='button'
-            onClick={handleOpenAddModal}
-            className='flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600'
-          >
-            <Plus className='h-4 w-4' />
-            New Workflow
-          </button>
-        </div>
-
-        {/* Footer legend */}
-        <div className='border-t border-slate-100 px-4 py-3 dark:border-[#2d3540]'>
-          <div className='mb-2 text-[10px] font-semibold tracking-wider text-slate-400 uppercase dark:text-[#9dabb9]'>
-            Platform
-          </div>
-          <div className='space-y-1.5'>
-            {Object.entries(ENGINE_COLORS).map(([engine, color]) => (
-              <div key={engine} className='flex items-center gap-2'>
-                <div className='h-2 w-2 shrink-0 rounded-full' style={{ background: color }} />
-                <span className='text-[10px] text-slate-500 dark:text-[#9dabb9]'>{engine}</span>
-              </div>
-            ))}
-          </div>
-
-          <div className='mt-3 mb-2 text-[10px] font-semibold tracking-wider text-slate-400 uppercase dark:text-[#9dabb9]'>
-            Edge Type
-          </div>
-          <div className='space-y-1.5'>
-            <div className='flex items-center gap-2'>
-              <svg width='20' height='6'>
-                <line x1='0' y1='3' x2='20' y2='3' stroke='#94a3b8' strokeWidth='2' />
-              </svg>
-              <span className='text-[10px] text-slate-500 dark:text-[#9dabb9]'>Trigger</span>
-            </div>
-            <div className='flex items-center gap-2'>
-              <svg width='20' height='6'>
-                <line
-                  x1='0'
-                  y1='3'
-                  x2='20'
-                  y2='3'
-                  stroke='#94a3b8'
-                  strokeWidth='1.5'
-                  strokeDasharray='4 2'
-                />
-              </svg>
-              <span className='text-[10px] text-slate-500 dark:text-[#9dabb9]'>
-                Trigger + Input
-              </span>
-            </div>
-            <div className='flex items-center gap-2'>
-              <svg width='20' height='6'>
-                <line
-                  x1='0'
-                  y1='3'
-                  x2='20'
-                  y2='3'
-                  stroke='#cbd5e1'
-                  strokeWidth='1'
-                  strokeDasharray='3 2'
-                />
-              </svg>
-              <span className='text-[10px] text-slate-500 dark:text-[#9dabb9]'>Input Only</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Right Panel ───────────────────────────────────────────── */}
-      <div className='flex min-w-0 flex-1 flex-col overflow-hidden'>
-        {/* Top bar */}
-        <div className='flex h-14 shrink-0 items-center gap-3 border-b border-slate-200 bg-white px-5 dark:border-[#2d3540] dark:bg-[#111418]'>
-          <div className='relative max-w-sm flex-1'>
-            <Search className='absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 text-slate-400 dark:text-[#9dabb9]' />
-            <input
-              type='text'
-              placeholder='Search workflows…'
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className='w-full rounded-lg border border-slate-200 bg-slate-50 py-2 pr-8 pl-8 text-sm text-slate-900 transition-all placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-white dark:placeholder:text-[#9dabb9] dark:focus:bg-[#1e252e] dark:focus:ring-indigo-400'
-            />
-            {searchQuery && (
-              <button
-                type='button'
-                onClick={() => setSearchQuery('')}
-                className='absolute top-1/2 right-2.5 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:text-[#9dabb9] dark:hover:text-white'
-              >
-                <X className='h-3.5 w-3.5' />
-              </button>
-            )}
-          </div>
-
-          {activeAnalysis && activeAnalysis.id !== 'ALL' && (
-            <div
-              className='flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium'
-              style={{
-                background: `${activeAnalysis.color}12`,
-                color: activeAnalysis.color,
-                border: `1px solid ${activeAnalysis.color}30`,
-              }}
+          {/* Diagram name (opens details modal) */}
+          {diagram && (
+            <button
+              type='button'
+              onClick={() => setIsDetailsOpen(true)}
+              className='max-w-48 truncate rounded-lg px-2 py-1 text-sm font-semibold text-slate-800 transition-colors hover:bg-slate-100 dark:text-white dark:hover:bg-[#1e252e]'
+              title='View diagram details'
             >
-              <div
-                className='h-1.5 w-1.5 rounded-full'
-                style={{ background: activeAnalysis.color }}
-              />
-              Focusing: {activeAnalysis.label}
-            </div>
+              {diagram.name}
+            </button>
           )}
 
-          <div className='ml-auto text-xs text-slate-400 dark:text-[#9dabb9]'>
-            {Object.keys(workflows).length} workflows
-          </div>
-        </div>
+          <div className='mx-0.5 h-5 w-px bg-slate-200 dark:bg-[#2d3540]' />
 
-        {/* Diagram + Drawer row */}
-        <div className='flex min-h-0 flex-1 overflow-hidden'>
-          <div className='relative flex-1'>
-            {selectedAnalysis === 'ALL' && !searchQuery && (
-              <div className='pointer-events-none absolute top-4 left-1/2 z-10 -translate-x-1/2'>
-                <div className='max-w-xs rounded-xl border border-slate-200 bg-white/90 px-4 py-2.5 text-center text-sm text-slate-500 shadow-sm backdrop-blur-sm dark:border-[#2d3540] dark:bg-[#1e252e]/90 dark:text-[#9dabb9]'>
-                  Select an analysis to focus the diagram, or search workflows to explore.
+          {/* Group dropdown */}
+          <div ref={groupDropdownRef} className='relative'>
+            <button
+              type='button'
+              onClick={() => setIsGroupDropdownOpen((prev) => !prev)}
+              className='flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-[#1e252e]'
+            >
+              {activeGroup && activeGroup.id !== 'ALL' ? (
+                <>
+                  <div className='h-2 w-2 rounded-full' style={{ background: activeGroup.color }} />
+                  <span className='max-w-35 truncate'>{activeGroup.name}</span>
+                </>
+              ) : (
+                <>
+                  <Layers className='h-3.5 w-3.5 text-slate-400 dark:text-[#6b7a8d]' />
+                  <span>All Groups</span>
+                </>
+              )}
+              <ChevronDown className='h-3 w-3 text-slate-400 dark:text-[#6b7a8d]' />
+            </button>
+
+            {isGroupDropdownOpen && (
+              <div className='absolute top-full left-0 mt-1.5 w-56 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl dark:border-[#2d3540] dark:bg-[#111418]'>
+                <div className='p-1.5'>
+                  {GROUP_LIST.map((group) => {
+                    const isActive = selectedGroup === group.id;
+                    return (
+                      <button
+                        key={group.id}
+                        type='button'
+                        onClick={() => {
+                          setSelectedGroup(group.id);
+                          setIsGroupDropdownOpen(false);
+                        }}
+                        className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm transition-colors ${
+                          isActive
+                            ? 'bg-slate-100 font-medium text-slate-900 dark:bg-[#1e252e] dark:text-white'
+                            : 'text-slate-600 hover:bg-slate-50 dark:text-[#9dabb9] dark:hover:bg-[#1e252e]/60'
+                        }`}
+                      >
+                        <div
+                          className='h-2 w-2 shrink-0 rounded-full'
+                          style={{ background: group.color }}
+                        />
+                        <span className='flex-1 truncate'>{group.name}</span>
+                        <span className='text-xs text-slate-400 dark:text-[#6b7a8d]'>
+                          {group.count}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className='border-t border-slate-100 p-1.5 dark:border-[#2d3540]'>
+                  <button
+                    type='button'
+                    className='flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-blue-600 transition-colors hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/20'
+                  >
+                    <Plus className='h-3.5 w-3.5' />
+                    Add Group
+                  </button>
                 </div>
               </div>
             )}
-            <DiagramInner
-              selectedAnalysis={selectedAnalysis}
-              onNodeClick={handleNodeClick}
-              searchQuery={searchQuery}
-              workflows={workflows}
-              positions={positions}
-              catalogEdges={catalogEdges}
-            />
           </div>
 
-          {selectedWorkflowId && (
-            <div className='flex w-[480px] shrink-0 flex-col overflow-hidden border-l border-slate-200 dark:border-[#2d3540]'>
-              <WorkflowDrawer
-                workflowId={selectedWorkflowId}
-                workflows={workflows}
-                onClose={() => setSelectedWorkflowId(null)}
-                onEdit={handleOpenEditModal}
-                onDelete={(id) => setDeleteConfirmId(id)}
-                onUpdateEvents={handleUpdateWorkflowEvents}
-              />
-            </div>
+          {/* Active group badge */}
+          {activeGroup && activeGroup.id !== 'ALL' && (
+            <button
+              type='button'
+              onClick={() => setSelectedGroup('ALL')}
+              className='flex h-6 items-center gap-1 rounded-full pr-1 pl-2 text-xs font-medium transition-colors'
+              style={{
+                background: `${activeGroup.color}15`,
+                color: activeGroup.color,
+              }}
+            >
+              Focused
+              <X className='h-3 w-3 opacity-60' />
+            </button>
           )}
+
+          <div className='mx-0.5 h-5 w-px bg-slate-200 dark:bg-[#2d3540]' />
+
+          {/* Search */}
+          <div className='flex items-center'>
+            {isSearchExpanded ? (
+              <div className='relative'>
+                <Search className='absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2 text-slate-400 dark:text-[#6b7a8d]' />
+                <input
+                  ref={searchInputRef}
+                  type='text'
+                  placeholder='Search nodes…'
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onBlur={() => {
+                    if (!searchQuery) setIsSearchExpanded(false);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Escape') {
+                      setSearchQuery('');
+                      setIsSearchExpanded(false);
+                    }
+                  }}
+                  className='h-8 w-48 rounded-lg border border-slate-200 bg-white py-1 pr-7 pl-8 text-sm text-slate-900 transition-all placeholder:text-slate-400 focus:ring-2 focus:ring-blue-200 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-white dark:placeholder:text-[#6b7a8d] dark:focus:ring-blue-900/40'
+                />
+                {searchQuery && (
+                  <button
+                    type='button'
+                    onClick={() => {
+                      setSearchQuery('');
+                      searchInputRef.current?.focus();
+                    }}
+                    className='absolute top-1/2 right-2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:text-[#6b7a8d] dark:hover:text-white'
+                  >
+                    <X className='h-3 w-3' />
+                  </button>
+                )}
+              </div>
+            ) : (
+              <button
+                type='button'
+                onClick={() => setIsSearchExpanded(true)}
+                className='flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:text-[#6b7a8d] dark:hover:bg-[#1e252e] dark:hover:text-white'
+                title='Search nodes'
+              >
+                <Search className='h-4 w-4' />
+              </button>
+            )}
+          </div>
+
+          <div className='mx-0.5 h-5 w-px bg-slate-200 dark:bg-[#2d3540]' />
+
+          {/* Add node */}
+          <button
+            type='button'
+            onClick={handleOpenAddModal}
+            className='flex h-8 items-center gap-1.5 rounded-lg bg-blue-600 px-3 text-sm font-medium text-white transition-colors hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600'
+          >
+            <Plus className='h-3.5 w-3.5' />
+            <span className='hidden sm:inline'>Add Node</span>
+          </button>
+
+          <div className='mx-0.5 h-5 w-px bg-slate-200 dark:bg-[#2d3540]' />
+
+          {/* Node count */}
+          <span className='px-1 text-xs text-slate-400 dark:text-[#6b7a8d]'>
+            {Object.keys(workflows).length} nodes
+          </span>
         </div>
+      </div>
+
+      {/* ── Diagram + Drawer ──────────────────────────────────────── */}
+      <div className='flex h-full overflow-hidden'>
+        <div className='relative flex-1'>
+          <DiagramInner
+            selectedGroup={selectedGroup}
+            onNodeClick={handleNodeClick}
+            searchQuery={searchQuery}
+            workflows={workflows}
+            positions={positions}
+            catalogEdges={catalogEdges}
+          />
+        </div>
+
+        {selectedWorkflowId && (
+          <div className='z-30 flex w-120 shrink-0 flex-col overflow-hidden border-l border-slate-200 dark:border-[#2d3540]'>
+            <WorkflowDrawer
+              workflowId={selectedWorkflowId}
+              workflows={workflows}
+              onClose={() => setSelectedWorkflowId(null)}
+              onEdit={handleOpenEditModal}
+              onDelete={(id) => setDeleteConfirmId(id)}
+              onUpdateEvents={handleUpdateWorkflowEvents}
+            />
+          </div>
+        )}
       </div>
 
       {/* ── Modals ────────────────────────────────────────────────── */}
@@ -464,8 +476,7 @@ function WorkflowCatalogContent() {
         isOpen={isModalOpen}
         editingId={editingId}
         initialData={modalInitialData}
-        allWorkflowIds={allWorkflowIds}
-        allWorkflowLabels={allWorkflowLabels}
+        allWorkflows={allWorkflows}
         onSubmit={handleSubmitWorkflow}
         onClose={handleCloseModal}
       />
@@ -475,6 +486,17 @@ function WorkflowCatalogContent() {
           workflowLabel={workflows[deleteConfirmId].label}
           onConfirm={() => handleDeleteWorkflow(deleteConfirmId)}
           onCancel={() => setDeleteConfirmId(null)}
+        />
+      )}
+
+      {diagram && (
+        <DiagramDetailsModal
+          diagram={diagram}
+          open={isDetailsOpen}
+          onOpenChange={setIsDetailsOpen}
+          onEdit={() => {
+            // TODO: Enter edit mode for the diagram
+          }}
         />
       )}
     </div>
