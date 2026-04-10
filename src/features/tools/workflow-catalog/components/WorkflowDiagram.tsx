@@ -17,7 +17,7 @@ import {
 import { Cpu } from 'lucide-react';
 import { useTheme } from '@/context/theme-context';
 import type { WorkflowNodeData, EdgeDef, EdgeType } from '../types/workflow-catalog.types';
-import { ANALYSIS_LIST, ENGINE_COLORS } from '../data';
+import { GROUP_LIST, ENGINE_COLORS } from '../data';
 
 const EDGE_TYPE_STYLES: Record<EdgeType, { strokeDasharray?: string; strokeWidth: number }> = {
   trigger: { strokeWidth: 2 },
@@ -75,7 +75,7 @@ function WorkflowNode({ data, selected }: NodeProps) {
 const nodeTypes = { workflow: WorkflowNode };
 
 export interface DiagramInnerProps {
-  selectedAnalysis: string;
+  selectedGroup: string;
   onNodeClick: (id: string) => void;
   searchQuery: string;
   workflows: Record<string, WorkflowNodeData>;
@@ -84,7 +84,7 @@ export interface DiagramInnerProps {
 }
 
 export function DiagramInner({
-  selectedAnalysis,
+  selectedGroup,
   onNodeClick,
   searchQuery,
   workflows,
@@ -120,9 +120,9 @@ export function DiagramInner({
   );
 
   const buildNodes = useCallback((): Node[] => {
-    const activeAnalysis =
-      selectedAnalysis !== 'ALL' ? ANALYSIS_LIST.find((a) => a.id === selectedAnalysis) : null;
-    const focusedIds = activeAnalysis ? new Set(activeAnalysis.workflowIds) : null;
+    const activeGroup =
+      selectedGroup !== 'ALL' ? GROUP_LIST.find((a) => a.id === selectedGroup) : null;
+    const focusedIds = activeGroup ? new Set(activeGroup.workflowIds) : null;
 
     return Object.entries(workflows)
       .filter(([, data]) => {
@@ -142,16 +142,16 @@ export function DiagramInner({
           data: { ...data, highlighted, dimmed },
         };
       });
-  }, [selectedAnalysis, searchQuery, workflows, positions]);
+  }, [selectedGroup, searchQuery, workflows, positions]);
 
   const dimmedColor = resolvedTheme === 'dark' ? '#2d3540' : '#e2e8f0';
   const defaultEdgeColor = resolvedTheme === 'dark' ? '#64748b' : '#94a3b8';
 
   const buildEdges = useCallback((): Edge[] => {
-    const activeAnalysis =
-      selectedAnalysis !== 'ALL' ? ANALYSIS_LIST.find((a) => a.id === selectedAnalysis) : null;
-    const focusedIds = activeAnalysis ? new Set(activeAnalysis.workflowIds) : null;
-    const analysisColor = ANALYSIS_LIST.find((a) => a.id === selectedAnalysis)?.color;
+    const activeGroup =
+      selectedGroup !== 'ALL' ? GROUP_LIST.find((a) => a.id === selectedGroup) : null;
+    const focusedIds = activeGroup ? new Set(activeGroup.workflowIds) : null;
+    const groupColor = GROUP_LIST.find((a) => a.id === selectedGroup)?.color;
 
     return initialEdges.map((edge) => {
       const meta = edgeMeta.get(edge.id);
@@ -161,7 +161,7 @@ export function DiagramInner({
         : true;
       const strokeColor = isActive
         ? focusedIds
-          ? (analysisColor ?? defaultEdgeColor)
+          ? (groupColor ?? defaultEdgeColor)
           : meta?.edgeType === 'input_dependency'
             ? resolvedTheme === 'dark'
               ? '#475569'
@@ -185,7 +185,7 @@ export function DiagramInner({
         markerEnd: { type: MarkerType.ArrowClosed, color: strokeColor },
       };
     });
-  }, [selectedAnalysis, dimmedColor, defaultEdgeColor, resolvedTheme, initialEdges, edgeMeta]);
+  }, [selectedGroup, dimmedColor, defaultEdgeColor, resolvedTheme, initialEdges, edgeMeta]);
 
   const computedNodes = useMemo(() => buildNodes(), [buildNodes]);
   const computedEdges = useMemo(() => buildEdges(), [buildEdges]);
@@ -200,11 +200,11 @@ export function DiagramInner({
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      const activeAnalysis =
-        selectedAnalysis !== 'ALL' ? ANALYSIS_LIST.find((a) => a.id === selectedAnalysis) : null;
-      if (activeAnalysis) {
+      const activeGroup =
+        selectedGroup !== 'ALL' ? GROUP_LIST.find((a) => a.id === selectedGroup) : null;
+      if (activeGroup) {
         void fitView({
-          nodes: activeAnalysis.workflowIds.map((id) => ({ id })),
+          nodes: activeGroup.workflowIds.map((id) => ({ id })),
           duration: 600,
           padding: 0.3,
         });
@@ -213,7 +213,7 @@ export function DiagramInner({
       }
     }, 50);
     return () => clearTimeout(timer);
-  }, [selectedAnalysis, fitView]);
+  }, [selectedGroup, fitView]);
 
   return (
     <ReactFlow

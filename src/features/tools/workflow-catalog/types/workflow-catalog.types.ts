@@ -15,10 +15,21 @@ export interface EventFormData {
   payloadJson: string;
 }
 
-export interface WorkflowConfig {
-  maxRetries: number;
-  timeout: string;
-  computeQueue: string;
+export type WorkflowConfig = Record<string, string>;
+
+export interface WorkflowParentLink {
+  workflowId: string;
+  edgeType: EdgeType;
+}
+
+export interface WorkflowFormData {
+  name: string;
+  version: string;
+  engine: string;
+  groupId: string;
+  parentLinks: WorkflowParentLink[];
+  description: string;
+  configJson: string;
 }
 
 export interface WorkflowNodeData {
@@ -26,18 +37,19 @@ export interface WorkflowNodeData {
   version: string;
   engine: string;
   description: string;
-  analysisIds: string[];
+  groupIds: string[];
   inputEvents: EventDef[];
   outputEvents: EventDef[];
-  config: WorkflowConfig;
+  tags: WorkflowConfig;
   dimmed?: boolean;
   highlighted?: boolean;
   [key: string]: unknown;
 }
 
-export interface AnalysisItem {
+export interface GroupItem {
   id: string;
-  label: string;
+  name: string;
+  type: string;
   count: number;
   color: string;
   workflowIds: string[];
@@ -62,7 +74,7 @@ export interface NodePosition {
 
 export interface CatalogApiResponse {
   workflows: Record<string, WorkflowNodeData>;
-  analyses: AnalysisItem[];
+  groups: GroupItem[];
   edges: EdgeDef[];
   layout: Record<string, NodePosition>;
   engineColors: Record<string, string>;

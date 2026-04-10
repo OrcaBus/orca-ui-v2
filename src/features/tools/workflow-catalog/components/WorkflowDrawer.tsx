@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { X, Tag, Cpu, ArrowRight, ChevronRight, Plus, Pencil, Trash2 } from 'lucide-react';
 import type { WorkflowNodeData, EventDef } from '../types/workflow-catalog.types';
-import { ANALYSIS_LIST, ENGINE_COLORS } from '../data';
+import { GROUP_LIST, ENGINE_COLORS } from '../data';
 import { EventCard } from './EventCard';
 import { EventModal } from './EventModal';
 import { DeleteEventConfirmDialog } from './DeleteEventConfirmDialog';
@@ -81,6 +81,7 @@ export function WorkflowDrawer({
 
   if (!data) return null;
   const engineColor = ENGINE_COLORS[data.engine] ?? '#6b7280';
+  const tagEntries = Object.entries(data.tags);
 
   return (
     <div className='flex h-full flex-col border-l border-slate-200 bg-white dark:border-[#2d3540] dark:bg-[#111418]'>
@@ -226,27 +227,49 @@ export function WorkflowDrawer({
           </div>
         </section>
 
-        {/* Analysis Tags */}
+        {/* Group Tags */}
+        <section>
+          <h3 className='mb-3 text-xs font-semibold tracking-wider text-slate-500 uppercase dark:text-[#9dabb9]'>
+            Tags
+          </h3>
+          {tagEntries.length > 0 ? (
+            <div className='flex flex-wrap gap-2'>
+              {tagEntries.map(([key, value]) => (
+                <span
+                  key={key}
+                  className='inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs text-slate-700 dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-300'
+                >
+                  <span className='font-semibold'>{key}</span>
+                  <span className='text-slate-400 dark:text-[#9dabb9]'>=</span>
+                  <span className='font-mono'>{value}</span>
+                </span>
+              ))}
+            </div>
+          ) : (
+            <p className='text-sm text-slate-500 dark:text-[#9dabb9]'>No tags configured.</p>
+          )}
+        </section>
+
         <section>
           <h3 className='mb-3 flex items-center gap-1.5 text-xs font-semibold tracking-wider text-slate-500 uppercase dark:text-[#9dabb9]'>
             <Tag className='h-3.5 w-3.5 dark:text-[#9dabb9]' />
             Used In
           </h3>
           <div className='flex flex-wrap gap-2'>
-            {data.analysisIds.map((aid) => {
-              const analysis = ANALYSIS_LIST.find((a) => a.id === aid);
-              if (!analysis || aid === 'ALL') return null;
+            {data.groupIds.map((gid) => {
+              const group = GROUP_LIST.find((g) => g.id === gid);
+              if (!group || gid === 'ALL') return null;
               return (
                 <span
-                  key={aid}
+                  key={gid}
                   className='inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium'
                   style={{
-                    background: `${analysis.color}15`,
-                    color: analysis.color,
-                    border: `1px solid ${analysis.color}30`,
+                    background: `${group.color}15`,
+                    color: group.color,
+                    border: `1px solid ${group.color}30`,
                   }}
                 >
-                  {analysis.label}
+                  {group.name}
                 </span>
               );
             })}

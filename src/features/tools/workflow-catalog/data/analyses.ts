@@ -1,30 +1,34 @@
-import type { AnalysisItem } from '../types/workflow-catalog.types';
+import type { GroupItem } from '../types/workflow-catalog.types';
 
-export const ANALYSIS_LIST: AnalysisItem[] = [
+export const GROUP_LIST: GroupItem[] = [
   {
     id: 'ALL',
-    label: 'ALL',
+    name: 'ALL',
+    type: 'all',
     count: 18,
     color: '#6366f1',
     workflowIds: [],
   },
   {
     id: 'SEQUENCING',
-    label: 'Sequencing & BCL',
+    name: 'Sequencing & BCL',
+    type: 'analysis',
     count: 2,
     color: '#06b6d4',
     workflowIds: ['bssh', 'bcl-convert'],
   },
   {
     id: 'CTDNA',
-    label: 'ctDNA Analysis',
+    name: 'ctDNA Analysis',
+    type: 'analysis',
     count: 4,
     color: '#a855f7',
     workflowIds: ['bssh', 'bcl-convert', 'tso-ctdna-tumor-only', 'pierian-dx'],
   },
   {
     id: 'WGS',
-    label: 'WGS Somatic',
+    name: 'WGS Somatic',
+    type: 'analysis',
     count: 10,
     color: '#f59e0b',
     workflowIds: [
@@ -42,7 +46,8 @@ export const ANALYSIS_LIST: AnalysisItem[] = [
   },
   {
     id: 'WTS',
-    label: 'WTS Transcriptome',
+    name: 'WTS Transcriptome',
+    type: 'analysis',
     count: 8,
     color: '#3b82f6',
     workflowIds: [
@@ -58,14 +63,16 @@ export const ANALYSIS_LIST: AnalysisItem[] = [
   },
   {
     id: 'QC',
-    label: 'QC & Fingerprinting',
+    name: 'QC & Fingerprinting',
+    type: 'analysis',
     count: 5,
     color: '#10b981',
     workflowIds: ['bssh', 'bcl-convert', 'wgs-alignment-qc', 'holmes', 'gpl'],
   },
   {
     id: 'INTEGRATED',
-    label: 'Integrated WGS+WTS',
+    name: 'Integrated WGS+WTS',
+    type: 'analysis',
     count: 8,
     color: '#ec4899',
     workflowIds: [

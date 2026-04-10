@@ -68,3 +68,6 @@ src/api/types/*
 
 # Cursor
 .cursor/
+
+# Ignore github skills 
+.github/skills/*

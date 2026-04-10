@@ -8,7 +8,7 @@ export const WORKFLOW_CATALOG: Record<string, WorkflowNodeData> = {
     engine: 'BASESPACE',
     description:
       'BaseSpace Sequence Hub — Illumina cloud service that receives raw sequencing data from the instrument and stages it for downstream BCL conversion.',
-    analysisIds: ['SEQUENCING', 'WGS', 'WTS', 'CTDNA'],
+    groupIds: ['SEQUENCING', 'WGS', 'WTS', 'CTDNA'],
     inputEvents: [
       {
         name: 'orcabus.instrumentrun.succeeded',
@@ -32,7 +32,7 @@ export const WORKFLOW_CATALOG: Record<string, WorkflowNodeData> = {
         },
       },
     ],
-    config: { maxRetries: 2, timeout: '2h', computeQueue: 'basespace-default' },
+    tags: { maxRetries: '2', timeout: '2h', computeQueue: 'basespace-default' },
   },
 
   // ── Layer 1: BCL Conversion ────────────────────────────────────────────────
@@ -42,7 +42,7 @@ export const WORKFLOW_CATALOG: Record<string, WorkflowNodeData> = {
     engine: 'ICA',
     description:
       'Illumina BCL to FASTQ conversion pipeline on ICA (DRAGEN Cloud). Demultiplexes sequencing runs into per-sample FASTQ files for all downstream analysis workflows.',
-    analysisIds: ['SEQUENCING', 'WGS', 'WTS', 'CTDNA'],
+    groupIds: ['SEQUENCING', 'WGS', 'WTS', 'CTDNA'],
     inputEvents: [
       {
         name: 'orcabus.bssh.fastqlistrows_event_showered',
@@ -68,7 +68,7 @@ export const WORKFLOW_CATALOG: Record<string, WorkflowNodeData> = {
         },
       },
     ],
-    config: { maxRetries: 2, timeout: '8h', computeQueue: 'ica-prod-bcl-convert' },
+    tags: { maxRetries: '2', timeout: '8h', computeQueue: 'ica-prod-bcl-convert' },
   },
 
   // ── Layer 2: Alignment & QC ────────────────────────────────────────────────
@@ -78,7 +78,7 @@ export const WORKFLOW_CATALOG: Record<string, WorkflowNodeData> = {
     engine: 'ICA',
     description:
       'TruSight Oncology ctDNA pipeline for circulating tumor DNA analysis. Runs tumor-only variant calling on liquid biopsy samples to detect somatic mutations from cell-free DNA.',
-    analysisIds: ['CTDNA'],
+    groupIds: ['CTDNA'],
     inputEvents: [
       {
         name: 'orcabus.workflowmanager.bclconvert.succeeded',
@@ -108,7 +108,7 @@ export const WORKFLOW_CATALOG: Record<string, WorkflowNodeData> = {
         },
       },
     ],
-    config: { maxRetries: 2, timeout: '12h', computeQueue: 'ica-prod-tso-ctdna' },
+    tags: { maxRetries: '2', timeout: '12h', computeQueue: 'ica-prod-tso-ctdna' },
   },
 
   'wgs-alignment-qc': {
@@ -117,7 +117,7 @@ export const WORKFLOW_CATALOG: Record<string, WorkflowNodeData> = {
     engine: 'ICA',
     description:
       'Whole-genome sequencing alignment and quality control on DRAGEN. Aligns FASTQ reads to hg38 reference, produces BAM/CRAM files, and generates QC metrics including coverage, insert size, and contamination estimates.',
-    analysisIds: ['WGS', 'QC'],
+    groupIds: ['WGS', 'QC'],
     inputEvents: [
       {
         name: 'orcabus.workflowmanager.bclconvert.succeeded',
@@ -145,7 +145,7 @@ export const WORKFLOW_CATALOG: Record<string, WorkflowNodeData> = {
         },
       },
     ],
-    config: { maxRetries: 3, timeout: '24h', computeQueue: 'ica-prod-wgs-qc' },
+    tags: { maxRetries: '3', timeout: '24h', computeQueue: 'ica-prod-wgs-qc' },
   },
 
   'wts-alignment-qc': {
@@ -154,7 +154,7 @@ export const WORKFLOW_CATALOG: Record<string, WorkflowNodeData> = {
     engine: 'ICA',
     description:
       'Whole-transcriptome sequencing alignment and QC on DRAGEN. Aligns RNA-seq FASTQ reads using splice-aware alignment, quantifies gene expression, and generates QC metrics.',
-    analysisIds: ['WTS', 'QC'],
+    groupIds: ['WTS', 'QC'],
     inputEvents: [
       {
         name: 'orcabus.workflowmanager.bclconvert.succeeded',
@@ -186,7 +186,7 @@ export const WORKFLOW_CATALOG: Record<string, WorkflowNodeData> = {
         },
       },
     ],
-    config: { maxRetries: 3, timeout: '18h', computeQueue: 'ica-prod-wts-qc' },
+    tags: { maxRetries: '3', timeout: '18h', computeQueue: 'ica-prod-wts-qc' },
   },
 
   // ── Layer 3: Secondary Analysis ────────────────────────────────────────────
@@ -196,7 +196,7 @@ export const WORKFLOW_CATALOG: Record<string, WorkflowNodeData> = {
     engine: 'PIERIAN',
     description:
       'Clinical genomics interpretation platform for case accession automation. Ingests ctDNA variant calls and automatically creates clinical cases with annotated variants, therapy matches, and clinical trial recommendations.',
-    analysisIds: ['CTDNA'],
+    groupIds: ['CTDNA'],
     inputEvents: [
       {
         name: 'orcabus.workflowmanager.tso_ctdna_tumor_only.succeeded',
@@ -220,7 +220,7 @@ export const WORKFLOW_CATALOG: Record<string, WorkflowNodeData> = {
         },
       },
     ],
-    config: { maxRetries: 1, timeout: '4h', computeQueue: 'pierian-prod' },
+    tags: { maxRetries: '1', timeout: '4h', computeQueue: 'pierian-prod' },
   },
 
   holmes: {
@@ -229,7 +229,7 @@ export const WORKFLOW_CATALOG: Record<string, WorkflowNodeData> = {
     engine: 'AWS_BATCH',
     description:
       'BAM fingerprint extraction service. Extracts SNP fingerprints from aligned BAM files to enable sample identity verification, swap detection, and relatedness checks across the biobank.',
-    analysisIds: ['QC'],
+    groupIds: ['QC'],
     inputEvents: [
       {
         name: 'orcabus.workflowmanager.wgs_alignment_qc.succeeded',
@@ -252,7 +252,7 @@ export const WORKFLOW_CATALOG: Record<string, WorkflowNodeData> = {
         },
       },
     ],
-    config: { maxRetries: 2, timeout: '2h', computeQueue: 'aws-prod-fingerprint' },
+    tags: { maxRetries: '2', timeout: '2h', computeQueue: 'aws-prod-fingerprint' },
   },
 
   'wgs-tumor-normal': {
@@ -261,7 +261,7 @@ export const WORKFLOW_CATALOG: Record<string, WorkflowNodeData> = {
     engine: 'ICA',
     description:
       'DRAGEN-based WGS tumor-normal somatic variant calling. Takes matched tumor-normal BAM pairs and FASTQ inputs to call SNVs, indels, SVs, and CNVs with high sensitivity.',
-    analysisIds: ['WGS'],
+    groupIds: ['WGS'],
     inputEvents: [
       {
         name: 'orcabus.workflowmanager.wgs_alignment_qc.succeeded',
@@ -302,7 +302,7 @@ export const WORKFLOW_CATALOG: Record<string, WorkflowNodeData> = {
         },
       },
     ],
-    config: { maxRetries: 3, timeout: '48h', computeQueue: 'ica-prod-tn' },
+    tags: { maxRetries: '3', timeout: '48h', computeQueue: 'ica-prod-tn' },
   },
 
   'wts-tumor-only': {
@@ -311,7 +311,7 @@ export const WORKFLOW_CATALOG: Record<string, WorkflowNodeData> = {
     engine: 'ICA',
     description:
       'DRAGEN-based whole-transcriptome tumor-only analysis. Quantifies gene expression, detects gene fusions, and identifies RNA-level variants from tumor RNA-seq data without matched normal.',
-    analysisIds: ['WTS'],
+    groupIds: ['WTS'],
     inputEvents: [
       {
         name: 'orcabus.workflowmanager.wts_alignment_qc.succeeded',
@@ -346,7 +346,7 @@ export const WORKFLOW_CATALOG: Record<string, WorkflowNodeData> = {
         },
       },
     ],
-    config: { maxRetries: 3, timeout: '24h', computeQueue: 'ica-prod-wts' },
+    tags: { maxRetries: '3', timeout: '24h', computeQueue: 'ica-prod-wts' },
   },
 
   gpl: {
@@ -355,7 +355,7 @@ export const WORKFLOW_CATALOG: Record<string, WorkflowNodeData> = {
     engine: 'AWS_BATCH',
     description:
       'Genome-Phenome Lookup service. Matches WGS tumor-normal variant data against known phenotype associations, pharmacogenomics panels, and clinical annotations for comprehensive genomic profiling.',
-    analysisIds: ['QC', 'WGS'],
+    groupIds: ['QC', 'WGS'],
     inputEvents: [
       {
         name: 'orcabus.workflowmanager.wgs_tumor_normal.succeeded',
@@ -380,7 +380,7 @@ export const WORKFLOW_CATALOG: Record<string, WorkflowNodeData> = {
         },
       },
     ],
-    config: { maxRetries: 2, timeout: '4h', computeQueue: 'aws-prod-gpl' },
+    tags: { maxRetries: '2', timeout: '4h', computeQueue: 'aws-prod-gpl' },
   },
 
   'star-alignment': {
@@ -389,7 +389,7 @@ export const WORKFLOW_CATALOG: Record<string, WorkflowNodeData> = {
     engine: 'SEQERA',
     description:
       'STAR splice-aware RNA-seq aligner for producing transcriptome BAM files. Performs two-pass alignment of WTS FASTQ reads to the reference genome for fusion detection and expression quantification.',
-    analysisIds: ['WTS'],
+    groupIds: ['WTS'],
     inputEvents: [
       {
         name: 'orcabus.workflowmanager.bclconvert.succeeded',
@@ -418,7 +418,7 @@ export const WORKFLOW_CATALOG: Record<string, WorkflowNodeData> = {
         },
       },
     ],
-    config: { maxRetries: 2, timeout: '12h', computeQueue: 'seqera-prod-star' },
+    tags: { maxRetries: '2', timeout: '12h', computeQueue: 'seqera-prod-star' },
   },
 
   // ── Layer 4: Tertiary Analysis ─────────────────────────────────────────────
@@ -428,7 +428,7 @@ export const WORKFLOW_CATALOG: Record<string, WorkflowNodeData> = {
     engine: 'AWS_BATCH',
     description:
       'UMCCR cancer report generation pipeline. Takes WGS tumor-normal results and produces a comprehensive cancer report including mutational signatures, driver mutations, HRD score, and TMB.',
-    analysisIds: ['WGS'],
+    groupIds: ['WGS'],
     inputEvents: [
       {
         name: 'orcabus.workflowmanager.wgs_tumor_normal.succeeded',
@@ -458,7 +458,7 @@ export const WORKFLOW_CATALOG: Record<string, WorkflowNodeData> = {
         },
       },
     ],
-    config: { maxRetries: 2, timeout: '36h', computeQueue: 'aws-prod-umccrise' },
+    tags: { maxRetries: '2', timeout: '36h', computeQueue: 'aws-prod-umccrise' },
   },
 
   'oncoanalyser-wgs': {
@@ -467,7 +467,7 @@ export const WORKFLOW_CATALOG: Record<string, WorkflowNodeData> = {
     engine: 'SEQERA',
     description:
       'Hartwig Medical Foundation OncoAnalyser for WGS data. Runs PURPLE (purity/ploidy), LINX (structural variant interpretation), SAGE (somatic calling), and GRIPSS (SV filtering) on WGS tumor-normal pairs.',
-    analysisIds: ['WGS', 'INTEGRATED'],
+    groupIds: ['WGS', 'INTEGRATED'],
     inputEvents: [
       {
         name: 'orcabus.workflowmanager.wts_tumor_only.succeeded',
@@ -498,7 +498,7 @@ export const WORKFLOW_CATALOG: Record<string, WorkflowNodeData> = {
         },
       },
     ],
-    config: { maxRetries: 2, timeout: '48h', computeQueue: 'seqera-prod-oncoanalyser' },
+    tags: { maxRetries: '2', timeout: '48h', computeQueue: 'seqera-prod-oncoanalyser' },
   },
 
   'oncoanalyser-wts': {
@@ -507,7 +507,7 @@ export const WORKFLOW_CATALOG: Record<string, WorkflowNodeData> = {
     engine: 'SEQERA',
     description:
       'OncoAnalyser for WTS data. Runs Isofox for gene expression analysis, fusion detection, and novel splice junction identification from RNA-seq BAM files.',
-    analysisIds: ['WTS', 'INTEGRATED'],
+    groupIds: ['WTS', 'INTEGRATED'],
     inputEvents: [
       {
         name: 'orcabus.workflowmanager.star_alignment.succeeded',
@@ -534,7 +534,7 @@ export const WORKFLOW_CATALOG: Record<string, WorkflowNodeData> = {
         },
       },
     ],
-    config: { maxRetries: 2, timeout: '24h', computeQueue: 'seqera-prod-oncoanalyser' },
+    tags: { maxRetries: '2', timeout: '24h', computeQueue: 'seqera-prod-oncoanalyser' },
   },
 
   // ── Layer 5: Reporting & Integration ───────────────────────────────────────
@@ -544,7 +544,7 @@ export const WORKFLOW_CATALOG: Record<string, WorkflowNodeData> = {
     engine: 'AWS_BATCH',
     description:
       'Pan-cancer cohort analysis. Compares individual tumor profiles against the UMCCR pan-cancer cohort to identify relative ranking of mutational burden, signatures, and driver gene alterations.',
-    analysisIds: ['WGS'],
+    groupIds: ['WGS'],
     inputEvents: [
       {
         name: 'orcabus.workflowmanager.umccrise.succeeded',
@@ -570,7 +570,7 @@ export const WORKFLOW_CATALOG: Record<string, WorkflowNodeData> = {
         },
       },
     ],
-    config: { maxRetries: 1, timeout: '6h', computeQueue: 'aws-prod-pancan' },
+    tags: { maxRetries: '1', timeout: '6h', computeQueue: 'aws-prod-pancan' },
   },
 
   sash: {
@@ -579,7 +579,7 @@ export const WORKFLOW_CATALOG: Record<string, WorkflowNodeData> = {
     engine: 'AWS_BATCH',
     description:
       'Somatic Annotation and Summary of HMF pipeline results. Combines OncoAnalyser WGS output with WGS tumor-normal data to generate an integrated somatic variant report with clinical annotations.',
-    analysisIds: ['WGS', 'INTEGRATED'],
+    groupIds: ['WGS', 'INTEGRATED'],
     inputEvents: [
       {
         name: 'orcabus.workflowmanager.oncoanalyser_wgs.succeeded',
@@ -615,7 +615,7 @@ export const WORKFLOW_CATALOG: Record<string, WorkflowNodeData> = {
         },
       },
     ],
-    config: { maxRetries: 2, timeout: '12h', computeQueue: 'aws-prod-sash' },
+    tags: { maxRetries: '2', timeout: '12h', computeQueue: 'aws-prod-sash' },
   },
 
   'oncoanalyser-wgts-existing-both': {
@@ -624,7 +624,7 @@ export const WORKFLOW_CATALOG: Record<string, WorkflowNodeData> = {
     engine: 'SEQERA',
     description:
       'Integrated WGS + WTS OncoAnalyser pipeline. Runs when both WGS and WTS data exist for a subject, combining genomic and transcriptomic evidence for comprehensive tumor characterization.',
-    analysisIds: ['INTEGRATED'],
+    groupIds: ['INTEGRATED'],
     inputEvents: [
       {
         name: 'orcabus.workflowmanager.oncoanalyser_wts.succeeded',
@@ -660,7 +660,7 @@ export const WORKFLOW_CATALOG: Record<string, WorkflowNodeData> = {
         },
       },
     ],
-    config: { maxRetries: 2, timeout: '48h', computeQueue: 'seqera-prod-oncoanalyser' },
+    tags: { maxRetries: '2', timeout: '48h', computeQueue: 'seqera-prod-oncoanalyser' },
   },
 
   // ── Layer 6: Final Reporting ───────────────────────────────────────────────
@@ -670,7 +670,7 @@ export const WORKFLOW_CATALOG: Record<string, WorkflowNodeData> = {
     engine: 'AWS_BATCH',
     description:
       'RNA expression summary and reporting. Integrates WGS cancer report from PANCAN with transcriptome BAM data to generate a combined DNA + RNA clinical report with expression outlier analysis.',
-    analysisIds: ['WTS', 'WGS'],
+    groupIds: ['WTS', 'WGS'],
     inputEvents: [
       {
         name: 'orcabus.workflowmanager.pancan.succeeded',
@@ -704,6 +704,6 @@ export const WORKFLOW_CATALOG: Record<string, WorkflowNodeData> = {
         },
       },
     ],
-    config: { maxRetries: 1, timeout: '8h', computeQueue: 'aws-prod-rnasum' },
+    tags: { maxRetries: '1', timeout: '8h', computeQueue: 'aws-prod-rnasum' },
   },
 };
