@@ -1,7 +1,7 @@
 import { useMemo, useCallback } from 'react';
 import { useQueryParams } from '@/hooks/useQueryParams';
 import { PARAM_ORDER_BY, PARAM_SEARCH } from '@/utils/constants';
-import { toUtcStartOfDayQueryParam } from '@/utils/timeFormat';
+import { toUtcStartOfDay } from '@/utils/timeFormat';
 
 export type WorkflowRunStatus =
   | 'draft'
@@ -119,8 +119,8 @@ export function useWorkflowRunsQueryParams() {
       workflow__orcabus_id: typeValues.length ? typeValues.join(',') : undefined,
       status: statusForApi,
       is_ongoing: statusRaw === 'ongoing' ? true : undefined,
-      start_time: toUtcStartOfDayQueryParam(filterValues[PARAM_FROM]),
-      end_time: toUtcStartOfDayQueryParam(filterValues[PARAM_TO]),
+      start_time: toUtcStartOfDay(filterValues[PARAM_FROM]),
+      end_time: toUtcStartOfDay(filterValues[PARAM_TO]),
       order_by: orderBy || '-timestamp',
     };
   }, [filterValues, pagination.page, pagination.rowsPerPage, search, orderBy]);

@@ -10,7 +10,7 @@ import {
   useWorkflowRunsQueryParams,
   type WorkflowRunStatus,
 } from '../hooks/useWorkflowRunsQueryParams';
-import { toUtcStartOfDayQueryParam } from '@/utils/timeFormat';
+import { toUtcStartOfDay } from '@/utils/timeFormat';
 
 interface WorkflowRunsStatusCardsProps {
   status: WorkflowRunStatus | 'all';
@@ -46,8 +46,8 @@ export function WorkflowRunsStatusCards({
     params: {
       query: {
         search: search ? search : undefined,
-        start_time: dateFrom ? toUtcStartOfDayQueryParam(dateFrom) : undefined,
-        end_time: dateTo ? toUtcStartOfDayQueryParam(dateTo) : undefined,
+        start_time: dateFrom ? toUtcStartOfDay(dateFrom) : undefined,
+        end_time: dateTo ? toUtcStartOfDay(dateTo) : undefined,
         workflow: filterValues.wfType || undefined,
       },
     },

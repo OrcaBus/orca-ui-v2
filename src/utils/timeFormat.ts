@@ -60,22 +60,7 @@ export function formatBackendDate(date: Date): string {
  * Convert a date-only string (YYYY-MM-DD) to UTC start-of-day format for API query params.
  * @returns e.g. "2025-11-06T00:00:00+00:00", or undefined when input is empty/invalid.
  */
-export function formatQueryDateToUtcStartOfDay(
-  dateString: string | null | undefined
-): string | undefined {
-  if (!dateString) return undefined;
-  const d = dayjs.utc(dateString);
-  if (!d.isValid()) return undefined;
-  return d.startOf('day').format('YYYY-MM-DDTHH:mm:ssZ');
-}
-
-/**
- * Alias for API query params date conversion.
- * Kept for readability in query-params hooks.
- */
-export function toUtcStartOfDayQueryParam(
-  dateString: string | null | undefined
-): string | undefined {
+export function toUtcStartOfDay(dateString: string | null | undefined): string | undefined {
   if (!dateString) return undefined;
   const d = dayjs.utc(dateString);
   if (!d.isValid()) return undefined;
