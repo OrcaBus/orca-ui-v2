@@ -1,6 +1,5 @@
 import { Suspense, useMemo } from 'react';
 import { FilterBar } from '../../../components/tables/FilterBar';
-import { Select } from '../../../components/ui/Select';
 import { PageHeader } from '../../../components/layout/PageHeader';
 import { DetailedErrorBoundary } from '@/components/ui/DetailedErrorBoundary';
 import { SpinnerWithText } from '@/components/ui/Spinner';
@@ -9,17 +8,6 @@ import type { InstrumentRunStatus } from '../utils/groupByInstrumentRun';
 import { buildSequenceRunsFilterBadges } from '../utils/buildSequenceRunsFilterBadges';
 import { SequenceRunsStatusCards } from '../components/SequenceRunsStatusCards';
 import SequenceRunsTable from '../components/SequenceRunsTable';
-
-const STATUS_ALL = 'all' as const;
-const STATUS_OPTIONS: { value: SequenceStatus | typeof STATUS_ALL; label: string }[] = [
-  { value: STATUS_ALL, label: 'All statuses' },
-  { value: 'SUCCEEDED', label: 'Succeeded' },
-  { value: 'FAILED', label: 'Failed' },
-  { value: 'STARTED', label: 'Started' },
-  { value: 'ABORTED', label: 'Aborted' },
-  { value: 'RESOLVED', label: 'Resolved' },
-  { value: 'DEPRECATED', label: 'Deprecated' },
-];
 
 export function SequencePage() {
   const {
@@ -87,11 +75,6 @@ export function SequencePage() {
         searchId='sequence-search'
         filters={
           <>
-            <Select
-              value={statusFilter}
-              onChange={(v) => setStatusFilter(v as SequenceStatus | 'all')}
-              options={STATUS_OPTIONS}
-            />
             <div className='flex items-center gap-2'>
               <label
                 htmlFor='sequence-start-from'

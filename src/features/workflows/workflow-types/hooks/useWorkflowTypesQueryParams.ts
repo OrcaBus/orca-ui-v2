@@ -1,6 +1,6 @@
 import { useMemo, useCallback } from 'react';
 import { useQueryParams } from '@/hooks/useQueryParams';
-import { PARAM_ORDER_BY, PARAM_SEARCH } from '@/utils/constants';
+import { DEFAULT_PAGE_SIZE, PARAM_ORDER_BY, PARAM_SEARCH } from '@/utils/constants';
 import type { FilterBadge } from '@/components/tables/FilterBar';
 import type { WorkflowTypeDefinition } from '@/data/mockData';
 import type { ExecutionEngineEnum, ValidationStateEnum } from '../../api/workflows.api';
@@ -102,8 +102,8 @@ export function useWorkflowTypesQueryParams(options: UseWorkflowTypesQueryParams
     const validationState = filterValues[PARAM_VALIDATION_STATE];
 
     return {
-      page: pagination.page,
-      rowsPerPage: pagination.rowsPerPage,
+      page: pagination.page || 1,
+      rows_per_page: pagination.rowsPerPage || DEFAULT_PAGE_SIZE,
       search: search || undefined,
       name: filterValues[PARAM_TYPE_NAME] || undefined,
       executionEngine: (filterValues[PARAM_EXECUTION_ENGINE] || undefined) as

@@ -1,5 +1,5 @@
 import config from '@/app/config';
-import type { components, paths, operations } from '@/api/types/sequence-run.openapi.d.ts';
+import type { components, paths } from '@/api/types/sequence-run.openapi.d.ts';
 import {
   ApiClient,
   getVersionedPath,
@@ -20,14 +20,13 @@ const sequenceRunApi = new ApiClient<paths>({
 // export component types for consumers
 export type SequenceRunModel = components['schemas']['SequenceRun'];
 export type SequenceRunListByInstrumentRunIdModel =
-  operations['apiV1SequenceRunListByInstrumentRunIdRetrieve']['responses']['200']['content']['application/json']['results'][number];
+  components['schemas']['SequenceRunGroupByInstrumentRunId'];
 export type SequenceRunItemListByInstrumentRunIdModel = NonNullable<
   SequenceRunListByInstrumentRunIdModel['items']
 >[number];
 export type SequenceRunStatusEnum = components['schemas']['StatusEnum'];
 export type CommentTargetTypeEnum = components['schemas']['TargetTypeEnum'];
-export type SequenceRunStatsStatusCountsModel =
-  operations['apiV1SequenceRunStatsStatusCountsRetrieve']['responses']['200']['content']['application/json'];
+export type SequenceRunStatsStatusCountsModel = components['schemas']['SequenceRunCountByStatus'];
 
 // sequence run list
 export const useSequenceRunListModel = createQueryHook(sequenceRunApi, '/api/v1/sequence_run/');
@@ -77,7 +76,11 @@ export const useSequenceRunCommentDeleteModel = createDeleteMutationHook(
 // status count
 export const useSequenceRunStatsStatusCountsModel = createQueryHook(
   sequenceRunApi,
-  '/api/v1/sequence_run/stats/status_counts/'
+  '/api/v1/stats/sequence_run_status_counts/'
+);
+export const useInstrumentRunStatsStatusCountsModel = createQueryHook(
+  sequenceRunApi,
+  '/api/v1/stats/instrument_run_status_counts/'
 );
 
 // sample sheet

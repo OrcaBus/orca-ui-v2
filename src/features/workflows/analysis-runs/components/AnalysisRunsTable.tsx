@@ -27,8 +27,6 @@ const AnalysisRunsTable = () => {
     params: {
       query: {
         ...analysisRunListQueryParams,
-        page: analysisRunListQueryParams.page || 1,
-        rowsPerPage: analysisRunListQueryParams.rowsPerPage || DEFAULT_PAGE_SIZE,
       },
     },
   });

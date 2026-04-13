@@ -1,6 +1,6 @@
 import { useMemo, useCallback } from 'react';
 import { useQueryParams } from '@/hooks/useQueryParams';
-import { PARAM_ORDER_BY, PARAM_SEARCH } from '@/utils/constants';
+import { DEFAULT_PAGE_SIZE, PARAM_ORDER_BY, PARAM_SEARCH } from '@/utils/constants';
 import type { FilterBadge } from '@/components/tables/FilterBar';
 import type { AnalysisType } from '@/data/mockData';
 import type { ListAnalysisModel } from '../../api/workflows.api';
@@ -103,8 +103,8 @@ export function useAnalysisTypesQueryParams(options: UseAnalysisTypesQueryParams
       !statusRaw || statusRaw === 'all' ? undefined : (statusRaw as AnalysisTypeStatus);
 
     return {
-      page: pagination.page,
-      rowsPerPage: pagination.rowsPerPage,
+      page: pagination.page || 1,
+      rows_per_page: pagination.rowsPerPage || DEFAULT_PAGE_SIZE,
       search: search || undefined,
       analysisName: filterValues[PARAM_ANALYSIS_NAME] || undefined,
       analysisVersion: filterValues[PARAM_ANALYSIS_VERSION] || undefined,

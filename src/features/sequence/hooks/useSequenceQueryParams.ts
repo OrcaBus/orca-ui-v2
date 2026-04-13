@@ -85,7 +85,7 @@ export function useSequenceQueryParams() {
 
     return {
       page: pagination.page,
-      rowsPerPage: pagination.rowsPerPage,
+      rows_per_page: pagination.rowsPerPage,
       search: search || undefined,
       status: statusForApi,
       start_time: toUtcStartOfDay(filterValues[PARAM_FROM]),

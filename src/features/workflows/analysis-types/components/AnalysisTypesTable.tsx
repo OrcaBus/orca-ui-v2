@@ -24,8 +24,6 @@ const AnalysisTypesTable = () => {
     params: {
       query: {
         ...analysisTypesQueryParams,
-        page: analysisTypesQueryParams.page || 1,
-        rowsPerPage: analysisTypesQueryParams.rowsPerPage || DEFAULT_PAGE_SIZE,
       },
     },
   });

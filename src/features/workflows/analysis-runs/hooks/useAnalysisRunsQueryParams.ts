@@ -1,6 +1,6 @@
 import { useMemo, useCallback } from 'react';
 import { useQueryParams } from '@/hooks/useQueryParams';
-import { PARAM_ORDER_BY, PARAM_SEARCH } from '@/utils/constants';
+import { DEFAULT_PAGE_SIZE, PARAM_ORDER_BY, PARAM_SEARCH } from '@/utils/constants';
 import { toUtcStartOfDay } from '@/utils/timeFormat';
 
 export type AnalysisRunStatus =
@@ -112,8 +112,8 @@ export function useAnalysisRunsQueryParams() {
       !statusRaw || statusRaw === 'all' ? undefined : (statusRaw as AnalysisRunStatus);
 
     return {
-      page: pagination.page,
-      rowsPerPage: pagination.rowsPerPage,
+      page: pagination.page || 1,
+      rows_per_page: pagination.rowsPerPage | DEFAULT_PAGE_SIZE,
       search: search || undefined,
       analysis: typeValues.length ? typeValues.join(',') : undefined,
       status: statusForApi,
