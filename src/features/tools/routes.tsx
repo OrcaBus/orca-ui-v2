@@ -5,14 +5,14 @@ const ToolsPage = lazy(() => import('./pages/ToolsPage').then((m) => ({ default:
 const SSCheckerPage = lazy(() =>
   import('./sschecker/pages/SSCheckerPage').then((m) => ({ default: m.SSCheckerPage }))
 );
-const DiagramListPage = lazy(() =>
-  import('./workflow-catalog/pages/DiagramListPage').then((m) => ({
-    default: m.DiagramListPage,
+const MapListPage = lazy(() =>
+  import('./system-catalog/pages/MapListPage').then((m) => ({
+    default: m.MapListPage,
   }))
 );
-const WorkflowCatalogPage = lazy(() =>
-  import('./workflow-catalog/pages/WorkflowCatalogPage').then((m) => ({
-    default: m.WorkflowCatalogPage,
+const SystemCatalogPage = lazy(() =>
+  import('./system-catalog/pages/SystemCatalogPage').then((m) => ({
+    default: m.SystemCatalogPage,
   }))
 );
 
@@ -29,16 +29,16 @@ const Routes: RouteObject = {
       element: <SSCheckerPage />,
     },
     {
-      path: 'workflow-catalog',
+      path: 'system-catalog',
       element: <Outlet />,
       children: [
         {
           index: true,
-          element: <DiagramListPage />,
+          element: <MapListPage />,
         },
         {
-          path: ':diagramId',
-          element: <WorkflowCatalogPage />,
+          path: ':mapId',
+          element: <SystemCatalogPage />,
         },
       ],
     },
