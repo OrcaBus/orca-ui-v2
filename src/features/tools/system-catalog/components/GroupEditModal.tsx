@@ -7,7 +7,7 @@ import type { CatalogNodeData } from '../types/system-catalog.types';
 
 // ─── Schema ─────────────────────────────────────────────────────────────────
 
-const GROUP_TYPES = ['analysis', 'flows', 'service'] as const;
+const GROUP_TYPES = ['infrastructure', 'ingestion', 'analysis', 'flows', 'service'] as const;
 export type GroupType = (typeof GROUP_TYPES)[number];
 
 const groupFormSchema = z.object({
@@ -37,6 +37,8 @@ const COLOR_PRESETS = [
 ];
 
 const TYPE_LABELS: Record<GroupType, string> = {
+  infrastructure: 'Infrastructure',
+  ingestion: 'Ingestion',
   analysis: 'Analysis',
   flows: 'Flows',
   service: 'Service',

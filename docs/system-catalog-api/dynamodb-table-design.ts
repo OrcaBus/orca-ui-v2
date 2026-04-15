@@ -1,15 +1,15 @@
 /**
  * ════════════════════════════════════════════════════════════════════════════
- * DynamoDB Table Design — Workflow Catalog Service
+ * DynamoDB Table Design — System Catalog Service
  * ════════════════════════════════════════════════════════════════════════════
  *
- * Table Name: WorkflowCatalog
+ * Table Name: SystemCatalog
  *
  * ┌────────────────────────────────────────────────────────────────────────┐
  * │ Key Schema                                                            │
  * ├─────────────┬──────────────────────────────────────────────────────────┤
  * │ PK (String) │ Tenant / catalog version.  e.g. "CATALOG_V1"           │
- * │ SK (String) │ Entity type + ID.  e.g. "DIAGRAM#umccr-production"     │
+ * │ SK (String) │ Entity type + ID.  e.g. "MAP#umccr-production"     │
  * └─────────────┴──────────────────────────────────────────────────────────┘
  *
  * ┌────────────────────────────────────────────────────────────────────────┐
@@ -18,28 +18,28 @@
  * │ GSI1PK (String)  │ "STATUS#active"  or "STATUS#draft"                │
  * │ GSI1SK (String)  │ "UPDATED#2026-04-14T00:00:00Z#umccr-production"   │
  * └─────────────────┴──────────────────────────────────────────────────────┘
- *   → Enables: "List all active diagrams, sorted by last updated"
- *   → Enables: "List all draft diagrams"
- *   → Enables: "List all archived diagrams"
+ *   → Enables: "List all active maps, sorted by last updated"
+ *   → Enables: "List all draft maps"
+ *   → Enables: "List all archived maps"
  *
  * ════════════════════════════════════════════════════════════════════════════
  * Design Rationale
  * ════════════════════════════════════════════════════════════════════════════
  *
- * SINGLE-DOCUMENT model: Each diagram is ONE DynamoDB item containing
+ * SINGLE-DOCUMENT model: Each map is ONE DynamoDB item containing
  * its nodes, groups, edges, and layout embedded as arrays/maps.
  *
  * Why single-document (not normalized)?
- *  1. A diagram is always loaded as a whole (the ReactFlow canvas needs
+ *  1. A map is always loaded as a whole (the ReactFlow canvas needs
  *     all nodes + edges + layout at once). No partial loading use case.
- *  2. Max item size: 400KB. A diagram with 50 nodes × ~2KB each = ~100KB.
+ *  2. Max item size: 400KB. A map with 50 nodes × ~2KB each = ~100KB.
  *     Even with rich event payloads we stay well under the limit.
- *  3. Writes are diagram-level (save button saves the entire canvas state).
+ *  3. Writes are map-level (save button saves the entire canvas state).
  *     No need for fine-grained item-level mutations.
- *  4. Simpler transactions: Create/update/delete a diagram = 1 PutItem.
+ *  4. Simpler transactions: Create/update/delete a map = 1 PutItem.
  *
  * When would you split?
- *  - If diagrams exceed ~300 nodes (approaching 400KB).
+ *  - If maps exceed ~300 nodes (approaching 400KB).
  *  - If you need independent versioning of individual nodes.
  *  - Neither applies to this use case.
  *
@@ -49,33 +49,47 @@
  *
  *  #  │ Access Pattern                          │ Key Condition
  *  ───┼─────────────────────────────────────────┼──────────────────────────
- *  1  │ List all diagrams (summaries)           │ PK = "CATALOG_V1",
- *     │                                         │ SK begins_with "DIAGRAM#"
+ *  1  │ List all maps (summaries)           │ PK = "CATALOG_V1",
+ *     │                                         │ SK begins_with "MAP#"
  *     │                                         │ ProjectionExpression on
  *     │                                         │ summary fields only
  *  ───┼─────────────────────────────────────────┼──────────────────────────
- *  2  │ Get full diagram                        │ PK = "CATALOG_V1",
- *     │                                         │ SK = "DIAGRAM#<diagramId>"
+ *  2  │ Get full map                        │ PK = "CATALOG_V1",
+ *     │                                         │ SK = "MAP#<mapId>"
  *  ───┼─────────────────────────────────────────┼──────────────────────────
- *  3  │ Filter diagrams by status               │ GSI1PK = "STATUS#active",
+ *  3  │ Filter maps by status               │ GSI1PK = "STATUS#active",
  *     │ (sorted by updatedAt)                   │ GSI1SK begins_with "UPDATED#"
  *  ───┼─────────────────────────────────────────┼──────────────────────────
- *  4  │ Create diagram                          │ PutItem (condition: SK
+ *  4  │ Create map                          │ PutItem (condition: SK
  *     │                                         │ attribute_not_exists)
  *  ───┼─────────────────────────────────────────┼──────────────────────────
- *  5  │ Update diagram (full replace)           │ PutItem
+ *  5  │ Update map (full replace)           │ PutItem
  *  ───┼─────────────────────────────────────────┼──────────────────────────
- *  6  │ Update diagram metadata only            │ UpdateExpression SET
+ *  6  │ Update map metadata only            │ UpdateExpression SET
  *     │ (name, description, status, tags)       │ name = :n, status = :s ...
+ *     │                                         │ ConditionExpression:
+ *     │                                         │ version = :expectedVersion
  *  ───┼─────────────────────────────────────────┼──────────────────────────
- *  7  │ Delete diagram                          │ DeleteItem
+ *  7  │ Soft-delete map                     │ UpdateExpression SET
+ *     │                                         │ isDeleted = true,
+ *     │                                         │ version = version + 1
+ *     │                                         │ ConditionExpression:
+ *     │                                         │ version = :expectedVersion
+ *  ───┼─────────────────────────────────────────┼──────────────────────────
+ *  8  │ List history for a map              │ PK = "CATALOG_V1",
+ *     │                                         │ SK begins_with
+ *     │                                         │ "HISTORY#<mapId>#"
+ *  ───┼─────────────────────────────────────────┼──────────────────────────
+ *  9  │ Get history snapshot                │ PK = "CATALOG_V1",
+ *     │                                         │ SK = "HISTORY#<mapId>#
+ *     │                                         │         <historyId>"
  *  ───┼─────────────────────────────────────────┼──────────────────────────
  */
 
 // ─── Enums ────────────────────────────────────────────────────────────────
 
-export type DiagramNodeType =
-  | 'workflow'
+export type MapNodeType =
+  | 'pipeline'
   | 'aws_lambda'
   | 'aws_eks'
   | 'aws_step_function'
@@ -84,20 +98,48 @@ export type DiagramNodeType =
   | 'aws_s3'
   | 'aws_sqs'
   | 'aws_sns'
-  | 'external_service';
+  | 'external_service'
+  | 'ica_pipeline'
+  | 'rest_api_service'
+  | 'execution_service';
 
-export type DiagramEdgeType = 'trigger' | 'trigger_input' | 'input_dependency';
+export type MapEdgeType =
+  | 'trigger'
+  | 'trigger_input'
+  | 'input_dependency'
+  | 'event_publish'
+  | 'event_subscribe'
+  | 'state_change'
+  | 'execution_request'
+  | 'rest_call';
 
-export type DiagramStatus = 'active' | 'draft' | 'archived';
+export type MapStatus = 'active' | 'draft' | 'archived';
 
-export type GroupType = 'analysis' | 'flows' | 'service';
+export type GroupType = 'infrastructure' | 'ingestion' | 'analysis' | 'flows' | 'service';
+
+export type HistoryChangeType =
+  | 'created'
+  | 'metadata_updated'
+  | 'content_saved'
+  | 'content_patched'
+  | 'node_added'
+  | 'node_updated'
+  | 'node_deleted'
+  | 'group_added'
+  | 'group_updated'
+  | 'group_deleted'
+  | 'edge_added'
+  | 'edge_updated'
+  | 'edge_deleted'
+  | 'soft_deleted'
+  | 'restored';
 
 // ─── Embedded Sub-Documents ───────────────────────────────────────────────
 
-export interface DiagramNode {
-  /** Unique within the diagram. Used as ReactFlow node id. */
+export interface MapNode {
+  /** Unique within the map. Used as ReactFlow node id. */
   nodeId: string;
-  nodeType: DiagramNodeType;
+  nodeType: MapNodeType;
   label: string;
   version: string;
   engine: string;
@@ -119,66 +161,75 @@ export interface EventDef {
   payload: Record<string, unknown>;
 }
 
-export interface DiagramGroup {
+export interface MapGroup {
   groupId: string;
   name: string;
+  description?: string;
   type: GroupType;
   color: string;
   /** Node IDs belonging to this group. */
   nodeIds: string[];
 }
 
-export interface DiagramEdge {
+export interface MapEdge {
   edgeId: string;
   source: string;
   target: string;
-  edgeType: DiagramEdgeType;
+  edgeType: MapEdgeType;
   label?: string;
 }
 
 // ─── DynamoDB Item ────────────────────────────────────────────────────────
 
-export interface DynamoDBDiagramItem {
+export interface DynamoDBMapItem {
   /** Partition key: "CATALOG_V1" */
   PK: string;
-  /** Sort key: "DIAGRAM#<diagramId>" */
+  /** Sort key: "MAP#<mapId>" */
   SK: string;
 
   /** GSI-1 partition key: "STATUS#<status>" */
   GSI1PK: string;
-  /** GSI-1 sort key: "UPDATED#<ISO8601>#<diagramId>" */
+  /** GSI-1 sort key: "UPDATED#<ISO8601>#<mapId>" */
   GSI1SK: string;
 
-  entityType: 'DIAGRAM';
+  entityType: 'MAP';
 
   // ── Summary fields (projected in list queries) ──
-  diagramId: string;
+  mapId: string;
   name: string;
   description: string;
-  status: DiagramStatus;
+  status: MapStatus;
   createdBy: string;
   createdAt: string; // ISO 8601
   updatedBy: string;
   updatedAt: string; // ISO 8601
   tags: Record<string, string>;
+  /** Auto-incremented on each write. Used for optimistic concurrency (ETag / If-Match). */
+  version: number;
+  /** Soft-delete flag. Excluded from list queries by default. */
+  isDeleted: boolean;
   /** Denormalized counts for list queries (avoids projecting full arrays into GSI). */
   nodeCount: number;
   edgeCount: number;
 
-  // ── Full diagram content ──
-  nodes: DiagramNode[];
-  groups: DiagramGroup[];
-  edges: DiagramEdge[];
+  // ── Full map content ──
+  nodes: MapNode[];
+  groups: MapGroup[];
+  edges: MapEdge[];
+  /** Engine name → hex color for consistent UI rendering. */
+  engineColors: Record<string, string>;
 }
 
 // ─── Derived Types (API responses) ────────────────────────────────────────
 
-/** Lightweight shape returned by GET /diagrams (list endpoint). */
-export interface DiagramSummary {
-  diagramId: string;
+/** Lightweight shape returned by GET /maps (list endpoint). */
+export interface MapSummary {
+  mapId: string;
   name: string;
   description: string;
-  status: DiagramStatus;
+  status: MapStatus;
+  version: number;
+  isDeleted: boolean;
   createdBy: string;
   createdAt: string;
   updatedBy: string;
@@ -188,20 +239,56 @@ export interface DiagramSummary {
   tags: Record<string, string>;
 }
 
-/** Full shape returned by GET /diagrams/:id. */
-export interface DiagramFull {
-  diagramId: string;
+/** Full shape returned by GET /maps/:id. */
+export interface MapFull {
+  mapId: string;
   name: string;
   description: string;
-  status: DiagramStatus;
+  status: MapStatus;
+  version: number;
+  isDeleted: boolean;
   createdBy: string;
   createdAt: string;
   updatedBy: string;
   updatedAt: string;
   tags: Record<string, string>;
-  nodes: DiagramNode[];
-  groups: DiagramGroup[];
-  edges: DiagramEdge[];
+  nodes: MapNode[];
+  groups: MapGroup[];
+  edges: MapEdge[];
+  engineColors: Record<string, string>;
+}
+
+// ─── History Item ─────────────────────────────────────────────────────────
+
+/** Audit trail entry stored alongside maps in the same table. */
+export interface MapHistoryEntry {
+  historyId: string;
+  mapId: string;
+  version: number;
+  changeType: HistoryChangeType;
+  changedBy: string;
+  changedAt: string; // ISO 8601
+  summary: string;
+}
+
+/**
+ * DynamoDB item for history entries.
+ * SK pattern: "HISTORY#<mapId>#<historyId>"
+ * Enables range queries: SK begins_with "HISTORY#<mapId>#"
+ */
+export interface DynamoDBHistoryItem {
+  PK: string; // "CATALOG_V1"
+  SK: string; // "HISTORY#<mapId>#<historyId>"
+  entityType: 'HISTORY';
+  historyId: string;
+  mapId: string;
+  version: number;
+  changeType: HistoryChangeType;
+  changedBy: string;
+  changedAt: string;
+  summary: string;
+  /** Optional: full map snapshot at this point for restore capability. */
+  snapshot?: Omit<DynamoDBMapItem, 'PK' | 'SK' | 'GSI1PK' | 'GSI1SK' | 'entityType'>;
 }
 
 // ─── CDK Table Definition (reference) ─────────────────────────────────────
@@ -210,8 +297,8 @@ export interface DiagramFull {
  * AWS CDK definition (for reference):
  *
  * ```typescript
- * const table = new dynamodb.Table(this, 'WorkflowCatalog', {
- *   tableName: 'WorkflowCatalog',
+ * const table = new dynamodb.Table(this, 'SystemCatalog', {
+ *   tableName: 'SystemCatalog',
  *   partitionKey: { name: 'PK', type: dynamodb.AttributeType.STRING },
  *   sortKey: { name: 'SK', type: dynamodb.AttributeType.STRING },
  *   billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
@@ -225,7 +312,8 @@ export interface DiagramFull {
  *   sortKey: { name: 'GSI1SK', type: dynamodb.AttributeType.STRING },
  *   projectionType: dynamodb.ProjectionType.INCLUDE,
  *   nonKeyAttributes: [
- *     'diagramId', 'name', 'description', 'status',
+ *     'mapId', 'name', 'description', 'status',
+ *     'version', 'isDeleted',
  *     'createdBy', 'createdAt', 'updatedBy', 'updatedAt',
  *     'tags', 'nodeCount', 'edgeCount',
  *   ],

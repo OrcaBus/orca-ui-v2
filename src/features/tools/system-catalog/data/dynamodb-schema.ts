@@ -1,19 +1,19 @@
 /**
- * DynamoDB Single-Table Design for Workflow Diagram / Event Catalog
+ * DynamoDB Single-Table Design for System Catalog
  *
- * Table: WorkflowCatalog
+ * Table: SystemCatalog
  * ──────────────────────────────────────────────────────────────────────
  * Partition Key (PK): String  — catalog version, e.g. "CATALOG_V1"
- * Sort Key      (SK): String  — entity type + id, e.g. "DIAGRAM#umccr-production"
+ * Sort Key      (SK): String  — entity type + id, e.g. "MAP#umccr-production"
  *
  * ──────────────────────────────────────────────────────────────────────
  * Access Patterns:
  *
- *  1. Load full catalog (all diagrams for a version):
+ *  1. Load full catalog (all maps for a version):
  *     Query: PK = "CATALOG_V1"
  *
- *  2. Get a single diagram (contains nodes, groups, edges):
- *     GetItem: PK = "CATALOG_V1", SK = "DIAGRAM#umccr-production"
+ *  2. Get a single map (contains nodes, groups, edges):
+ *     GetItem: PK = "CATALOG_V1", SK = "MAP#umccr-production"
  *
  * ──────────────────────────────────────────────────────────────────────
  * Versioning: The PK includes a version suffix (CATALOG_V1, CATALOG_V2)
@@ -24,7 +24,7 @@
 // ─── Node Types ───────────────────────────────────────────────────────────
 
 export type MapNodeType =
-  | 'workflow'
+  | 'pipeline'
   | 'aws_lambda'
   | 'aws_eks'
   | 'aws_step_function'
@@ -50,11 +50,15 @@ export type MapEdgeType =
   | 'execution_request'
   | 'rest_call';
 
-// ─── Diagram Status ───────────────────────────────────────────────────────
+// ─── Map Status ───────────────────────────────────────────────────────
 
 export type MapStatus = 'active' | 'draft' | 'archived';
 
-// ─── Global Config (shared across all diagrams) ──────────────────────────
+// ─── Group Type ───────────────────────────────────────────────────────
+
+export type GroupType = 'infrastructure' | 'ingestion' | 'analysis' | 'flows' | 'service';
+
+// ─── Global Config (shared across all maps) ──────────────────────────
 
 export const ENGINE_COLORS: Record<string, string> = {
   ON_PREM: '#f97316',
@@ -67,7 +71,7 @@ export const ENGINE_COLORS: Record<string, string> = {
 };
 
 export const NODE_TYPE_ICONS: Record<MapNodeType, string> = {
-  workflow: 'GitBranch',
+  pipeline: 'GitBranch',
   aws_lambda: 'Zap',
   aws_eks: 'Container',
   aws_step_function: 'Workflow',
@@ -83,15 +87,17 @@ export const NODE_TYPE_ICONS: Record<MapNodeType, string> = {
 };
 
 /**
- * Lightweight diagram summary for the list page.
+ * Lightweight map summary for the list page.
  * The full DynamoDBMapItem (with nodes/edges/groups) is only loaded
- * when the user opens a specific diagram.
+ * when the user opens a specific map.
  */
 export interface MapSummary {
   mapId: string;
   name: string;
   description: string;
   status: MapStatus;
+  version: number;
+  isDeleted: boolean;
   createdBy: string;
   createdAt: string;
   updatedBy: string;
@@ -103,7 +109,7 @@ export interface MapSummary {
 
 // ─── Embedded Item Types (live inside a DynamoDBMapItem) ──────────────
 
-export interface DiagramNode {
+export interface MapNode {
   nodeId: string;
   nodeType: MapNodeType;
   label: string;
@@ -130,13 +136,13 @@ export interface DiagramNode {
 export interface MapGroup {
   groupId: string;
   name: string;
-  type: string;
-  count: number;
+  description?: string;
+  type: GroupType;
   color: string;
   nodeIds: string[];
 }
 
-export interface DiagramEdge {
+export interface MapEdge {
   edgeId: string;
   source: string;
   target: string;
@@ -155,40 +161,49 @@ interface DynamoDBBaseItem {
 }
 
 export interface DynamoDBMapItem extends DynamoDBBaseItem {
-  entityType: 'DIAGRAM';
+  entityType: 'MAP';
   mapId: string;
   name: string;
   description: string;
   status: MapStatus;
+  version: number;
+  isDeleted: boolean;
   tags: Record<string, string>;
   createdBy: string; // user email
   createdAt: string;
   updatedBy: string; // user email
   updatedAt: string;
-  nodes: DiagramNode[];
+  nodeCount: number;
+  edgeCount: number;
+  nodes: MapNode[];
   groups: MapGroup[];
-  edges: DiagramEdge[];
+  edges: MapEdge[];
+  engineColors: Record<string, string>;
 }
 
 // ─── Sample DynamoDB Items (for seeding / reference) ──────────────────────
 
 export const SAMPLE_MAP: DynamoDBMapItem = {
   PK: 'CATALOG_V1',
-  SK: 'DIAGRAM#umccr-production',
-  entityType: 'DIAGRAM',
+  SK: 'MAP#umccr-production',
+  entityType: 'MAP',
   mapId: 'umccr-production',
   name: 'UMCCR Production Pipeline',
-  description: 'Primary production workflow diagram for UMCCR genomics processing.',
+  description: 'Primary production pipeline map for UMCCR genomics processing.',
   status: 'active',
+  version: 1,
+  isDeleted: false,
   tags: { environment: 'production', team: 'umccr' },
   createdBy: 'admin@umccr.org',
   createdAt: '2025-01-15T08:00:00Z',
   updatedBy: 'admin@umccr.org',
   updatedAt: '2025-06-20T14:30:00Z',
+  nodeCount: 5,
+  edgeCount: 4,
   nodes: [
     {
       nodeId: 'bcl-convert',
-      nodeType: 'workflow',
+      nodeType: 'pipeline',
       label: 'BCL Convert',
       version: 'v4.2.7',
       engine: 'ICA',
@@ -265,8 +280,8 @@ export const SAMPLE_MAP: DynamoDBMapItem = {
     {
       groupId: 'WGS',
       name: 'WGS Somatic',
+      description: 'Whole genome sequencing somatic analysis pipeline group',
       type: 'analysis',
-      count: 10,
       color: '#f59e0b',
       nodeIds: [
         'bssh',
@@ -311,4 +326,8 @@ export const SAMPLE_MAP: DynamoDBMapItem = {
       label: 'dispatch workflow',
     },
   ],
+  engineColors: {
+    ICA: '#06b6d4',
+    AWS: '#ff9900',
+  },
 };

@@ -1,5 +1,5 @@
 {
-  "WorkflowCatalog": [
+  "SystemCatalog": [
     {
       "PutRequest": {
         "Item": {
@@ -7,7 +7,7 @@
             "S": "CATALOG_V1"
           },
           "SK": {
-            "S": "DIAGRAM#umccr-production"
+            "S": "MAP#umccr-production"
           },
           "GSI1PK": {
             "S": "STATUS#active"
@@ -16,9 +16,9 @@
             "S": "UPDATED#2026-04-10T06:30:00Z#umccr-production"
           },
           "entityType": {
-            "S": "DIAGRAM"
+            "S": "MAP"
           },
-          "diagramId": {
+          "mapId": {
             "S": "umccr-production"
           },
           "name": {
@@ -66,7 +66,7 @@
                     "S": "bssh"
                   },
                   "nodeType": {
-                    "S": "workflow"
+                    "S": "pipeline"
                   },
                   "label": {
                     "S": "BSSH"
@@ -166,7 +166,7 @@
                     "S": "bcl-convert"
                   },
                   "nodeType": {
-                    "S": "workflow"
+                    "S": "pipeline"
                   },
                   "label": {
                     "S": "BCL Convert"
@@ -230,7 +230,7 @@
                     "S": "tso-ctdna-tumor-only"
                   },
                   "nodeType": {
-                    "S": "workflow"
+                    "S": "pipeline"
                   },
                   "label": {
                     "S": "TSO ctDNA Tumor Only"
@@ -285,7 +285,7 @@
                     "S": "wgs-alignment-qc"
                   },
                   "nodeType": {
-                    "S": "workflow"
+                    "S": "pipeline"
                   },
                   "label": {
                     "S": "WGS Alignment QC"
@@ -343,7 +343,7 @@
                     "S": "wts-alignment-qc"
                   },
                   "nodeType": {
-                    "S": "workflow"
+                    "S": "pipeline"
                   },
                   "label": {
                     "S": "WTS Alignment QC"
@@ -401,7 +401,7 @@
                     "S": "star-alignment"
                   },
                   "nodeType": {
-                    "S": "workflow"
+                    "S": "pipeline"
                   },
                   "label": {
                     "S": "STAR Alignment"
@@ -459,7 +459,7 @@
                     "S": "pierian-dx"
                   },
                   "nodeType": {
-                    "S": "workflow"
+                    "S": "pipeline"
                   },
                   "label": {
                     "S": "Pierian DX"
@@ -514,7 +514,7 @@
                     "S": "holmes"
                   },
                   "nodeType": {
-                    "S": "workflow"
+                    "S": "pipeline"
                   },
                   "label": {
                     "S": "Holmes"
@@ -562,7 +562,7 @@
                     "S": "wgs-tumor-normal"
                   },
                   "nodeType": {
-                    "S": "workflow"
+                    "S": "pipeline"
                   },
                   "label": {
                     "S": "WGS Tumor Normal"
@@ -620,7 +620,7 @@
                     "S": "wts-tumor-only"
                   },
                   "nodeType": {
-                    "S": "workflow"
+                    "S": "pipeline"
                   },
                   "label": {
                     "S": "WTS Tumor Only"
@@ -671,7 +671,7 @@
                     "S": "gpl"
                   },
                   "nodeType": {
-                    "S": "workflow"
+                    "S": "pipeline"
                   },
                   "label": {
                     "S": "GPL"
@@ -719,7 +719,7 @@
                     "S": "oncoanalyser-wts"
                   },
                   "nodeType": {
-                    "S": "workflow"
+                    "S": "pipeline"
                   },
                   "label": {
                     "S": "OncoAnalyser WTS"
@@ -770,7 +770,7 @@
                     "S": "umccrise"
                   },
                   "nodeType": {
-                    "S": "workflow"
+                    "S": "pipeline"
                   },
                   "label": {
                     "S": "UMCCRise"
@@ -818,7 +818,7 @@
                     "S": "oncoanalyser-wgs"
                   },
                   "nodeType": {
-                    "S": "workflow"
+                    "S": "pipeline"
                   },
                   "label": {
                     "S": "OncoAnalyser WGS"
@@ -872,7 +872,7 @@
                     "S": "pancan"
                   },
                   "nodeType": {
-                    "S": "workflow"
+                    "S": "pipeline"
                   },
                   "label": {
                     "S": "PanCan"
@@ -920,7 +920,7 @@
                     "S": "sash"
                   },
                   "nodeType": {
-                    "S": "workflow"
+                    "S": "pipeline"
                   },
                   "label": {
                     "S": "Sash"
@@ -971,7 +971,7 @@
                     "S": "oncoanalyser-wgts-existing-both"
                   },
                   "nodeType": {
-                    "S": "workflow"
+                    "S": "pipeline"
                   },
                   "label": {
                     "S": "OncoAnalyser WGTS"
@@ -1019,7 +1019,7 @@
                     "S": "rnasum"
                   },
                   "nodeType": {
-                    "S": "workflow"
+                    "S": "pipeline"
                   },
                   "label": {
                     "S": "RNAsum"
@@ -1669,7 +1669,7 @@
             "S": "CATALOG_V1"
           },
           "SK": {
-            "S": "DIAGRAM#emergency-reroute"
+            "S": "MAP#emergency-reroute"
           },
           "GSI1PK": {
             "S": "STATUS#draft"
@@ -1678,9 +1678,9 @@
             "S": "UPDATED#2023-10-12T09:15:00Z#emergency-reroute"
           },
           "entityType": {
-            "S": "DIAGRAM"
+            "S": "MAP"
           },
-          "diagramId": {
+          "mapId": {
             "S": "emergency-reroute"
           },
           "name": {
@@ -1739,7 +1739,7 @@
             "S": "CATALOG_V1"
           },
           "SK": {
-            "S": "DIAGRAM#sample-intake-v3"
+            "S": "MAP#sample-intake-v3"
           },
           "GSI1PK": {
             "S": "STATUS#archived"
@@ -1748,9 +1748,9 @@
             "S": "UPDATED#2023-05-30T14:00:00Z#sample-intake-v3"
           },
           "entityType": {
-            "S": "DIAGRAM"
+            "S": "MAP"
           },
-          "diagramId": {
+          "mapId": {
             "S": "sample-intake-v3"
           },
           "name": {
@@ -1809,7 +1809,7 @@
             "S": "CATALOG_V1"
           },
           "SK": {
-            "S": "DIAGRAM#qc-automator-beta"
+            "S": "MAP#qc-automator-beta"
           },
           "GSI1PK": {
             "S": "STATUS#active"
@@ -1818,9 +1818,9 @@
             "S": "UPDATED#2026-04-10T10:00:00Z#qc-automator-beta"
           },
           "entityType": {
-            "S": "DIAGRAM"
+            "S": "MAP"
           },
-          "diagramId": {
+          "mapId": {
             "S": "qc-automator-beta"
           },
           "name": {
@@ -1879,7 +1879,7 @@
             "S": "CATALOG_V1"
           },
           "SK": {
-            "S": "DIAGRAM#wts-pipeline"
+            "S": "MAP#wts-pipeline"
           },
           "GSI1PK": {
             "S": "STATUS#active"
@@ -1888,9 +1888,9 @@
             "S": "UPDATED#2026-03-28T11:45:00Z#wts-pipeline"
           },
           "entityType": {
-            "S": "DIAGRAM"
+            "S": "MAP"
           },
-          "diagramId": {
+          "mapId": {
             "S": "wts-pipeline"
           },
           "name": {

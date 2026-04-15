@@ -7,6 +7,8 @@ export const MAP_LIST: MapSummary[] = [
     description:
       'AWS event-driven architecture showing ICA integration, EventBridge routing, REST API microservices, and Step Function execution services.',
     status: 'active',
+    version: 1,
+    isDeleted: false,
     createdBy: 'Platform Team',
     createdAt: '2026-04-14T00:00:00Z',
     updatedBy: 'Platform Team',
@@ -21,6 +23,8 @@ export const MAP_LIST: MapSummary[] = [
     description:
       'Standard operating procedure for Illumina HiSeq raw data processing and downstream bioinformatics analysis workflows.',
     status: 'active',
+    version: 1,
+    isDeleted: false,
     createdBy: 'Dr. Aris Thorne',
     createdAt: '2024-01-15T09:00:00Z',
     updatedBy: 'Dr. Aris Thorne',
@@ -35,6 +39,8 @@ export const MAP_LIST: MapSummary[] = [
     description:
       'Contingency workflow for instrument downtime, mapping automated failover paths between sequencing centres.',
     status: 'draft',
+    version: 1,
+    isDeleted: false,
     createdBy: 'Sarah Jenkins',
     createdAt: '2023-08-20T14:30:00Z',
     updatedBy: 'Sarah Jenkins',
@@ -49,6 +55,8 @@ export const MAP_LIST: MapSummary[] = [
     description:
       'Legacy intake diagram for clinical trials cohort B. Kept for historical compliance and audit trail purposes.',
     status: 'archived',
+    version: 1,
+    isDeleted: false,
     createdBy: 'Marcus Vane',
     createdAt: '2022-11-01T10:00:00Z',
     updatedBy: 'Marcus Vane',
@@ -63,6 +71,8 @@ export const MAP_LIST: MapSummary[] = [
     description:
       'New automated quality gate workflow utilising machine learning models for real-time sample QC assessment.',
     status: 'active',
+    version: 1,
+    isDeleted: false,
     createdBy: 'Admin User',
     createdAt: '2025-06-01T08:00:00Z',
     updatedBy: 'Admin User',
@@ -77,6 +87,8 @@ export const MAP_LIST: MapSummary[] = [
     description:
       'RNA sequencing analysis pipeline for gene expression profiling and fusion detection across tumour samples.',
     status: 'active',
+    version: 1,
+    isDeleted: false,
     createdBy: 'Dr. Aris Thorne',
     createdAt: '2024-09-12T11:00:00Z',
     updatedBy: 'Sarah Jenkins',
