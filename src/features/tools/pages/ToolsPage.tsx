@@ -17,15 +17,16 @@ export function ToolsPage() {
       learnMoreUrl: '#',
     },
     {
-      id: 'workflow-catalog',
-      name: 'Workflow Diagram / Event Catalog',
-      description: 'Explore workflows and events in an interactive diagram and searchable catalog.',
+      id: 'system-catalog',
+      name: 'System Catalog',
+      description:
+        'Document, explore, and plan system architecture through interactive diagrams with searchable service and event metadata.',
       icon: Workflow,
       iconColor: 'text-green-600',
       iconBg: 'bg-green-100',
       hoverBorder: 'hover:border-green-300',
-      route: '/tools/workflow-catalog',
-      tags: ['Workflows', 'Documentation', 'Interactive', 'Events'],
+      route: '/tools/system-catalog',
+      tags: ['Architecture', 'Services', 'Events', 'Diagrams', 'Planning'],
       learnMoreUrl: '#',
     },
   ];
@@ -34,7 +35,7 @@ export function ToolsPage() {
     <div className='p-6'>
       <PageHeader
         title='Tools'
-        description='Utilities for validating inputs and exploring workflow catalogs.'
+        description='Utilities for validating inputs and exploring system architecture.'
         icon={<Settings className='h-6 w-6' />}
       />
 

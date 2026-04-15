@@ -1,0 +1,937 @@
+openapi: '3.1.0'
+info:
+  title: Workflow Catalog API
+  description: |
+    CRUD API for managing workflow diagram catalogs.
+    Each diagram contains workflow nodes, groups, edges, and canvas layout.
+    Deployed on AWS Lambda behind API Gateway at workflow-catalog.dev.umccr.org.
+  version: '1.0.0'
+  contact:
+    name: UMCCR Platform Team
+    email: platform@umccr.org
+
+servers:
+  - url: https://workflow-catalog.dev.umccr.org
+    description: Development
+  - url: https://workflow-catalog.stg.umccr.org
+    description: Staging
+  - url: https://workflow-catalog.prod.umccr.org
+    description: Production
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: diagrams
+    description: Diagram CRUD — list, create, read, update, delete
+  - name: diagrams-content
+    description: Diagram content operations — full save, individual node/group/edge mutations
+  - name: health
+    description: Service health check
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Paths
+# ═══════════════════════════════════════════════════════════════════════════
+paths:
+  # ── Health ──────────────────────────────────────────────────────────────
+  /health:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      security: []
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                properties:
+                  status:
+                    type: string
+                    enum: [ok]
+
+  # ── Diagrams List / Create ──────────────────────────────────────────────
+  /api/v1/diagrams:
+    get:
+      operationId: listDiagrams
+      tags: [diagrams]
+      summary: List diagrams (summary only)
+      description: |
+        Returns lightweight summaries of all diagrams.
+        Supports filtering by status and searching by name.
+        Results are sorted by updatedAt descending (most recent first).
+      parameters:
+        - $ref: '#/components/parameters/StatusFilter'
+        - $ref: '#/components/parameters/SearchQuery'
+      responses:
+        '200':
+          description: List of diagram summaries
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [diagrams]
+                properties:
+                  diagrams:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DiagramSummary'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      operationId: createDiagram
+      tags: [diagrams]
+      summary: Create a new diagram
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDiagramRequest'
+      responses:
+        '201':
+          description: Diagram created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiagramFull'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: Diagram with this ID already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ── Diagram Get / Update / Delete ───────────────────────────────────────
+  /api/v1/diagrams/{diagramId}:
+    parameters:
+      - $ref: '#/components/parameters/DiagramId'
+
+    get:
+      operationId: getDiagram
+      tags: [diagrams]
+      summary: Get full diagram (nodes, groups, edges, layout)
+      responses:
+        '200':
+          description: Full diagram with all content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiagramFull'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      operationId: updateDiagramMetadata
+      tags: [diagrams]
+      summary: Update diagram metadata (name, description, status, tags)
+      description: |
+        Partial update of diagram-level metadata.
+        Does NOT modify nodes, groups, or edges.
+        Use PUT /diagrams/{diagramId}/content for full content updates.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateDiagramMetadataRequest'
+      responses:
+        '200':
+          description: Updated diagram
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiagramFull'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      operationId: deleteDiagram
+      tags: [diagrams]
+      summary: Delete a diagram
+      responses:
+        '204':
+          description: Diagram deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ── Diagram Full Content Save ───────────────────────────────────────────
+  /api/v1/diagrams/{diagramId}/content:
+    parameters:
+      - $ref: '#/components/parameters/DiagramId'
+
+    put:
+      operationId: saveDiagramContent
+      tags: [diagrams-content]
+      summary: Save full diagram content (nodes, groups, edges)
+      description: |
+        Replaces the entire content (nodes, groups, edges) of a diagram.
+        This is the primary "save" operation from the canvas editor.
+        Metadata (name, description, status, tags) is NOT affected.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveDiagramContentRequest'
+      responses:
+        '200':
+          description: Content saved, returns updated full diagram
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiagramFull'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ── Individual Node CRUD ────────────────────────────────────────────────
+  /api/v1/diagrams/{diagramId}/nodes:
+    parameters:
+      - $ref: '#/components/parameters/DiagramId'
+
+    post:
+      operationId: addNode
+      tags: [diagrams-content]
+      summary: Add a workflow node to the diagram
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateNodeRequest'
+      responses:
+        '201':
+          description: Node added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiagramNode'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Node with this ID already exists in the diagram
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/diagrams/{diagramId}/nodes/{nodeId}:
+    parameters:
+      - $ref: '#/components/parameters/DiagramId'
+      - $ref: '#/components/parameters/NodeId'
+
+    put:
+      operationId: updateNode
+      tags: [diagrams-content]
+      summary: Update a workflow node
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateNodeRequest'
+      responses:
+        '200':
+          description: Node updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiagramNode'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      operationId: deleteNode
+      tags: [diagrams-content]
+      summary: Remove a node and its connected edges
+      responses:
+        '204':
+          description: Node and connected edges removed
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ── Individual Group CRUD ───────────────────────────────────────────────
+  /api/v1/diagrams/{diagramId}/groups:
+    parameters:
+      - $ref: '#/components/parameters/DiagramId'
+
+    post:
+      operationId: addGroup
+      tags: [diagrams-content]
+      summary: Add a group to the diagram
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGroupRequest'
+      responses:
+        '201':
+          description: Group added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiagramGroup'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/diagrams/{diagramId}/groups/{groupId}:
+    parameters:
+      - $ref: '#/components/parameters/DiagramId'
+      - $ref: '#/components/parameters/GroupId'
+
+    put:
+      operationId: updateGroup
+      tags: [diagrams-content]
+      summary: Update a group
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateGroupRequest'
+      responses:
+        '200':
+          description: Group updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiagramGroup'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      operationId: deleteGroup
+      tags: [diagrams-content]
+      summary: Remove a group (does not delete its nodes)
+      responses:
+        '204':
+          description: Group removed
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Components
+# ═══════════════════════════════════════════════════════════════════════════
+components:
+  # ── Security Schemes ────────────────────────────────────────────────────
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: AWS Cognito ID token
+
+  # ── Parameters ──────────────────────────────────────────────────────────
+  parameters:
+    DiagramId:
+      name: diagramId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Unique diagram identifier (slug)
+      example: umccr-production
+
+    NodeId:
+      name: nodeId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Node identifier within a diagram
+      example: bcl-convert
+
+    GroupId:
+      name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Group identifier within a diagram
+      example: WGS
+
+    StatusFilter:
+      name: status
+      in: query
+      required: false
+      schema:
+        $ref: '#/components/schemas/DiagramStatus'
+      description: Filter diagrams by status
+
+    SearchQuery:
+      name: search
+      in: query
+      required: false
+      schema:
+        type: string
+      description: Search diagrams by name (case-insensitive contains)
+
+  # ── Responses ───────────────────────────────────────────────────────────
+  responses:
+    Unauthorized:
+      description: Missing or invalid authentication token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    ValidationError:
+      description: Request validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationErrorResponse'
+
+  # ── Schemas ─────────────────────────────────────────────────────────────
+  schemas:
+    # ─ Enums ──────────────────────────────────────────────────────────────
+    DiagramStatus:
+      type: string
+      enum: [active, draft, archived]
+
+    DiagramNodeType:
+      type: string
+      enum:
+        - workflow
+        - aws_lambda
+        - aws_eks
+        - aws_step_function
+        - aws_event_bridge
+        - aws_batch
+        - aws_s3
+        - aws_sqs
+        - aws_sns
+        - external_service
+
+    DiagramEdgeType:
+      type: string
+      enum: [trigger, trigger_input, input_dependency]
+
+    GroupType:
+      type: string
+      enum: [analysis, flows, service]
+
+    # ─ Embedded Objects ───────────────────────────────────────────────────
+    Position:
+      type: object
+      required: [x, y]
+      properties:
+        x:
+          type: number
+          description: Canvas X coordinate in pixels
+        y:
+          type: number
+          description: Canvas Y coordinate in pixels
+
+    EventDef:
+      type: object
+      required: [name, payload]
+      properties:
+        name:
+          type: string
+          description: Event name (e.g. "orcabus.bssh.fastqlistrows_event_showered")
+          example: orcabus.workflowmanager.bclconvert.succeeded
+        topic:
+          type: string
+          description: Event bus topic
+          example: orcabus.workflowmanager
+        condition:
+          type: string
+          description: JSONPath filter condition
+          example: "$.libraryType == 'WGS'"
+        payload:
+          type: object
+          additionalProperties: true
+          description: Example payload shape
+
+    # ─ Core Domain Objects ────────────────────────────────────────────────
+    DiagramNode:
+      type: object
+      required:
+        - nodeId
+        - nodeType
+        - label
+        - version
+        - engine
+        - description
+        - groupIds
+        - inputEvents
+        - outputEvents
+        - tags
+        - position
+      properties:
+        nodeId:
+          type: string
+          description: Unique within diagram, used as ReactFlow node ID
+          example: bcl-convert
+        nodeType:
+          $ref: '#/components/schemas/DiagramNodeType'
+        label:
+          type: string
+          description: Display label
+          example: BCL Convert
+        version:
+          type: string
+          example: v4.2.7
+        engine:
+          type: string
+          description: Execution engine / platform
+          example: ICA
+        description:
+          type: string
+          example: Illumina BCL to FASTQ conversion pipeline
+        groupIds:
+          type: array
+          items:
+            type: string
+          description: Group IDs this node belongs to
+          example: [SEQUENCING, WGS, WTS, CTDNA]
+        inputEvents:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventDef'
+        outputEvents:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventDef'
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+          description: Arbitrary key-value metadata
+          example:
+            maxRetries: '2'
+            timeout: '8h'
+        position:
+          $ref: '#/components/schemas/Position'
+
+    DiagramGroup:
+      type: object
+      required: [groupId, name, type, color, nodeIds]
+      properties:
+        groupId:
+          type: string
+          example: WGS
+        name:
+          type: string
+          example: WGS Somatic
+        type:
+          $ref: '#/components/schemas/GroupType'
+        color:
+          type: string
+          description: Hex color for UI display
+          example: '#f59e0b'
+        nodeIds:
+          type: array
+          items:
+            type: string
+          description: Node IDs belonging to this group
+          example: [bssh, bcl-convert, wgs-alignment-qc, wgs-tumor-normal]
+
+    DiagramEdge:
+      type: object
+      required: [edgeId, source, target, edgeType]
+      properties:
+        edgeId:
+          type: string
+          example: e-bssh-bcl
+        source:
+          type: string
+          description: Source node ID
+          example: bssh
+        target:
+          type: string
+          description: Target node ID
+          example: bcl-convert
+        edgeType:
+          $ref: '#/components/schemas/DiagramEdgeType'
+        label:
+          type: string
+          description: Optional edge label displayed on the canvas
+          example: use FASTQs as input
+
+    # ─ API Response Objects ───────────────────────────────────────────────
+    DiagramSummary:
+      type: object
+      required:
+        - diagramId
+        - name
+        - description
+        - status
+        - createdBy
+        - createdAt
+        - updatedBy
+        - updatedAt
+        - nodeCount
+        - edgeCount
+        - tags
+      properties:
+        diagramId:
+          type: string
+          example: umccr-production
+        name:
+          type: string
+          example: Primary Sequencing Pipeline
+        description:
+          type: string
+        status:
+          $ref: '#/components/schemas/DiagramStatus'
+        createdBy:
+          type: string
+          example: admin@umccr.org
+        createdAt:
+          type: string
+          format: date-time
+        updatedBy:
+          type: string
+          example: admin@umccr.org
+        updatedAt:
+          type: string
+          format: date-time
+        nodeCount:
+          type: integer
+          example: 18
+        edgeCount:
+          type: integer
+          example: 24
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+
+    DiagramFull:
+      type: object
+      required:
+        - diagramId
+        - name
+        - description
+        - status
+        - createdBy
+        - createdAt
+        - updatedBy
+        - updatedAt
+        - tags
+        - nodes
+        - groups
+        - edges
+      properties:
+        diagramId:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        status:
+          $ref: '#/components/schemas/DiagramStatus'
+        createdBy:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedBy:
+          type: string
+        updatedAt:
+          type: string
+          format: date-time
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+        nodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiagramNode'
+        groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiagramGroup'
+        edges:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiagramEdge'
+
+    # ─ Request Bodies ─────────────────────────────────────────────────────
+    CreateDiagramRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+          example: My New Pipeline
+        description:
+          type: string
+          default: ''
+        status:
+          $ref: '#/components/schemas/DiagramStatus'
+          default: draft
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+          default: {}
+
+    UpdateDiagramMetadataRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        description:
+          type: string
+        status:
+          $ref: '#/components/schemas/DiagramStatus'
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+
+    SaveDiagramContentRequest:
+      type: object
+      required: [nodes, groups, edges]
+      properties:
+        nodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiagramNode'
+        groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiagramGroup'
+        edges:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiagramEdge'
+
+    CreateNodeRequest:
+      type: object
+      required: [nodeId, label, engine, position]
+      properties:
+        nodeId:
+          type: string
+          minLength: 1
+          description: Must be unique within the diagram
+        nodeType:
+          $ref: '#/components/schemas/DiagramNodeType'
+          default: workflow
+        label:
+          type: string
+          minLength: 1
+        version:
+          type: string
+          default: ''
+        engine:
+          type: string
+          minLength: 1
+        description:
+          type: string
+          default: ''
+        groupIds:
+          type: array
+          items:
+            type: string
+          default: []
+        inputEvents:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventDef'
+          default: []
+        outputEvents:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventDef'
+          default: []
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+          default: {}
+        position:
+          $ref: '#/components/schemas/Position'
+        parentEdges:
+          type: array
+          items:
+            type: object
+            required: [sourceNodeId, edgeType]
+            properties:
+              sourceNodeId:
+                type: string
+              edgeType:
+                $ref: '#/components/schemas/DiagramEdgeType'
+              label:
+                type: string
+          description: |
+            Edges from parent nodes to this node.
+            The API will auto-generate edge IDs and add them to the diagram.
+          default: []
+
+    UpdateNodeRequest:
+      type: object
+      properties:
+        label:
+          type: string
+          minLength: 1
+        nodeType:
+          $ref: '#/components/schemas/DiagramNodeType'
+        version:
+          type: string
+        engine:
+          type: string
+        description:
+          type: string
+        groupIds:
+          type: array
+          items:
+            type: string
+        inputEvents:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventDef'
+        outputEvents:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventDef'
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+        position:
+          $ref: '#/components/schemas/Position'
+        parentEdges:
+          type: array
+          items:
+            type: object
+            required: [sourceNodeId, edgeType]
+            properties:
+              sourceNodeId:
+                type: string
+              edgeType:
+                $ref: '#/components/schemas/DiagramEdgeType'
+              label:
+                type: string
+          description: |
+            If provided, replaces all incoming edges for this node.
+            Existing edges targeting this node are removed and replaced.
+
+    CreateGroupRequest:
+      type: object
+      required: [name, type, color]
+      properties:
+        groupId:
+          type: string
+          description: Optional. Auto-generated from name if omitted.
+        name:
+          type: string
+          minLength: 1
+        type:
+          $ref: '#/components/schemas/GroupType'
+        color:
+          type: string
+          pattern: '^#[0-9a-fA-F]{6}$'
+          example: '#f59e0b'
+        nodeIds:
+          type: array
+          items:
+            type: string
+          default: []
+
+    UpdateGroupRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        type:
+          $ref: '#/components/schemas/GroupType'
+        color:
+          type: string
+          pattern: '^#[0-9a-fA-F]{6}$'
+        nodeIds:
+          type: array
+          items:
+            type: string
+
+    # ─ Error Responses ────────────────────────────────────────────────────
+    ErrorResponse:
+      type: object
+      required: [error, message]
+      properties:
+        error:
+          type: string
+          example: NOT_FOUND
+        message:
+          type: string
+          example: Diagram 'foo' not found
+
+    ValidationErrorResponse:
+      type: object
+      required: [error, message, details]
+      properties:
+        error:
+          type: string
+          enum: [VALIDATION_ERROR]
+        message:
+          type: string
+          example: Request validation failed
+        details:
+          type: array
+          items:
+            type: object
+            required: [path, message]
+            properties:
+              path:
+                type: string
+                example: name
+              message:
+                type: string
+                example: Required
