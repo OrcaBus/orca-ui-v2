@@ -7,5 +7,5 @@ export const DEFAULT_ITEMS_PER_PAGE_OPTIONS = [3, 10, 20, 50, 100]; // list tabl
 // query params constants
 export const PARAM_PAGE = 'page';
 export const PARAM_ROWS_PER_PAGE = 'rowsPerPage';
-export const PARAM_ORDER_BY = 'orderBy';
+export const PARAM_ORDER_BY = 'ordering';
 export const PARAM_SEARCH = 'search';

@@ -54,7 +54,7 @@ const caseApi = new ApiClient<paths>({
 
 export type CaseModel = components['schemas']['Case'];
 export type CaseDetailModel = components['schemas']['CaseDetail'];
-export type CaseRequestModel = components['schemas']['CaseRequest'];
+export type CaseRequestModel = components['schemas']['CaseDetailRequest'];
 export type PatchedCaseDetailRequestModel = components['schemas']['PatchedCaseDetailRequest'];
 export type CaseExternalEntityLinkCreateRequestModel =
   components['schemas']['CaseExternalEntityLinkCreateRequest'];
@@ -74,7 +74,7 @@ export const useCaseUnlinkEntityModel = createDeleteMutationHook(
 );
 export const useCaseLinkEntityModel = createPostMutationHook(
   caseApi,
-  '/api/v1/case/link/external-entity/'
+  '/api/v1/case/{orcabusId}/external-entity/'
 );
 
 export const useCaseGenerateModel = createPostMutationHook(caseApi, '/api/v1/case/generate/');

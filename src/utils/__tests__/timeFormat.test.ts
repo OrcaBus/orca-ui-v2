@@ -4,6 +4,8 @@ import {
   formatDetailDate,
   formatTableDate,
   getRelativeTime,
+  toLocalStartOfDay,
+  toUtcStartOfDay,
 } from '../timeFormat';
 
 describe('formatTableDate', () => {
@@ -26,6 +28,30 @@ describe('formatBackendDate', () => {
   it('returns UTC ISO 8601 output', () => {
     const date = new Date('2026-02-05T03:09:00Z');
     expect(formatBackendDate(date)).toBe('2026-02-05T03:09:00.000Z');
+  });
+});
+
+describe('toUtcStartOfDay', () => {
+  it('returns UTC start-of-day for date-only values', () => {
+    expect(toUtcStartOfDay('2025-11-06')).toBe('2025-11-06T00:00:00+00:00');
+  });
+
+  it('returns undefined for empty input', () => {
+    expect(toUtcStartOfDay('')).toBeUndefined();
+    expect(toUtcStartOfDay(undefined)).toBeUndefined();
+    expect(toUtcStartOfDay(null)).toBeUndefined();
+  });
+});
+
+describe('toLocalStartOfDay', () => {
+  it('returns UTC+11 start-of-day for date-only values', () => {
+    expect(toLocalStartOfDay('2025-11-06')).toBe('2025-11-06T00:00:00+11:00');
+  });
+
+  it('returns undefined for empty input', () => {
+    expect(toLocalStartOfDay('')).toBeUndefined();
+    expect(toLocalStartOfDay(undefined)).toBeUndefined();
+    expect(toLocalStartOfDay(null)).toBeUndefined();
   });
 });
 

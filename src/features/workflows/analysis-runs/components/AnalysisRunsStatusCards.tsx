@@ -2,24 +2,24 @@ import { keepPreviousData } from '@tanstack/react-query';
 import { ApiErrorState } from '@/components/ui/ApiErrorState';
 import { StatusCard } from '@/components/ui/StatusCard';
 import {
-  useWorkflowRunStatusCountModel,
-  type WorkflowRunStatsStatusCountModel,
+  useAnalysisRunStatusCountModel,
+  type AnalysisRunStatusCountModel,
 } from '../../api/workflows.api';
 import { getRunsStatusIcon } from '../../shared/utils/statusIcons';
 import {
-  useWorkflowRunsQueryParams,
-  type WorkflowRunStatus,
-} from '../hooks/useWorkflowRunsQueryParams';
+  useAnalysisRunsQueryParams,
+  type AnalysisRunStatus,
+} from '../hooks/useAnalysisRunsQueryParams';
 import { toLocalStartOfDay } from '@/utils/timeFormat';
 
-interface WorkflowRunsStatusCardsProps {
-  status: WorkflowRunStatus | 'all';
-  onStatusCardClick: (status: WorkflowRunStatus) => void;
+interface AnalysisRunsStatusCardsProps {
+  status: AnalysisRunStatus | 'all';
+  onStatusCardClick: (status: AnalysisRunStatus) => void;
 }
 
 const statusCards: Array<{
   label: string;
-  status: Exclude<WorkflowRunStatus, 'draft'>;
+  status: Exclude<AnalysisRunStatus, 'draft'>;
   variant: 'success' | 'error' | 'warning' | 'neutral' | 'info';
 }> = [
   { label: 'Succeeded', status: 'succeeded', variant: 'success' },
@@ -27,28 +27,28 @@ const statusCards: Array<{
   { label: 'Aborted', status: 'aborted', variant: 'neutral' },
   { label: 'Resolved', status: 'resolved', variant: 'info' },
   { label: 'Deprecated', status: 'deprecated', variant: 'neutral' },
-  { label: 'Ongoing', status: 'ongoing', variant: 'warning' },
+  { label: 'Running', status: 'running', variant: 'warning' },
 ];
 
-export function WorkflowRunsStatusCards({
+export function AnalysisRunsStatusCards({
   status,
   onStatusCardClick,
-}: WorkflowRunsStatusCardsProps) {
-  const { search, dateFrom, dateTo, filterValues } = useWorkflowRunsQueryParams();
+}: AnalysisRunsStatusCardsProps) {
+  const { search, dateFrom, dateTo, filterValues } = useAnalysisRunsQueryParams();
 
   const {
-    data: workflowStatusCountsData,
-    isLoading: isLoadingWorkflowStatusCounts,
-    isFetching: isFetchingWorkflowStatusCounts,
-    isError: isErrorWorkflowStatusCounts,
-    error: workflowStatusCountsError,
-  } = useWorkflowRunStatusCountModel({
+    data: analysisRunStatusCountsData,
+    isLoading: isLoadingAnalysisRunStatusCounts,
+    isFetching: isFetchingAnalysisRunStatusCounts,
+    isError: isErrorAnalysisRunStatusCounts,
+    error: analysisRunStatusCountsError,
+  } = useAnalysisRunStatusCountModel({
     params: {
       query: {
         search: search ? search : undefined,
-        start_time: dateFrom ? toLocalStartOfDay(dateFrom) : undefined,
-        end_time: dateTo ? toLocalStartOfDay(dateTo) : undefined,
-        workflow: filterValues.wfType || undefined,
+        startTime: dateFrom ? toLocalStartOfDay(dateFrom) : undefined,
+        endTime: dateTo ? toLocalStartOfDay(dateTo) : undefined,
+        analysis: filterValues.arType || undefined,
       },
     },
     reactQuery: {
@@ -57,21 +57,21 @@ export function WorkflowRunsStatusCards({
     },
   });
 
-  if (isErrorWorkflowStatusCounts) {
-    return <ApiErrorState error={workflowStatusCountsError} className='mb-4' />;
+  if (isErrorAnalysisRunStatusCounts) {
+    return <ApiErrorState error={analysisRunStatusCountsError} className='mb-4' />;
   }
 
-  const counts: Required<WorkflowRunStatsStatusCountModel> = {
-    all: workflowStatusCountsData?.all ?? 0,
-    succeeded: workflowStatusCountsData?.succeeded ?? 0,
-    aborted: workflowStatusCountsData?.aborted ?? 0,
-    failed: workflowStatusCountsData?.failed ?? 0,
-    resolved: workflowStatusCountsData?.resolved ?? 0,
-    ongoing: workflowStatusCountsData?.ongoing ?? 0,
-    deprecated: workflowStatusCountsData?.deprecated ?? 0,
+  const counts: Required<AnalysisRunStatusCountModel> = {
+    all: analysisRunStatusCountsData?.all ?? 0,
+    succeeded: analysisRunStatusCountsData?.succeeded ?? 0,
+    aborted: analysisRunStatusCountsData?.aborted ?? 0,
+    failed: analysisRunStatusCountsData?.failed ?? 0,
+    resolved: analysisRunStatusCountsData?.resolved ?? 0,
+    ongoing: analysisRunStatusCountsData?.ongoing ?? 0,
+    deprecated: analysisRunStatusCountsData?.deprecated ?? 0,
   };
 
-  const showLoadingCards = isFetchingWorkflowStatusCounts || isLoadingWorkflowStatusCounts;
+  const showLoadingCards = isFetchingAnalysisRunStatusCounts || isLoadingAnalysisRunStatusCounts;
   const total = counts.all;
 
   return (
@@ -79,7 +79,7 @@ export function WorkflowRunsStatusCards({
       {showLoadingCards
         ? statusCards.map((card) => <StatusCard key={card.status} label='' value={0} isLoading />)
         : statusCards.map((card) => {
-            const count = counts[card.status];
+            const count = card.status === 'running' ? counts.ongoing : counts[card.status];
             const percentage = total > 0 ? Math.round((count / total) * 100) : 0;
             return (
               <StatusCard

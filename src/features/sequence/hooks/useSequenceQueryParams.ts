@@ -1,7 +1,7 @@
 import { useMemo, useCallback } from 'react';
 import { useQueryParams } from '@/hooks/useQueryParams';
 import { PARAM_ORDER_BY, PARAM_SEARCH } from '@/utils/constants';
-import { toUtcStartOfDay } from '@/utils/timeFormat';
+import { toLocalStartOfDay } from '@/utils/timeFormat';
 import type { SequenceRunStatusEnum } from '../api/sequence.api';
 
 export type SequenceStatus = SequenceRunStatusEnum;
@@ -88,8 +88,8 @@ export function useSequenceQueryParams() {
       rows_per_page: pagination.rowsPerPage,
       search: search || undefined,
       status: statusForApi,
-      start_time: toUtcStartOfDay(filterValues[PARAM_FROM]),
-      end_time: toUtcStartOfDay(filterValues[PARAM_TO]),
+      start_time: toLocalStartOfDay(filterValues[PARAM_FROM]),
+      end_time: toLocalStartOfDay(filterValues[PARAM_TO]),
       ordering: orderBy || '-start_time',
     };
   }, [filterValues, pagination.page, pagination.rowsPerPage, search, orderBy]);

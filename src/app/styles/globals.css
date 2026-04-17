@@ -84,6 +84,10 @@
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
+  /* Skeleton loading colors */
+  --skeleton-base: var(--color-slate-100);
+  --skeleton-highlight: var(--color-slate-200);
+
   --radius: 0.5rem;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: var(--radius);
@@ -142,6 +146,10 @@
   --sidebar-accent-foreground: #e2e8f0;
   --sidebar-border: var(--color-border-dark);
   --sidebar-ring: var(--color-primary-dark);
+
+  /* Skeleton loading colors */
+  --skeleton-base: var(--color-surface-elevated);
+  --skeleton-highlight: var(--color-border-dark);
 
   /* Semantic status colors for dark mode */
   --color-success-bg: rgba(34, 197, 94, 0.1);
