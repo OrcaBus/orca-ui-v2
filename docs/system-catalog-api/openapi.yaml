@@ -1,0 +1,1558 @@
+openapi: '3.1.0'
+info:
+  title: System Catalog API
+  description: |
+    CRUD API for managing system architecture maps.
+    Each map contains nodes (pipelines, services, infrastructure), groups, edges, and canvas layout.
+    Deployed on AWS Lambda behind API Gateway at system-catalog.dev.umccr.org.
+
+    Key features:
+    - Optimistic concurrency via version field (ETag / If-Match)
+    - Soft delete for maps (isDeleted flag)
+    - Cursor-based pagination for list endpoint
+    - Full content save (PUT) and partial diff save (PATCH) for canvas content
+    - Audit trail via map edit history
+  version: '1.0.0'
+  contact:
+    name: UMCCR Platform Team
+    email: platform@umccr.org
+
+servers:
+  - url: https://system-catalog.dev.umccr.org
+    description: Development
+  - url: https://system-catalog.stg.umccr.org
+    description: Staging
+  - url: https://system-catalog.prod.umccr.org
+    description: Production
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: maps
+    description: Map CRUD — list, create, read, update, soft-delete
+  - name: maps-content
+    description: Map content operations — full save, partial diff, individual node/group/edge mutations
+  - name: maps-history
+    description: Map edit history / audit trail
+  - name: health
+    description: Service health check
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Paths
+# ═══════════════════════════════════════════════════════════════════════════
+paths:
+  # ── Health ──────────────────────────────────────────────────────────────
+  /health:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      security: []
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                properties:
+                  status:
+                    type: string
+                    enum: [ok]
+
+  # ── Maps List / Create ──────────────────────────────────────────────
+  /api/v1/maps:
+    get:
+      operationId: listMaps
+      tags: [maps]
+      summary: List maps (summary only, paginated)
+      description: |
+        Returns lightweight summaries of maps.
+        Supports filtering by status, nodeType, and searching by name.
+        Supports sorting and cursor-based pagination.
+        Soft-deleted maps are excluded by default (use includeDeleted=true to include them).
+      parameters:
+        - $ref: '#/components/parameters/StatusFilter'
+        - $ref: '#/components/parameters/NodeTypeFilter'
+        - $ref: '#/components/parameters/SearchQuery'
+        - $ref: '#/components/parameters/SortField'
+        - $ref: '#/components/parameters/SortOrder'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/IncludeDeleted'
+      responses:
+        '200':
+          description: Paginated list of map summaries
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [maps]
+                properties:
+                  maps:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MapSummary'
+                  nextCursor:
+                    type: string
+                    nullable: true
+                    description: |
+                      Opaque cursor for fetching the next page.
+                      Null or absent when there are no more results.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      operationId: createMap
+      tags: [maps]
+      summary: Create a new map
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMapRequest'
+      responses:
+        '201':
+          description: Map created (version starts at 1)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MapFull'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: Map with this ID already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ── Map Get / Update / Soft-Delete ──────────────────────────────────
+  /api/v1/maps/{mapId}:
+    parameters:
+      - $ref: '#/components/parameters/MapId'
+
+    get:
+      operationId: getMap
+      tags: [maps]
+      summary: Get full map (nodes, groups, edges, layout, engineColors)
+      description: |
+        Returns the complete map with all content.
+        Response includes ETag header with the current version for optimistic concurrency.
+      responses:
+        '200':
+          description: Full map with all content
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: Current version of the map (e.g. "5")
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MapFull'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      operationId: updateMapMetadata
+      tags: [maps]
+      summary: Update map metadata (name, description, status, tags)
+      description: |
+        Partial update of map-level metadata.
+        Does NOT modify nodes, groups, or edges.
+        Use PUT /maps/{mapId}/content for full content updates.
+        Use PATCH /maps/{mapId}/content for partial diff updates.
+        Requires If-Match header with the current version for optimistic concurrency.
+      parameters:
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMapMetadataRequest'
+      responses:
+        '200':
+          description: Updated map
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: New version after update
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MapFull'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/ConflictVersion'
+
+    delete:
+      operationId: deleteMap
+      tags: [maps]
+      summary: Soft-delete a map
+      description: |
+        Sets isDeleted=true on the map. The map is excluded from list queries by default.
+        Use GET /maps?includeDeleted=true to see soft-deleted maps.
+        Use PATCH /maps/{mapId} with isDeleted=false to restore a soft-deleted map.
+        Requires If-Match header for optimistic concurrency.
+      parameters:
+        - $ref: '#/components/parameters/IfMatch'
+      responses:
+        '200':
+          description: Map soft-deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MapSummary'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/ConflictVersion'
+
+  # ── Map Full Content Save + Partial Diff ────────────────────────────
+  /api/v1/maps/{mapId}/content:
+    parameters:
+      - $ref: '#/components/parameters/MapId'
+
+    put:
+      operationId: saveMapContent
+      tags: [maps-content]
+      summary: Save full map content (replace all nodes, groups, edges)
+      description: |
+        Replaces the entire content (nodes, groups, edges, engineColors) of a map.
+        This is the primary "save" operation from the canvas editor.
+        Metadata (name, description, status, tags) is NOT affected.
+        Requires If-Match header for optimistic concurrency.
+      parameters:
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveMapContentRequest'
+      responses:
+        '200':
+          description: Content saved, returns updated full map
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: New version after save
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MapFull'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/ConflictVersion'
+
+    patch:
+      operationId: patchMapContent
+      tags: [maps-content]
+      summary: Partial diff update of map content
+      description: |
+        Applies a partial diff to the map content. Only the provided fields are modified.
+        Use this instead of PUT when you want to update specific nodes, groups, or edges
+        without replacing the entire content.
+
+        Each array field (addNodes, updateNodes, removeNodeIds, etc.) is optional.
+        Operations are applied in order: removes then updates then adds.
+        Requires If-Match header for optimistic concurrency.
+      parameters:
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchMapContentRequest'
+      responses:
+        '200':
+          description: Diff applied, returns updated full map
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: New version after patch
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MapFull'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/ConflictVersion'
+
+  # ── Individual Node CRUD ────────────────────────────────────────────────
+  /api/v1/maps/{mapId}/nodes:
+    parameters:
+      - $ref: '#/components/parameters/MapId'
+
+    post:
+      operationId: addNode
+      tags: [maps-content]
+      summary: Add a node to the map
+      parameters:
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateNodeRequest'
+      responses:
+        '201':
+          description: Node added
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: New map version after adding node
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MapNode'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Node with this ID already exists in the map, or version conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/maps/{mapId}/nodes/{nodeId}:
+    parameters:
+      - $ref: '#/components/parameters/MapId'
+      - $ref: '#/components/parameters/NodeId'
+
+    put:
+      operationId: updateNode
+      tags: [maps-content]
+      summary: Update a node
+      parameters:
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateNodeRequest'
+      responses:
+        '200':
+          description: Node updated
+          headers:
+            ETag:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MapNode'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/ConflictVersion'
+
+    delete:
+      operationId: deleteNode
+      tags: [maps-content]
+      summary: Remove a node and its connected edges
+      parameters:
+        - $ref: '#/components/parameters/IfMatch'
+      responses:
+        '204':
+          description: Node and connected edges removed
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: New map version after deletion
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/ConflictVersion'
+
+  # ── Individual Group CRUD ───────────────────────────────────────────────
+  /api/v1/maps/{mapId}/groups:
+    parameters:
+      - $ref: '#/components/parameters/MapId'
+
+    post:
+      operationId: addGroup
+      tags: [maps-content]
+      summary: Add a group to the map
+      parameters:
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGroupRequest'
+      responses:
+        '201':
+          description: Group added
+          headers:
+            ETag:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MapGroup'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/ConflictVersion'
+
+  /api/v1/maps/{mapId}/groups/{groupId}:
+    parameters:
+      - $ref: '#/components/parameters/MapId'
+      - $ref: '#/components/parameters/GroupId'
+
+    put:
+      operationId: updateGroup
+      tags: [maps-content]
+      summary: Update a group
+      parameters:
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateGroupRequest'
+      responses:
+        '200':
+          description: Group updated
+          headers:
+            ETag:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MapGroup'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/ConflictVersion'
+
+    delete:
+      operationId: deleteGroup
+      tags: [maps-content]
+      summary: Remove a group (does not delete its nodes)
+      parameters:
+        - $ref: '#/components/parameters/IfMatch'
+      responses:
+        '204':
+          description: Group removed
+          headers:
+            ETag:
+              schema:
+                type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/ConflictVersion'
+
+  # ── Individual Edge CRUD ────────────────────────────────────────────────
+  /api/v1/maps/{mapId}/edges:
+    parameters:
+      - $ref: '#/components/parameters/MapId'
+
+    post:
+      operationId: addEdge
+      tags: [maps-content]
+      summary: Add an edge to the map
+      description: |
+        Creates a new edge connecting two nodes.
+        The edge ID is auto-generated if not provided.
+        Both source and target node IDs must exist in the map.
+      parameters:
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEdgeRequest'
+      responses:
+        '201':
+          description: Edge added
+          headers:
+            ETag:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MapEdge'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Edge with this ID already exists, or version conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/maps/{mapId}/edges/{edgeId}:
+    parameters:
+      - $ref: '#/components/parameters/MapId'
+      - $ref: '#/components/parameters/EdgeId'
+
+    put:
+      operationId: updateEdge
+      tags: [maps-content]
+      summary: Update an edge
+      parameters:
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateEdgeRequest'
+      responses:
+        '200':
+          description: Edge updated
+          headers:
+            ETag:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MapEdge'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/ConflictVersion'
+
+    delete:
+      operationId: deleteEdge
+      tags: [maps-content]
+      summary: Remove an edge
+      parameters:
+        - $ref: '#/components/parameters/IfMatch'
+      responses:
+        '204':
+          description: Edge removed
+          headers:
+            ETag:
+              schema:
+                type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/ConflictVersion'
+
+  # ── Map Edit History ────────────────────────────────────────────────────
+  /api/v1/maps/{mapId}/history:
+    parameters:
+      - $ref: '#/components/parameters/MapId'
+
+    get:
+      operationId: getMapHistory
+      tags: [maps-history]
+      summary: Get map edit history (audit trail)
+      description: |
+        Returns a paginated list of history entries for the map, ordered by most recent first.
+        Each entry captures who made the change, when, what type of change, and a summary.
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+      responses:
+        '200':
+          description: Paginated list of history entries
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [entries]
+                properties:
+                  entries:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MapHistoryEntry'
+                  nextCursor:
+                    type: string
+                    nullable: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/maps/{mapId}/history/{historyId}:
+    parameters:
+      - $ref: '#/components/parameters/MapId'
+      - $ref: '#/components/parameters/HistoryId'
+
+    get:
+      operationId: getMapHistorySnapshot
+      tags: [maps-history]
+      summary: Get a specific history snapshot
+      description: |
+        Returns the full map content as it was at the given history point.
+        Can be used for comparison or to restore a previous version.
+      responses:
+        '200':
+          description: Full map snapshot at that history point
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MapFull'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Components
+# ═══════════════════════════════════════════════════════════════════════════
+components:
+  # ── Security Schemes ────────────────────────────────────────────────────
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: AWS Cognito ID token
+
+  # ── Parameters ──────────────────────────────────────────────────────────
+  parameters:
+    MapId:
+      name: mapId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Unique map identifier (slug)
+      example: umccr-production
+
+    NodeId:
+      name: nodeId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Node identifier within a map
+      example: bcl-convert
+
+    GroupId:
+      name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Group identifier within a map
+      example: WGS
+
+    EdgeId:
+      name: edgeId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Edge identifier within a map
+      example: e-bssh-bcl
+
+    HistoryId:
+      name: historyId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: History entry identifier
+      example: h-2026-04-15T10-30-00Z
+
+    StatusFilter:
+      name: status
+      in: query
+      required: false
+      schema:
+        $ref: '#/components/schemas/MapStatus'
+      description: Filter maps by status
+
+    NodeTypeFilter:
+      name: nodeType
+      in: query
+      required: false
+      schema:
+        $ref: '#/components/schemas/MapNodeType'
+      description: Filter maps that contain at least one node of this type
+
+    SearchQuery:
+      name: search
+      in: query
+      required: false
+      schema:
+        type: string
+      description: Search maps by name (case-insensitive contains)
+
+    SortField:
+      name: sort
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: [updatedAt, createdAt, name, status]
+        default: updatedAt
+      description: Field to sort results by
+
+    SortOrder:
+      name: order
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: [asc, desc]
+        default: desc
+      description: Sort direction
+
+    Limit:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+      description: Maximum number of results per page
+
+    Cursor:
+      name: cursor
+      in: query
+      required: false
+      schema:
+        type: string
+      description: Opaque pagination cursor from a previous response
+
+    IncludeDeleted:
+      name: includeDeleted
+      in: query
+      required: false
+      schema:
+        type: boolean
+        default: false
+      description: Include soft-deleted maps in results
+
+    IfMatch:
+      name: If-Match
+      in: header
+      required: true
+      schema:
+        type: string
+      description: |
+        Current version of the map for optimistic concurrency control.
+        Must match the version (ETag) returned by GET.
+        Returns 409 Conflict if the version has changed since last read.
+      example: '"5"'
+
+  # ── Responses ───────────────────────────────────────────────────────────
+  responses:
+    Unauthorized:
+      description: Missing or invalid authentication token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    ValidationError:
+      description: Request validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationErrorResponse'
+
+    ConflictVersion:
+      description: Version conflict — the map has been modified since your last read
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/ErrorResponse'
+              - type: object
+                properties:
+                  currentVersion:
+                    type: integer
+                    description: The current version on the server
+                    example: 6
+
+  # ── Schemas ─────────────────────────────────────────────────────────────
+  schemas:
+    # ─ Enums ──────────────────────────────────────────────────────────────
+    MapStatus:
+      type: string
+      enum: [active, draft, archived]
+
+    MapNodeType:
+      type: string
+      enum:
+        - pipeline
+        - aws_lambda
+        - aws_eks
+        - aws_step_function
+        - aws_event_bridge
+        - aws_batch
+        - aws_s3
+        - aws_sqs
+        - aws_sns
+        - external_service
+        - ica_pipeline
+        - rest_api_service
+        - execution_service
+
+    MapEdgeType:
+      type: string
+      enum:
+        - trigger
+        - trigger_input
+        - input_dependency
+        - event_publish
+        - event_subscribe
+        - state_change
+        - execution_request
+        - rest_call
+
+    GroupType:
+      type: string
+      enum: [infrastructure, ingestion, analysis, flows, service]
+
+    HistoryChangeType:
+      type: string
+      enum:
+        - created
+        - metadata_updated
+        - content_saved
+        - content_patched
+        - node_added
+        - node_updated
+        - node_deleted
+        - group_added
+        - group_updated
+        - group_deleted
+        - edge_added
+        - edge_updated
+        - edge_deleted
+        - soft_deleted
+        - restored
+
+    # ─ Embedded Objects ───────────────────────────────────────────────────
+    Position:
+      type: object
+      required: [x, y]
+      properties:
+        x:
+          type: number
+          description: Canvas X coordinate in pixels
+        y:
+          type: number
+          description: Canvas Y coordinate in pixels
+
+    EventDef:
+      type: object
+      required: [name, payload]
+      properties:
+        name:
+          type: string
+          description: Event name (e.g. "orcabus.bssh.fastqlistrows_event_showered")
+          example: orcabus.workflowmanager.bclconvert.succeeded
+        topic:
+          type: string
+          description: Event bus topic
+          example: orcabus.workflowmanager
+        condition:
+          type: string
+          description: JSONPath filter condition
+          example: "$.libraryType == 'WGS'"
+        payload:
+          type: object
+          additionalProperties: true
+          description: Example payload shape
+
+    # ─ Core Domain Objects ────────────────────────────────────────────────
+    MapNode:
+      type: object
+      required:
+        - nodeId
+        - nodeType
+        - label
+        - version
+        - engine
+        - description
+        - groupIds
+        - inputEvents
+        - outputEvents
+        - tags
+        - position
+      properties:
+        nodeId:
+          type: string
+          description: Unique within map, used as ReactFlow node ID
+          example: bcl-convert
+        nodeType:
+          $ref: '#/components/schemas/MapNodeType'
+        label:
+          type: string
+          description: Display label
+          example: BCL Convert
+        version:
+          type: string
+          example: v4.2.7
+        engine:
+          type: string
+          description: Execution engine / platform
+          example: ICA
+        description:
+          type: string
+          example: Illumina BCL to FASTQ conversion pipeline
+        groupIds:
+          type: array
+          items:
+            type: string
+          description: Group IDs this node belongs to
+          example: [SEQUENCING, WGS, WTS, CTDNA]
+        inputEvents:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventDef'
+        outputEvents:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventDef'
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+          description: Arbitrary key-value metadata
+          example:
+            maxRetries: '2'
+            timeout: '8h'
+        position:
+          $ref: '#/components/schemas/Position'
+
+    MapGroup:
+      type: object
+      required: [groupId, name, type, color, nodeIds]
+      properties:
+        groupId:
+          type: string
+          example: WGS
+        name:
+          type: string
+          example: WGS Somatic
+        description:
+          type: string
+          description: Optional description of the group purpose
+          example: Whole genome sequencing somatic analysis pipeline group
+        type:
+          $ref: '#/components/schemas/GroupType'
+        color:
+          type: string
+          description: Hex color for UI display
+          example: '#f59e0b'
+        nodeIds:
+          type: array
+          items:
+            type: string
+          description: Node IDs belonging to this group
+          example: [bssh, bcl-convert, wgs-alignment-qc, wgs-tumor-normal]
+
+    MapEdge:
+      type: object
+      required: [edgeId, source, target, edgeType]
+      properties:
+        edgeId:
+          type: string
+          example: e-bssh-bcl
+        source:
+          type: string
+          description: Source node ID
+          example: bssh
+        target:
+          type: string
+          description: Target node ID
+          example: bcl-convert
+        edgeType:
+          $ref: '#/components/schemas/MapEdgeType'
+        label:
+          type: string
+          description: Optional edge label displayed on the canvas
+          example: use FASTQs as input
+
+    # ─ History Objects ────────────────────────────────────────────────────
+    MapHistoryEntry:
+      type: object
+      required: [historyId, mapId, version, changeType, changedBy, changedAt, summary]
+      properties:
+        historyId:
+          type: string
+          example: h-2026-04-15T10-30-00Z
+        mapId:
+          type: string
+          example: umccr-production
+        version:
+          type: integer
+          description: Map version at this point in history
+          example: 5
+        changeType:
+          $ref: '#/components/schemas/HistoryChangeType'
+        changedBy:
+          type: string
+          description: User who made the change
+          example: admin@umccr.org
+        changedAt:
+          type: string
+          format: date-time
+          description: When the change was made
+        summary:
+          type: string
+          description: Human-readable summary of the change
+          example: 'Updated metadata: name, status'
+
+    # ─ API Response Objects ───────────────────────────────────────────────
+    MapSummary:
+      type: object
+      required:
+        - mapId
+        - name
+        - description
+        - status
+        - version
+        - isDeleted
+        - createdBy
+        - createdAt
+        - updatedBy
+        - updatedAt
+        - nodeCount
+        - edgeCount
+        - tags
+      properties:
+        mapId:
+          type: string
+          example: umccr-production
+        name:
+          type: string
+          example: Primary Sequencing Pipeline
+        description:
+          type: string
+        status:
+          $ref: '#/components/schemas/MapStatus'
+        version:
+          type: integer
+          description: Auto-incremented on each write. Used for optimistic concurrency (ETag).
+          example: 5
+        isDeleted:
+          type: boolean
+          description: Whether the map has been soft-deleted
+          default: false
+        createdBy:
+          type: string
+          example: admin@umccr.org
+        createdAt:
+          type: string
+          format: date-time
+        updatedBy:
+          type: string
+          example: admin@umccr.org
+        updatedAt:
+          type: string
+          format: date-time
+        nodeCount:
+          type: integer
+          example: 18
+        edgeCount:
+          type: integer
+          example: 24
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+
+    MapFull:
+      type: object
+      required:
+        - mapId
+        - name
+        - description
+        - status
+        - version
+        - isDeleted
+        - createdBy
+        - createdAt
+        - updatedBy
+        - updatedAt
+        - tags
+        - nodes
+        - groups
+        - edges
+        - engineColors
+      properties:
+        mapId:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        status:
+          $ref: '#/components/schemas/MapStatus'
+        version:
+          type: integer
+          description: Auto-incremented on each write. Used as ETag for optimistic concurrency.
+          example: 5
+        isDeleted:
+          type: boolean
+          default: false
+        createdBy:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedBy:
+          type: string
+        updatedAt:
+          type: string
+          format: date-time
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+        nodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/MapNode'
+        groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/MapGroup'
+        edges:
+          type: array
+          items:
+            $ref: '#/components/schemas/MapEdge'
+        engineColors:
+          type: object
+          additionalProperties:
+            type: string
+            pattern: '^#[0-9a-fA-F]{6}$'
+          description: Map of engine name to hex color for consistent UI rendering
+          example:
+            ICA: '#3b82f6'
+            AWS: '#f59e0b'
+            External: '#8b5cf6'
+
+    # ─ Request Bodies ─────────────────────────────────────────────────────
+    CreateMapRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+          example: My New Pipeline
+        description:
+          type: string
+          default: ''
+        status:
+          $ref: '#/components/schemas/MapStatus'
+          default: draft
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+          default: {}
+        engineColors:
+          type: object
+          additionalProperties:
+            type: string
+            pattern: '^#[0-9a-fA-F]{6}$'
+          default: {}
+          description: Initial engine color assignments
+
+    UpdateMapMetadataRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        description:
+          type: string
+        status:
+          $ref: '#/components/schemas/MapStatus'
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+        isDeleted:
+          type: boolean
+          description: Set to false to restore a soft-deleted map
+
+    SaveMapContentRequest:
+      type: object
+      required: [nodes, groups, edges]
+      properties:
+        nodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/MapNode'
+        groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/MapGroup'
+        edges:
+          type: array
+          items:
+            $ref: '#/components/schemas/MapEdge'
+        engineColors:
+          type: object
+          additionalProperties:
+            type: string
+            pattern: '^#[0-9a-fA-F]{6}$'
+
+    PatchMapContentRequest:
+      type: object
+      description: |
+        Partial diff for map content. All fields are optional.
+        Operations are applied in order: removes then updates then adds.
+      properties:
+        addNodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/MapNode'
+          description: Nodes to add (must not already exist)
+        updateNodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/MapNode'
+          description: Nodes to update (matched by nodeId, full replacement)
+        removeNodeIds:
+          type: array
+          items:
+            type: string
+          description: Node IDs to remove (also removes connected edges)
+        addGroups:
+          type: array
+          items:
+            $ref: '#/components/schemas/MapGroup'
+          description: Groups to add
+        updateGroups:
+          type: array
+          items:
+            $ref: '#/components/schemas/MapGroup'
+          description: Groups to update (matched by groupId, full replacement)
+        removeGroupIds:
+          type: array
+          items:
+            type: string
+          description: Group IDs to remove
+        addEdges:
+          type: array
+          items:
+            $ref: '#/components/schemas/MapEdge'
+          description: Edges to add
+        updateEdges:
+          type: array
+          items:
+            $ref: '#/components/schemas/MapEdge'
+          description: Edges to update (matched by edgeId, full replacement)
+        removeEdgeIds:
+          type: array
+          items:
+            type: string
+          description: Edge IDs to remove
+        engineColors:
+          type: object
+          additionalProperties:
+            type: string
+            pattern: '^#[0-9a-fA-F]{6}$'
+          description: If provided, replaces the entire engineColors map
+
+    CreateNodeRequest:
+      type: object
+      required: [nodeId, label, engine, position]
+      properties:
+        nodeId:
+          type: string
+          minLength: 1
+          description: Must be unique within the map
+        nodeType:
+          $ref: '#/components/schemas/MapNodeType'
+          default: pipeline
+        label:
+          type: string
+          minLength: 1
+        version:
+          type: string
+          default: ''
+        engine:
+          type: string
+          minLength: 1
+        description:
+          type: string
+          default: ''
+        groupIds:
+          type: array
+          items:
+            type: string
+          default: []
+        inputEvents:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventDef'
+          default: []
+        outputEvents:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventDef'
+          default: []
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+          default: {}
+        position:
+          $ref: '#/components/schemas/Position'
+        parentEdges:
+          type: array
+          items:
+            type: object
+            required: [sourceNodeId, edgeType]
+            properties:
+              sourceNodeId:
+                type: string
+              edgeType:
+                $ref: '#/components/schemas/MapEdgeType'
+              label:
+                type: string
+          description: |
+            Edges from parent nodes to this node.
+            The API will auto-generate edge IDs and add them to the map.
+          default: []
+
+    UpdateNodeRequest:
+      type: object
+      properties:
+        label:
+          type: string
+          minLength: 1
+        nodeType:
+          $ref: '#/components/schemas/MapNodeType'
+        version:
+          type: string
+        engine:
+          type: string
+        description:
+          type: string
+        groupIds:
+          type: array
+          items:
+            type: string
+        inputEvents:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventDef'
+        outputEvents:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventDef'
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+        position:
+          $ref: '#/components/schemas/Position'
+        parentEdges:
+          type: array
+          items:
+            type: object
+            required: [sourceNodeId, edgeType]
+            properties:
+              sourceNodeId:
+                type: string
+              edgeType:
+                $ref: '#/components/schemas/MapEdgeType'
+              label:
+                type: string
+          description: |
+            If provided, replaces all incoming edges for this node.
+            Existing edges targeting this node are removed and replaced.
+
+    CreateEdgeRequest:
+      type: object
+      required: [source, target, edgeType]
+      properties:
+        edgeId:
+          type: string
+          description: Optional. Auto-generated (e-{source}-{target}) if omitted.
+        source:
+          type: string
+          description: Source node ID (must exist in the map)
+        target:
+          type: string
+          description: Target node ID (must exist in the map)
+        edgeType:
+          $ref: '#/components/schemas/MapEdgeType'
+        label:
+          type: string
+          description: Optional edge label displayed on the canvas
+
+    UpdateEdgeRequest:
+      type: object
+      properties:
+        source:
+          type: string
+          description: New source node ID (must exist in the map)
+        target:
+          type: string
+          description: New target node ID (must exist in the map)
+        edgeType:
+          $ref: '#/components/schemas/MapEdgeType'
+        label:
+          type: string
+
+    CreateGroupRequest:
+      type: object
+      required: [name, type, color]
+      properties:
+        groupId:
+          type: string
+          description: Optional. Auto-generated from name if omitted.
+        name:
+          type: string
+          minLength: 1
+        description:
+          type: string
+          description: Optional description of the group purpose
+          default: ''
+        type:
+          $ref: '#/components/schemas/GroupType'
+        color:
+          type: string
+          pattern: '^#[0-9a-fA-F]{6}$'
+          example: '#f59e0b'
+        nodeIds:
+          type: array
+          items:
+            type: string
+          default: []
+
+    UpdateGroupRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        description:
+          type: string
+        type:
+          $ref: '#/components/schemas/GroupType'
+        color:
+          type: string
+          pattern: '^#[0-9a-fA-F]{6}$'
+        nodeIds:
+          type: array
+          items:
+            type: string
+
+    # ─ Error Responses ────────────────────────────────────────────────────
+    ErrorResponse:
+      type: object
+      required: [error, message]
+      properties:
+        error:
+          type: string
+          example: NOT_FOUND
+        message:
+          type: string
+          example: "Map 'foo' not found"
+
+    ValidationErrorResponse:
+      type: object
+      required: [error, message, details]
+      properties:
+        error:
+          type: string
+          enum: [VALIDATION_ERROR]
+        message:
+          type: string
+          example: Request validation failed
+        details:
+          type: array
+          items:
+            type: object
+            required: [path, message]
+            properties:
+              path:
+                type: string
+                example: name
+              message:
+                type: string
+                example: Required

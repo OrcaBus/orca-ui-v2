@@ -8,7 +8,7 @@ import { defineConfig, globalIgnores } from 'eslint/config';
 
 export default defineConfig([
   // Global ignores (in addition to default node_modules, .git)
-  globalIgnores(['dist', 'build', 'coverage', 'src/api/types']),
+  globalIgnores(['dist', 'build', 'coverage', 'src/api/types', 'docs']),
 
   // Base configs
   js.configs.recommended,
