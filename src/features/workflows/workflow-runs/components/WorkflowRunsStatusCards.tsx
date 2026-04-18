@@ -19,7 +19,7 @@ interface WorkflowRunsStatusCardsProps {
 
 const statusCards: Array<{
   label: string;
-  status: Exclude<WorkflowRunStatus, 'draft'>;
+  status: Exclude<WorkflowRunStatus, 'all'>;
   variant: 'success' | 'error' | 'warning' | 'neutral' | 'info';
 }> = [
   { label: 'Succeeded', status: 'succeeded', variant: 'success' },
@@ -27,6 +27,7 @@ const statusCards: Array<{
   { label: 'Aborted', status: 'aborted', variant: 'neutral' },
   { label: 'Resolved', status: 'resolved', variant: 'info' },
   { label: 'Deprecated', status: 'deprecated', variant: 'neutral' },
+  { label: 'Draft', status: 'draft', variant: 'neutral' },
   { label: 'Ongoing', status: 'ongoing', variant: 'warning' },
 ];
 
@@ -67,6 +68,7 @@ export function WorkflowRunsStatusCards({
     aborted: workflowStatusCountsData?.aborted ?? 0,
     failed: workflowStatusCountsData?.failed ?? 0,
     resolved: workflowStatusCountsData?.resolved ?? 0,
+    draft: workflowStatusCountsData?.draft ?? 0,
     ongoing: workflowStatusCountsData?.ongoing ?? 0,
     deprecated: workflowStatusCountsData?.deprecated ?? 0,
   };
@@ -75,7 +77,7 @@ export function WorkflowRunsStatusCards({
   const total = counts.all;
 
   return (
-    <div className='mb-6 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-6'>
+    <div className='mb-6 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-7'>
       {showLoadingCards
         ? statusCards.map((card) => <StatusCard key={card.status} label='' value={0} isLoading />)
         : statusCards.map((card) => {

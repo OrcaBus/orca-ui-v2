@@ -9,7 +9,7 @@ export type AnalysisRunStatus =
   | 'aborted'
   | 'resolved'
   | 'deprecated'
-  | 'running';
+  | 'ongoing';
 
 const PARAM_STATUS = 'arStatus';
 const PARAM_TYPE = 'arType';
@@ -109,7 +109,9 @@ export function useAnalysisRunsQueryParams() {
     const typeValues = splitTypes(filterValues[PARAM_TYPE]);
     const statusRaw = filterValues[PARAM_STATUS];
     const statusForApi =
-      !statusRaw || statusRaw === 'all' ? undefined : (statusRaw as AnalysisRunStatus);
+      !statusRaw || statusRaw === 'all' || statusRaw === 'ongoing'
+        ? undefined
+        : (statusRaw as AnalysisRunStatus);
 
     return {
       page: pagination.page || 1,

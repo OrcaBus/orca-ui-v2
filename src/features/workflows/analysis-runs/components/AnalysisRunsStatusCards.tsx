@@ -27,7 +27,7 @@ const statusCards: Array<{
   { label: 'Aborted', status: 'aborted', variant: 'neutral' },
   { label: 'Resolved', status: 'resolved', variant: 'info' },
   { label: 'Deprecated', status: 'deprecated', variant: 'neutral' },
-  { label: 'Running', status: 'running', variant: 'warning' },
+  { label: 'Ongoing', status: 'ongoing', variant: 'warning' },
 ];
 
 export function AnalysisRunsStatusCards({
@@ -79,7 +79,7 @@ export function AnalysisRunsStatusCards({
       {showLoadingCards
         ? statusCards.map((card) => <StatusCard key={card.status} label='' value={0} isLoading />)
         : statusCards.map((card) => {
-            const count = card.status === 'running' ? counts.ongoing : counts[card.status];
+            const count = counts[card.status];
             const percentage = total > 0 ? Math.round((count / total) * 100) : 0;
             return (
               <StatusCard

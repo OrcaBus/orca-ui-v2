@@ -37,7 +37,7 @@ export type AnalysisModel = components['schemas']['Analysis'];
 export type AnalysisListModel = components['schemas']['AnalysisMin'];
 export type ComputeContextModel = components['schemas']['AnalysisContext'];
 export type StorageContextModel = components['schemas']['AnalysisContext'];
-export type StatusEnum = components['schemas']['StatusEnum'];
+export type WorkflowStatusEnum = components['schemas']['StatusEnum'];
 export type UsecaseEnum = components['schemas']['UsecaseEnum'];
 
 export type ListWorkflowModel = operations['workflowList']['parameters']['query'];

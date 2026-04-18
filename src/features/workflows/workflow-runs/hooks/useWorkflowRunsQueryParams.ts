@@ -110,7 +110,9 @@ export function useWorkflowRunsQueryParams() {
     const typeValues = splitTypes(filterValues[PARAM_TYPE]);
     const statusRaw = filterValues[PARAM_STATUS];
     const statusForApi =
-      !statusRaw || statusRaw === 'all' ? undefined : (statusRaw as WorkflowRunStatus);
+      !statusRaw || statusRaw === 'all' || statusRaw === 'ongoing'
+        ? undefined
+        : (statusRaw as WorkflowRunStatus);
 
     return {
       page: pagination.page || 1,
