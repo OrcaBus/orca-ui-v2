@@ -61,16 +61,22 @@ export function WorkflowTypeDetailsDrawer({
   return (
     <>
       {/* Overlay */}
-      <div className='fixed inset-0 z-40 bg-black/20' onClick={onClose} />
+      <div
+        className='fixed inset-0 z-40 bg-black/30 dark:bg-black/50'
+        onClick={onClose}
+        aria-hidden
+      />
 
       {/* Drawer */}
-      <div className='fixed top-0 right-0 z-50 flex h-full w-full max-w-3xl flex-col bg-white shadow-2xl'>
+      <div className='fixed top-0 right-0 z-50 flex h-full w-full max-w-3xl flex-col bg-white shadow-2xl dark:border-l dark:border-[#2d3540] dark:bg-[#111418]'>
         {/* Header */}
-        <div className='flex items-center justify-between border-b border-neutral-200 px-6 py-4'>
-          <h2 className='text-lg font-semibold text-neutral-900'>{workflowType.name}</h2>
+        <div className='flex items-center justify-between border-b border-neutral-200 px-6 py-4 dark:border-[#2d3540]'>
+          <h2 className='text-lg font-semibold text-neutral-900 dark:text-slate-100'>
+            {workflowType.name}
+          </h2>
           <button
             onClick={onClose}
-            className='cursor-pointer rounded-lg p-2 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-600'
+            className='cursor-pointer rounded-lg p-2 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-600 dark:hover:bg-[#1e252e] dark:hover:text-neutral-200'
           >
             <X className='h-5 w-5' />
           </button>

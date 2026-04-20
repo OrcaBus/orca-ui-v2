@@ -68,6 +68,18 @@ export function toUtcStartOfDay(dateString: string | null | undefined): string |
 }
 
 /**
+ * Convert a date-only string (YYYY-MM-DD) to display-timezone start-of-day for API query params.
+ * The resulting timestamp is anchored to UTC+11 to match table/detail local-time presentation.
+ * @returns e.g. "2025-11-06T00:00:00+11:00", or undefined when input is empty/invalid.
+ */
+export function toLocalStartOfDay(dateString: string | null | undefined): string | undefined {
+  if (!dateString) return undefined;
+  const d = dayjs.utc(dateString).utcOffset(DISPLAY_UTC_OFFSET, true);
+  if (!d.isValid()) return undefined;
+  return d.startOf('day').format('YYYY-MM-DDTHH:mm:ssZ');
+}
+
+/**
  * Get relative time description (e.g., "2h ago", "just now")
  * Useful for timestamps that need human-friendly relative formatting
  */

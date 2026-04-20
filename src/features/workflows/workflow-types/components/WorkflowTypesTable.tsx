@@ -28,8 +28,6 @@ const WorkflowTypesTable = () => {
     params: {
       query: {
         ...workflowTypesQueryParams,
-        page: workflowTypesQueryParams.page || 1,
-        rowsPerPage: workflowTypesQueryParams.rowsPerPage || DEFAULT_PAGE_SIZE,
       },
     },
   });

@@ -3,10 +3,10 @@ import { StatusCard } from '@/components/ui/StatusCard';
 import { ApiErrorState } from '@/components/ui/ApiErrorState';
 import type { SequenceStatus } from '../hooks/useSequenceQueryParams';
 import type { InstrumentRunStatus } from '../utils/groupByInstrumentRun';
-import { useSequenceRunStatsStatusCountsModel } from '../api/sequence.api';
+import { useInstrumentRunStatsStatusCountsModel } from '../api/sequence.api';
 import { useSequenceQueryParams } from '../hooks/useSequenceQueryParams';
 import { keepPreviousData } from '@tanstack/react-query';
-import { toUtcStartOfDay } from '@/utils/timeFormat';
+import { toLocalStartOfDay } from '@/utils/timeFormat';
 
 const filledIconProps = { fill: 'currentColor', stroke: 'white', strokeWidth: 1.5 } as const;
 
@@ -66,12 +66,12 @@ export function SequenceRunsStatusCards({
     isLoading: isLoadingSequenceRunStatsStatusCounts,
     isError: isErrorSequenceRunStatsStatusCounts,
     error: sequenceRunStatsStatusCountsError,
-  } = useSequenceRunStatsStatusCountsModel({
+  } = useInstrumentRunStatsStatusCountsModel({
     params: {
       query: {
         search: search ? search : undefined,
-        start_time: dateFrom ? toUtcStartOfDay(dateFrom) : undefined,
-        end_time: dateTo ? toUtcStartOfDay(dateTo) : undefined,
+        start_time: dateFrom ? toLocalStartOfDay(dateFrom) : undefined,
+        end_time: dateTo ? toLocalStartOfDay(dateTo) : undefined,
       },
     },
     reactQuery: {

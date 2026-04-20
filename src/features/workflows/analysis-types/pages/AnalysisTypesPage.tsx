@@ -1,29 +1,18 @@
 import { Suspense, useCallback } from 'react';
-import { mockAnalysisTypes } from '@/data/mockData';
 import { FilterBar } from '@/components/tables/FilterBar';
 import { Select } from '@/components/ui/Select';
-import { StatusCard } from '@/components/ui/StatusCard';
 import { DetailedErrorBoundary } from '@/components/ui/DetailedErrorBoundary';
 import { SpinnerWithText } from '@/components/ui/Spinner';
-import { getAnalysisTypeIcon } from '../../shared/utils/statusIcons';
 import {
   useAnalysisTypesQueryParams,
   type AnalysisTypeStatus,
 } from '../hooks/useAnalysisTypesQueryParams';
 import AnalysisTypesTable from '../components/AnalysisTypesTable';
-
-const AT_STATUS_CARDS: Array<{
-  label: string;
-  status: AnalysisTypeStatus;
-  variant: 'success' | 'error' | 'warning' | 'neutral' | 'info';
-}> = [
-  { label: 'Active', status: 'ACTIVE', variant: 'success' },
-  { label: 'Inactive', status: 'INACTIVE', variant: 'neutral' },
-];
+import { AnalysisTypesStatusCards } from '../components/AnalysisTypesStatusCards';
 
 export function AnalysisTypesPage() {
   const { search, setSearchQuery, status, setStatus, clearAllFilters, activeFilterBadges } =
-    useAnalysisTypesQueryParams({ analysisTypes: mockAnalysisTypes });
+    useAnalysisTypesQueryParams();
 
   const handleAtStatusCardClick = useCallback(
     (s: AnalysisTypeStatus) => setStatus(status === s ? 'all' : s),
@@ -32,28 +21,11 @@ export function AnalysisTypesPage() {
 
   return (
     <div>
-      <div className='mb-6 grid grid-cols-4 gap-4'>
-        {AT_STATUS_CARDS.map((card) => (
-          <StatusCard
-            key={card.status}
-            label={card.label}
-            value={mockAnalysisTypes.filter((at) => at.status === card.status).length}
-            percentage={
-              mockAnalysisTypes.length > 0
-                ? Math.round(
-                    (mockAnalysisTypes.filter((at) => at.status === card.status).length /
-                      mockAnalysisTypes.length) *
-                      100
-                  )
-                : 0
-            }
-            icon={getAnalysisTypeIcon(card.status)}
-            variant={card.variant}
-            selected={status === card.status}
-            onClick={() => handleAtStatusCardClick(card.status)}
-          />
-        ))}
-      </div>
+      <DetailedErrorBoundary errorTitle='Unable to load analysis type status'>
+        <Suspense fallback={<SpinnerWithText text='Loading analysis type status...' />}>
+          <AnalysisTypesStatusCards status={status} onStatusCardClick={handleAtStatusCardClick} />
+        </Suspense>
+      </DetailedErrorBoundary>
 
       <FilterBar
         searchValue={search}

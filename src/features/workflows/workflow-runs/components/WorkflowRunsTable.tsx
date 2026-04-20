@@ -24,8 +24,6 @@ const WorkflowRunsTable = () => {
     params: {
       query: {
         ...workflowRunListQueryParams,
-        page: workflowRunListQueryParams.page || 1,
-        rowsPerPage: workflowRunListQueryParams.rowsPerPage || DEFAULT_PAGE_SIZE,
       },
     },
   });

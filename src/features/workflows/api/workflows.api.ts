@@ -37,7 +37,7 @@ export type AnalysisModel = components['schemas']['Analysis'];
 export type AnalysisListModel = components['schemas']['AnalysisMin'];
 export type ComputeContextModel = components['schemas']['AnalysisContext'];
 export type StorageContextModel = components['schemas']['AnalysisContext'];
-export type StatusEnum = components['schemas']['StatusEnum'];
+export type WorkflowStatusEnum = components['schemas']['StatusEnum'];
 export type UsecaseEnum = components['schemas']['UsecaseEnum'];
 
 export type ListWorkflowModel = operations['workflowList']['parameters']['query'];
@@ -46,8 +46,10 @@ export type ListAnalysisRunModel = operations['analysisrunList']['parameters']['
 export type ListAnalysisModel = operations['analysisList']['parameters']['query'];
 export type DatasetEnum = components['schemas']['DatasetEnum'];
 
-export type WorkflowRunStatsCountByStatusModel =
-  operations['workflowrunStatsCountByStatusRetrieve']['responses']['200']['content']['application/json'];
+export type WorkflowRunStatsStatusCountModel = components['schemas']['WorkflowRunStatusCount'];
+export type WorkflowStatusCountModel = components['schemas']['WorkflowStatusCount'];
+export type AnalysisRunStatusCountModel = components['schemas']['AnalysisRunStatusCount'];
+export type AnalysisStatusCountModel = components['schemas']['AnalysisStatusCount'];
 
 // workflow model
 export const useWorkflowModel = createQueryHook(workflowApi, '/api/v1/workflow/');
@@ -191,5 +193,21 @@ export const useWorkflowRunRerunValidateModel = createQueryHook(
 // statistics model
 export const useWorkflowRunStatusCountModel = createQueryHook(
   workflowApi,
-  '/api/v1/workflowrun/stats/count_by_status/'
+  '/api/v1/stats/workflow_run/status_counts/'
+);
+export const useWorkflowStatusCountModel = createQueryHook(
+  workflowApi,
+  '/api/v1/stats/workflow/status_counts/'
+);
+export const useGroupedWorkflowStatusCountModel = createQueryHook(
+  workflowApi,
+  '/api/v1/stats/grouped_workflow/status_counts/'
+);
+export const useAnalysisRunStatusCountModel = createQueryHook(
+  workflowApi,
+  '/api/v1/stats/analysis_run/status_counts/'
+);
+export const useAnalysisStatusCountModel = createQueryHook(
+  workflowApi,
+  '/api/v1/stats/analysis/status_counts/'
 );

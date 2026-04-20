@@ -32,8 +32,6 @@ const SequenceRunsTable = () => {
     params: {
       query: {
         ...sequenceListQueryParams,
-        page: sequenceListQueryParams.page || 1,
-        rowsPerPage: sequenceListQueryParams.rowsPerPage || DEFAULT_PAGE_SIZE,
       },
     },
   });
@@ -181,7 +179,7 @@ const SequenceRunsTable = () => {
         onRefresh={() => void refetchSequenceRuns()}
         paginationProps={{
           page: sequenceRunsData?.pagination.page || 1,
-          pageSize: sequenceRunsData?.pagination.rows_per_page || DEFAULT_PAGE_SIZE,
+          pageSize: sequenceRunsData?.pagination.rowsPerPage || DEFAULT_PAGE_SIZE,
           onPageChange: (p) => setPage(p ?? 1),
           onPageSizeChange: (size) => setRowsPerPage(size),
           totalItems: sequenceRunsData?.pagination.count || 0,

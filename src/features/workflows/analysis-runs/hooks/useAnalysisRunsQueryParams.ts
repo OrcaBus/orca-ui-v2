@@ -1,7 +1,7 @@
 import { useMemo, useCallback } from 'react';
 import { useQueryParams } from '@/hooks/useQueryParams';
-import { PARAM_ORDER_BY, PARAM_SEARCH } from '@/utils/constants';
-import { toUtcStartOfDay } from '@/utils/timeFormat';
+import { DEFAULT_PAGE_SIZE, PARAM_ORDER_BY, PARAM_SEARCH } from '@/utils/constants';
+import { toLocalStartOfDay } from '@/utils/timeFormat';
 
 export type AnalysisRunStatus =
   | 'succeeded'
@@ -9,7 +9,7 @@ export type AnalysisRunStatus =
   | 'aborted'
   | 'resolved'
   | 'deprecated'
-  | 'running';
+  | 'ongoing';
 
 const PARAM_STATUS = 'arStatus';
 const PARAM_TYPE = 'arType';
@@ -109,20 +109,22 @@ export function useAnalysisRunsQueryParams() {
     const typeValues = splitTypes(filterValues[PARAM_TYPE]);
     const statusRaw = filterValues[PARAM_STATUS];
     const statusForApi =
-      !statusRaw || statusRaw === 'all' ? undefined : (statusRaw as AnalysisRunStatus);
+      !statusRaw || statusRaw === 'all' || statusRaw === 'ongoing'
+        ? undefined
+        : (statusRaw as AnalysisRunStatus);
 
     return {
-      page: pagination.page,
-      rowsPerPage: pagination.rowsPerPage,
+      page: pagination.page || 1,
+      rows_per_page: pagination.rowsPerPage | DEFAULT_PAGE_SIZE,
       search: search || undefined,
       analysis: typeValues.length ? typeValues.join(',') : undefined,
       status: statusForApi,
       is_ongoing: statusRaw === 'ongoing' ? true : undefined,
-      start_time: toUtcStartOfDay(filterValues[PARAM_FROM]),
-      end_time: toUtcStartOfDay(filterValues[PARAM_TO]),
-      // order_by: orderBy || '-timestamp',
+      start_time: toLocalStartOfDay(filterValues[PARAM_FROM]),
+      end_time: toLocalStartOfDay(filterValues[PARAM_TO]),
+      ordering: orderBy || '-timestamp',
     };
-  }, [filterValues, pagination.page, pagination.rowsPerPage, search]);
+  }, [filterValues, pagination.page, pagination.rowsPerPage, search, orderBy]);
 
   const clearAllFilters = useCallback(() => {
     setParams({

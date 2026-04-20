@@ -43,7 +43,11 @@ export function WorkflowRunsPage() {
 
   return (
     <div>
-      <WorkflowRunsStatusCards status={status} onStatusCardClick={handleStatusCardClick} />
+      <DetailedErrorBoundary errorTitle='Unable to load workflow run status'>
+        <Suspense fallback={<SpinnerWithText text='Loading workflow run status...' />}>
+          <WorkflowRunsStatusCards status={status} onStatusCardClick={handleStatusCardClick} />
+        </Suspense>
+      </DetailedErrorBoundary>
 
       <FilterBar
         searchValue={search}

@@ -12,8 +12,8 @@ import { SkeletonTheme } from 'react-loading-skeleton';
 
 export default function App() {
   return (
-    <SkeletonTheme baseColor='var(--color-slate-100)' highlightColor='var(--color-slate-200)'>
-      <ThemeProvider>
+    <ThemeProvider>
+      <SkeletonTheme baseColor='var(--skeleton-base)' highlightColor='var(--skeleton-highlight)'>
         <AuthProvider>
           <ReactQueryClientProvider>
             <EnvironmentProvider>
@@ -28,7 +28,7 @@ export default function App() {
           </ReactQueryClientProvider>
         </AuthProvider>
         <Toaster position='top-right' richColors />
-      </ThemeProvider>
-    </SkeletonTheme>
+      </SkeletonTheme>
+    </ThemeProvider>
   );
 }

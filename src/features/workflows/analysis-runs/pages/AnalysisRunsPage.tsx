@@ -1,30 +1,15 @@
 import { Suspense, useCallback, useMemo } from 'react';
-import { mockAnalysisRuns } from '@/data/mockData';
 import { FilterBar } from '@/components/tables/FilterBar';
 // import { MultiSelect } from '@/components/ui/MultiSelect';
-import { StatusCard } from '@/components/ui/StatusCard';
 import { DetailedErrorBoundary } from '@/components/ui/DetailedErrorBoundary';
 import { SpinnerWithText } from '@/components/ui/Spinner';
-import { getRunsStatusIcon } from '../../shared/utils/statusIcons';
 import {
   useAnalysisRunsQueryParams,
   type AnalysisRunStatus,
 } from '../hooks/useAnalysisRunsQueryParams';
 import { buildAnalysisRunsFilterBadges } from '../utils/buildAnalysisRunsFilterBadges';
 import AnalysisRunsTable from '../components/AnalysisRunsTable';
-
-const AR_STATUS_CARDS: Array<{
-  label: string;
-  status: AnalysisRunStatus;
-  variant: 'success' | 'error' | 'warning' | 'neutral' | 'info';
-}> = [
-  { label: 'Succeeded', status: 'succeeded', variant: 'success' },
-  { label: 'Failed', status: 'failed', variant: 'error' },
-  { label: 'Aborted', status: 'aborted', variant: 'neutral' },
-  { label: 'Resolved', status: 'resolved', variant: 'info' },
-  { label: 'Deprecated', status: 'deprecated', variant: 'neutral' },
-  { label: 'Running', status: 'running', variant: 'warning' },
-];
+import { AnalysisRunsStatusCards } from '../components/AnalysisRunsStatusCards';
 
 export function AnalysisRunsPage() {
   const {
@@ -59,25 +44,11 @@ export function AnalysisRunsPage() {
 
   return (
     <div>
-      <div className='mb-6 grid grid-cols-6 gap-4'>
-        {AR_STATUS_CARDS.map((card) => {
-          const count = mockAnalysisRuns.filter((ar) => ar.status === card.status).length;
-          const percentage =
-            mockAnalysisRuns.length > 0 ? Math.round((count / mockAnalysisRuns.length) * 100) : 0;
-          return (
-            <StatusCard
-              key={card.status}
-              label={card.label}
-              value={count}
-              percentage={percentage}
-              icon={getRunsStatusIcon(card.status)}
-              variant={card.variant}
-              selected={status === card.status}
-              onClick={() => handleStatusCardClick(card.status)}
-            />
-          );
-        })}
-      </div>
+      <DetailedErrorBoundary errorTitle='Unable to load analysis run status'>
+        <Suspense fallback={<SpinnerWithText text='Loading analysis run status...' />}>
+          <AnalysisRunsStatusCards status={status} onStatusCardClick={handleStatusCardClick} />
+        </Suspense>
+      </DetailedErrorBoundary>
 
       <FilterBar
         searchValue={search}
