@@ -1,407 +1,456 @@
-# Enhanced Timeline Component System
+# Timeline Component
 
-A comprehensive, production-ready timeline component for the Orcabus LIMS system. Designed for displaying operational events, state changes, and user interactions for Sequence Runs and Workflow Runs.
+Reusable timeline components for Orcabus operational detail pages. The timeline displays state changes and comments for sequence runs, workflow runs, etc. And also support for sorting, selection, caller-owned actions, custom state/comment dialogs, and state payload inspection.
 
-## Features
+## Feature Summary
 
-### Core Functionality
+- Vertical event timeline with icon nodes, a connecting rail, and responsive event rows.
+- Built-in sort toggle for latest-first and oldest-first ordering.
+- Optional header actions rendered by the caller through `customActions`.
+- Optional per-event overflow actions through `TimelineEventAction[]`.
+- Controlled or uncontrolled event selection through `selectedEventId` and `onEventSelect`.
+- State, comment, sample sheet, and severity-specific visual styling.
+- Dark mode support throughout the timeline and dialogs.
+- Dialogs for adding/editing custom states, adding/editing comments, deleting comments, and viewing payloads.
 
-- **Event Display**: Vertical timeline showing progression from start to end with visual indicators
-- **Event Types**: Status updates, comments, file uploads, QC events, custom states, and more
-- **Filtering**: Filter events by run ID (supports multiple runs on same timeline)
-- **Sorting**: Toggle between "Latest First" and "Oldest First"
-- **Interactive Actions**: Add custom states, add comments, view event payloads
+## Files
 
-### Event Information
+| File                      | Purpose                                                         |
+| ------------------------- | --------------------------------------------------------------- |
+| `Timeline.tsx`            | Main timeline UI and `TimelineFunctionButton`.                  |
+| `CustomStateDialog.tsx`   | Create/edit dialog for custom state events.                     |
+| `CommentDialog.tsx`       | Create/edit dialog for comment events.                          |
+| `DeleteCommentDialog.tsx` | Confirmation dialog for comment deletion.                       |
+| `PayloadViewerDialog.tsx` | State payload carousel, structured payload view, and JSON view. |
+| `TimelineDialogFrame.tsx` | Shared dialog shell for state/comment forms.                    |
+| `timeline.type.ts`        | Event, form, source, severity, and action types.                |
+| `timeline.constants.ts`   | Event label/icon configuration.                                 |
+| `timeline.visuals.ts`     | State/comment icon and color mappings.                          |
+| `index.ts`                | Public exports.                                                 |
 
-Each timeline event displays:
-
-- **Event Type**: Clear label (e.g., "Status Updated", "Comment Added", "Sample Sheet Validated")
-- **State Badge**: Visual pill showing state name (only for state-based events)
-- **Timestamp**: Formatted date and time
-- **Source**: System (automated), User (manual), or Custom (user-added)
-- **Comment/Note**: Optional descriptive text
-- **Payload**: Optional JSON data with viewer dialog
-
-### Visual Design
-
-- **Icon-based nodes**: Different icons and colors for different event types
-  - ✅ Green checkmark: Success states (completed, succeeded)
-  - ❌ Red X: Failure states (failed, aborted, error)
-  - ▶️ Blue play: Active states (running, ongoing, processing)
-  - 🕐 Amber clock: Pending states (queued, pending, initializing)
-  - 💬 Blue speech bubble: Comments
-  - ⬆️ Purple upload: File/samplesheet uploads
-  - ⚪ Grey dot: Neutral/other events
-
-- **Vertical rail**: Connecting line between events
-- **Event cards**: Clean cards with hover effects
-- **Dark mode**: Full dark mode support throughout
-
-## Components
-
-### 1. EnhancedTimeline (Main Component)
-
-**Location**: `/components/timeline/EnhancedTimeline.tsx`
-
-The primary timeline component that orchestrates all features.
+## Main Component
 
 ```tsx
-import { EnhancedTimeline } from '../timeline/EnhancedTimeline';
+import { Timeline, TimelineFunctionButton } from '@/components/timeline';
+import type { TimelineEvent } from '@/components/timeline';
 
-<EnhancedTimeline
-  events={timelineEvents}
-  availableRunIds={[
-    { value: 'SEQ001', label: 'SEQ.240201.A01052' },
-    { value: 'WF001', label: 'WFR.7x9k2m5p' },
-  ]}
-  availableStates={[
-    { value: 'succeeded', label: 'Succeeded' },
-    { value: 'failed', label: 'Failed' },
-    { value: 'ongoing', label: 'Ongoing' },
-  ]}
-  onAddCustomState={handleAddCustomState}
-  onAddComment={handleAddComment}
-  filterLabel='Workflow Run ID' // or "Sequence Run ID"
+export function RunTimeline({ events }: { events: TimelineEvent[] }) {
+  return (
+    <Timeline
+      events={events}
+      customActions={
+        <TimelineFunctionButton onClick={() => console.log('filter')}>
+          Filter
+        </TimelineFunctionButton>
+      }
+    />
+  );
+}
+```
+
+### Timeline Props
+
+```ts
+interface TimelineProps {
+  events: TimelineEvent[];
+  customActions?: ReactNode;
+  selectedEventId?: string | null;
+  onEventSelect?: (event: TimelineEvent) => void;
+}
+```
+
+`selectedEventId` makes selection controlled. If it is omitted, the timeline manages the focused event internally.
+
+### Function Buttons
+
+Use `TimelineFunctionButton` for timeline-level actions such as add state, add comment, view payload, or filters.
+
+```tsx
+<TimelineFunctionButton
+  icon={<Plus className='h-4 w-4' />}
+  variant='primary'
+  onClick={openCustomStateDialog}
+>
+  Add State
+</TimelineFunctionButton>
+```
+
+## Event Model
+
+The current timeline has two event families: `state` and `comment`. Older mock data and legacy labels such as `workflow_completed`, `samplesheet_added`, and `qc_failed` are converted into one of these families before rendering.
+
+```ts
+export enum TimelineEventTypes {
+  STATE = 'state',
+  COMMENT = 'comment',
+}
+
+export enum TimelineEventSourceTypes {
+  SYSTEM = 'system',
+  USER = 'user',
+  CUSTOM = 'custom',
+}
+
+interface TimelineBaseEvent {
+  eventId: string;
+  timestamp: string;
+  createdBy?: string;
+  sourceType: TimelineEventSourceTypes;
+  actions?: TimelineEventAction[];
+  payloadId?: string;
+  payload?: Record<string, unknown>;
+}
+
+export interface TimelineStateEvent extends TimelineBaseEvent {
+  eventType: TimelineEventTypes.STATE;
+  state: string;
+  comment?: string;
+}
+
+export interface TimelineCommentEvent extends TimelineBaseEvent {
+  eventType: TimelineEventTypes.COMMENT;
+  comment: string;
+  severity?: 'DEBUG' | 'INFO' | 'WARNING' | 'ERROR';
+  commentType?: 'comment' | 'samplesheet';
+}
+
+export type TimelineEvent = TimelineStateEvent | TimelineCommentEvent;
+```
+
+### Event Actions
+
+Each event can expose caller-owned actions in the overflow menu.
+
+```ts
+interface TimelineEventAction {
+  id: string;
+  label: string;
+  onClick: (event: TimelineEvent) => void | Promise<void>;
+  disabled?: boolean | ((event: TimelineEvent) => boolean);
+  icon?: ReactNode;
+}
+```
+
+Actions with `delete` in the action id are styled as destructive. Async action failures are caught and shown with a toast.
+
+## Event Anatomy
+
+Each rendered event includes:
+
+| Area     | Contents                                                                    |
+| -------- | --------------------------------------------------------------------------- |
+| Node     | Icon selected from the event state, comment severity, or sample sheet type. |
+| Rail     | Vertical connector between events.                                          |
+| Title    | `Workflow State Update`, `Comment Added`, or `Sample Sheet Comment`.        |
+| Metadata | Non-system source label, formatted timestamp, and contextual badges.        |
+| Badges   | State badge, `Custom`, `Sample Sheet`, or non-info severity badge.          |
+| Body     | Optional event comment/note.                                                |
+| Menu     | Optional event actions from `event.actions`.                                |
+
+System events intentionally omit a source label in the row. User and custom events can display `createdBy`.
+
+## Visual Reference
+
+State visuals are defined in `timeline.visuals.ts`. State keys are normalized to uppercase and can also match aliases such as `completed -> SUCCEEDED`, `ongoing -> STARTED`, and `queued -> DRAFT`.
+
+| State group                                        | Icon            | Color   |
+| -------------------------------------------------- | --------------- | ------- |
+| `DRAFT`, `QUEUED`, `PENDING`                       | `FilePenLine`   | Neutral |
+| `READY`, `SUCCEEDED`, `COMPLETED`, `SUCCESS`       | `CheckCircle`   | Green   |
+| `SUBMITTED`                                        | `CircleArrowUp` | Neutral |
+| `RUNNABLE`                                         | `PlayCircle`    | Neutral |
+| `STARTING`                                         | `Clock`         | Neutral |
+| `RUNNING`                                          | `LoaderCircle`  | Neutral |
+| `STARTED`, `ONGOING`, `PROCESSING`, `INITIALIZING` | `LoaderCircle`  | Blue    |
+| `FAILED`, `ERROR`                                  | `XCircle`       | Red     |
+| `ABORTED`, `CANCELLED`, `CANCELED`                 | `Ban`           | Orange  |
+| `RESOLVED`                                         | `CheckCircle`   | Teal    |
+| `DEPRECATED`                                       | `Archive`       | Neutral |
+| Unknown state                                      | `PlayCircle`    | Neutral |
+
+Comment visuals are severity-driven:
+
+| Comment kind          | Icon                   | Color          |
+| --------------------- | ---------------------- | -------------- |
+| `DEBUG`               | `MessageCircleCode`    | Neutral        |
+| `INFO`                | `MessageCircle`        | Slate          |
+| `WARNING`             | `MessageCircleWarning` | Amber          |
+| `ERROR`               | `MessageCircleX`       | Red            |
+| Sample sheet `INFO`   | `FileText`             | Cyan           |
+| Sample sheet non-info | `FileText`             | Severity color |
+
+## Dialogs
+
+### CustomStateDialog
+
+Creates or edits state events.
+
+```tsx
+<CustomStateDialog
+  isOpen={isCustomStateDialogOpen}
+  onClose={() => setIsCustomStateDialogOpen(false)}
+  onSubmit={handleAddCustomState}
+  availableStates={availableStateOptions}
+  hideTimestamp
+  actorEmail={currentUserEmail}
+  actorTimestamp={dialogActorTimestamp}
+/>
+```
+
+Props:
+
+```ts
+interface CustomStateDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (data: CustomStateFormData) => Promise<void>;
+  availableStates?: Array<{ value: string; label: string }>;
+  initialValues?: Partial<CustomStateFormData>;
+  mode?: 'create' | 'edit';
+  title?: string;
+  submitLabel?: string;
+  hideTimestamp?: boolean;
+  actorEmail?: string;
+  actorTimestamp?: string;
+}
+```
+
+Validation:
+
+- `stateName` is required.
+- `timestamp` is required unless the caller hides it and supplies a value.
+- `comment` is optional and limited to 2000 characters.
+- Submit is disabled when `availableStates` is provided but empty.
+
+### CommentDialog
+
+Creates or edits comments.
+
+```tsx
+<CommentDialog
+  isOpen={isCommentDialogOpen}
+  onClose={() => setIsCommentDialogOpen(false)}
+  onSubmit={handleAddComment}
+  hideTimestamp
+  hideSeverity
+  actorEmail={currentUserEmail}
+  actorTimestamp={dialogActorTimestamp}
+/>
+```
+
+Props:
+
+```ts
+interface CommentDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (data: CommentFormData) => Promise<void>;
+  initialValues?: Partial<CommentFormData>;
+  mode?: 'create' | 'edit';
+  title?: string;
+  submitLabel?: string;
+  hideTimestamp?: boolean;
+  hideSeverity?: boolean;
+  actorEmail?: string;
+  actorTimestamp?: string;
+}
+```
+
+Validation:
+
+- `timestamp` is required unless the caller hides it and supplies a value.
+- `comment` is required and limited to 2000 characters.
+- `severity` is one of `DEBUG`, `INFO`, `WARNING`, or `ERROR`.
+
+### DeleteCommentDialog
+
+Confirms comment deletion and can show a short preview.
+
+```tsx
+<DeleteCommentDialog
+  isOpen={!!deletingComment}
+  onClose={() => setDeletingComment(null)}
+  onDelete={handleDeleteComment}
+  commentPreview={deletingComment?.text}
+/>
+```
+
+### PayloadViewerDialog
+
+Displays workflow state payloads. It provides a selectable state carousel, a structured payload tab, a raw JSON tab, copy-to-clipboard, download, loading, and empty states.
+
+```tsx
+<PayloadViewerDialog
+  isOpen={isPayloadViewerOpen}
+  onClose={() => setIsPayloadViewerOpen(false)}
+  states={payloadViewerStates}
+  selectedStateEventId={selectedPayloadStateEventId}
+  onSelectedStateEventIdChange={setSelectedPayloadStateEventId}
+  payload={payloadViewerPayload}
+  isLoading={isFetchingSelectedWorkflowPayload}
+/>
+```
+
+The structured tab reads from `payload.data` when `payload` is an object. The JSON tab renders the full payload object.
+
+## Usage Patterns
+
+### Basic Timeline
+
+```tsx
+<Timeline events={events} />
+```
+
+### Timeline With Header Actions
+
+```tsx
+<Timeline
+  events={events}
+  customActions={
+    <>
+      <TimelineFunctionButton
+        icon={<Plus className='h-4 w-4' />}
+        variant='primary'
+        onClick={openStateDialog}
+      >
+        Add State
+      </TimelineFunctionButton>
+      <TimelineFunctionButton
+        icon={<MessageCircle className='h-4 w-4' />}
+        onClick={openCommentDialog}
+      >
+        Add Comment
+      </TimelineFunctionButton>
+    </>
+  }
+/>
+```
+
+### Controlled Selection
+
+```tsx
+const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+
+<Timeline
+  events={events}
+  selectedEventId={selectedEventId}
+  onEventSelect={(event) => setSelectedEventId(event.eventId)}
 />;
 ```
 
-**Props**:
+### Event Menu Actions
 
-- `events`: Array of `TimelineEvent` objects
-- `availableRunIds`: Optional array of run IDs for filtering dropdown
-- `availableStates`: Array of states available for custom state creation
-- `onAddCustomState`: Async handler for adding custom states
-- `onAddComment`: Async handler for adding comments
-- `filterLabel`: Label for the run ID filter (default: "Run ID")
-
-### 2. AddCustomStateDialog
-
-**Location**: `/components/timeline/AddCustomStateDialog.tsx`
-
-Dialog for adding custom states with validation.
-
-**Features**:
-
-- State name dropdown (required)
-- Timestamp picker (default: now, required)
-- Comment textarea (optional, max 2000 chars)
-- Form validation with Zod
-- Optimistic updates supported
-
-### 3. AddCommentDialog
-
-**Location**: `/components/timeline/AddCommentDialog.tsx`
-
-Dialog for adding timestamped comments.
-
-**Features**:
-
-- Timestamp picker (default: now, required)
-- Comment textarea (required, max 2000 chars)
-- Form validation with Zod
-- Optimistic updates supported
-
-### 4. PayloadViewerDialog
-
-**Location**: `/components/timeline/PayloadViewerDialog.tsx`
-
-Dialog for viewing event payload JSON.
-
-**Features**:
-
-- Pretty-printed JSON display
-- Copy to clipboard button
-- Download JSON button
-- Scrollable for large payloads
-- Syntax highlighting with monospace font
-
-## Type Definitions
-
-**Location**: `/types/timeline.ts`
-
-### TimelineEvent
-
-```typescript
-interface TimelineEvent {
-  id: string;
-  eventType: TimelineEventType;
-  stateName?: WorkflowRunStatus | SequenceRunStatus | string;
-  timestamp: string; // ISO 8601 format
-  comment?: string;
-  source: TimelineEventSource;
-  payload?: Record<string, unknown>;
-  runId?: string;
-  runDisplayName?: string;
-}
-```
-
-### TimelineEventType
-
-```typescript
-type TimelineEventType =
-  | 'status_updated'
-  | 'comment'
-  | 'samplesheet_added'
-  | 'samplesheet_validated'
-  | 'workflow_started'
-  | 'workflow_completed'
-  | 'lane_completed'
-  | 'qc_passed'
-  | 'qc_failed'
-  | 'file_uploaded'
-  | 'metadata_updated'
-  | 'custom_state';
-```
-
-### TimelineEventSource
-
-```typescript
-type TimelineEventSource =
-  | { type: 'system' }
-  | { type: 'user'; userName: string }
-  | { type: 'custom' };
-```
-
-## Mock Data
-
-**Location**: `/data/mockTimelineData.ts`
-
-Comprehensive mock data including:
-
-- `sequenceRunTimelineEvents`: Complete sequence run lifecycle (11 events)
-- `workflowRunTimelineEvents`: Successful workflow run (9 events)
-- `failedWorkflowTimelineEvents`: Failed workflow with error handling (6 events)
-- Helper functions: `getTimelineEventsForRun()`, `getAllRunIds()`
-- State definitions: `workflowRunStates`, `sequenceRunStates`
-
-## API Integration
-
-### MSW Handlers
-
-**Location**: `/mocks/handlers.ts`
-
-Mock API endpoints:
-
-```typescript
-GET    /api/timeline/:runId      // Get events for specific run
-GET    /api/timeline              // Get all events
-POST   /api/timeline/custom-state // Add custom state
-POST   /api/timeline/comment      // Add comment
-DELETE /api/timeline/:eventId     // Delete event (optional)
-```
-
-### Example Handlers
-
-```typescript
-// Add custom state
-const handleAddCustomState = async (data: AddCustomStateFormData) => {
-  const response = await fetch('/api/timeline/custom-state', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      ...data,
-      runId: currentRunId,
-      runDisplayName: currentRunDisplayName,
-    }),
-  });
-
-  if (!response.ok) throw new Error('Failed to add custom state');
-
-  // Refetch timeline data or update optimistically
+```tsx
+const event: TimelineEvent = {
+  eventId: 'comment-1',
+  eventType: TimelineEventTypes.COMMENT,
+  timestamp: new Date().toISOString(),
+  comment: 'Review complete',
+  sourceType: TimelineEventSourceTypes.USER,
+  createdBy: 'operator@example.org',
+  severity: TimelineCommentSeverityEnum.INFO,
+  commentType: TimelineCommentTypes.GENERAL,
+  actions: [
+    {
+      id: 'edit-comment',
+      label: 'Edit comment',
+      icon: <Pencil className='h-4 w-4' />,
+      onClick: openEditDialog,
+    },
+    {
+      id: 'delete-comment',
+      label: 'Delete comment',
+      icon: <Trash2 className='h-4 w-4' />,
+      onClick: openDeleteDialog,
+    },
+  ],
 };
 ```
 
-## Usage Examples
-
-### In a Workflow Run Detail Page
+### TanStack Query Mutation Pattern
 
 ```tsx
-import { EnhancedTimeline } from '../timeline/EnhancedTimeline';
-import { workflowRunStates } from '../../data/mockTimelineData';
+const addComment = useMutation({
+  mutationFn: createComment,
+  onSuccess: () => queryClient.invalidateQueries({ queryKey: ['timeline', runId] }),
+});
 
-export function WorkflowRunDetailPage() {
-  const { runId } = useParams();
-  const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([]);
-
-  const handleAddCustomState = async (data: AddCustomStateFormData) => {
-    // API call to add custom state
-    const newEvent = await addCustomStateAPI(data, runId);
-    setTimelineEvents((prev) => [...prev, newEvent]);
-  };
-
-  const handleAddComment = async (data: AddCommentFormData) => {
-    // API call to add comment
-    const newEvent = await addCommentAPI(data, runId);
-    setTimelineEvents((prev) => [...prev, newEvent]);
-  };
-
-  return (
-    <div className='p-6'>
-      <EnhancedTimeline
-        events={timelineEvents}
-        availableStates={workflowRunStates}
-        onAddCustomState={handleAddCustomState}
-        onAddComment={handleAddComment}
-        filterLabel='Workflow Run ID'
-      />
-    </div>
-  );
-}
+<CommentDialog
+  isOpen={isCommentDialogOpen}
+  onClose={() => setIsCommentDialogOpen(false)}
+  onSubmit={(data) => addComment.mutateAsync(data)}
+/>;
 ```
 
-### In a Sequence Run Detail Page
+## Data Integration
 
-```tsx
-import { EnhancedTimeline } from '../timeline/EnhancedTimeline';
-import { sequenceRunStates } from '../../data/mockTimelineData';
+The MSW handlers in `src/mocks/handlers.ts` provide mock timeline endpoints:
 
-export function SequenceRunDetailPage() {
-  const { runId } = useParams();
-  const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([]);
-
-  return (
-    <div className='p-6'>
-      <EnhancedTimeline
-        events={timelineEvents}
-        availableStates={sequenceRunStates}
-        onAddCustomState={handleAddCustomState}
-        onAddComment={handleAddComment}
-        filterLabel='Sequence Run ID'
-      />
-    </div>
-  );
-}
+```txt
+GET    /api/timeline/:runId
+GET    /api/timeline
+POST   /api/timeline/custom-state
+POST   /api/timeline/comment
+DELETE /api/timeline/:eventId
 ```
 
-## Showcase Page
+`src/data/mockTimelineData.ts` includes legacy-shaped timeline examples and converts them into the current `TimelineEvent` shape. This is useful for demos and tests, but new application code should create `TimelineStateEvent` and `TimelineCommentEvent` objects directly.
 
-**Location**: `/components/pages/TimelineShowcasePage.tsx`
-**Route**: `/timeline-showcase`
+Current in-app consumers include:
 
-A comprehensive demonstration page showing:
+- `SequenceTimelineTab`
+- `WorkflowRunDetailTimeline`
+- `AnalysisRunDetailTimeline`
 
-- Multiple timeline examples (successful workflow, failed workflow, sequence run)
-- All interactive features
-- Usage instructions
-- Feature overview
+## Extending The Timeline
 
-Access it by navigating to `/timeline-showcase` in your browser.
+### Add A New State Visual
+
+Add the canonical state key to `STATE_VISUALS` in `timeline.visuals.ts`.
+
+```ts
+STATE_VISUALS.UNDER_REVIEW = {
+  icon: Clock,
+  nodeClassName: 'border-transparent bg-amber-100 dark:bg-amber-950',
+  iconClassName: 'text-amber-700 dark:text-amber-300',
+  cardClassName: '...',
+  badgeClassName: 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300',
+};
+```
+
+If the API can send alternative names, add aliases to `STATE_ALIASES`.
+
+### Add A New Comment Type
+
+Add the type to `TimelineCommentTypes` in `timeline.type.ts`, then update `getCommentVisual()` in `timeline.visuals.ts` and the badge logic in `Timeline.tsx` if the new type needs distinct display.
+
+### Add A New Mutation
+
+Keep mutation behavior owned by the consuming feature. The timeline should receive:
+
+- Updated `events` data.
+- Header actions through `customActions`.
+- Per-event actions through `event.actions`.
+- Dialog state and submit handlers from the parent.
 
 ## Best Practices
 
-### 1. Event Creation
-
-- Always provide an `id` (use unique identifiers like UUIDs)
-- Use ISO 8601 format for timestamps
-- Keep comments concise but descriptive
-- Include relevant payload data for debugging/auditing
-
-### 2. State Management
-
-- Use optimistic updates for better UX
-- Handle API errors gracefully with toast notifications
-- Sort events chronologically after adding new ones
-- Consider using TanStack Query for server state management
-
-### 3. Performance
-
-- Paginate events if timeline grows very large (>100 events)
-- Use virtualization for extremely long timelines
-- Debounce filter/sort operations if needed
-
-### 4. Accessibility
-
-- All dialogs have proper ARIA labels
-- Keyboard navigation supported
-- Focus management in dialogs
-- Color contrast meets WCAG AA standards
-
-### 5. Dark Mode
-
-- All components fully support dark mode
-- Use semantic color classes (e.g., `text-neutral-900 dark:text-neutral-100`)
-- Test in both light and dark modes
-
-## Customization
-
-### Adding New Event Types
-
-1. Add to `TimelineEventType` in `/types/timeline.ts`
-2. Add configuration to `TIMELINE_EVENT_CONFIGS`
-3. Update icon mapping in `EnhancedTimeline.tsx` → `getEventIcon()`
-4. Add mock data examples in `/data/mockTimelineData.ts`
-
-### Custom Event Icons
-
-Modify the `getEventIcon()` function in `EnhancedTimeline.tsx`:
-
-```typescript
-if (event.eventType === 'my_custom_event') {
-  return {
-    icon: MyCustomIcon,
-    bgColor: 'bg-purple-100 dark:bg-purple-950',
-    iconColor: 'text-purple-600 dark:text-purple-400',
-    borderColor: 'border-purple-300 dark:border-purple-800',
-  };
-}
-```
-
-### Styling
-
-All styling uses Tailwind CSS v4 with the design system tokens from `/styles/globals.css`. Modify colors, spacing, and typography there for global changes.
+- Use stable, unique `eventId` values.
+- Use ISO 8601 timestamps.
+- Keep timeline mutations in the feature layer and refetch or invalidate after success.
+- Prefer `TimelineFunctionButton` for header actions so controls stay visually consistent.
+- Keep event action ids stable; include `delete` in destructive action ids for automatic destructive styling.
+- Use `hideTimestamp` and `hideSeverity` when the backend owns those fields.
+- Paginate or virtualize if a timeline grows beyond a few hundred events.
+- Validate API permissions before exposing edit or delete actions.
 
 ## Dependencies
 
-- React 18+
-- Headless UI (dialogs, menus)
-- React Hook Form (form handling)
-- Zod (validation)
-- Lucide React (icons)
-- Sonner (toast notifications)
-- TanStack Router (routing)
-
-## Future Enhancements
-
-Potential improvements:
-
-- [ ] Event editing/deletion with permissions
-- [ ] Event reactions (emoji, upvotes)
-- [ ] Event mentions/tagging
-- [ ] Export timeline as PDF/CSV
-- [ ] Real-time updates via WebSocket
-- [ ] Advanced filtering (date range, event type, source)
-- [ ] Event search/highlight
-- [ ] Collapsed view with expand/collapse
-- [ ] Timeline swimlanes (multiple runs side-by-side)
-- [ ] Attachment support for events
-
-## Troubleshooting
-
-### Events not appearing
-
-- Check that `events` prop is being passed correctly
-- Verify event structure matches `TimelineEvent` type
-- Check browser console for errors
-
-### Dialogs not opening
-
-- Ensure Headless UI is installed: `@headlessui/react`
-- Check z-index conflicts with other modals
-- Verify dialog state management
-
-### Dark mode not working
-
-- Ensure Tailwind dark mode is configured
-- Check that `dark:` classes are present
-- Verify color tokens in `/styles/globals.css`
-
-### Form validation errors
-
-- Check Zod schema matches form fields
-- Verify React Hook Form resolver is configured
-- Check console for validation error messages
-
-## Support
-
-For questions or issues, please refer to the main project documentation or contact the development team.
+- React
+- Headless UI
+- React Hook Form
+- Zod
+- Lucide React
+- Sonner
+- Day.js
+- Tailwind CSS

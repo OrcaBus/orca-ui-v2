@@ -6,10 +6,10 @@ import { WorkflowTypesPage } from '../workflow-types/pages/WorkflowTypesPage';
 import { AnalysisTypesPage } from '../analysis-types/pages/AnalysisTypesPage';
 
 const TABS = [
-  { id: 'workflowRuns', label: 'Workflow Runs' },
-  { id: 'analysisRuns', label: 'Analysis Runs' },
-  { id: 'workflowTypes', label: 'Workflow Types' },
-  { id: 'analysisTypes', label: 'Analysis Types' },
+  { id: 'workflow-runs', label: 'Workflow Runs' },
+  { id: 'analysis-runs', label: 'Analysis Runs' },
+  { id: 'workflow-types', label: 'Workflow Types' },
+  { id: 'analysis-types', label: 'Analysis Types' },
 ];
 
 export function WorkflowsPage() {
@@ -30,10 +30,10 @@ export function WorkflowsPage() {
         <Tabs tabs={TABS} activeTab={activeTab} onTabChange={setActiveTab} />
       </div>
 
-      {activeTab === 'workflowRuns' && <WorkflowRunsPage />}
-      {activeTab === 'analysisRuns' && <AnalysisRunsPage />}
-      {activeTab === 'workflowTypes' && <WorkflowTypesPage />}
-      {activeTab === 'analysisTypes' && <AnalysisTypesPage />}
+      {activeTab === 'workflow-runs' && <WorkflowRunsPage />}
+      {activeTab === 'analysis-runs' && <AnalysisRunsPage />}
+      {activeTab === 'workflow-types' && <WorkflowTypesPage />}
+      {activeTab === 'analysis-types' && <AnalysisTypesPage />}
     </div>
   );
 }

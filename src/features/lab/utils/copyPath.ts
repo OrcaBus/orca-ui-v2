@@ -1,35 +1,15 @@
 import { toast } from 'sonner';
 
 /**
- * Copy text to clipboard and show toast. Falls back to execCommand if Clipboard API is unavailable.
+ * Copy text to clipboard and show toast.
  */
-export function copyToClipboard(text: string): void {
-  if (navigator.clipboard?.writeText) {
-    navigator.clipboard
-      .writeText(text)
-      .then(() => toast.success('Path copied to clipboard'))
-      .catch(() => fallbackCopy(text));
-  } else {
-    fallbackCopy(text);
-  }
-}
-
-function fallbackCopy(text: string): void {
-  const textArea = document.createElement('textarea');
-  textArea.value = text;
-  textArea.style.position = 'fixed';
-  textArea.style.left = '-999999px';
-  textArea.style.top = '-999999px';
-  document.body.appendChild(textArea);
-  textArea.focus();
-  textArea.select();
+export async function copyToClipboard(text: string): Promise<void> {
   try {
-    const success = document.execCommand('copy');
-    if (success) toast.success('Path copied to clipboard');
+    await navigator.clipboard.writeText(text);
+    toast.success('Path copied to clipboard');
   } catch {
     // Silently fail
   }
-  textArea.remove();
 }
 
 export function formatBytes(bytes: number): string {

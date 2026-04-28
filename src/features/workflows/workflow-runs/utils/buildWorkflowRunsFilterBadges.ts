@@ -1,5 +1,5 @@
 import type { FilterBadge } from '@/components/tables/FilterBar';
-import type { WorkflowRunsFilterPatch } from '../hooks/useWorkflowRunsQueryParams';
+import type { WorkflowRunsFilterPatch } from '../hooks/useWorkflowRunListQueryParams';
 
 const PARAM_STATUS = 'wfStatus';
 const PARAM_TYPE = 'wfType';

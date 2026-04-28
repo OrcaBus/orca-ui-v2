@@ -7,9 +7,9 @@ import {
 } from '../../api/workflows.api';
 import { getRunsStatusIcon } from '../../shared/utils/statusIcons';
 import {
-  useWorkflowRunsQueryParams,
+  useWorkflowRunListQueryParams,
   type WorkflowRunStatus,
-} from '../hooks/useWorkflowRunsQueryParams';
+} from '../hooks/useWorkflowRunListQueryParams';
 import { toLocalStartOfDay } from '@/utils/timeFormat';
 
 interface WorkflowRunsStatusCardsProps {
@@ -35,7 +35,7 @@ export function WorkflowRunsStatusCards({
   status,
   onStatusCardClick,
 }: WorkflowRunsStatusCardsProps) {
-  const { search, dateFrom, dateTo, filterValues } = useWorkflowRunsQueryParams();
+  const { search, dateFrom, dateTo, filterValues } = useWorkflowRunListQueryParams();
 
   const {
     data: workflowStatusCountsData,

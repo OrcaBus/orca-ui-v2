@@ -131,7 +131,7 @@ export function FileDetailsDrawer({
           </h3>
           {workflowRun ? (
             <Link
-              to={`/workflows/${workflowRun.id}`}
+              to={`/workflows/workflow-runs/${workflowRun.id}`}
               className='flex items-center gap-1 text-sm text-blue-600 hover:underline dark:text-blue-400'
             >
               {workflowRun.workflowType}
@@ -150,7 +150,7 @@ export function FileDetailsDrawer({
           </h3>
           {library ? (
             <Link
-              to={`/lab/${library.id}`}
+              to={`/lab/libraries/${library.id}`}
               className='flex items-center gap-1 font-mono text-sm text-blue-600 hover:underline dark:text-blue-400'
             >
               {library.name}

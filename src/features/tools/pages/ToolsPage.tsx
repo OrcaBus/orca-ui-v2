@@ -12,7 +12,7 @@ export function ToolsPage() {
       iconColor: 'text-blue-600',
       iconBg: 'bg-blue-100',
       hoverBorder: 'hover:border-blue-300',
-      route: '/tools/sscheck',
+      route: '/tools/ss-check',
       tags: ['Validation', 'Sample Sheets'],
       learnMoreUrl: '#',
     },

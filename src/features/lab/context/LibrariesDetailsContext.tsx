@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import { LibrariesDetailsContext } from './libraries-context';
 
 export const LibrariesDetailsProvider: FC<PropsWithChildren> = ({ children }) => {
-  const { orcabusId } = useParams<{ orcabusId: string }>();
+  const { libraryOrcabusId } = useParams<{ libraryOrcabusId: string }>();
 
   const {
     data: libraryDetail,
@@ -14,7 +14,7 @@ export const LibrariesDetailsProvider: FC<PropsWithChildren> = ({ children }) =>
   } = useQueryMetadataDetailLibraryModel({
     params: {
       path: {
-        orcabusId: orcabusId as string,
+        orcabusId: libraryOrcabusId as string,
       },
     },
   });

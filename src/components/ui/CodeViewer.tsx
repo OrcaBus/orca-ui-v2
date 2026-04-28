@@ -11,56 +11,15 @@ export function CodeViewer({ code, title }: CodeViewerProps) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
-    // Try modern Clipboard API first, silently fall back if blocked
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard
-        .writeText(code)
-        .then(() => {
-          setCopied(true);
-          setTimeout(() => setCopied(false), 2000);
-        })
-        .catch(() => {
-          // Fall back to textarea method
-          const textArea = document.createElement('textarea');
-          textArea.value = code;
-          textArea.style.position = 'fixed';
-          textArea.style.left = '-999999px';
-          textArea.style.top = '-999999px';
-          document.body.appendChild(textArea);
-          textArea.focus();
-          textArea.select();
-
-          try {
-            document.execCommand('copy');
-            setCopied(true);
-            setTimeout(() => setCopied(false), 2000);
-          } catch {
-            // Silently fail
-          }
-
-          textArea.remove();
-        });
-    } else {
-      // Use fallback method if Clipboard API unavailable
-      const textArea = document.createElement('textarea');
-      textArea.value = code;
-      textArea.style.position = 'fixed';
-      textArea.style.left = '-999999px';
-      textArea.style.top = '-999999px';
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
-
-      try {
-        document.execCommand('copy');
+    void navigator.clipboard
+      .writeText(code)
+      .then(() => {
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
-      } catch {
+      })
+      .catch(() => {
         // Silently fail
-      }
-
-      textArea.remove();
-    }
+      });
   };
 
   return (

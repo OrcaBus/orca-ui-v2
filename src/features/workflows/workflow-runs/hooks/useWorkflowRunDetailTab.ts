@@ -1,19 +1,20 @@
 import { useMemo, useCallback } from 'react';
 import { useQueryParams } from '@/hooks/useQueryParams';
 
-export const WORKFLOW_RUN_DETAIL_TAB_VALUES = [
-  'timeline',
-  'libraries',
-  'run-context',
-  'readsets',
-] as const;
-export type WorkflowRunDetailTabId = (typeof WORKFLOW_RUN_DETAIL_TAB_VALUES)[number];
+export enum WorkflowRunDetailTabValues {
+  Timeline = 'timeline',
+  Libraries = 'libraries',
+  RunContext = 'run-context',
+  Readsets = 'readsets',
+}
 
-function parseTabParam(value: string | undefined): WorkflowRunDetailTabId {
-  if (value && WORKFLOW_RUN_DETAIL_TAB_VALUES.includes(value as WorkflowRunDetailTabId)) {
-    return value as WorkflowRunDetailTabId;
+export const TAB_VALUES = Object.values(WorkflowRunDetailTabValues);
+
+function parseTabParam(value: string | undefined): WorkflowRunDetailTabValues {
+  if (value && TAB_VALUES.includes(value as WorkflowRunDetailTabValues)) {
+    return value as WorkflowRunDetailTabValues;
   }
-  return 'timeline';
+  return WorkflowRunDetailTabValues.Timeline;
 }
 
 /**
@@ -30,7 +31,7 @@ export function useWorkflowRunDetailTab() {
   const setActiveTab = useCallback(
     (id: string) => {
       const tab = parseTabParam(id);
-      setParams({ tab: tab === 'timeline' ? undefined : tab });
+      setParams({ tab });
     },
     [setParams]
   );

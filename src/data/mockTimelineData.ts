@@ -1,8 +1,120 @@
 // Mock timeline data for Sequence Runs and Workflow Runs
-import type { TimelineEvent } from '../components/timeline/timeline.type';
+import {
+  TimelineCommentSeverityEnum,
+  TimelineCommentTypes,
+  TimelineEventSourceTypes,
+  TimelineEventTypes,
+  type TimelineEvent,
+} from '../components/timeline/timeline.type';
+
+type LegacyTimelineEventType =
+  | 'status_updated'
+  | 'comment'
+  | 'samplesheet_added'
+  | 'samplesheet_validated'
+  | 'workflow_started'
+  | 'workflow_completed'
+  | 'lane_completed'
+  | 'qc_passed'
+  | 'qc_failed'
+  | 'file_uploaded'
+  | 'metadata_updated'
+  | 'custom_state';
+
+type LegacyTimelineEventSource =
+  | { type: 'system' }
+  | { type: 'user'; userName: string }
+  | { type: 'custom' };
+
+interface LegacyTimelineEvent {
+  id: string;
+  eventType: LegacyTimelineEventType;
+  stateName?: string;
+  timestamp: string;
+  comment?: string;
+  source: LegacyTimelineEventSource;
+  payload?: Record<string, unknown>;
+  runId?: string;
+  runDisplayName?: string;
+}
+
+const LEGACY_STATE_EVENT_TYPES = new Set<LegacyTimelineEventType>([
+  'status_updated',
+  'workflow_started',
+  'workflow_completed',
+  'lane_completed',
+  'qc_passed',
+  'qc_failed',
+  'custom_state',
+]);
+
+const LEGACY_STATE_BY_EVENT_TYPE: Partial<Record<LegacyTimelineEventType, string>> = {
+  workflow_started: 'STARTED',
+  workflow_completed: 'SUCCEEDED',
+  lane_completed: 'SUCCEEDED',
+  qc_passed: 'SUCCEEDED',
+  qc_failed: 'FAILED',
+  custom_state: 'CUSTOM',
+};
+
+function sourceTypeFromLegacySource(source: LegacyTimelineEventSource): TimelineEventSourceTypes {
+  switch (source.type) {
+    case 'user':
+      return TimelineEventSourceTypes.USER;
+    case 'custom':
+      return TimelineEventSourceTypes.CUSTOM;
+    case 'system':
+    default:
+      return TimelineEventSourceTypes.SYSTEM;
+  }
+}
+
+function createdByFromLegacySource(source: LegacyTimelineEventSource): string | undefined {
+  return source.type === 'user' ? source.userName : undefined;
+}
+
+function labelFromLegacyEventType(eventType: LegacyTimelineEventType): string {
+  return eventType
+    .replace(/_/g, ' ')
+    .toLowerCase()
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function legacyTimelineEventToTimelineEvent(event: LegacyTimelineEvent): TimelineEvent {
+  const sourceType = sourceTypeFromLegacySource(event.source);
+  const createdBy = createdByFromLegacySource(event.source);
+
+  if (LEGACY_STATE_EVENT_TYPES.has(event.eventType)) {
+    return {
+      eventId: event.id,
+      eventType: TimelineEventTypes.STATE,
+      state: event.stateName ?? LEGACY_STATE_BY_EVENT_TYPE[event.eventType] ?? event.eventType,
+      timestamp: event.timestamp,
+      comment: event.comment,
+      createdBy,
+      sourceType,
+      payload: event.payload,
+    };
+  }
+
+  return {
+    eventId: event.id,
+    eventType: TimelineEventTypes.COMMENT,
+    timestamp: event.timestamp,
+    comment: event.comment ?? labelFromLegacyEventType(event.eventType),
+    createdBy,
+    sourceType,
+    severity: TimelineCommentSeverityEnum.INFO,
+    commentType:
+      event.eventType === 'samplesheet_added' || event.eventType === 'samplesheet_validated'
+        ? TimelineCommentTypes.SAMPLESHEET
+        : TimelineCommentTypes.GENERAL,
+    payload: event.payload,
+  };
+}
 
 // Timeline events for Sequence Run: 240201_A01052_0280_AHTV35DSX7
-export const sequenceRunTimelineEvents: TimelineEvent[] = [
+const legacySequenceRunTimelineEvents: LegacyTimelineEvent[] = [
   {
     id: 'evt_seq_001',
     eventType: 'status_updated',
@@ -157,8 +269,12 @@ export const sequenceRunTimelineEvents: TimelineEvent[] = [
   },
 ];
 
+export const sequenceRunTimelineEvents: TimelineEvent[] = legacySequenceRunTimelineEvents.map(
+  legacyTimelineEventToTimelineEvent
+);
+
 // Timeline events for Workflow Run: BCL Convert - Run 240201
-export const workflowRunTimelineEvents: TimelineEvent[] = [
+const legacyWorkflowRunTimelineEvents: LegacyTimelineEvent[] = [
   {
     id: 'evt_wf_001',
     eventType: 'status_updated',
@@ -287,8 +403,12 @@ export const workflowRunTimelineEvents: TimelineEvent[] = [
   },
 ];
 
+export const workflowRunTimelineEvents: TimelineEvent[] = legacyWorkflowRunTimelineEvents.map(
+  legacyTimelineEventToTimelineEvent
+);
+
 // Timeline events for a failed workflow (for testing failure states)
-export const failedWorkflowTimelineEvents: TimelineEvent[] = [
+const legacyFailedWorkflowTimelineEvents: LegacyTimelineEvent[] = [
   {
     id: 'evt_wf_fail_001',
     eventType: 'status_updated',
@@ -354,22 +474,32 @@ export const failedWorkflowTimelineEvents: TimelineEvent[] = [
   },
 ];
 
-// Combined export for easy access
-export const allTimelineEvents: TimelineEvent[] = [
-  ...sequenceRunTimelineEvents,
-  ...workflowRunTimelineEvents,
-  ...failedWorkflowTimelineEvents,
+export const failedWorkflowTimelineEvents: TimelineEvent[] = legacyFailedWorkflowTimelineEvents.map(
+  legacyTimelineEventToTimelineEvent
+);
+
+const legacyAllTimelineEvents: LegacyTimelineEvent[] = [
+  ...legacySequenceRunTimelineEvents,
+  ...legacyWorkflowRunTimelineEvents,
+  ...legacyFailedWorkflowTimelineEvents,
 ];
+
+// Combined export for easy access
+export const allTimelineEvents: TimelineEvent[] = legacyAllTimelineEvents.map(
+  legacyTimelineEventToTimelineEvent
+);
 
 // Helper function to get events for a specific run
 export function getTimelineEventsForRun(runId: string): TimelineEvent[] {
-  return allTimelineEvents.filter((event) => event.runId === runId);
+  return legacyAllTimelineEvents
+    .filter((event) => event.runId === runId)
+    .map(legacyTimelineEventToTimelineEvent);
 }
 
 // Helper function to get all unique run IDs
 export function getAllRunIds(): Array<{ value: string; label: string }> {
   const runIds = new Set(
-    allTimelineEvents
+    legacyAllTimelineEvents
       .filter((event) => event.runId && event.runDisplayName)
       .map((event) => JSON.stringify({ value: event.runId!, label: event.runDisplayName! }))
   );

@@ -48,7 +48,7 @@ export function VaultWorkflowsPage() {
         sortable: true,
         render: (wf) => (
           <Link
-            to={`/workflows/workflowrun/${wf.id}`}
+            to={`/workflows/workflow-runs/${wf.id}`}
             className='text-sm text-blue-600 hover:underline dark:text-blue-400'
           >
             {wf.name}
@@ -79,7 +79,7 @@ export function VaultWorkflowsPage() {
           const library = mockLibraries.find((l) => l.id === wf.libraryId);
           return library ? (
             <Link
-              to={`/lab/${library.id}`}
+              to={`/lab/libraries/${library.id}`}
               className='flex items-center gap-1 font-mono text-sm text-blue-600 hover:underline dark:text-blue-400'
             >
               {library.name}

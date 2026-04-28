@@ -9,12 +9,14 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from './Breadcrumb';
+import { Skeleton } from './Skeleton';
 import { cn } from '@/utils/cn';
 
 export interface BreadcrumbEntry {
   label: string;
   href?: string;
   onClick?: () => void;
+  isLoading?: boolean;
 }
 
 interface PageBreadcrumbProps {
@@ -34,7 +36,9 @@ export function PageBreadcrumb({ items, className }: PageBreadcrumbProps) {
           return (
             <Fragment key={index}>
               <BreadcrumbItem>
-                {isLast ? (
+                {item.isLoading ? (
+                  <Skeleton className='h-4 w-24' />
+                ) : isLast ? (
                   <BreadcrumbPage className='font-medium text-neutral-900 dark:text-white'>
                     {item.label}
                   </BreadcrumbPage>

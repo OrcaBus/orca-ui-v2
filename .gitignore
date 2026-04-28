@@ -16,6 +16,7 @@ dist-ssr
 *.local
 build/*
 build.zip
+*build
 
 # Editor directories and files
 .vscode/*
@@ -36,6 +37,9 @@ build.zip
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# pnpm lcoal package cache folder https://pnpm.io/cli/store
+.pnpm-store
 
 # storybook
 *.storybook.log

@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import Skeleton from 'react-loading-skeleton';
 
 export interface SimpleTableColumn<T> {
   key: string;
@@ -15,6 +16,10 @@ interface SimpleTableProps<T> {
   /** Optional title rendered above the table. */
   title?: string;
   className?: string;
+  /** When true, renders skeleton placeholder rows instead of data. */
+  isLoading?: boolean;
+  /** Number of skeleton rows to show while loading. Default 8. */
+  loadingRows?: number;
 }
 
 export function SimpleTable<T>({
@@ -24,6 +29,8 @@ export function SimpleTable<T>({
   emptyMessage = 'No data to display.',
   title,
   className,
+  isLoading = false,
+  loadingRows = 8,
 }: SimpleTableProps<T>) {
   return (
     <div className={className}>
@@ -50,7 +57,21 @@ export function SimpleTable<T>({
             </thead>
 
             <tbody className='divide-y divide-neutral-200 bg-white dark:divide-[#2d3540] dark:bg-[#111418]'>
-              {data.length === 0 ? (
+              {isLoading ? (
+                Array.from({ length: loadingRows }).map((_, rowIdx) => (
+                  <tr key={`skeleton-${rowIdx}`}>
+                    {columns.map((col) => (
+                      <td key={col.key} className='px-4 py-3'>
+                        <Skeleton
+                          height={14}
+                          borderRadius={4}
+                          style={{ width: `${55 + Math.random() * 35}%` }}
+                        />
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              ) : data.length === 0 ? (
                 <tr>
                   <td
                     colSpan={columns.length}

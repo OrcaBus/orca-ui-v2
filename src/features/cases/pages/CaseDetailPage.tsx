@@ -17,7 +17,7 @@ import {
 import { useCaseDetailTab } from '../hooks/useCaseDetailTab';
 
 export function CaseDetailPage() {
-  const { caseId } = useParams();
+  const { caseOrcabusId } = useParams();
   const navigate = useNavigate();
   const { activeTab, setActiveTab } = useCaseDetailTab();
 
@@ -30,11 +30,11 @@ export function CaseDetailPage() {
   const [selectedLibrariesToLink, setSelectedLibrariesToLink] = useState<string[]>([]);
   const [selectedWorkflowsToAdd, setSelectedWorkflowsToAdd] = useState<string[]>([]);
   const [linkedLibraryIds, setLinkedLibraryIds] = useState<string[]>(() =>
-    caseId ? (getCaseById(caseId)?.linkedLibraries ?? []) : []
+    caseOrcabusId ? (getCaseById(caseOrcabusId)?.linkedLibraries ?? []) : []
   );
   const [manualWorkflowIds, setManualWorkflowIds] = useState<string[]>([]);
 
-  const caseData = caseId ? getCaseById(caseId) : undefined;
+  const caseData = caseOrcabusId ? getCaseById(caseOrcabusId) : undefined;
   const libraries = getLibraries();
   const workflowRuns = getWorkflowRuns();
   const files = getFiles();

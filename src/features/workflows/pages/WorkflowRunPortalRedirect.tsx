@@ -1,0 +1,76 @@
+import { useParams, Navigate, Link } from 'react-router-dom';
+import { useWorkflowRunListModel } from '../api/workflows.api';
+import { SpinnerWithText } from '@/components/ui/Spinner';
+
+/**
+ * Resolves a portal run ID (used by external users) to the internal orcabusId
+ * and redirects to the workflow run details page.
+ *
+ * External users should link to: /workflows/workflowrun/prid/:portalRunId
+ * This page fetches the run by portalRunId and redirects to /workflows/workflow-runs/:workflowRunOrcabusId
+ */
+export function WorkflowRunPortalRedirect() {
+  const { portalRunId } = useParams<{ portalRunId: string }>();
+
+  const { data, isFetching, isError } = useWorkflowRunListModel({
+    params: {
+      query: {
+        page: 1,
+        rows_per_page: 2, // 2 is enough — detect duplicates without over-fetching
+        portal_run_id: portalRunId ?? undefined,
+        ordering: '-timestamp', // latest first; when multiple matches, we show the first (latest)
+      },
+    },
+    reactQuery: {
+      enabled: !!portalRunId,
+    },
+  });
+
+  if (!portalRunId) {
+    return <Navigate to='/workflows/workflow-runs' replace />;
+  }
+
+  if (isFetching) {
+    return (
+      <div className='flex h-screen items-center justify-center'>
+        <SpinnerWithText text='Resolving workflow run...' />
+      </div>
+    );
+  }
+
+  if (isError || !data?.results?.length) {
+    return (
+      <div className='flex h-screen flex-col items-center justify-center gap-2 text-gray-600 dark:text-gray-400'>
+        <p>Workflow run not found for Portal Run ID: {portalRunId}</p>
+        <Link
+          to='/workflows/workflow-runs'
+          className='text-blue-600 hover:underline dark:text-blue-400'
+        >
+          Back to Workflow Runs
+        </Link>
+      </div>
+    );
+  }
+
+  const results = data.results;
+  const run = results[0];
+
+  if (results.length > 1) {
+    console.warn(
+      `[WorkflowRunPortalRedirect] Multiple workflow runs found for Portal Run ID: ${portalRunId}. Showing latest run (orcabusId: ${run?.orcabusId}).`
+    );
+  }
+
+  const orcabusId = run?.orcabusId;
+  if (!orcabusId) {
+    return (
+      <div className='flex h-screen items-center justify-center text-gray-600 dark:text-gray-400'>
+        Invalid workflow run data (missing orcabusId).
+      </div>
+    );
+  }
+
+  return <Navigate to={`/workflows/workflow-runs/${orcabusId}`} replace />;
+}
+
+export default WorkflowRunPortalRedirect;

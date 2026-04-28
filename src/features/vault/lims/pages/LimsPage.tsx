@@ -40,7 +40,7 @@ export function LimsPage() {
         sortable: true,
         render: (lib) => (
           <Link
-            to={`/lab/${lib.id}`}
+            to={`/lab/libraries/${lib.id}`}
             className='font-mono text-sm text-blue-600 hover:underline dark:text-blue-400'
           >
             {lib.name}

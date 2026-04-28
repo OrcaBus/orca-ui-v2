@@ -4,146 +4,53 @@
  * Tab selection is driven by the `tab` query param (e.g. ?tab=libraries).
  */
 
-import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router';
-import { PageBreadcrumb } from '@/components/ui/PageBreadcrumb';
-import { Tabs } from '@/components/ui/Tabs';
+import { useRef, useEffect } from 'react';
 import {
-  mockAnalysisRunDetails,
-  mockAnalysisWorkflowRuns,
-  mockAnalysisLibraries,
-  mockAnalysisRunContexts,
-  mockAnalysisReadsets,
-} from '@/data/mockData';
-import {
-  useAnalysisRunDetailTab,
-  type AnalysisRunDetailTabId,
-} from '../hooks/useAnalysisRunDetailTab';
-import {
+  AnalysisRunDetailPageBreadcrumb,
   AnalysisRunDetailPageHeader,
-  AnalysisRunOverviewCard,
-  AnalysisWorkflowRunsTab,
-  AnalysisLibrariesTab,
-  AnalysisRunContextTab,
-  AnalysisReadsetsTab,
+  AnalysisRunDetailOverviewCard,
+  AnalysisRunDetailTabs,
+  AnalysisRunDetailTimeline,
+  AnalysisRunDetailWorkflowRunsTable,
+  AnalysisRunDetailLibrariesTable,
+  AnalysisRunDetailRunContextTable,
+  AnalysisRunDetailReadsetsTable,
 } from '../components';
+import { AnalysisRunDetailProvider } from '../context/AnalysisRunDetailContext';
+import { useAnalysisRunDetailTab } from '../hooks/useAnalysisRunDetailTab';
 
 export function AnalysisRunDetailPage() {
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const { activeTab, setActiveTab } = useAnalysisRunDetailTab();
-  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const { activeTab } = useAnalysisRunDetailTab();
 
-  const analysisRun = id ? mockAnalysisRunDetails[id] : null;
-  const workflowRuns = id ? mockAnalysisWorkflowRuns[id] || [] : [];
-  const libraries = id ? mockAnalysisLibraries[id] || [] : [];
-  const runContexts = id ? mockAnalysisRunContexts[id] || [] : [];
-  const readsets = id ? mockAnalysisReadsets[id] || [] : [];
+  const tabsRef = useRef<HTMLDivElement>(null);
+  const isFirstRender = useRef(true);
 
-  if (!analysisRun) {
-    return (
-      <div className='p-6'>
-        <div className='py-12 text-center'>
-          <h2 className='mb-2 text-xl font-semibold text-neutral-900 dark:text-white'>
-            Analysis Run Not Found
-          </h2>
-          <p className='mb-4 text-neutral-600 dark:text-neutral-400'>
-            The analysis run you're looking for doesn't exist.
-          </p>
-          <button
-            onClick={() => {
-              void navigate('/workflows');
-            }}
-            className='text-blue-600 hover:text-blue-800 hover:underline dark:text-blue-400 dark:hover:text-blue-300'
-          >
-            Back to Workflows
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  const handleCopy = (text: string, copyId: string) => {
-    if (navigator.clipboard?.writeText) {
-      navigator.clipboard
-        .writeText(text)
-        .then(() => {
-          setCopiedId(copyId);
-          setTimeout(() => setCopiedId(null), 2000);
-        })
-        .catch(() => {
-          const textArea = document.createElement('textarea');
-          textArea.value = text;
-          textArea.style.position = 'fixed';
-          textArea.style.left = '-999999px';
-          textArea.style.top = '-999999px';
-          document.body.appendChild(textArea);
-          textArea.focus();
-          textArea.select();
-          try {
-            document.execCommand('copy');
-            setCopiedId(copyId);
-            setTimeout(() => setCopiedId(null), 2000);
-          } catch {
-            // Silently fail
-          }
-          textArea.remove();
-        });
-    } else {
-      const textArea = document.createElement('textarea');
-      textArea.value = text;
-      textArea.style.position = 'fixed';
-      textArea.style.left = '-999999px';
-      textArea.style.top = '-999999px';
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
-      try {
-        document.execCommand('copy');
-        setCopiedId(copyId);
-        setTimeout(() => setCopiedId(null), 2000);
-      } catch {
-        // Silently fail
-      }
-      textArea.remove();
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
     }
-  };
-
-  const tabs: Array<{ id: AnalysisRunDetailTabId; label: string; count: number }> = [
-    { id: 'workflow-runs', label: 'Workflow Runs', count: analysisRun.workflowRunCount },
-    { id: 'libraries', label: 'Libraries', count: analysisRun.libraryCount },
-    { id: 'run-context', label: 'Run Context', count: analysisRun.contextCount },
-    { id: 'readsets', label: 'Readsets', count: analysisRun.readsetCount },
-  ];
+    tabsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [activeTab]);
 
   return (
-    <div className='p-6'>
-      <PageBreadcrumb
-        items={[
-          { label: 'Workflows', href: '/workflows' },
-          { label: 'Analysis Runs', href: '/workflows/analysisRuns' },
-          { label: analysisRun.name },
-        ]}
-      />
+    <AnalysisRunDetailProvider>
+      <div className='p-6'>
+        <AnalysisRunDetailPageBreadcrumb />
+        <AnalysisRunDetailPageHeader />
+        <AnalysisRunDetailOverviewCard />
 
-      <AnalysisRunDetailPageHeader
-        analysisRun={analysisRun}
-        copiedId={copiedId}
-        onCopy={handleCopy}
-      />
-      <AnalysisRunOverviewCard analysisRun={analysisRun} />
-
-      {/* Tabs - selection synced to ?tab= query param */}
-      <div className='mb-6'>
-        <Tabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
+        {/* Tabs - selection synced to ?tab= query param */}
+        <div ref={tabsRef}>
+          <AnalysisRunDetailTabs />
+        </div>
+        {/* Tab Content */}
+        {activeTab === 'timeline' && <AnalysisRunDetailTimeline />}
+        {activeTab === 'workflow-runs' && <AnalysisRunDetailWorkflowRunsTable />}
+        {activeTab === 'libraries' && <AnalysisRunDetailLibrariesTable />}
+        {activeTab === 'run-context' && <AnalysisRunDetailRunContextTable />}
+        {activeTab === 'readsets' && <AnalysisRunDetailReadsetsTable />}
       </div>
-
-      {activeTab === 'workflow-runs' && <AnalysisWorkflowRunsTab workflowRuns={workflowRuns} />}
-      {activeTab === 'libraries' && <AnalysisLibrariesTab libraries={libraries} />}
-      {activeTab === 'run-context' && <AnalysisRunContextTab runContexts={runContexts} />}
-      {activeTab === 'readsets' && (
-        <AnalysisReadsetsTab readsets={readsets} copiedId={copiedId} onCopy={handleCopy} />
-      )}
-    </div>
+    </AnalysisRunDetailProvider>
   );
 }

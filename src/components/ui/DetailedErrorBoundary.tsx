@@ -66,7 +66,7 @@ function ErrorFallback({
       </div>
 
       <div className='rounded-md bg-red-50 p-4 dark:bg-red-900/10'>
-        <pre className='font-mono text-sm wrap-break-word whitespace-pre-wrap text-red-600 dark:text-red-400'>
+        <pre className='wrap-wrap-break-word font-mono text-sm whitespace-pre-wrap text-red-600 dark:text-red-400'>
           {formatErrorMessage(error)}
         </pre>
       </div>

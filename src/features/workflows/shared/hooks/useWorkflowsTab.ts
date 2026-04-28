@@ -2,10 +2,10 @@ import { useMemo, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router';
 
 export const WORKFLOWS_TAB_VALUES = [
-  'workflowRuns',
-  'analysisRuns',
-  'workflowTypes',
-  'analysisTypes',
+  'workflow-runs',
+  'analysis-runs',
+  'workflow-types',
+  'analysis-types',
 ] as const;
 export type WorkflowsTabId = (typeof WORKFLOWS_TAB_VALUES)[number];
 
@@ -13,15 +13,15 @@ function parseTabPathSegment(value: string | undefined): WorkflowsTabId {
   if (value && WORKFLOWS_TAB_VALUES.includes(value as WorkflowsTabId)) {
     return value as WorkflowsTabId;
   }
-  return 'workflowRuns';
+  return 'workflow-runs';
 }
 
 /**
  * Controls the workflows page tab via URL path segment `:tab`.
- * - /workflows/workflowRuns (or /workflows) → Workflow Runs
- * - /workflows/analysisRuns → Analysis Runs
- * - /workflows/workflowTypes → Workflow Types
- * - /workflows/analysisTypes → Analysis Types
+ * - /workflows/workflow-runs (or /workflows) → Workflow Runs
+ * - /workflows/analysis-runs → Analysis Runs
+ * - /workflows/workflow-types → Workflow Types
+ * - /workflows/analysis-types → Analysis Types
  */
 export function useWorkflowsTab() {
   const { tab } = useParams<{ tab?: string }>();

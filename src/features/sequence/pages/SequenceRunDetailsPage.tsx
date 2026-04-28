@@ -38,13 +38,13 @@ function getStatusBadgeStatus(status: InstrumentRunStatus): BadgeStatus {
 }
 
 export function SequenceRunDetailsPage() {
-  const { runId } = useParams<{ runId: string }>();
+  const { instrumentRunId } = useParams<{ instrumentRunId: string }>();
   const navigate = useNavigate();
   const { activeTab, setActiveTab } = useSequenceRunDetailTab();
 
   const [showUploadDialog, setShowUploadDialog] = useState(false);
 
-  const sequenceRuns = mockSequenceRuns.filter((run) => run.instrumentRunId === runId);
+  const sequenceRuns = mockSequenceRuns.filter((run) => run.instrumentRunId === instrumentRunId);
 
   if (sequenceRuns.length === 0) {
     return (
@@ -116,9 +116,9 @@ export function SequenceRunDetailsPage() {
 
   return (
     <div className='p-6'>
-      <SequenceRunDetailsPageHeader runId={runId ?? ''} statusBadge={statusBadge} />
+      <SequenceRunDetailsPageHeader runId={instrumentRunId ?? ''} statusBadge={statusBadge} />
       <SequenceRunOverviewCard
-        runId={runId ?? ''}
+        runId={instrumentRunId ?? ''}
         statusBadge={statusBadge}
         startTime={startTime}
         endTime={endTime}

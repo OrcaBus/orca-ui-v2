@@ -25,7 +25,7 @@ const Routes: RouteObject = {
       element: <ToolsPage />,
     },
     {
-      path: 'sscheck',
+      path: 'ss-check',
       element: <SSCheckerPage />,
     },
     {

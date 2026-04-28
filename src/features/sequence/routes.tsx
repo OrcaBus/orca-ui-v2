@@ -19,7 +19,7 @@ const Routes: RouteObject = {
       element: <SequencePage />,
     },
     {
-      path: ':runId',
+      path: 'instrument-runs/:instrumentRunId',
       element: <SequenceRunDetailsPage />,
     },
   ],

@@ -56,13 +56,14 @@ function buildMockLibraryHistory(library: (typeof mockLibraries)[0]): LibraryHis
 }
 
 export function LibraryDetailsPage() {
-  const { orcabusId } = useParams<{ orcabusId: string }>();
+  const { libraryOrcabusId } = useParams<{ libraryOrcabusId: string }>();
   const navigate = useNavigate();
   const { activeTab, setActiveTab } = useLibraryDetailTab();
 
   const library =
-    mockLibraries.find((lib) => lib.orcabusId === orcabusId || lib.id === orcabusId) ??
-    mockLibraries[0];
+    mockLibraries.find(
+      (lib) => lib.orcabusId === libraryOrcabusId || lib.id === libraryOrcabusId
+    ) ?? mockLibraries[0];
 
   if (!library) {
     return (
@@ -71,7 +72,7 @@ export function LibraryDetailsPage() {
           <h2 className='mb-2 font-medium text-neutral-900 dark:text-white'>Library not found</h2>
           <p className='mb-4 text-sm text-neutral-600'>The requested library could not be found.</p>
           <button
-            onClick={() => void navigate('/lab')}
+            onClick={() => void navigate('/lab/libraries')}
             className='rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700'
           >
             Back to Lab
