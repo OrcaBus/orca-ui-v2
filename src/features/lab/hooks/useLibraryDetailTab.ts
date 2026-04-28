@@ -13,23 +13,23 @@ function parseTabPathSegment(value: string | undefined): LibraryDetailTabId {
 
 /**
  * Controls the library detail page tab via URL path segment `:tab`.
- * - /lab/:orcabusId (or /lab/:orcabusId/workflows) → Workflow Runs
- * - /lab/:orcabusId/files → Files
- * - /lab/:orcabusId/related → Related Libraries
- * - /lab/:orcabusId/history → History
+ * - /lab/libraries/:libraryOrcabusId (or /lab/libraries/:libraryOrcabusId/workflows) → Workflow Runs
+ * - /lab/libraries/:libraryOrcabusId/files → Files
+ * - /lab/libraries/:libraryOrcabusId/related → Related Libraries
+ * - /lab/libraries/:libraryOrcabusId/history → History
  */
 export function useLibraryDetailTab() {
-  const { orcabusId, tab } = useParams<{ orcabusId?: string; tab?: string }>();
+  const { libraryOrcabusId, tab } = useParams<{ libraryOrcabusId?: string; tab?: string }>();
   const navigate = useNavigate();
   const activeTab = useMemo(() => parseTabPathSegment(tab), [tab]);
 
   const setActiveTab = useCallback(
     (id: string) => {
       const nextTab = parseTabPathSegment(id);
-      if (!orcabusId) return;
-      void navigate(`/lab/${orcabusId}/${nextTab}`);
+      if (!libraryOrcabusId) return;
+      void navigate(`/lab/libraries/${libraryOrcabusId}/${nextTab}`);
     },
-    [navigate, orcabusId]
+    [navigate, libraryOrcabusId]
   );
 
   return { activeTab, setActiveTab };

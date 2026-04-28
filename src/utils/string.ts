@@ -1,4 +1,12 @@
 /**
+ * Returns true if the given string is a valid email address.
+ * Used to distinguish user-authored content (email) from system-authored content.
+ */
+export function isEmail(value: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+/**
  * Get username from email (e.g. "test.name@example" → "Test Name")
  */
 export function getUsername(email: string) {

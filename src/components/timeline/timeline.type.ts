@@ -1,25 +1,60 @@
+import type { ReactNode } from 'react';
+
 // Timeline types for Sequence Run and Workflow Run detail pages
 
-export type TimelineEventType =
-  | 'status_updated'
-  | 'comment'
-  | 'samplesheet_added'
-  | 'samplesheet_validated'
-  | 'workflow_started'
-  | 'workflow_completed'
-  | 'lane_completed'
-  | 'qc_passed'
-  | 'qc_failed'
-  | 'file_uploaded'
-  | 'metadata_updated'
-  | 'custom_state';
+export enum TimelineEventTypes {
+  STATE = 'state',
+  COMMENT = 'comment',
+}
 
-export type TimelineEventSource =
-  | { type: 'system' }
-  | { type: 'user'; userName: string }
-  | { type: 'custom' };
+export const TimelineStateEventTypes = {
+  STATE: TimelineEventTypes.STATE,
+} as const;
+export type TimelineStateEventTypes =
+  (typeof TimelineStateEventTypes)[keyof typeof TimelineStateEventTypes];
+
+export const TimelineCommentEventTypes = {
+  COMMENT: TimelineEventTypes.COMMENT,
+} as const;
+export type TimelineCommentEventTypes =
+  (typeof TimelineCommentEventTypes)[keyof typeof TimelineCommentEventTypes];
+
+export enum TimelineEventSourceTypes {
+  SYSTEM = 'system',
+  USER = 'user',
+  CUSTOM = 'custom',
+}
+
+export const TimelineSourceTypes = TimelineEventSourceTypes;
+export type TimelineSourceTypes = TimelineEventSourceTypes;
+
+export const TimelineCommentSeverityEnum = {
+  DEBUG: 'DEBUG',
+  INFO: 'INFO',
+  WARNING: 'WARNING',
+  ERROR: 'ERROR',
+} as const;
+export type TimelineCommentSeverityEnum =
+  (typeof TimelineCommentSeverityEnum)[keyof typeof TimelineCommentSeverityEnum];
+
+export const CommentSeverityEnum = TimelineCommentSeverityEnum;
+export type CommentSeverityEnum = TimelineCommentSeverityEnum;
+
+export const TimelineCommentTypes = {
+  GENERAL: 'comment',
+  SAMPLESHEET: 'samplesheet',
+} as const;
+export type TimelineCommentTypes = (typeof TimelineCommentTypes)[keyof typeof TimelineCommentTypes];
+
+export type TimelineEventType = TimelineEventTypes;
 
 export type WorkflowRunStatus =
+  | 'DRAFT'
+  | 'SUCCEEDED'
+  | 'FAILED'
+  | 'ABORTED'
+  | 'RESOLVED'
+  | 'DEPRECATED'
   | 'succeeded'
   | 'failed'
   | 'aborted'
@@ -29,52 +64,76 @@ export type WorkflowRunStatus =
   | 'queued'
   | 'initializing';
 
-export type SequenceRunStatus = 'pending' | 'running' | 'completed' | 'failed' | 'aborted';
+export type SequenceRunStatus =
+  | 'DEPRECATED'
+  | 'FAILED'
+  | 'STARTED'
+  | 'SUCCEEDED'
+  | 'ABORTED'
+  | 'RESOLVED'
+  | 'pending'
+  | 'running'
+  | 'completed'
+  | 'failed'
+  | 'aborted';
 
-export interface TimelineEvent {
+export interface TimelineEventAction {
+  /** Stable identifier used as React key and internal pending state. */
   id: string;
-  eventType: TimelineEventType;
+  label: string;
+  onClick: (event: TimelineEvent) => void | Promise<void>;
+  disabled?: boolean | ((event: TimelineEvent) => boolean);
+  icon?: ReactNode;
+}
 
-  // State information (optional - only for state-based events)
-  stateName?: string;
-
-  // Timestamp
+interface TimelineBaseEvent {
+  eventId: string;
   timestamp: string;
+  createdBy?: string;
+  sourceType: TimelineEventSourceTypes;
+  actions?: TimelineEventAction[];
 
-  // Optional comment/note
-  comment?: string;
-
-  // Event source
-  source: TimelineEventSource;
-
-  // Optional payload (JSON data associated with the event)
+  // Optional payload metadata for dialog-driven payload viewers.
+  payloadId?: string;
   payload?: Record<string, unknown>;
-
-  // Associated run ID (for filtering)
-  runId?: string;
-
-  // Display name for the run (e.g., "WFR.abc123xyz")
-  runDisplayName?: string;
 }
 
-export interface TimelineFilters {
-  runId: string; // "all" or specific run ID
-  sortOrder: 'latest' | 'oldest';
+export interface TimelineStateEvent extends TimelineBaseEvent {
+  eventType: TimelineStateEventTypes;
+  state: string;
+  comment?: string;
 }
 
-export interface AddCustomStateFormData {
+export interface TimelineCommentEvent extends TimelineBaseEvent {
+  eventType: TimelineCommentEventTypes;
+  comment: string;
+  severity?: CommentSeverityEnum;
+  commentType?: TimelineCommentTypes;
+}
+
+/** @deprecated Prefer TimelineCommentEvent. */
+export type TimelinecommentEvent = TimelineCommentEvent;
+
+export type TimelineEvent = TimelineStateEvent | TimelineCommentEvent;
+
+export interface CustomStateFormData {
   stateName: string;
   timestamp: string;
   comment: string;
 }
 
-export interface AddCommentFormData {
+export type AddCustomStateFormData = CustomStateFormData;
+
+export interface CommentFormData {
   timestamp: string;
   comment: string;
+  severity: CommentSeverityEnum;
 }
+
+export type AddCommentFormData = CommentFormData;
 
 // Timeline event display configuration
 export interface TimelineEventConfig {
   label: string; // Display label for the event type
-  icon: 'success' | 'failure' | 'neutral' | 'comment' | 'upload' | 'processing';
+  icon: 'state' | 'comment';
 }

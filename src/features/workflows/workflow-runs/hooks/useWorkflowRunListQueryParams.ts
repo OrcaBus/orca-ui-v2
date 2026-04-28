@@ -2,6 +2,7 @@ import { useMemo, useCallback } from 'react';
 import { useQueryParams } from '@/hooks/useQueryParams';
 import { DEFAULT_PAGE_SIZE, PARAM_ORDER_BY, PARAM_SEARCH } from '@/utils/constants';
 import { toLocalStartOfDay } from '@/utils/timeFormat';
+import { toFirstString } from '@/utils/queryParams';
 
 export type WorkflowRunStatus =
   | 'draft'
@@ -35,11 +36,6 @@ export type WorkflowRunsFilterPatch = Partial<{
   wfTo: string | string[];
 }>;
 
-function toFirstString(value: string | string[] | undefined): string {
-  if (value == null) return '';
-  return Array.isArray(value) ? (value[0] ?? '') : value;
-}
-
 function splitTypes(wfType: string): string[] {
   return wfType
     .split(',')
@@ -51,7 +47,7 @@ function splitTypes(wfType: string): string[] {
  * Workflow runs list page state driven by URL query params.
  * Filter params: wfStatus, wfType, wfFrom, wfTo. Shared: search, orderBy, pagination.
  */
-export function useWorkflowRunsQueryParams() {
+export function useWorkflowRunListQueryParams() {
   const {
     params,
     getArrayParam,

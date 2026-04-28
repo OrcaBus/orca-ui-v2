@@ -3,9 +3,9 @@ import { FilterBar } from '@/components/tables/FilterBar';
 import { DetailedErrorBoundary } from '@/components/ui/DetailedErrorBoundary';
 import { SpinnerWithText } from '@/components/ui/Spinner';
 import {
-  useWorkflowRunsQueryParams,
+  useWorkflowRunListQueryParams,
   type WorkflowRunStatus,
-} from '../hooks/useWorkflowRunsQueryParams';
+} from '../hooks/useWorkflowRunListQueryParams';
 import WorkflowRunsTable from '../components/WorkflowRunsTable';
 import { buildWorkflowRunsFilterBadges } from '../utils/buildWorkflowRunsFilterBadges';
 import { WorkflowRunsStatusCards } from '../components/WorkflowRunsStatusCards';
@@ -23,7 +23,7 @@ export function WorkflowRunsPage() {
     dateTo,
     setDateTo,
     clearAllFilters,
-  } = useWorkflowRunsQueryParams();
+  } = useWorkflowRunListQueryParams();
 
   const activeFilterBadges = useMemo(
     () =>

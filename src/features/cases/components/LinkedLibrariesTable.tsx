@@ -31,7 +31,7 @@ export function LinkedLibrariesTable({
         <button
           onClick={(e) => {
             e.stopPropagation();
-            void navigate(`/lab/${lib.id}`);
+            void navigate(`/lab/libraries/${lib.id}`);
           }}
           className='font-mono text-blue-600 hover:underline dark:text-blue-400'
         >

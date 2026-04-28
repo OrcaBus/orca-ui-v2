@@ -27,7 +27,7 @@ function buildRecentFailureNotifications(now: Date): Omit<NotificationItem, 'isU
         workflowType: run.workflowType,
         status,
         occurredAt,
-        href: `/workflows/workflowrun/${run.id}`,
+        href: `/workflows/workflow-runs/${run.id}`,
       } as const;
     })
     .filter((item) => new Date(item.occurredAt).getTime() >= cutoffMs);
@@ -48,7 +48,7 @@ function buildRecentFailureNotifications(now: Date): Omit<NotificationItem, 'isU
       workflowType: 'RNA-Seq',
       status: 'failed',
       occurredAt: new Date(now.getTime() - 2 * 60 * 60 * 1000).toISOString(),
-      href: '/workflows/workflowrun/WF010',
+      href: '/workflows/workflow-runs/WF010',
     },
     {
       id: 'workflow-mock-aborted-recent',
@@ -58,7 +58,7 @@ function buildRecentFailureNotifications(now: Date): Omit<NotificationItem, 'isU
       workflowType: 'Variant Calling',
       status: 'aborted',
       occurredAt: new Date(now.getTime() - 6 * 60 * 60 * 1000).toISOString(),
-      href: '/workflows/workflowrun/WF008',
+      href: '/workflows/workflow-runs/WF008',
     },
   ];
 }

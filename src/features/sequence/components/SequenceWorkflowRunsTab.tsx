@@ -77,7 +77,7 @@ export function SequenceWorkflowRunsTab({
         const library = libraries.find((lib) => lib.id === workflow.libraryId);
         return library ? (
           <button
-            onClick={() => void navigate(`/lab/${library.id}`)}
+            onClick={() => void navigate(`/lab/libraries/${library.id}`)}
             className='font-mono text-sm text-blue-600 hover:text-blue-800 hover:underline dark:text-blue-400 dark:hover:text-blue-300'
           >
             {library.name}

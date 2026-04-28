@@ -1,5 +1,8 @@
 import { Column, DataTable } from '@/components/tables/DataTable';
-import { useWorkflowRunsQueryParams, WorkflowRunStatus } from '../hooks/useWorkflowRunsQueryParams';
+import {
+  useWorkflowRunListQueryParams,
+  WorkflowRunStatus,
+} from '../hooks/useWorkflowRunListQueryParams';
 import { useWorkflowRunListModel, type WorkflowRunListModel } from '../../api/workflows.api';
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router';
@@ -11,7 +14,7 @@ import { ApiErrorState } from '@/components/ui/ApiErrorState';
 
 const WorkflowRunsTable = () => {
   const navigate = useNavigate();
-  const { workflowRunListQueryParams, setPage, setRowsPerPage } = useWorkflowRunsQueryParams();
+  const { workflowRunListQueryParams, setPage, setRowsPerPage } = useWorkflowRunListQueryParams();
 
   const {
     data: workflowRuns,
@@ -37,7 +40,7 @@ const WorkflowRunsTable = () => {
         render: (wf) => (
           <button
             onClick={() => {
-              void navigate(`/workflows/workflowrun/${wf.orcabusId}`);
+              void navigate(`/workflows/workflow-runs/${wf.orcabusId}`);
             }}
             className='text-left text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline dark:text-blue-400 dark:hover:text-blue-300'
           >
@@ -76,7 +79,7 @@ const WorkflowRunsTable = () => {
         header: 'Last Modified',
         sortable: true,
         render: (wf) => (
-          <div className='text-sm'>{formatTableDate(wf.currentState.timestamp as string)}</div>
+          <div className='text-sm'>{formatTableDate(wf.currentState?.timestamp ?? '')}</div>
         ),
       },
     ],

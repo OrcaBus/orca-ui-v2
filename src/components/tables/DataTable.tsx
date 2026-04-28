@@ -226,30 +226,8 @@ export function DataTable<T>({
       return;
     }
 
-    let copySuccess = false;
-    if (navigator.clipboard?.writeText) {
-      try {
-        await navigator.clipboard.writeText(value);
-        copySuccess = true;
-      } catch {
-        // ignore
-      }
-    }
-    if (!copySuccess) {
-      const textArea = document.createElement('textarea');
-      textArea.value = value;
-      textArea.style.position = 'fixed';
-      textArea.style.left = '-999999px';
-      document.body.appendChild(textArea);
-      textArea.select();
-      try {
-        copySuccess = document.execCommand('copy');
-      } catch {
-        // ignore
-      }
-      textArea.remove();
-    }
-    if (copySuccess) {
+    try {
+      await navigator.clipboard.writeText(value);
       toast.success(`${value} copied to clipboard`);
       setCopiedCell(cellKey);
       if (copyResetTimeoutRef.current !== null) {
@@ -258,10 +236,9 @@ export function DataTable<T>({
       copyResetTimeoutRef.current = window.setTimeout(() => {
         setCopiedCell(null);
       }, 2000);
-      return;
+    } catch {
+      toast.error(`Failed to copy ${cellKey}`);
     }
-
-    toast.error('Failed to copy ${cellKey}');
   };
 
   const visibleColumnsList = columns.filter((col) => visibleColumns.has(col.key));
@@ -487,7 +464,7 @@ export function DataTable<T>({
       )}
 
       {/* Table */}
-      <div className='scrollbar-thin max-h-[600px] overflow-x-auto overflow-y-auto'>
+      <div className='scrollbar-thin max-h-150 overflow-x-auto overflow-y-auto'>
         <table className='w-full'>
           <thead className='sticky top-0 z-10 border-b border-neutral-200 bg-neutral-50 dark:border-[#2d3540] dark:bg-[#111418]'>
             <tr>

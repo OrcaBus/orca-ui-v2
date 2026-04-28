@@ -99,7 +99,7 @@ export function WorkflowRunsTable({
           <button
             onClick={(e) => {
               e.stopPropagation();
-              void navigate(`/lab/${lib.id}`);
+              void navigate(`/lab/libraries/${lib.id}`);
             }}
             className='font-mono text-xs text-blue-600 hover:underline dark:text-blue-400'
           >

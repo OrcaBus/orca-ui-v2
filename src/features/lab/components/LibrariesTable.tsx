@@ -12,15 +12,11 @@ import {
   type LibraryDetailType,
   type QualityEnum,
 } from '../api/lab.api';
-import type { SortDirection } from '@/hooks/useQueryParams';
 import { useLabQueryParams } from '../hooks/useLabQueryParams';
 import { downloadTableAsCsv } from '@/utils/csv';
 import { Download } from 'lucide-react';
 import { toast } from 'sonner';
-
-function orderByParam(direction: SortDirection, field: string): string {
-  return direction === 'desc' ? `-${field}` : field;
-}
+import { orderByParam } from '@/utils/queryParams';
 
 export function LibrariesTable() {
   const navigate = useNavigate();
@@ -57,7 +53,7 @@ export function LibrariesTable() {
         <button
           onClick={(e) => {
             e.stopPropagation();
-            void navigate(`/lab/${lib.orcabusId}`);
+            void navigate(`/lab/libraries/${lib.orcabusId}`);
           }}
           className='cursor-pointer text-left font-mono font-medium text-blue-600 hover:text-blue-800 hover:underline dark:text-[#137fec] dark:hover:text-blue-400'
         >

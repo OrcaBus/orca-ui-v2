@@ -7,8 +7,8 @@ const CaseDetailPage = lazy(() =>
 );
 
 function CaseDetailRoute() {
-  const { caseId } = useParams();
-  return <CaseDetailPage key={caseId} />;
+  const { caseOrcabusId } = useParams();
+  return <CaseDetailPage key={caseOrcabusId} />;
 }
 
 const Routes: RouteObject = {
@@ -20,7 +20,7 @@ const Routes: RouteObject = {
       element: <CasesPage />,
     },
     {
-      path: ':caseId',
+      path: ':caseOrcabusId',
       element: <CaseDetailRoute />,
     },
   ],

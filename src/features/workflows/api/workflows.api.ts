@@ -8,7 +8,6 @@ import {
   createPostMutationHook,
   createPatchMutationHook,
   createDeleteMutationHook,
-  type PathsWithPatch,
 } from '@/api/client';
 import { env } from '@/utils/env';
 
@@ -18,9 +17,13 @@ const workflowApi = new ApiClient<paths>({
   baseUrl: config.apiEndpoint.workflow,
   getPath: (path) => getVersionedPath(path, apiVersion),
 });
-export type ExecutionEngineEnum = components['schemas']['ExecutionEngineEnum'];
 
 // export component types for consumers
+export type ExecutionEngineEnum = components['schemas']['ExecutionEngineEnum'];
+export type RunContext = components['schemas']['RunContext'];
+export type Readset = components['schemas']['Readset'];
+export type CommentSeverityEnum = components['schemas']['SeverityEnum'];
+
 export type WorkflowModel = components['schemas']['Workflow'];
 export type WorkflowListModel = components['schemas']['WorkflowList'];
 export type WorkflowHistoryModel = components['schemas']['WorkflowHistory'];
@@ -28,10 +31,16 @@ export type ValidationStateEnum = components['schemas']['ValidationStateEnum'];
 
 export type WorkflowRunModel = components['schemas']['WorkflowRunDetail'];
 export type WorkflowRunListModel = components['schemas']['WorkflowRun'];
+export type WorkflowRunListParamsModel = operations['workflowrunList']['parameters']['query'];
 export type WorkflowRunPaginatedModel = components['schemas']['PaginatedWorkflowRunList'];
 export type WorkflowRunRerunValidMapDataModel = components['schemas']['AllowedRerunWorkflow'];
+export type WorkflowRunStateModel = components['schemas']['State'];
+export type WorkflowRunCommentModel = components['schemas']['Comment'];
+
 export type AnalysisRunModel = components['schemas']['AnalysisRunDetail'];
 export type AnalysisRunListModel = components['schemas']['AnalysisRun'];
+export type AnalysisRunStateModel = components['schemas']['AnalysisRunState'];
+export type AnalysisRunCommentModel = components['schemas']['Comment'];
 
 export type AnalysisModel = components['schemas']['Analysis'];
 export type AnalysisListModel = components['schemas']['AnalysisMin'];
@@ -62,21 +71,15 @@ export const useWorkflowRunDetailModel = createQueryHook(
   workflowApi,
   '/api/v1/workflowrun/{orcabusId}/'
 );
-// Schema marks this path as get-only; backend may support PATCH - assert for hook compatibility
-export const useWorkflowRunDetailUpdateModel = createPatchMutationHook(
-  workflowApi,
-  '/api/v1/workflowrun/{orcabusId}/' as PathsWithPatch<paths>
-);
-export const useWorkflowStateModel = createQueryHook(
-  workflowApi,
-  '/api/v1/workflowrun/{orcabusId}/state/'
-);
 
 // payload model
-export const useWorkflowPayloadModel = createQueryHook(workflowApi, '/api/v1/payload/{orcabusId}/');
+export const useWorkflowRunPayloadModel = createQueryHook(
+  workflowApi,
+  '/api/v1/payload/{orcabusId}/'
+);
 
 // workflow run comment model
-export const useWorkflowRunCommentModel = createQueryHook(
+export const useWorkflowRunCommentsListModel = createQueryHook(
   workflowApi,
   '/api/v1/workflowrun/{orcabusId}/comment/'
 );
@@ -94,6 +97,10 @@ export const useWorkflowRunCommentDeleteModel = createDeleteMutationHook(
 );
 
 // workflow run state creation model
+export const useWorkflowRunStateListModel = createQueryHook(
+  workflowApi,
+  '/api/v1/workflowrun/{orcabusId}/state/'
+);
 export const useWorkflowRunStateCreateModel = createPostMutationHook(
   workflowApi,
   '/api/v1/workflowrun/{orcabusId}/state/'

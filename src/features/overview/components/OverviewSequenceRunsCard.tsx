@@ -49,7 +49,7 @@ export function OverviewSequenceRunsCard({ runs }: OverviewSequenceRunsCardProps
               >
                 <td className='px-4 py-3'>
                   <Link
-                    to={`/sequence/${run.id}`}
+                    to={`/sequence/instrument-runs/${run.id}`}
                     className='font-mono text-[13px] text-blue-600 hover:underline dark:text-blue-400'
                   >
                     {run.runId}

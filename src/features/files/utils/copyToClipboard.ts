@@ -1,28 +1,11 @@
 /**
- * Copy text to clipboard; on success calls onSuccess. Falls back to execCommand if needed.
+ * Copy text to clipboard; on success calls onSuccess.
  */
-export function copyToClipboard(text: string, onSuccess: () => void): void {
-  const doFallback = () => {
-    const textArea = document.createElement('textarea');
-    textArea.value = text;
-    textArea.style.position = 'fixed';
-    textArea.style.left = '-999999px';
-    textArea.style.top = '-999999px';
-    document.body.appendChild(textArea);
-    textArea.focus();
-    textArea.select();
-    try {
-      document.execCommand('copy');
-      onSuccess();
-    } catch {
-      // Silently fail
-    }
-    textArea.remove();
-  };
-
-  if (navigator.clipboard?.writeText) {
-    navigator.clipboard.writeText(text).then(onSuccess).catch(doFallback);
-  } else {
-    doFallback();
+export async function copyToClipboard(text: string, onSuccess: () => void): Promise<void> {
+  try {
+    await navigator.clipboard.writeText(text);
+    onSuccess();
+  } catch {
+    // Silently fail
   }
 }

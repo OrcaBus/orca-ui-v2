@@ -46,7 +46,7 @@ const SequenceRunsTable = () => {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              void navigate(`/sequence/${instrumentRun.instrumentRunId}`);
+              void navigate(`/sequence/instrument-runs/${instrumentRun.instrumentRunId}`);
             }}
             className='-mx-1 rounded px-1 font-mono text-sm font-medium text-blue-600 transition-colors hover:text-blue-800 hover:underline dark:text-[#137fec] dark:hover:bg-[#137fec]/10 dark:hover:text-blue-300'
           >
@@ -159,7 +159,7 @@ const SequenceRunsTable = () => {
         ),
       },
     ],
-    [navigate]
+    []
   );
 
   if (isSequenceError) {

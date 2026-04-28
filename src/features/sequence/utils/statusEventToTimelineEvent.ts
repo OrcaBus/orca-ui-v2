@@ -1,7 +1,10 @@
 import type { StatusEvent } from '../../../data/mockData';
-import type {
-  TimelineEvent,
-  TimelineEventSource,
+import {
+  TimelineCommentSeverityEnum,
+  TimelineCommentTypes,
+  TimelineEventSourceTypes,
+  TimelineEventTypes,
+  type TimelineEvent,
 } from '../../../components/timeline/timeline.type';
 
 /**
@@ -10,32 +13,36 @@ import type {
 export function statusEventToTimelineEvent(
   event: StatusEvent,
   runId: string,
-  runDisplayName: string,
   index: number
 ): TimelineEvent {
-  const eventType =
+  const sourceType =
     event.type === 'comment'
-      ? 'comment'
+      ? TimelineEventSourceTypes.USER
       : event.type === 'manual'
-        ? 'custom_state'
-        : 'status_updated';
+        ? TimelineEventSourceTypes.CUSTOM
+        : TimelineEventSourceTypes.SYSTEM;
 
-  const source: TimelineEventSource =
-    event.type === 'comment'
-      ? { type: 'user', userName: event.user ?? 'Unknown' }
-      : event.type === 'manual'
-        ? { type: 'custom' }
-        : { type: 'system' };
+  if (event.type === 'comment') {
+    return {
+      eventId: `seq-${runId}-${index}-${event.timestamp}`,
+      eventType: TimelineEventTypes.COMMENT,
+      timestamp: event.timestamp,
+      comment: event.message ?? '',
+      createdBy: event.user,
+      sourceType,
+      severity: TimelineCommentSeverityEnum.INFO,
+      commentType: TimelineCommentTypes.GENERAL,
+    };
+  }
 
   return {
-    id: `seq-${runId}-${index}-${event.timestamp}`,
-    eventType,
-    stateName: event.status,
+    eventId: `seq-${runId}-${index}-${event.timestamp}`,
+    eventType: TimelineEventTypes.STATE,
+    state: event.status,
     timestamp: event.timestamp,
     comment: event.message,
-    source,
-    runId,
-    runDisplayName,
+    createdBy: event.user,
+    sourceType,
   };
 }
 
@@ -44,8 +51,7 @@ export function statusEventToTimelineEvent(
  */
 export function statusEventsToTimelineEvents(
   events: StatusEvent[],
-  runId: string,
-  runDisplayName: string
+  runId: string
 ): TimelineEvent[] {
-  return events.map((e, i) => statusEventToTimelineEvent(e, runId, runDisplayName, i));
+  return events.map((e, i) => statusEventToTimelineEvent(e, runId, i));
 }

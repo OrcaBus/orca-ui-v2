@@ -3,6 +3,7 @@ import { useQueryParams } from '@/hooks/useQueryParams';
 import { PARAM_ORDER_BY, PARAM_SEARCH } from '@/utils/constants';
 import { toLocalStartOfDay } from '@/utils/timeFormat';
 import type { SequenceRunStatusEnum } from '../api/sequence.api';
+import { toFirstString } from '@/utils/queryParams';
 
 export type SequenceStatus = SequenceRunStatusEnum;
 
@@ -25,11 +26,6 @@ export type SequenceFilterPatch = Partial<{
   seqFrom: string | string[];
   seqTo: string | string[];
 }>;
-
-function toFirstString(value: string | string[] | undefined): string {
-  if (value == null) return '';
-  return Array.isArray(value) ? (value[0] ?? '') : value;
-}
 
 /**
  * Sequence list page state driven by URL query params.

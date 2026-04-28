@@ -5,6 +5,9 @@ const LabPage = lazy(() => import('./pages/LabPage').then((m) => ({ default: m.L
 const LibraryDetailsPage = lazy(() =>
   import('./pages/LibraryDetailsPage').then((m) => ({ default: m.LibraryDetailsPage }))
 );
+const LibraryIdRedirect = lazy(() =>
+  import('./pages/LibraryIdRedirect').then((m) => ({ default: m.LibraryIdRedirect }))
+);
 
 const Routes: RouteObject = {
   path: '/lab',
@@ -15,12 +18,16 @@ const Routes: RouteObject = {
       element: <LabPage />,
     },
     {
-      path: ':orcabusId',
+      path: 'libraries/:libraryOrcabusId',
       element: <Outlet />,
       children: [
         { index: true, element: <LibraryDetailsPage /> },
         { path: ':tab', element: <LibraryDetailsPage /> },
       ],
+    },
+    {
+      path: 'libraries/libid/:libraryId',
+      element: <LibraryIdRedirect />,
     },
   ],
 };

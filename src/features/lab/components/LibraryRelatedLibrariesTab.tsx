@@ -20,7 +20,7 @@ export function LibraryRelatedLibrariesTab({ relatedLibraries }: LibraryRelatedL
       sortable: true,
       render: (lib) => (
         <button
-          onClick={() => void navigate(`/lab/${lib.id}`)}
+          onClick={() => void navigate(`/lab/libraries/${lib.id}`)}
           className='font-mono font-medium text-blue-600 hover:text-blue-800 hover:underline dark:text-blue-400 dark:hover:text-blue-300'
         >
           {lib.name}

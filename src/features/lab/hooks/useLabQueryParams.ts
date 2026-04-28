@@ -2,6 +2,17 @@ import { useMemo, useCallback } from 'react';
 import { useQueryParams } from '@/hooks/useQueryParams';
 import type { LibraryListQueryParams } from '../api/lab.api';
 import { PARAM_ORDER_BY, PARAM_SEARCH } from '@/utils/constants';
+import {
+  toFirstString,
+  toNumber,
+  toNumberArray,
+  toFilterQueryValue,
+  toFilterDisplayValue,
+  toSearchQueryValue,
+  toSearchDisplayValue,
+  toSearchApiQueryValue,
+  toApiCsvQueryValue,
+} from '@/utils/queryParams';
 
 type LibraryListQuery = NonNullable<LibraryListQueryParams>;
 
@@ -47,76 +58,6 @@ const DEFAULT_FILTER_VALUES: Record<string, string> = {
   [PARAM_COVERAGE_MAX]: '',
 };
 
-function toFirstString(value: string | string[] | undefined): string {
-  if (value == null) return '';
-  return Array.isArray(value) ? (value[0] ?? '') : value;
-}
-
-function parseCsvValues(value: string | string[] | undefined): string[] {
-  if (value == null) return [];
-  const values = Array.isArray(value) ? value : [value];
-  return values
-    .flatMap((entry) => entry.split(','))
-    .map((v) => v.trim())
-    .filter(Boolean);
-}
-
-function toCsvString(value: string | string[] | undefined): string {
-  return parseCsvValues(value).join(',');
-}
-
-function toQueryParamValue(value: string | string[] | undefined): string | string[] | undefined {
-  const values = parseCsvValues(value);
-  if (values.length === 0) return undefined;
-  if (values.length === 1) return values[0];
-  return values;
-}
-
-function toFirstCsvValue(value: string | string[] | undefined): string | undefined {
-  const first = parseCsvValues(value)[0];
-  return first || undefined;
-}
-
-function toNumberArray(value: string | string[] | undefined): number[] | undefined {
-  const numbers = parseCsvValues(value)
-    .map((v) => Number(v))
-    .filter((n) => Number.isFinite(n));
-  return numbers.length ? numbers : undefined;
-}
-
-function toNumber(value: string | string[] | undefined): number | undefined {
-  const first = toFirstCsvValue(value);
-  if (!first?.trim()) return undefined;
-  const number = Number(first);
-  return Number.isFinite(number) ? number : undefined;
-}
-
-function toStringOrArray(values: string[]): string | string[] | undefined {
-  if (values.length === 0) return undefined;
-  if (values.length === 1) return values[0];
-  return values;
-}
-
-function toSearchQueryValue(value: string): string | string[] | undefined {
-  return toQueryParamValue(value);
-}
-
-function toFilterQueryValue(value: string | string[] | undefined): string | string[] | undefined {
-  return toQueryParamValue(value);
-}
-
-function toCsvList(value: string | string[] | undefined): string[] {
-  return parseCsvValues(value);
-}
-
-function toSearchDisplayValue(value: string | string[] | undefined): string {
-  return toCsvString(value);
-}
-
-function toFilterDisplayValue(value: string | string[] | undefined): string {
-  return toCsvString(value);
-}
-
 function toCoverageValue(value: string | string[] | undefined): string {
   return toFirstString(value);
 }
@@ -128,16 +69,6 @@ function toProjectIdQueryValue(
   if (!values?.length) return undefined;
   if (values.length === 1) return values[0];
   return values;
-}
-
-function toSearchApiQueryValue(value: string): string | string[] | undefined {
-  const values = toCsvList(value);
-  return toStringOrArray(values);
-}
-
-function toApiCsvQueryValue(value: string): string | string[] | undefined {
-  const values = toCsvList(value);
-  return toStringOrArray(values);
 }
 
 /**

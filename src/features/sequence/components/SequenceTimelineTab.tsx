@@ -1,17 +1,14 @@
-import { useMemo } from 'react';
-import { EnhancedTimeline } from '../../../components/timeline';
+import { useMemo, useState } from 'react';
+import { MessageCircle, Plus } from 'lucide-react';
+import {
+  CommentDialog,
+  CustomStateDialog,
+  Timeline,
+  TimelineFunctionButton,
+} from '../../../components/timeline';
 import type { AddCustomStateFormData, AddCommentFormData } from '../../../components/timeline';
 import type { SequenceRun } from '../../../data/mockData';
 import { statusEventsToTimelineEvents } from '../utils/statusEventToTimelineEvent';
-
-const SEQUENCE_RUN_STATES = [
-  { value: 'pending', label: 'Pending' },
-  { value: 'running', label: 'Running' },
-  { value: 'completed', label: 'Completed' },
-  { value: 'failed', label: 'Failed' },
-  { value: 'aborted', label: 'Aborted' },
-  { value: 'on_hold', label: 'On Hold' },
-] as const;
 
 interface SequenceTimelineTabProps {
   sequenceRuns: SequenceRun[];
@@ -24,24 +21,47 @@ export function SequenceTimelineTab({
   onAddCustomState,
   onAddComment,
 }: SequenceTimelineTabProps) {
-  const { events, availableRunIds } = useMemo(() => {
-    const allEvents = sequenceRuns.flatMap((sr) =>
-      statusEventsToTimelineEvents(sr.statusHistory ?? [], sr.id, sr.runId)
-    );
-    const runIds =
-      sequenceRuns.length > 1 ? sequenceRuns.map((sr) => ({ value: sr.id, label: sr.runId })) : [];
-    return { events: allEvents, availableRunIds: runIds };
-  }, [sequenceRuns]);
+  const [isCustomStateDialogOpen, setIsCustomStateDialogOpen] = useState(false);
+  const [isCommentDialogOpen, setIsCommentDialogOpen] = useState(false);
+
+  const events = useMemo(
+    () => sequenceRuns.flatMap((sr) => statusEventsToTimelineEvents(sr.statusHistory ?? [], sr.id)),
+    [sequenceRuns]
+  );
 
   return (
     <div className='rounded-lg border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900'>
-      <EnhancedTimeline
+      <Timeline
         events={events}
-        availableRunIds={availableRunIds}
-        availableStates={[...SEQUENCE_RUN_STATES]}
-        onAddCustomState={onAddCustomState}
-        onAddComment={onAddComment}
-        filterLabel='Sequence Run ID'
+        customActions={
+          <>
+            <TimelineFunctionButton
+              icon={<Plus className='h-4 w-4' />}
+              variant='primary'
+              onClick={() => setIsCustomStateDialogOpen(true)}
+            >
+              Add State
+            </TimelineFunctionButton>
+            <TimelineFunctionButton
+              icon={<MessageCircle className='h-4 w-4' />}
+              onClick={() => setIsCommentDialogOpen(true)}
+            >
+              Add Comment
+            </TimelineFunctionButton>
+          </>
+        }
+      />
+
+      <CustomStateDialog
+        isOpen={isCustomStateDialogOpen}
+        onClose={() => setIsCustomStateDialogOpen(false)}
+        onSubmit={onAddCustomState}
+      />
+
+      <CommentDialog
+        isOpen={isCommentDialogOpen}
+        onClose={() => setIsCommentDialogOpen(false)}
+        onSubmit={onAddComment}
       />
     </div>
   );

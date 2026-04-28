@@ -18,7 +18,7 @@ export function SequenceRelatedLibrariesTab({ libraries }: SequenceRelatedLibrar
       sortable: true,
       render: (library) => (
         <button
-          onClick={() => void navigate(`/lab/${library.id}`)}
+          onClick={() => void navigate(`/lab/libraries/${library.id}`)}
           className='font-mono text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline dark:text-blue-400 dark:hover:text-blue-300'
         >
           {library.name}
