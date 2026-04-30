@@ -1,5 +1,5 @@
 import config from '@/app/config';
-import type { components, paths } from '@/api/types/sequence-run.openapi.d.ts';
+import type { components, paths, operations } from '@/api/types/sequence-run.openapi.d.ts';
 import {
   ApiClient,
   getVersionedPath,
@@ -19,6 +19,12 @@ const sequenceRunApi = new ApiClient<paths>({
 
 // export component types for consumers
 export type SequenceRunModel = components['schemas']['SequenceRun'];
+export type SequenceRunCommentModel = components['schemas']['Comment'];
+export type SequenceRunStateModel = components['schemas']['State'];
+export type SequenceRunSampleSheetModel = components['schemas']['SampleSheet'];
+export type SequenceRunSampleSheetDetailModel = components['schemas']['SampleSheetWithComment'];
+export type SequenceRunStateValidMapModel =
+  operations['apiV1SequenceGetStatesTransitionValidationMapRetrieve']['responses']['200']['content']['application/json'];
 export type SequenceRunListByInstrumentRunIdModel =
   components['schemas']['SequenceRunGroupByInstrumentRunId'];
 export type SequenceRunItemListByInstrumentRunIdModel = NonNullable<

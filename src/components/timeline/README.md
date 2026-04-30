@@ -1,6 +1,6 @@
 # Timeline Component
 
-Reusable timeline components for Orcabus operational detail pages. The timeline displays state changes and comments for sequence runs, workflow runs, etc. And also support for sorting, selection, caller-owned actions, custom state/comment dialogs, and state payload inspection.
+Reusable timeline components for Orcabus operational details pages. The timeline displays state changes and comments for sequence runs, workflow runs, etc. And also support for sorting, selection, caller-owned actions, custom state/comment dialogs, and state payload inspection.
 
 ## Feature Summary
 
@@ -141,7 +141,7 @@ Each rendered event includes:
 | -------- | --------------------------------------------------------------------------- |
 | Node     | Icon selected from the event state, comment severity, or sample sheet type. |
 | Rail     | Vertical connector between events.                                          |
-| Title    | `Workflow State Update`, `Comment Added`, or `Sample Sheet Comment`.        |
+| Title    | `Workflow State Update`, `Comment Added`, or `Sample Sheet Uploaded`.       |
 | Metadata | Non-system source label, formatted timestamp, and contextual badges.        |
 | Badges   | State badge, `Custom`, `Sample Sheet`, or non-info severity badge.          |
 | Body     | Optional event comment/note.                                                |
@@ -399,8 +399,8 @@ DELETE /api/timeline/:eventId
 Current in-app consumers include:
 
 - `SequenceTimelineTab`
-- `WorkflowRunDetailTimeline`
-- `AnalysisRunDetailTimeline`
+- `WorkflowRunDetailsTimeline`
+- `AnalysisRunDetailsTimeline`
 
 ## Extending The Timeline
 

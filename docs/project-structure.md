@@ -177,6 +177,19 @@ Each feature can contain:
 
 This keeps related code together and makes the codebase easier to scale.
 
+Entity details screens inside a feature should use the `XDetailsPage` naming pattern.
+
+Examples:
+
+- `WorkflowRunDetailsPage.tsx`
+- `AnalysisRunDetailsPage.tsx`
+
+Page-scoped helpers for those screens should keep the same stem, such as:
+
+- `WorkflowRunDetailsPageHeader.tsx`
+- `AnalysisRunDetailsTabs.tsx`
+- `useCaseDetailsTab.ts`
+
 ### 4. Keep `/components` for shared components only
 
 The `/components` folder should contain only generic, reusable components shared across multiple features.

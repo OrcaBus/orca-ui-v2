@@ -175,7 +175,7 @@ Default structure for a resource:
 
 - **List page**  
   `/module/resource`
-- **Detail page**  
+- **Detail route**  
   `/module/resource/:resourceId`
 - **Detail sub-view**  
   `/module/resource/:resourceId/:subView`
@@ -193,5 +193,21 @@ Examples:
 - `/sequence/instrument-runs`
 - `/sequence/instrument-runs/:instrumentRunId`
 - `/sequence/instrument-runs/:instrumentRunId/sample-sheet`
+
+### 3.5 Detail route component naming
+
+Use `detail route` and `detail sub-view` as the URL and routing terms.
+
+For the React page component that serves a resource detail route, use the `XDetailsPage` naming pattern.
+
+Examples:
+
+- `/workflows/workflow-runs/:workflowRunOrcabusId` → `WorkflowRunDetailsPage`
+- `/workflows/analysis-runs/:analysisRunOrcabusId` → `AnalysisRunDetailsPage`
+- `/cases/:caseOrcabusId` → `CaseDetailsPage`
+- `/lab/libraries/:libraryOrcabusId` → `LibraryDetailsPage`
+- `/sequence/instrument-runs/:instrumentRunId` → `SequenceRunDetailsPage`
+
+This naming rule affects component, file, and helper names only. URL paths, route params, and query param keys do not change because of it.
 
 ---

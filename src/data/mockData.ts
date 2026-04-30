@@ -86,7 +86,7 @@ export interface WorkflowRun {
   outputFileCount: number;
 }
 
-// Detailed Workflow Run for detail page
+// Detailed Workflow Run for details page
 export interface WorkflowRunDetail {
   id: string;
   name: string;
@@ -197,7 +197,7 @@ export interface AnalysisRun {
   readsetCount: number;
 }
 
-// Detailed Analysis Run for detail page
+// Detailed Analysis Run for details page
 export interface AnalysisRunDetail {
   id: string;
   name: string;
@@ -3032,7 +3032,7 @@ export const mockWorkflowDetails: WorkflowDetail[] = [
   },
 ];
 
-// Detailed mock data for workflow run detail page
+// Detailed mock data for workflow run details page
 export const mockWorkflowRunDetails: Record<string, WorkflowRunDetail> = {
   WF001: {
     id: 'WF001',
@@ -3344,7 +3344,7 @@ export const mockWorkflowReadsets: Record<string, WorkflowReadset[]> = {
   ],
 };
 
-// Analysis Run Details (extended data for detail page)
+// Analysis Run Details (extended data for details page)
 export const mockAnalysisRunDetails: Record<string, AnalysisRunDetail> = {
   AR001: {
     id: 'AR001',

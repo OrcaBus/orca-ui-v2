@@ -10,7 +10,7 @@ import {
   LibraryHistoryTab,
   type LibraryHistoryRecord,
 } from '../components';
-import { useLibraryDetailTab } from '../hooks/useLibraryDetailTab';
+import { useLibraryDetailsTab } from '../hooks/useLibraryDetailsTab';
 
 function buildMockLibraryHistory(library: (typeof mockLibraries)[0]): LibraryHistoryRecord[] {
   return [
@@ -58,7 +58,7 @@ function buildMockLibraryHistory(library: (typeof mockLibraries)[0]): LibraryHis
 export function LibraryDetailsPage() {
   const { libraryOrcabusId } = useParams<{ libraryOrcabusId: string }>();
   const navigate = useNavigate();
-  const { activeTab, setActiveTab } = useLibraryDetailTab();
+  const { activeTab, setActiveTab } = useLibraryDetailsTab();
 
   const library =
     mockLibraries.find(

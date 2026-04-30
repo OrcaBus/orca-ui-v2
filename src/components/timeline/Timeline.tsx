@@ -57,7 +57,7 @@ function getEventTitle(event: TimelineEvent): string {
   }
 
   if (event.commentType === TimelineCommentTypes.SAMPLESHEET) {
-    return 'Sample Sheet Comment';
+    return 'Sample Sheet Uploaded';
   }
 
   return 'Comment Added';

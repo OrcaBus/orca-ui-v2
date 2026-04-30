@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-// Timeline types for Sequence Run and Workflow Run detail pages
+// Timeline types for Sequence Run and Workflow Run details pages
 
 export enum TimelineEventTypes {
   STATE = 'state',
