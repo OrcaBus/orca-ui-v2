@@ -4,7 +4,7 @@ import { SpinnerWithText } from '@/components/ui/Spinner';
 
 /**
  * Resolves a human-readable library ID (e.g. "L2400001") to the internal orcabusId
- * and redirects to the library detail page.
+ * and redirects to the library details page.
  *
  * External users should link to: /lab/libraries/libid/:libraryId
  * This page fetches the library by libraryId and redirects to /lab/libraries/:orcabusId

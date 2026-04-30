@@ -9,14 +9,14 @@ const WorkflowRunPortalRedirect = lazy(() =>
     default: m.WorkflowRunPortalRedirect,
   }))
 );
-const WorkflowRunDetailPage = lazy(() =>
-  import('./workflow-runs/pages/WorkflowRunDetailPage').then((m) => ({
-    default: m.WorkflowRunDetailPage,
+const WorkflowRunDetailsPage = lazy(() =>
+  import('./workflow-runs/pages/WorkflowRunDetailsPage').then((m) => ({
+    default: m.WorkflowRunDetailsPage,
   }))
 );
-const AnalysisRunDetailPage = lazy(() =>
-  import('./analysis-runs/pages/AnalysisRunDetailPage').then((m) => ({
-    default: m.AnalysisRunDetailPage,
+const AnalysisRunDetailsPage = lazy(() =>
+  import('./analysis-runs/pages/AnalysisRunDetailsPage').then((m) => ({
+    default: m.AnalysisRunDetailsPage,
   }))
 );
 
@@ -38,11 +38,11 @@ const Routes: RouteObject = {
     },
     {
       path: 'workflow-runs/:workflowRunOrcabusId',
-      element: <WorkflowRunDetailPage />,
+      element: <WorkflowRunDetailsPage />,
     },
     {
       path: 'analysis-runs/:analysisRunOrcabusId',
-      element: <AnalysisRunDetailPage />,
+      element: <AnalysisRunDetailsPage />,
     },
   ],
 };

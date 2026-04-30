@@ -1,8 +1,8 @@
 import { lazy } from 'react';
 import { Outlet, type RouteObject } from 'react-router';
 
-const SequencePage = lazy(() =>
-  import('./pages/SequencePage').then((m) => ({ default: m.SequencePage }))
+const SequenceRunsPage = lazy(() =>
+  import('./pages/SequenceRunsPage').then((m) => ({ default: m.SequenceRunsPage }))
 );
 const SequenceRunDetailsPage = lazy(() =>
   import('./pages/SequenceRunDetailsPage').then((m) => ({
@@ -16,7 +16,7 @@ const Routes: RouteObject = {
   children: [
     {
       index: true,
-      element: <SequencePage />,
+      element: <SequenceRunsPage />,
     },
     {
       path: 'instrument-runs/:instrumentRunId',

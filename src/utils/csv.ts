@@ -78,3 +78,63 @@ export function downloadTableAsCsv<T>(
   const csv = buildCsvString(rows, visibleColumns);
   downloadCsvFile(csv, filename);
 }
+
+// ---------------------------------------------------------------------------
+// Sample sheet JSON → CSV conversion
+// Mirrors the logic from the reference orca-ui samplesheetUtils.ts
+// ---------------------------------------------------------------------------
+
+type SampleSheetJsonValue = string | number | boolean | null | undefined;
+type SampleSheetJsonSection = Record<string, SampleSheetJsonValue>;
+
+export interface SampleSheetJsonModel {
+  [key: string]: SampleSheetJsonSection | SampleSheetJsonSection[] | undefined;
+}
+
+/** Convert a camelCase key to an IEM-style section heading, e.g. "bclconvertData" → "BCLConvert_Data" */
+function formatSectionHeading(key: string): string {
+  return key
+    .replace(/([A-Z])/g, '_$1')
+    .split('_')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join('_')
+    .replace(/^_/, '');
+}
+
+/**
+ * Convert a parsed sample sheet JSON object to IEM CSV format.
+ * Accepts `unknown` input so callers with `sampleSheetContent: unknown` don't need unsafe casts.
+ * Non-data sections (header, reads, settings) render as key,value rows.
+ * Data sections (arrays) render as column header + data rows.
+ */
+export function jsonToCsv(input: unknown): string {
+  if (!input || typeof input !== 'object' || Array.isArray(input)) return '';
+  const json = input as SampleSheetJsonModel;
+  const sections: string[] = [];
+
+  // Settings / scalar sections first (not ending in "Data")
+  for (const [key, value] of Object.entries(json)) {
+    if (!key.endsWith('Data') && value && typeof value === 'object' && !Array.isArray(value)) {
+      const heading = formatSectionHeading(key);
+      const rows = Object.entries(value)
+        .map(([k, v]) => `${k},${v ?? ''}`)
+        .join('\n');
+      sections.push(`[${heading}]\n${rows}\n`);
+    }
+  }
+
+  // Data array sections
+  for (const [key, value] of Object.entries(json)) {
+    if (key.endsWith('Data') && Array.isArray(value) && value.length > 0) {
+      const heading = formatSectionHeading(key);
+      const cols = Object.keys(value[0]);
+      const header = cols.join(',');
+      const rows = value
+        .map((row: SampleSheetJsonSection) => cols.map((c) => row[c] ?? '').join(','))
+        .join('\n');
+      sections.push(`[${heading}]\n${header}\n${rows}\n`);
+    }
+  }
+
+  return sections.join('\n');
+}

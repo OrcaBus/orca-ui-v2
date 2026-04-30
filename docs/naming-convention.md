@@ -64,6 +64,19 @@ Avoid vague names such as:
 - `MainThing`
 - `DataView`
 
+For entity details screens, use `XDetailsPage` for the page component and file name.
+
+Good examples:
+
+- `WorkflowRunDetailsPage.tsx`
+- `AnalysisRunDetailsPage.tsx`
+
+Good examples:
+
+- `WorkflowRunDetailsPageHeader.tsx`
+- `AnalysisRunDetailsTabs.tsx`
+- `useCaseDetailsTab.ts`
+
 ---
 
 ### Hook Files

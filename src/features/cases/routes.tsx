@@ -2,13 +2,13 @@ import { lazy } from 'react';
 import { Outlet, useParams, type RouteObject } from 'react-router';
 
 const CasesPage = lazy(() => import('./pages/CasesPage').then((m) => ({ default: m.CasesPage })));
-const CaseDetailPage = lazy(() =>
-  import('./pages/CaseDetailPage').then((m) => ({ default: m.CaseDetailPage }))
+const CaseDetailsPage = lazy(() =>
+  import('./pages/CaseDetailsPage').then((m) => ({ default: m.CaseDetailsPage }))
 );
 
-function CaseDetailRoute() {
+function CaseDetailsRoute() {
   const { caseOrcabusId } = useParams();
-  return <CaseDetailPage key={caseOrcabusId} />;
+  return <CaseDetailsPage key={caseOrcabusId} />;
 }
 
 const Routes: RouteObject = {
@@ -21,7 +21,7 @@ const Routes: RouteObject = {
     },
     {
       path: ':caseOrcabusId',
-      element: <CaseDetailRoute />,
+      element: <CaseDetailsRoute />,
     },
   ],
 };

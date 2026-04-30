@@ -1,7 +1,7 @@
 export { CasesTable } from './CasesTable';
 export { CaseSummaryDrawer } from './CaseSummaryDrawer';
 export { CaseOverviewCard } from './CaseOverviewCard';
-export { CaseDetailPageHeader } from './CaseDetailPageHeader';
+export { CaseDetailsPageHeader } from './CaseDetailsPageHeader';
 export { LinkedLibrariesTable } from './LinkedLibrariesTable';
 export { WorkflowRunsTable } from './WorkflowRunsTable';
 export { FilesTable } from './FilesTable';
