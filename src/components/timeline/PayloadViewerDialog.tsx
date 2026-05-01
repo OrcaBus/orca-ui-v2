@@ -312,7 +312,7 @@ export function PayloadViewerDialog({
                               type='button'
                               onClick={() => onSelectedStateEventIdChange?.(state.eventId)}
                               className={cn(
-                                'shrink-0 basis-[min(72vw,220px)] cursor-pointer rounded-lg border px-3 py-2 text-left shadow-xs transition-colors sm:basis-[calc((100%-0.75rem)/2)] md:basis-[calc((100%-1.5rem)/3)] lg:basis-[calc((100%-3rem)/5)]',
+                                'shrink-0 basis-[min(72vw,220px)] rounded-lg border px-3 py-2 text-left shadow-xs transition-colors sm:basis-[calc((100%-0.75rem)/2)] md:basis-[calc((100%-1.5rem)/3)] lg:basis-[calc((100%-3rem)/5)]',
                                 isSelected
                                   ? 'border-blue-500 bg-blue-50 dark:border-[#137fec] dark:bg-[#137fec]/10'
                                   : 'border-neutral-200 bg-white hover:border-neutral-300 dark:border-[#2d3540] dark:bg-[#111418] dark:hover:border-[#3d4550]'

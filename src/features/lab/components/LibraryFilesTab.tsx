@@ -22,9 +22,9 @@ export function LibraryFilesTab({ relatedWorkflows, filesForWorkflow }: LibraryF
   const filesPagination = useTablePagination(1, 20, selectedWorkflowFiles.length);
 
   const handleCopyPath = (path: string) => copyToClipboard(path);
-  const handleCopyAllPaths = () => {
+  const handleCopyAllPaths = async () => {
     const paths = selectedWorkflowFiles.map((f) => f.s3Key).join('\n');
-    copyToClipboard(paths);
+    await copyToClipboard(paths);
   };
 
   const fileColumns: Column<File>[] = useMemo(
@@ -63,7 +63,7 @@ export function LibraryFilesTab({ relatedWorkflows, filesForWorkflow }: LibraryF
               <Eye className='h-4 w-4 text-neutral-600 dark:text-[#8892a2]' />
             </button>
             <button
-              onClick={() => handleCopyPath(file.s3Key)}
+              onClick={() => void handleCopyPath(file.s3Key)}
               className='rounded p-1.5 transition-colors hover:bg-neutral-100 dark:hover:bg-[#2d3540]'
               title='Copy Path'
             >
@@ -141,7 +141,7 @@ export function LibraryFilesTab({ relatedWorkflows, filesForWorkflow }: LibraryF
               <button
                 key={wf.id}
                 onClick={() => setSelectedWorkflowRunId(wf.id)}
-                className={`w-full cursor-pointer px-4 py-3.5 text-left transition-colors ${
+                className={`w-full px-4 py-3.5 text-left transition-colors ${
                   isSelected
                     ? 'border-l-2 border-l-blue-400! bg-white dark:bg-[#1e252e]'
                     : 'border-l-transparent hover:border-l-2 hover:border-l-gray-400! hover:bg-neutral-100 dark:hover:bg-[#1e252e]'
@@ -188,7 +188,7 @@ export function LibraryFilesTab({ relatedWorkflows, filesForWorkflow }: LibraryF
               </div>
               <div className='flex shrink-0 items-center gap-2'>
                 <button
-                  onClick={handleCopyAllPaths}
+                  onClick={() => void handleCopyAllPaths()}
                   className='inline-flex items-center gap-1.5 rounded-md border border-neutral-300 bg-white px-3 py-1.5 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-[#c1cbd8] dark:hover:bg-[#2d3540]'
                 >
                   <Copy className='h-3.5 w-3.5' />

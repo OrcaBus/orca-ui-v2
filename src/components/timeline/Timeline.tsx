@@ -246,7 +246,7 @@ export function Timeline({ events, customActions, selectedEventId, onEventSelect
                       onFocus={() => handleSelectEvent(event)}
                       aria-label={`Select ${getEventTitle(event)}`}
                       className={cn(
-                        'relative z-10 flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full ring-8 ring-white transition-all duration-300 ease-in-out focus:outline-none dark:ring-gray-900',
+                        'relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ring-8 ring-white transition-all duration-300 ease-in-out focus:outline-none dark:ring-gray-900',
                         visual.nodeClassName,
                         isFocused
                           ? 'scale-110 bg-blue-100 shadow-lg shadow-blue-100/50 ring-blue-50 dark:bg-blue-900/30 dark:shadow-blue-900/20 dark:ring-blue-900/20'

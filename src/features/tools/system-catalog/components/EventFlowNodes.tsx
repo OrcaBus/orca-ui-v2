@@ -54,7 +54,7 @@ export function IcaPipelineNode({ data }: NodeProps) {
 
   return (
     <div
-      className='relative min-w-[200px] cursor-pointer'
+      className='relative min-w-50 cursor-pointer'
       style={{ ...dimStyle(isDimmed, isHighlighted, color) }}
     >
       {/* Cloud shape via CSS */}

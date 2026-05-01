@@ -55,7 +55,7 @@ export function LibrariesTable() {
             e.stopPropagation();
             void navigate(`/lab/libraries/${lib.orcabusId}`);
           }}
-          className='cursor-pointer text-left font-mono font-medium text-blue-600 hover:text-blue-800 hover:underline dark:text-[#137fec] dark:hover:text-blue-400'
+          className='text-left font-mono font-medium text-blue-600 hover:text-blue-800 hover:underline dark:text-[#137fec] dark:hover:text-blue-400'
         >
           {lib.libraryId}
         </button>

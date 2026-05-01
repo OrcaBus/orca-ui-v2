@@ -320,7 +320,7 @@ export function DataTable<T>({
                 type='button'
                 onClick={handleRefreshClick}
                 disabled={isRefreshing}
-                className='flex cursor-pointer items-center rounded-md border border-neutral-300 p-1.5 text-neutral-700 transition-colors hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-[#2d3540] dark:text-[#9dabb9] dark:hover:bg-[#1e252e]'
+                className='flex items-center rounded-md border border-neutral-300 p-1.5 text-neutral-700 transition-colors hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-[#2d3540] dark:text-[#9dabb9] dark:hover:bg-[#1e252e]'
                 title='Refresh'
                 aria-label='Refresh'
               >
@@ -335,7 +335,7 @@ export function DataTable<T>({
             <div className='flex items-center overflow-hidden rounded-md border border-neutral-300 dark:border-[#2d3540]'>
               <button
                 onClick={() => setDensity('comfortable')}
-                className={`cursor-pointer p-1.5 transition-colors ${
+                className={`p-1.5 transition-colors ${
                   density === 'comfortable'
                     ? 'bg-neutral-200 text-neutral-900 dark:bg-[#1e252e] dark:text-white'
                     : 'text-neutral-500 hover:bg-neutral-100 dark:text-[#9dabb9] dark:hover:bg-[#1e252e]/50'
@@ -348,7 +348,7 @@ export function DataTable<T>({
               </button>
               <button
                 onClick={() => setDensity('compact')}
-                className={`cursor-pointer p-1.5 transition-colors ${
+                className={`p-1.5 transition-colors ${
                   density === 'compact'
                     ? 'bg-neutral-200 text-neutral-900 dark:bg-[#1e252e] dark:text-white'
                     : 'text-neutral-500 hover:bg-neutral-100 dark:text-[#9dabb9] dark:hover:bg-[#1e252e]/50'
@@ -365,7 +365,7 @@ export function DataTable<T>({
             <div className='relative' ref={columnChooserRef}>
               <button
                 onClick={() => setShowColumnChooser(!showColumnChooser)}
-                className='flex cursor-pointer items-center gap-2 rounded-md border border-neutral-300 p-1.5 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-[#2d3540] dark:text-[#9dabb9] dark:hover:bg-[#1e252e]'
+                className='flex items-center gap-2 rounded-md border border-neutral-300 p-1.5 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-[#2d3540] dark:text-[#9dabb9] dark:hover:bg-[#1e252e]'
                 title='Toggle columns'
                 aria-label='Toggle columns'
                 aria-pressed={showColumnChooser}
