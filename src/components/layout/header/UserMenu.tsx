@@ -17,7 +17,7 @@ interface UserMenuProps {
 export function UserMenu({ onOpenSettings, onLogout }: UserMenuProps) {
   return (
     <Menu as='div' className='relative'>
-      <MenuButton className='flex cursor-pointer items-center gap-3 rounded-lg px-2 py-1 transition-colors hover:bg-slate-50 data-active:bg-slate-50 dark:hover:bg-[#1e252e]/50 dark:data-active:bg-[#1e252e]/50'>
+      <MenuButton className='flex items-center gap-3 rounded-lg px-2 py-1 transition-colors hover:bg-slate-50 data-active:bg-slate-50 dark:hover:bg-[#1e252e]/50 dark:data-active:bg-[#1e252e]/50'>
         <div className='hidden text-right md:block'>
           <div className='text-[13px] leading-none font-semibold text-slate-900 dark:text-white'>
             Dr. Sarah Chen

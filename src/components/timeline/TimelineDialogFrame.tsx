@@ -84,7 +84,7 @@ export function TimelineDialogFrame({
                   <button
                     type='button'
                     onClick={onClose}
-                    className='cursor-pointer rounded-md p-2 text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-900 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:text-[#9dabb9] dark:hover:bg-[#1e252e] dark:hover:text-slate-100'
+                    className='rounded-md p-2 text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-900 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:text-[#9dabb9] dark:hover:bg-[#1e252e] dark:hover:text-slate-100'
                     aria-label='Close dialog'
                   >
                     <X className='h-5 w-5' />

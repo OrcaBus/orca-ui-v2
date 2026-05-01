@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback } from 'react';
 import { mockFiles } from '@/data/mockData';
 import { mockFilesFromApi } from '@/data/mockFileData';
 import type { File } from '@/data/mockData';
@@ -10,31 +10,37 @@ function buildS3KeyRegex(pattern: string): RegExp {
   return new RegExp(escaped, 'i');
 }
 
-export interface FilesSearchState {
+export interface SearchParams {
+  generalSearch: string;
   portalRunId: string;
   bucketName: string;
   s3KeyPattern: string;
 }
 
 export interface UseFilesSearchReturn {
+  /** Committed general search value (matches across portal run ID, bucket, and S3 key). */
+  generalSearch: string;
+  /** Committed advanced filter values. */
   portalRunId: string;
-  setPortalRunId: (v: string) => void;
   bucketName: string;
-  setBucketName: (v: string) => void;
   s3KeyPattern: string;
-  setS3KeyPattern: (v: string) => void;
   hasSearched: boolean;
   searchResults: File[];
   searchError: string | null;
   canSearch: boolean;
-  handleSearch: () => void;
+  /**
+   * Execute a search with explicit parameter values.
+   * Avoids async state issues — pass the full desired state directly.
+   */
+  executeSearch: (params: SearchParams) => void;
   handleClear: () => void;
 }
 
 /**
- * At least one of Portal Run ID, Bucket Name, or S3 Key Pattern must be set to run a search.
+ * At least one of generalSearch, Portal Run ID, Bucket Name, or S3 Key Pattern must be set.
  */
 export function useFilesSearch(): UseFilesSearchReturn {
+  const [generalSearch, setGeneralSearch] = useState('');
   const [portalRunId, setPortalRunId] = useState('');
   const [bucketName, setBucketName] = useState('');
   const [s3KeyPattern, setS3KeyPattern] = useState('');
@@ -42,40 +48,58 @@ export function useFilesSearch(): UseFilesSearchReturn {
   const [searchResults, setSearchResults] = useState<File[]>([]);
   const [searchError, setSearchError] = useState<string | null>(null);
 
-  const canSearch = useMemo(
-    () => portalRunId.trim() !== '' || bucketName.trim() !== '' || s3KeyPattern.trim() !== '',
-    [portalRunId, bucketName, s3KeyPattern]
-  );
+  const canSearch =
+    generalSearch.trim() !== '' ||
+    portalRunId.trim() !== '' ||
+    bucketName.trim() !== '' ||
+    s3KeyPattern.trim() !== '';
 
-  const handleSearch = useCallback(() => {
+  const executeSearch = useCallback((params: SearchParams) => {
+    const { generalSearch: gs, portalRunId: pr, bucketName: bn, s3KeyPattern: sk } = params;
+
+    setGeneralSearch(gs);
+    setPortalRunId(pr);
+    setBucketName(bn);
+    setS3KeyPattern(sk);
     setSearchError(null);
-    if (!canSearch) {
-      setSearchError('Provide at least one of: Portal Run ID, Bucket Name, or S3 Key Pattern.');
+
+    const anySet = gs.trim() || pr.trim() || bn.trim() || sk.trim();
+    if (!anySet) {
+      setSearchResults([]);
+      setHasSearched(false);
       return;
     }
 
     const results = ALL_FILES.filter((file) => {
-      const matchesPortalRun =
-        !portalRunId.trim() ||
-        (file.portalRunId && file.portalRunId.toLowerCase().includes(portalRunId.toLowerCase()));
+      // General search: OR match across portal run ID, bucket, and S3 key
+      const matchesGeneral =
+        !gs.trim() ||
+        (file.portalRunId?.toLowerCase().includes(gs.toLowerCase()) ?? false) ||
+        file.bucket.toLowerCase().includes(gs.toLowerCase()) ||
+        file.s3Key.toLowerCase().includes(gs.toLowerCase());
 
-      const matchesBucket =
-        !bucketName.trim() || file.bucket.toLowerCase().includes(bucketName.toLowerCase());
+      // Advanced filters: AND constraints
+      const matchesPortalRun =
+        !pr.trim() ||
+        (file.portalRunId && file.portalRunId.toLowerCase().includes(pr.toLowerCase()));
+
+      const matchesBucket = !bn.trim() || file.bucket.toLowerCase().includes(bn.toLowerCase());
 
       let matchesS3Key = true;
-      if (s3KeyPattern.trim()) {
-        const regex = buildS3KeyRegex(s3KeyPattern);
+      if (sk.trim()) {
+        const regex = buildS3KeyRegex(sk);
         matchesS3Key = regex.test(file.s3Key);
       }
 
-      return matchesBucket && matchesPortalRun && matchesS3Key;
+      return matchesGeneral && matchesBucket && matchesPortalRun && matchesS3Key;
     });
 
     setSearchResults(results);
     setHasSearched(true);
-  }, [canSearch, portalRunId, bucketName, s3KeyPattern]);
+  }, []);
 
   const handleClear = useCallback(() => {
+    setGeneralSearch('');
     setPortalRunId('');
     setBucketName('');
     setS3KeyPattern('');
@@ -85,17 +109,15 @@ export function useFilesSearch(): UseFilesSearchReturn {
   }, []);
 
   return {
+    generalSearch,
     portalRunId,
-    setPortalRunId,
     bucketName,
-    setBucketName,
     s3KeyPattern,
-    setS3KeyPattern,
     hasSearched,
     searchResults,
     searchError,
     canSearch,
-    handleSearch,
+    executeSearch,
     handleClear,
   };
 }

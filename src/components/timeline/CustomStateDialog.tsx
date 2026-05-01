@@ -192,7 +192,7 @@ export function CustomStateDialog({
                         })
                       }
                       className={cn(
-                        'flex w-full cursor-pointer items-center gap-3 rounded-md border p-3 text-left text-sm transition-colors',
+                        'flex w-full items-center gap-3 rounded-md border p-3 text-left text-sm transition-colors',
                         isSelected
                           ? 'border-blue-500 bg-blue-50 dark:border-[#137fec] dark:bg-[#137fec]/10'
                           : 'border-neutral-200 hover:border-neutral-300 dark:border-[#2d3540] dark:hover:border-[#3d4550]'
