@@ -12,7 +12,7 @@ import {
   type IgvTrackSourceType,
 } from './utils';
 import { useFilePresignedURLListModel, useFilePresignedURLModel } from '../../../api/files.api';
-import { IgvDesktopButton } from '../../IgvDesktopButton';
+import { FileIgvDesktopButton as IgvDesktopButton } from '../../FileIgvDesktopButton';
 import { SpinnerWithText } from '@/components/ui/Spinner';
 import { ApiErrorState } from '@/components/ui/ApiErrorState';
 import { cn } from '@/utils/cn';
