@@ -26,13 +26,22 @@ export function WorkflowRunDetailsPage() {
   const { activeTab } = useWorkflowRunDetailsTab();
 
   const tabsRef = useRef<HTMLDivElement>(null);
-  const isFirstRender = useRef(true);
+  // Track the last-seen tab value so scroll only fires on genuine user-initiated
+  // tab changes, not on the initial mount (works correctly in React 18 Strict Mode
+  // because both mount cycles see the same activeTab value on remount).
+  const prevTabRef = useRef<WorkflowRunDetailsTabValues | null>(null);
 
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
+    if (prevTabRef.current === null) {
+      // First mount — record the tab but do not scroll.
+      prevTabRef.current = activeTab;
       return;
     }
+    if (prevTabRef.current === activeTab) {
+      // Strict Mode remount or unrelated re-render — tab hasn't changed.
+      return;
+    }
+    prevTabRef.current = activeTab;
     tabsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, [activeTab]);
 

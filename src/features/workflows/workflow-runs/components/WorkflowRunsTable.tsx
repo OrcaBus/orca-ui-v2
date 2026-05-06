@@ -1,20 +1,35 @@
-import { Column, DataTable } from '@/components/tables/DataTable';
+import {
+  Column,
+  DataTable,
+  type DataTableActionContext,
+  type DataTableToolbarAction,
+} from '@/components/tables/DataTable';
 import {
   useWorkflowRunListQueryParams,
   WorkflowRunStatus,
 } from '../hooks/useWorkflowRunListQueryParams';
 import { useWorkflowRunListModel, type WorkflowRunListModel } from '../../api/workflows.api';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { PillTag } from '@/components/ui/PillTag';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { formatTableDate } from '@/utils/timeFormat';
 import { DEFAULT_PAGE_SIZE } from '@/utils/constants';
 import { ApiErrorState } from '@/components/ui/ApiErrorState';
+import { ArrowLeftRight } from 'lucide-react';
+import WorkflowRunsBatchStateTransitionModal from './WorkflowRunsBatchStateTransitionModal';
 
-const WorkflowRunsTable = () => {
+interface WorkflowRunsTableProps {
+  onBatchStateTransitionSuccess?: () => void;
+}
+
+const WorkflowRunsTable = ({ onBatchStateTransitionSuccess }: WorkflowRunsTableProps) => {
   const navigate = useNavigate();
   const { workflowRunListQueryParams, setPage, setRowsPerPage } = useWorkflowRunListQueryParams();
+  const [isBatchStateTransitionModalOpen, setIsBatchStateTransitionModalOpen] = useState(false);
+  const [batchStateTransitionWorkflowRuns, setBatchStateTransitionWorkflowRuns] = useState<
+    WorkflowRunListModel[]
+  >([]);
 
   const {
     data: workflowRuns,
@@ -90,22 +105,50 @@ const WorkflowRunsTable = () => {
     return <ApiErrorState error={error} onRetry={() => void refetchWorkflowRuns()} />;
   }
 
+  const handleBatchStateTransition = (context: DataTableActionContext<WorkflowRunListModel>) => {
+    const selectedRuns = context.selectedRows;
+    setBatchStateTransitionWorkflowRuns(selectedRuns);
+    setIsBatchStateTransitionModalOpen(true);
+  };
+
+  const toolbarActions: DataTableToolbarAction<WorkflowRunListModel>[] = [
+    {
+      id: 'batch-states-transition',
+      label: 'Batch State Transition',
+      icon: <ArrowLeftRight className='h-4 w-4' />,
+      onClick: handleBatchStateTransition,
+      disabled: ({ selectedRows }) => selectedRows.length === 0,
+    },
+  ];
+
   return (
-    <DataTable
-      data={workflowRuns?.results || []}
-      columns={columns}
-      isLoading={isLoading || isFetching}
-      selectable
-      onRefresh={() => void refetchWorkflowRuns()}
-      emptyMessage='No workflow runs found'
-      paginationProps={{
-        page: workflowRuns?.pagination.page || 1,
-        pageSize: workflowRuns?.pagination.rowsPerPage || DEFAULT_PAGE_SIZE,
-        onPageChange: (p) => setPage(p ?? 1),
-        onPageSizeChange: (size) => setRowsPerPage(size),
-        totalItems: workflowRuns?.pagination.count || 0,
-      }}
-    />
+    <>
+      <DataTable
+        data={workflowRuns?.results || []}
+        columns={columns}
+        isLoading={isLoading || isFetching}
+        selectable
+        onRefresh={() => void refetchWorkflowRuns()}
+        emptyMessage='No workflow runs found'
+        toolbarActions={toolbarActions}
+        paginationProps={{
+          page: workflowRuns?.pagination.page || 1,
+          pageSize: workflowRuns?.pagination.rowsPerPage || DEFAULT_PAGE_SIZE,
+          onPageChange: (p) => setPage(p ?? 1),
+          onPageSizeChange: (size) => setRowsPerPage(size),
+          totalItems: workflowRuns?.pagination.count || 0,
+        }}
+      />
+      <WorkflowRunsBatchStateTransitionModal
+        isOpen={isBatchStateTransitionModalOpen}
+        onClose={() => setIsBatchStateTransitionModalOpen(false)}
+        workflowRuns={batchStateTransitionWorkflowRuns}
+        onSuccess={() => {
+          void refetchWorkflowRuns();
+          onBatchStateTransitionSuccess?.();
+        }}
+      />
+    </>
   );
 };
 

@@ -151,18 +151,16 @@ export function WorkflowRunDetailsPageHeader() {
         </div>
       </div>
 
-      {isRerunModalOpen && (
-        <WorkflowRunRerunModal
-          isOpen={isRerunModalOpen}
-          onClose={handleCloseRerunModal}
-          onSubmit={handleRerunSubmit}
-          workflowRunName={displayName}
-          workflowName={workflowRunDetail?.workflow?.name ?? ''}
-          isValid={workflowRunRerunValidMapData?.isValid ?? false}
-          allowedDatasetChoice={workflowRunRerunValidMapData?.allowedDatasetChoice ?? []}
-          validWorkflows={workflowRunRerunValidMapData?.validWorkflows ?? []}
-        />
-      )}
+      <WorkflowRunRerunModal
+        isOpen={isRerunModalOpen}
+        onClose={handleCloseRerunModal}
+        onSubmit={handleRerunSubmit}
+        workflowRunName={displayName}
+        workflowName={workflowRunDetail?.workflow?.name ?? ''}
+        isValid={workflowRunRerunValidMapData?.isValid ?? false}
+        allowedDatasetChoice={workflowRunRerunValidMapData?.allowedDatasetChoice ?? []}
+        validWorkflows={workflowRunRerunValidMapData?.validWorkflows ?? []}
+      />
     </div>
   );
 }

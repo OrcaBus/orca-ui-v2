@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useLocation, Link, Outlet } from 'react-router';
 import {
   LayoutDashboard,
@@ -20,6 +20,13 @@ import { UserMenu } from './header/UserMenu';
 export function Root() {
   const location = useLocation();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const mainRef = useRef<HTMLElement>(null);
+
+  // Scroll the content area back to the top whenever the route pathname changes.
+  // React Router does not reset scroll on a custom overflow container automatically.
+  useEffect(() => {
+    mainRef.current?.scrollTo({ top: 0, behavior: 'instant' });
+  }, [location.pathname]);
 
   const navItems: Array<{
     path: string;
@@ -143,7 +150,7 @@ export function Root() {
         </header>
 
         {/* Page Content */}
-        <main className='flex-1 overflow-auto bg-transparent'>
+        <main ref={mainRef} className='flex-1 overflow-auto bg-transparent'>
           <Outlet />
         </main>
       </div>

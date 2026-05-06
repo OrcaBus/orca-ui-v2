@@ -36,6 +36,10 @@ export type WorkflowRunPaginatedModel = components['schemas']['PaginatedWorkflow
 export type WorkflowRunRerunValidMapDataModel = components['schemas']['AllowedRerunWorkflow'];
 export type WorkflowRunStateModel = components['schemas']['State'];
 export type WorkflowRunCommentModel = components['schemas']['Comment'];
+export type WorkflowRunBatchStateTransitionRequestModel =
+  components['schemas']['StateBatchTransitionRequestRequest'];
+export type WorkflowRunBatchStateTransitionResponseModel =
+  components['schemas']['StateBatchTransitionResponse'];
 
 export type AnalysisRunModel = components['schemas']['AnalysisRunDetail'];
 export type AnalysisRunListModel = components['schemas']['AnalysisRun'];
@@ -112,6 +116,10 @@ export const useWorkflowRunStateUpdateModel = createPatchMutationHook(
 export const useWorkflowRunStateCreationValidMapModel = createQueryHook(
   workflowApi,
   '/api/v1/workflowrun/{orcabusId}/state/get_states_transition_validation_map/'
+);
+export const useWorkflowRunsBatchStateTransitionModel = createPostMutationHook(
+  workflowApi,
+  '/api/v1/workflowrun/state/batch-state-transition/'
 );
 
 // workflow run list model
