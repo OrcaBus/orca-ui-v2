@@ -1,3 +1,2 @@
-export { FileDetailsDrawer } from './FileDetailsDrawer';
-export { FilesResultsTable } from './FilesResultsTable';
+export { FilesTable } from './FilesTable';
 export { FilesSearchPanel } from './FilesSearchPanel';

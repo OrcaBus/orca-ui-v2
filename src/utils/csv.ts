@@ -1,5 +1,10 @@
 import type { Column } from '@/components/tables/DataTable';
 
+/**
+ * Escape a CSV field by wrapping in quotes if it contains special characters, and doubling any internal quotes.
+ * This ensures that the CSV output is correctly parsed by spreadsheet software and other CSV consumers.
+ * Special characters that trigger escaping: comma, quote, newline, carriage return.
+ */
 function escapeCsvField(value: string): string {
   if (value.includes(',') || value.includes('"') || value.includes('\n') || value.includes('\r')) {
     return `"${value.replace(/"/g, '""')}"`;
@@ -7,6 +12,11 @@ function escapeCsvField(value: string): string {
   return value;
 }
 
+/**
+ * Resolve the string value for a given row and column, using `csvValue` if provided.
+ * Handles null/undefined and non-string values gracefully by converting to empty string or JSON as needed.
+ * This ensures that the CSV output is well-formed regardless of the underlying data types.
+ */
 function resolveValue<T>(item: T, col: Column<T>): string {
   if (col.csvValue) {
     const v = col.csvValue(item);

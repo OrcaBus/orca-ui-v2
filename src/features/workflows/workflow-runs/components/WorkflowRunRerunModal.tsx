@@ -12,7 +12,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/form/form';
-import { RNASUMSelect } from './RNASUMSelect';
+import { RNASUMDatasetSelect } from './RNASUMDatasetSelect';
 
 // ─── Schema (private) ──────────────────────────────────────────────────────
 
@@ -159,7 +159,7 @@ export function WorkflowRunRerunModal({
                         dataset to rerun <span className='text-destructive'>*</span>
                       </FormLabel>
                       <FormControl>
-                        <RNASUMSelect
+                        <RNASUMDatasetSelect
                           availableOptions={allowedDatasetChoice}
                           selectedValue={field.value || null}
                           onChange={field.onChange}

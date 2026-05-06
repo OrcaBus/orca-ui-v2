@@ -33,5 +33,5 @@ export const router = createBrowserRouter(
     // Catch-all — unknown routes
     { path: '*', Component: NotFoundPage },
   ],
-  { basename: '/v2' }
+  { basename: '/v2/' }
 );

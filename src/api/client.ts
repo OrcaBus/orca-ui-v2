@@ -175,9 +175,6 @@ export function createSuspenseQueryHook<
   };
 }
 
-/** useQuery-based hook that supports `enabled` for conditional fetching */
-export const createConditionalSuspenseQueryHook = createQueryHook;
-
 /* ---------------------------------- */
 /* Query model factory                */
 /* ---------------------------------- */

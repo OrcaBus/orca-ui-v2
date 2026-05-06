@@ -4,7 +4,9 @@ import { StatusBadge } from '../../../components/ui/StatusBadge';
 import { DataTable, type Column } from '../../../components/tables/DataTable';
 import { useTablePagination } from '../../../components/tables/useTablePagination';
 import { getRelativeTime } from '../../../utils/timeFormat';
-import { copyToClipboard, formatBytes, getFileTypeBadgeStyle } from '../utils/copyPath';
+import { copyToClipboard } from '../utils/copyPath';
+import { getFileTypeBadgeStyle } from '@/utils/files';
+import { formatBytes } from '@/utils/files';
 import type { WorkflowRun, File } from '../../../data/mockData';
 
 interface LibraryFilesTabProps {
