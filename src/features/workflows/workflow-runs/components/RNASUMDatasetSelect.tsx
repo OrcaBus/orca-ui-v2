@@ -10,7 +10,7 @@ import { Check, ChevronsUpDown } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { ALL_RNASUM_DATASETS, type RNASUMDataset } from '@/utils/rnasumDatasets';
 
-interface RNASUMSelectProps {
+interface RNASUMDatasetSelectProps {
   /** Project codes that are valid choices (from allowedDatasetChoice) */
   availableOptions: string[];
   selectedValue: string | null;
@@ -18,12 +18,12 @@ interface RNASUMSelectProps {
   placeholder?: string;
 }
 
-export function RNASUMSelect({
+export function RNASUMDatasetSelect({
   availableOptions,
   selectedValue,
   onChange,
   placeholder = 'Search datasets…',
-}: RNASUMSelectProps) {
+}: RNASUMDatasetSelectProps) {
   const [query, setQuery] = useState('');
 
   const options: RNASUMDataset[] = ALL_RNASUM_DATASETS.filter((d) =>

@@ -56,7 +56,7 @@ export function DetailsDrawer({
           </div>
           <button
             onClick={onClose}
-            className='ml-4 flex-shrink-0 rounded p-1 transition-colors hover:bg-neutral-100'
+            className='ml-4 flex-0 rounded p-1 transition-colors hover:bg-neutral-100'
           >
             <X className='h-5 w-5 text-neutral-500' />
           </button>
@@ -86,7 +86,7 @@ export function DrawerSection({ title, children }: { title: string; children: Re
 export function DrawerRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className='flex items-start justify-between gap-4'>
-      <span className='flex-shrink-0 text-sm text-neutral-600'>{label}</span>
+      <span className='flex-0 text-sm text-neutral-600'>{label}</span>
       <span className='text-right text-sm font-medium text-neutral-900'>{value}</span>
     </div>
   );

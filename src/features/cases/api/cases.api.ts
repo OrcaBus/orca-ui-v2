@@ -35,7 +35,7 @@ export function getFiles(): File[] {
 }
 
 import config from '@/app/config';
-import type { components, paths } from '@/api/types/case.openapi.d.ts';
+import type { components, paths, operations } from '@/api/types/case.openapi.d.ts';
 import {
   ApiClient,
   getVersionedPath,
@@ -60,21 +60,45 @@ export type CaseExternalEntityLinkCreateRequestModel =
   components['schemas']['CaseExternalEntityLinkCreateRequest'];
 export type CaseExternalEntityLinkModel =
   components['schemas']['CaseExternalEntityLinkCreateRequest'];
-export type CaseExternalEntityUnlinkModel = components['schemas']['CaseExternalEntityLinkRequest'];
+export type CaseExternalEntityUnlinkModel =
+  operations['caseExternalEntityDestroy']['responses']['204']['content'];
 
+// case models
 export const useCaseListModel = createSuspenseQueryHook(caseApi, '/api/v1/case/');
 export const useCaseDetailModel = createSuspenseQueryHook(caseApi, '/api/v1/case/{orcabusId}/');
 export const useCaseCreateModel = createPostMutationHook(caseApi, '/api/v1/case/');
 export const useCaseUpdateModel = createPatchMutationHook(caseApi, '/api/v1/case/{orcabusId}/');
-export const useCaseDeleteModel = createDeleteMutationHook(caseApi, '/api/v1/case/{orcabusId}/');
 
+// case activity and external entities
+export const useCaseActivityModel = createSuspenseQueryHook(
+  caseApi,
+  '/api/v1/case/{orcabusId}/activity/'
+);
+export const useCaseExternalEntityCreateModel = createPostMutationHook(
+  caseApi,
+  '/api/v1/case/{orcabusId}/external-entity/'
+);
 export const useCaseUnlinkEntityModel = createDeleteMutationHook(
   caseApi,
   '/api/v1/case/{orcabusId}/external-entity/{externalEntityOrcabusId}/'
 );
-export const useCaseLinkEntityModel = createPostMutationHook(
+
+// case user management
+export const useCaseAddUserModel = createPostMutationHook(
   caseApi,
-  '/api/v1/case/{orcabusId}/external-entity/'
+  '/api/v1/case/{orcabusId}/user/'
+);
+export const useCaseRemoveUserModel = createDeleteMutationHook(
+  caseApi,
+  '/api/v1/case/{orcabusId}/user/{userOrcabusId}/'
 );
 
-export const useCaseGenerateModel = createPostMutationHook(caseApi, '/api/v1/case/generate/');
+// case states
+export const useCaseStatesModel = createSuspenseQueryHook(
+  caseApi,
+  '/api/v1/case/{orcabusId}/states/'
+);
+export const useCaseStateCreateModel = createPostMutationHook(caseApi, '/api/v1/state/');
+
+// case comments
+export const useCaseCommentCreateModel = createPostMutationHook(caseApi, '/api/v1/comment/');

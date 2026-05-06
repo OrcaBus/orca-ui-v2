@@ -62,7 +62,7 @@ export function MultiSelect({
           triggerClassName
         )}
       >
-        <span className='flex min-h-[20px] flex-1 flex-wrap items-center gap-1'>
+        <span className='flex min-h-5 flex-1 flex-wrap items-center gap-1'>
           {selectedLabels.length === 0 ? (
             <span className='text-neutral-500 dark:text-[#9dabb9]'>{placeholder}</span>
           ) : selectedLabels.length <= 2 ? (

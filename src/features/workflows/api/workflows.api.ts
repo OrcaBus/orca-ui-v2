@@ -123,7 +123,7 @@ export const useSuspenseWorkflowModel = createSuspenseQueryHook(workflowApi, '/a
 export const useSuspensePayloadListModel = createSuspenseQueryHook(workflowApi, '/api/v1/payload/');
 
 // analysis run model
-export const useAnalysisRunListModel = createQueryHook(workflowApi, '/api/v1/analysisrun/');
+export const useAnalysisRunListModel = createSuspenseQueryHook(workflowApi, '/api/v1/analysisrun/');
 export const useAnalysisRunDetailModel = createQueryHook(
   workflowApi,
   '/api/v1/analysisrun/{orcabusId}/'
