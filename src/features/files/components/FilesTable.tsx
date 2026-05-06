@@ -13,7 +13,7 @@ import { FileRecordDetailsDrawer } from './FileRecordDetailsDrawer';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { FilePathSegments } from './FilePathSegments';
 import { FilePreviewButton } from './FilePreviewButton';
-import { IgvDesktopButton } from './IgvDesktopButton';
+import { FileIgvDesktopButton as IgvDesktopButton } from './FileIgvDesktopButton';
 import { IGV_FILETYPE_LIST, isFileDownloadable } from '@/utils/files';
 import { FileMoreActionsDropdown } from './FileMoreActionsDropdown';
 

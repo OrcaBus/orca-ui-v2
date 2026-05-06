@@ -18,7 +18,7 @@ const toError = (error: unknown, fallbackMessage: string): Error => {
   return error instanceof Error ? error : new Error(fallbackMessage);
 };
 
-export const IgvDesktopButton = ({ s3ObjectId, bucket, s3Key, className, iconOnly }: Props) => {
+export const FileIgvDesktopButton = ({ s3ObjectId, bucket, s3Key, className, iconOnly }: Props) => {
   const [isOpening, setIsOpening] = useState(false);
   const idxKey = createIdxFileKey(s3Key);
 
