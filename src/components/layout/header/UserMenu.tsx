@@ -8,16 +8,18 @@ import {
   MenuSection,
   MenuSeparator,
 } from '@headlessui/react';
-import { LogOut, Settings, User } from 'lucide-react';
+import { UserKey, LogOut, Settings, User } from 'lucide-react';
 import { useAuthContext } from '@/context/auth-context';
 import { getUsername } from '@/utils/string';
 import { ThemeSettingsModal } from './ThemeSettingsModal';
 import { UserProfileModal } from './UserProfileModal';
+import { UserTokenModal } from './UserTokenModal';
 
 export function UserMenu() {
   const { user: userInformation, logout } = useAuthContext();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [tokenOpen, setTokenOpen] = useState(false);
   const userName = userInformation?.name || getUsername(userInformation?.email as string);
   const userEmail = userInformation?.email ?? '';
   const initials = userName
@@ -77,6 +79,21 @@ export function UserMenu() {
                 <button
                   type='button'
                   onClick={() => {
+                    setTokenOpen(true);
+                    close();
+                  }}
+                  className='flex w-full items-center gap-2 rounded px-3 py-2 text-left text-[13px] text-slate-700 data-focus:bg-slate-100 dark:text-slate-300 dark:data-focus:bg-[#1e252e]'
+                >
+                  <UserKey className='h-4 w-4 shrink-0' />
+                  Token
+                </button>
+              )}
+            </MenuItem>
+            <MenuItem>
+              {({ close }) => (
+                <button
+                  type='button'
+                  onClick={() => {
                     setSettingsOpen(true);
                     close();
                   }}
@@ -113,6 +130,7 @@ export function UserMenu() {
       {profileOpen && (
         <UserProfileModal user={userInformation} onClose={() => setProfileOpen(false)} />
       )}
+      {tokenOpen && <UserTokenModal onClose={() => setTokenOpen(false)} />}
     </>
   );
 }
