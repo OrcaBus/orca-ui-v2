@@ -1,5 +1,5 @@
 {
-  "name": "UMCCR Orcabus Portal Web UI",
+  "name": "ummcr-lims-portal-ui",
   "version": "0.1.0",
   "private": true,
   "type": "module",
