@@ -1,19 +1,10 @@
 import { useState } from 'react';
-import { useForm, useWatch } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { X, Search } from 'lucide-react';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/form/form';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
-import { Select } from '@/components/ui/Select';
 
 const CASE_TYPES = [
   { value: 'clinical', label: 'Clinical' },
@@ -60,6 +51,9 @@ export function AddCaseModal({ isOpen, libraries, onClose, onSubmit }: AddCaseMo
     defaultValues,
     mode: 'onChange',
   });
+  const {
+    formState: { errors },
+  } = form;
 
   const handleClose = () => {
     form.reset(defaultValues);
@@ -131,189 +125,230 @@ export function AddCaseModal({ isOpen, libraries, onClose, onSubmit }: AddCaseMo
         </div>
 
         <div className='px-6 py-5'>
-          <Form {...form}>
-            <form onSubmit={(e) => void form.handleSubmit(handleFormSubmit)(e)}>
-              <div className='mb-5 grid grid-cols-2 gap-4'>
-                <FormField
-                  control={form.control}
-                  name='title'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        Title <span className='text-red-500 dark:text-red-400'>*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder='e.g. Lung Cancer Study 2024'
-                          className='rounded-lg border-neutral-300 shadow-sm dark:border-[#2d3540] dark:bg-[#1e252e] dark:focus:border-[#137fec] dark:focus:ring-[#137fec]'
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+          <form onSubmit={(e) => void form.handleSubmit(handleFormSubmit)(e)}>
+            <div className='mb-5 grid grid-cols-2 gap-4'>
+              <div className='space-y-2'>
+                <label
+                  htmlFor='add-case-title'
+                  className='text-sm font-medium text-neutral-700 dark:text-neutral-300'
+                >
+                  Title <span className='text-red-500 dark:text-red-400'>*</span>
+                </label>
+                <Input
+                  id='add-case-title'
+                  aria-invalid={!!errors.title}
+                  aria-describedby={errors.title ? 'add-case-title-error' : undefined}
+                  {...form.register('title')}
+                  placeholder='e.g. Lung Cancer Study 2024'
+                  className='rounded-lg border-neutral-300 shadow-sm dark:border-[#2d3540] dark:bg-[#1e252e] dark:focus:border-[#137fec] dark:focus:ring-[#137fec]'
                 />
-                <FormField
-                  control={form.control}
-                  name='alias'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Alias</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder='Internal ID (Optional)'
-                          className='rounded-lg border-neutral-300 shadow-sm dark:border-[#2d3540] dark:bg-[#1e252e] dark:focus:border-[#137fec] dark:focus:ring-[#137fec]'
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {errors.title && (
+                  <p
+                    id='add-case-title-error'
+                    className='text-sm font-medium text-red-500 dark:text-red-400'
+                  >
+                    {errors.title.message}
+                  </p>
+                )}
               </div>
 
-              <div className='mb-5'>
-                <FormField
-                  control={form.control}
-                  name='caseType'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        Type <span className='text-red-500 dark:text-red-400'>*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Select
-                          value={field.value}
-                          onChange={field.onChange}
-                          placeholder='Select case type'
-                          options={[...CASE_TYPES]}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+              <div className='space-y-2'>
+                <label
+                  htmlFor='add-case-alias'
+                  className='text-sm font-medium text-neutral-700 dark:text-neutral-300'
+                >
+                  Alias
+                </label>
+                <Input
+                  id='add-case-alias'
+                  aria-invalid={!!errors.alias}
+                  aria-describedby={errors.alias ? 'add-case-alias-error' : undefined}
+                  {...form.register('alias')}
+                  placeholder='Internal ID (Optional)'
+                  className='rounded-lg border-neutral-300 shadow-sm dark:border-[#2d3540] dark:bg-[#1e252e] dark:focus:border-[#137fec] dark:focus:ring-[#137fec]'
                 />
+                {errors.alias && (
+                  <p
+                    id='add-case-alias-error'
+                    className='text-sm font-medium text-red-500 dark:text-red-400'
+                  >
+                    {errors.alias.message}
+                  </p>
+                )}
               </div>
+            </div>
 
-              <div className='mb-5'>
-                <FormField
-                  control={form.control}
-                  name='description'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Description</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          {...field}
-                          placeholder='Enter detailed description regarding the study goals, methodology or special handling requirements...'
-                          rows={4}
-                          className='min-h-0 resize-none rounded-lg border-neutral-300 shadow-sm dark:border-[#2d3540] dark:bg-[#1e252e] dark:focus:border-[#137fec] dark:focus:ring-[#137fec]'
+            <div className='mb-5 space-y-2'>
+              <label
+                htmlFor='add-case-type'
+                className='text-sm font-medium text-neutral-700 dark:text-neutral-300'
+              >
+                Type <span className='text-red-500 dark:text-red-400'>*</span>
+              </label>
+              <select
+                id='add-case-type'
+                aria-invalid={!!errors.caseType}
+                aria-describedby={errors.caseType ? 'add-case-type-error' : undefined}
+                {...form.register('caseType')}
+                className='w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-200 dark:focus:border-[#137fec] dark:focus:ring-[#137fec]'
+              >
+                <option value='' disabled>
+                  Select case type
+                </option>
+                {CASE_TYPES.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              {errors.caseType && (
+                <p
+                  id='add-case-type-error'
+                  className='text-sm font-medium text-red-500 dark:text-red-400'
+                >
+                  {errors.caseType.message}
+                </p>
+              )}
+            </div>
+
+            <div className='mb-5 space-y-2'>
+              <label
+                htmlFor='add-case-description'
+                className='text-sm font-medium text-neutral-700 dark:text-neutral-300'
+              >
+                Description
+              </label>
+              <Textarea
+                id='add-case-description'
+                aria-invalid={!!errors.description}
+                aria-describedby={errors.description ? 'add-case-description-error' : undefined}
+                {...form.register('description')}
+                placeholder='Enter detailed description regarding the study goals, methodology or special handling requirements...'
+                rows={4}
+                className='min-h-0 resize-none rounded-lg border-neutral-300 shadow-sm dark:border-[#2d3540] dark:bg-[#1e252e] dark:focus:border-[#137fec] dark:focus:ring-[#137fec]'
+              />
+              {errors.description && (
+                <p
+                  id='add-case-description-error'
+                  className='text-sm font-medium text-red-500 dark:text-red-400'
+                >
+                  {errors.description.message}
+                </p>
+              )}
+            </div>
+
+            <div className='mb-6'>
+              <Controller
+                control={form.control}
+                name='linkedLibraryIds'
+                render={() => (
+                  <div className='space-y-2'>
+                    <div className='mb-1.5 flex items-center justify-between'>
+                      <label
+                        htmlFor='add-case-linked-libraries'
+                        className='text-sm font-medium text-neutral-700 dark:text-neutral-300'
+                      >
+                        Initial Linked Libraries
+                      </label>
+                      <span className='text-xs text-neutral-400 dark:text-[#9dabb9]'>Optional</span>
+                    </div>
+                    <div
+                      id='add-case-linked-libraries'
+                      aria-invalid={!!errors.linkedLibraryIds}
+                      aria-describedby={
+                        errors.linkedLibraryIds ? 'add-case-linked-libraries-error' : undefined
+                      }
+                      className='overflow-hidden rounded-lg border border-neutral-300 bg-white dark:border-[#2d3540] dark:bg-[#1e252e]'
+                    >
+                      <div className='relative'>
+                        <Search className='absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-neutral-400 dark:text-[#9dabb9]' />
+                        <input
+                          type='text'
+                          value={librarySearchQuery}
+                          onChange={(e) => setLibrarySearchQuery(e.target.value)}
+                          placeholder='Search by Library ID...'
+                          className='w-full border-b border-neutral-200 bg-transparent py-2.5 pr-3 pl-9 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none dark:border-[#2d3540] dark:bg-transparent dark:text-slate-100 dark:placeholder:text-[#9dabb9]'
                         />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className='mb-6'>
-                <FormField
-                  control={form.control}
-                  name='linkedLibraryIds'
-                  render={() => (
-                    <FormItem>
-                      <div className='mb-1.5 flex items-center justify-between'>
-                        <FormLabel>Initial Linked Libraries</FormLabel>
-                        <span className='text-xs text-neutral-400 dark:text-[#9dabb9]'>
-                          Optional
-                        </span>
                       </div>
-                      <FormControl>
-                        <div className='overflow-hidden rounded-lg border border-neutral-300 bg-white dark:border-[#2d3540] dark:bg-[#1e252e]'>
-                          <div className='relative'>
-                            <Search className='absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-neutral-400 dark:text-[#9dabb9]' />
-                            <input
-                              type='text'
-                              value={librarySearchQuery}
-                              onChange={(e) => setLibrarySearchQuery(e.target.value)}
-                              placeholder='Search by Library ID...'
-                              className='w-full border-b border-neutral-200 bg-transparent py-2.5 pr-3 pl-9 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none dark:border-[#2d3540] dark:bg-transparent dark:text-slate-100 dark:placeholder:text-[#9dabb9]'
-                            />
-                          </div>
-                          <div className='min-h-12 px-3 py-2.5'>
-                            {linkedLibraryIds.length > 0 && (
-                              <div className='mb-2 flex flex-wrap gap-2'>
-                                {linkedLibraryIds.map((libId) => {
-                                  const lib = libraries.find((l) => l.id === libId);
-                                  return (
-                                    <span
-                                      key={libId}
-                                      className='inline-flex items-center gap-1 rounded-md border border-neutral-200 bg-neutral-100 px-2.5 py-1 text-xs font-medium text-neutral-700 dark:border-[#2d3540] dark:bg-[#2d3540] dark:text-slate-200'
-                                    >
-                                      {lib?.name ?? libId}
-                                      <button
-                                        type='button'
-                                        onClick={() => toggleLibrary(libId)}
-                                        className='text-neutral-400 transition-colors hover:text-neutral-600 dark:text-[#9dabb9] dark:hover:text-slate-100'
-                                      >
-                                        <X className='h-3 w-3' />
-                                      </button>
-                                    </span>
-                                  );
-                                })}
-                              </div>
-                            )}
-                            {librarySearchQuery.trim() ? (
-                              <div className='space-y-1'>
-                                {filteredLibraries.slice(0, 5).map((lib) => (
+                      <div className='min-h-12 px-3 py-2.5'>
+                        {linkedLibraryIds.length > 0 && (
+                          <div className='mb-2 flex flex-wrap gap-2'>
+                            {linkedLibraryIds.map((libId) => {
+                              const lib = libraries.find((l) => l.id === libId);
+                              return (
+                                <span
+                                  key={libId}
+                                  className='inline-flex items-center gap-1 rounded-md border border-neutral-200 bg-neutral-100 px-2.5 py-1 text-xs font-medium text-neutral-700 dark:border-[#2d3540] dark:bg-[#2d3540] dark:text-slate-200'
+                                >
+                                  {lib?.name ?? libId}
                                   <button
-                                    key={lib.id}
                                     type='button'
-                                    onClick={() => toggleLibrary(lib.id)}
-                                    className='w-full rounded px-2 py-1.5 text-left font-mono text-sm text-neutral-700 transition-colors hover:bg-blue-50 hover:text-blue-700 dark:text-slate-200 dark:hover:bg-blue-500/10 dark:hover:text-blue-400'
+                                    onClick={() => toggleLibrary(libId)}
+                                    className='text-neutral-400 transition-colors hover:text-neutral-600 dark:text-[#9dabb9] dark:hover:text-slate-100'
                                   >
-                                    {lib.name}
+                                    <X className='h-3 w-3' />
                                   </button>
-                                ))}
-                                {filteredLibraries.length === 0 && (
-                                  <p className='py-1 text-xs text-neutral-400 dark:text-[#9dabb9]'>
-                                    No matching libraries
-                                  </p>
-                                )}
-                              </div>
-                            ) : (
-                              linkedLibraryIds.length === 0 && (
-                                <p className='text-center text-sm text-blue-500 dark:text-blue-400'>
-                                  Search to add libraries
-                                </p>
-                              )
+                                </span>
+                              );
+                            })}
+                          </div>
+                        )}
+                        {librarySearchQuery.trim() ? (
+                          <div className='space-y-1'>
+                            {filteredLibraries.slice(0, 5).map((lib) => (
+                              <button
+                                key={lib.id}
+                                type='button'
+                                onClick={() => toggleLibrary(lib.id)}
+                                className='w-full rounded px-2 py-1.5 text-left font-mono text-sm text-neutral-700 transition-colors hover:bg-blue-50 hover:text-blue-700 dark:text-slate-200 dark:hover:bg-blue-500/10 dark:hover:text-blue-400'
+                              >
+                                {lib.name}
+                              </button>
+                            ))}
+                            {filteredLibraries.length === 0 && (
+                              <p className='py-1 text-xs text-neutral-400 dark:text-[#9dabb9]'>
+                                No matching libraries
+                              </p>
                             )}
                           </div>
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+                        ) : (
+                          linkedLibraryIds.length === 0 && (
+                            <p className='text-center text-sm text-blue-500 dark:text-blue-400'>
+                              Search to add libraries
+                            </p>
+                          )
+                        )}
+                      </div>
+                    </div>
+                    {errors.linkedLibraryIds && (
+                      <p
+                        id='add-case-linked-libraries-error'
+                        className='text-sm font-medium text-red-500 dark:text-red-400'
+                      >
+                        {errors.linkedLibraryIds.message}
+                      </p>
+                    )}
+                  </div>
+                )}
+              />
+            </div>
 
-              <div className='flex items-center justify-end gap-3 border-t border-neutral-200 pt-4 dark:border-[#2d3540]'>
-                <button
-                  type='button'
-                  onClick={handleClose}
-                  className='rounded-lg border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-[#2d3540] dark:bg-[#2d3540] dark:text-slate-200 dark:hover:bg-[#2d3540]/80'
-                >
-                  Cancel
-                </button>
-                <button
-                  type='submit'
-                  className='rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 dark:bg-[#137fec] dark:hover:bg-blue-600'
-                >
-                  Create Case
-                </button>
-              </div>
-            </form>
-          </Form>
+            <div className='flex items-center justify-end gap-3 border-t border-neutral-200 pt-4 dark:border-[#2d3540]'>
+              <button
+                type='button'
+                onClick={handleClose}
+                className='rounded-lg border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-[#2d3540] dark:bg-[#2d3540] dark:text-slate-200 dark:hover:bg-[#2d3540]/80'
+              >
+                Cancel
+              </button>
+              <button
+                type='submit'
+                className='rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 dark:bg-[#137fec] dark:hover:bg-blue-600'
+              >
+                Create Case
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>

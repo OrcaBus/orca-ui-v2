@@ -1,6 +1,6 @@
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { DialogFrame } from '@/components/modals/DialogFrame';
+import { TimelineDialogFrame } from '@/components/timeline/TimelineDialogFrame';
 
 export interface DeleteCommentDialogProps {
   isOpen: boolean;
@@ -29,11 +29,11 @@ export function DeleteCommentDialog({
   };
 
   return (
-    <DialogFrame
+    <TimelineDialogFrame
       isOpen={isOpen}
       onClose={onClose}
       title={title}
-      size='sm'
+      icon={<Trash2 className='h-5 w-5' />}
       footer={
         <>
           <button
@@ -68,6 +68,6 @@ export function DeleteCommentDialog({
           )}
         </div>
       </div>
-    </DialogFrame>
+    </TimelineDialogFrame>
   );
 }

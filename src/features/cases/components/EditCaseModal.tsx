@@ -3,17 +3,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { X } from 'lucide-react';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/form/form';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
-import { Select } from '@/components/ui/Select';
 import type { Case } from '../types/case.types';
 
 const CASE_TYPES = [
@@ -58,6 +49,9 @@ export function EditCaseModal({ isOpen, case_, onClose, onSubmit }: EditCaseModa
     },
     mode: 'onChange',
   });
+  const {
+    formState: { errors },
+  } = form;
 
   useEffect(() => {
     if (isOpen && case_) {
@@ -109,129 +103,164 @@ export function EditCaseModal({ isOpen, case_, onClose, onSubmit }: EditCaseModa
         </div>
 
         <div className='px-6 py-5'>
-          <Form {...form}>
-            <form onSubmit={(e) => void form.handleSubmit(handleFormSubmit)(e)}>
-              <div className='mb-5 grid grid-cols-2 gap-4'>
-                <FormField
-                  control={form.control}
-                  name='title'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        Title <span className='text-red-500 dark:text-red-400'>*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder='e.g. Lung Cancer Study 2024'
-                          className='rounded-lg border-neutral-300 shadow-sm dark:border-[#2d3540] dark:bg-[#1e252e] dark:focus:border-[#137fec] dark:focus:ring-[#137fec]'
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name='alias'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Alias</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder='Internal ID (Optional)'
-                          className='rounded-lg border-neutral-300 shadow-sm dark:border-[#2d3540] dark:bg-[#1e252e] dark:focus:border-[#137fec] dark:focus:ring-[#137fec]'
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className='mb-5'>
-                <FormField
-                  control={form.control}
-                  name='caseType'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        Type <span className='text-red-500 dark:text-red-400'>*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Select
-                          value={field.value}
-                          onChange={field.onChange}
-                          placeholder='Select case type'
-                          options={[...CASE_TYPES]}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className='mb-5'>
-                <FormField
-                  control={form.control}
-                  name='status'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Status</FormLabel>
-                      <FormControl>
-                        <Select
-                          value={field.value}
-                          onChange={field.onChange}
-                          placeholder='Select status'
-                          options={[...CASE_STATUSES]}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className='mb-6'>
-                <FormField
-                  control={form.control}
-                  name='description'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Description</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          {...field}
-                          placeholder='Enter detailed description regarding the study goals, methodology or special handling requirements...'
-                          rows={4}
-                          className='min-h-0 resize-none rounded-lg border-neutral-300 shadow-sm dark:border-[#2d3540] dark:bg-[#1e252e] dark:focus:border-[#137fec] dark:focus:ring-[#137fec]'
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className='flex items-center justify-end gap-3 border-t border-neutral-200 pt-4 dark:border-[#2d3540]'>
-                <button
-                  type='button'
-                  onClick={handleClose}
-                  className='rounded-lg border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-[#2d3540] dark:bg-[#2d3540] dark:text-slate-200 dark:hover:bg-[#2d3540]/80'
+          <form onSubmit={(e) => void form.handleSubmit(handleFormSubmit)(e)}>
+            <div className='mb-5 grid grid-cols-2 gap-4'>
+              <div className='space-y-2'>
+                <label
+                  htmlFor='edit-case-title'
+                  className='text-sm font-medium text-neutral-700 dark:text-neutral-300'
                 >
-                  Cancel
-                </button>
-                <button
-                  type='submit'
-                  className='rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 dark:bg-[#137fec] dark:hover:bg-blue-600'
-                >
-                  Save Changes
-                </button>
+                  Title <span className='text-red-500 dark:text-red-400'>*</span>
+                </label>
+                <Input
+                  id='edit-case-title'
+                  aria-invalid={!!errors.title}
+                  aria-describedby={errors.title ? 'edit-case-title-error' : undefined}
+                  {...form.register('title')}
+                  placeholder='e.g. Lung Cancer Study 2024'
+                  className='rounded-lg border-neutral-300 shadow-sm dark:border-[#2d3540] dark:bg-[#1e252e] dark:focus:border-[#137fec] dark:focus:ring-[#137fec]'
+                />
+                {errors.title && (
+                  <p
+                    id='edit-case-title-error'
+                    className='text-sm font-medium text-red-500 dark:text-red-400'
+                  >
+                    {errors.title.message}
+                  </p>
+                )}
               </div>
-            </form>
-          </Form>
+
+              <div className='space-y-2'>
+                <label
+                  htmlFor='edit-case-alias'
+                  className='text-sm font-medium text-neutral-700 dark:text-neutral-300'
+                >
+                  Alias
+                </label>
+                <Input
+                  id='edit-case-alias'
+                  aria-invalid={!!errors.alias}
+                  aria-describedby={errors.alias ? 'edit-case-alias-error' : undefined}
+                  {...form.register('alias')}
+                  placeholder='Internal ID (Optional)'
+                  className='rounded-lg border-neutral-300 shadow-sm dark:border-[#2d3540] dark:bg-[#1e252e] dark:focus:border-[#137fec] dark:focus:ring-[#137fec]'
+                />
+                {errors.alias && (
+                  <p
+                    id='edit-case-alias-error'
+                    className='text-sm font-medium text-red-500 dark:text-red-400'
+                  >
+                    {errors.alias.message}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className='mb-5 space-y-2'>
+              <label
+                htmlFor='edit-case-type'
+                className='text-sm font-medium text-neutral-700 dark:text-neutral-300'
+              >
+                Type <span className='text-red-500 dark:text-red-400'>*</span>
+              </label>
+              <select
+                id='edit-case-type'
+                aria-invalid={!!errors.caseType}
+                aria-describedby={errors.caseType ? 'edit-case-type-error' : undefined}
+                {...form.register('caseType')}
+                className='w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-200 dark:focus:border-[#137fec] dark:focus:ring-[#137fec]'
+              >
+                <option value='' disabled>
+                  Select case type
+                </option>
+                {CASE_TYPES.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              {errors.caseType && (
+                <p
+                  id='edit-case-type-error'
+                  className='text-sm font-medium text-red-500 dark:text-red-400'
+                >
+                  {errors.caseType.message}
+                </p>
+              )}
+            </div>
+
+            <div className='mb-5 space-y-2'>
+              <label
+                htmlFor='edit-case-status'
+                className='text-sm font-medium text-neutral-700 dark:text-neutral-300'
+              >
+                Status
+              </label>
+              <select
+                id='edit-case-status'
+                aria-invalid={!!errors.status}
+                aria-describedby={errors.status ? 'edit-case-status-error' : undefined}
+                {...form.register('status')}
+                className='w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-200 dark:focus:border-[#137fec] dark:focus:ring-[#137fec]'
+              >
+                {CASE_STATUSES.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              {errors.status && (
+                <p
+                  id='edit-case-status-error'
+                  className='text-sm font-medium text-red-500 dark:text-red-400'
+                >
+                  {errors.status.message}
+                </p>
+              )}
+            </div>
+
+            <div className='mb-6 space-y-2'>
+              <label
+                htmlFor='edit-case-description'
+                className='text-sm font-medium text-neutral-700 dark:text-neutral-300'
+              >
+                Description
+              </label>
+              <Textarea
+                id='edit-case-description'
+                aria-invalid={!!errors.description}
+                aria-describedby={errors.description ? 'edit-case-description-error' : undefined}
+                {...form.register('description')}
+                placeholder='Enter detailed description regarding the study goals, methodology or special handling requirements...'
+                rows={4}
+                className='min-h-0 resize-none rounded-lg border-neutral-300 shadow-sm dark:border-[#2d3540] dark:bg-[#1e252e] dark:focus:border-[#137fec] dark:focus:ring-[#137fec]'
+              />
+              {errors.description && (
+                <p
+                  id='edit-case-description-error'
+                  className='text-sm font-medium text-red-500 dark:text-red-400'
+                >
+                  {errors.description.message}
+                </p>
+              )}
+            </div>
+
+            <div className='flex items-center justify-end gap-3 border-t border-neutral-200 pt-4 dark:border-[#2d3540]'>
+              <button
+                type='button'
+                onClick={handleClose}
+                className='rounded-lg border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-[#2d3540] dark:bg-[#2d3540] dark:text-slate-200 dark:hover:bg-[#2d3540]/80'
+              >
+                Cancel
+              </button>
+              <button
+                type='submit'
+                className='rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 dark:bg-[#137fec] dark:hover:bg-blue-600'
+              >
+                Save Changes
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>

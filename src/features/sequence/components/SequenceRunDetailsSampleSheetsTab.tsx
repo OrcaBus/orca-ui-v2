@@ -12,22 +12,29 @@ import { SimpleTable } from '@/components/tables/SimpleTable';
 import { Column } from '@/components/tables/DataTable';
 import { SampleSheetUploadModal } from './SampleSheetUploadModal';
 import { SampleSheetViewModal } from './SampleSheetViewModal';
+import { ApiErrorState } from '@/components/ui/ApiErrorState';
 
 export function SequenceRunDetailsSampleSheetsTab() {
   const { instrumentRunId } = useParams<{ instrumentRunId: string }>();
-  const { sequenceRunData } = useSequenceRunDetailsContext();
+  const { sequenceRunData, refresh } = useSequenceRunDetailsContext();
 
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [viewingSampleSheet, setViewingSampleSheet] =
     useState<SequenceRunSampleSheetDetailModel | null>(null);
 
-  const { data: sequenceRunSampleSheetData, refetch: refetchSequenceRunSampleSheet } =
-    useSequenceRunSampleSheetsByInstrumentRunIdModel({
-      params: { path: { instrumentRunId: instrumentRunId as string } },
-      reactQuery: {
-        enabled: !!instrumentRunId,
-      },
-    });
+  const {
+    data: sequenceRunSampleSheetData,
+    isLoading: isLoadingSequenceRunSampleSheets,
+    isFetching: isFetchingSequenceRunSampleSheets,
+    isError: isErrorSequenceRunSampleSheets,
+    error: sequenceRunSampleSheetError,
+    refetch: refetchSequenceRunSampleSheet,
+  } = useSequenceRunSampleSheetsByInstrumentRunIdModel({
+    params: { path: { instrumentRunId: instrumentRunId as string } },
+    reactQuery: {
+      enabled: !!instrumentRunId,
+    },
+  });
 
   const columns: Column<SequenceRunSampleSheetDetailModel>[] = [
     {
@@ -100,6 +107,21 @@ export function SequenceRunDetailsSampleSheetsTab() {
     },
   ];
 
+  if (isErrorSequenceRunSampleSheets) {
+    return (
+      <ApiErrorState
+        error={sequenceRunSampleSheetError}
+        onRetry={() => void refetchSequenceRunSampleSheet()}
+      />
+    );
+  }
+
+  const handleSampleSheetUploadSuccess = () => {
+    setIsUploadModalOpen(false);
+    void refetchSequenceRunSampleSheet();
+    refresh(); // Refresh the entire context to update all panels with the new sample sheet.
+  };
+
   return (
     <>
       <div className='mb-4 flex items-center justify-between'>
@@ -121,13 +143,14 @@ export function SequenceRunDetailsSampleSheetsTab() {
           (a, b) =>
             new Date(b.associationTimestamp).getTime() - new Date(a.associationTimestamp).getTime()
         )}
+        isLoading={isLoadingSequenceRunSampleSheets || isFetchingSequenceRunSampleSheets}
         emptyMessage='No sample sheets found for this sequence run.'
       />
 
       <SampleSheetUploadModal
         isOpen={isUploadModalOpen}
         onClose={() => setIsUploadModalOpen(false)}
-        onSuccess={() => void refetchSequenceRunSampleSheet()}
+        onSuccess={handleSampleSheetUploadSuccess}
       />
 
       <SampleSheetViewModal
