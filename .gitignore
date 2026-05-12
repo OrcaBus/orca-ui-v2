@@ -61,17 +61,16 @@ storybook-static.zip
 # TypeScript incremental build cache
 *.tsbuildinfo
 
-# ignore response.json for local deployment
+# Ignore response.json for local deployment
 response.json
 
-# ignore Vite visualizer
+# Ignore Vite visualizer
 stats.html
 
-# ignore openapi types
+# Ignore openapi types
 src/api/types/*
 
-# Cursor
-.cursor/
-
-# Ignore github skills 
+# Ignore AI agents files and skills
+.cursor/ 
 .github/skills/*
+.agents/*

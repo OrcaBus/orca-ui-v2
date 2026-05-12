@@ -18,6 +18,8 @@ export type QualityEnum = components['schemas']['QualityEnum'];
 export type TypeEnum = components['schemas']['TypeEnum'];
 export type WorkflowEnum = components['schemas']['WorkflowEnum'];
 
+export type SyncGSheetRequestType = components['schemas']['SyncGSheetRequest'];
+
 export type LibraryListQueryParams = operations['libraryList']['parameters']['query'];
 export type SubjectListQueryParams = operations['subjectList']['parameters']['query'];
 export type IndividualListQueryParams = operations['individualList']['parameters']['query'];

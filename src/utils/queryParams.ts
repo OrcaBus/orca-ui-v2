@@ -147,3 +147,42 @@ export function toApiCsvQueryValue(value: string): string | string[] | undefined
   const values = toCsvList(value);
   return toStringOrArray(values);
 }
+
+/**
+ * Clean object from undefined, null, or empty string
+ */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any */
+export function cleanObject(obj: Record<string, any>) {
+  return Object.keys(obj).reduce(
+    (prev: Record<string, any>, key) => {
+      const val = obj[key];
+      if (val !== undefined && val !== null && val !== '') {
+        prev[key] = val;
+      }
+      return prev;
+    },
+    {} as Record<string, any>
+  );
+}
+/* eslint-enable @typescript-eslint/no-unsafe-assignment */
+
+/**
+ * Get query params from URLSearchParams (uses cleanObject)
+ */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any */
+export const getQueryParams = (searchParams: URLSearchParams) => {
+  const params = [...searchParams.entries()].reduce((acc, tuple) => {
+    const [key, val] = tuple;
+    if (Object.prototype.hasOwnProperty.call(acc, key)) {
+      if (Array.isArray(acc[key])) {
+        acc[key] = [...acc[key], val];
+      } else {
+        acc[key] = [acc[key], val];
+      }
+    } else {
+      acc[key] = val;
+    }
+    return acc;
+  }, {} as any);
+  return cleanObject(params);
+};

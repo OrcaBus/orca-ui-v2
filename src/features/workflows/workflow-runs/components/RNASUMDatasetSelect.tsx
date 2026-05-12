@@ -16,6 +16,9 @@ interface RNASUMDatasetSelectProps {
   selectedValue: string | null;
   onChange: (value: string) => void;
   placeholder?: string;
+  inputId?: string;
+  ariaDescribedBy?: string;
+  ariaInvalid?: boolean;
 }
 
 export function RNASUMDatasetSelect({
@@ -23,6 +26,9 @@ export function RNASUMDatasetSelect({
   selectedValue,
   onChange,
   placeholder = 'Search datasets…',
+  inputId,
+  ariaDescribedBy,
+  ariaInvalid,
 }: RNASUMDatasetSelectProps) {
   const [query, setQuery] = useState('');
 
@@ -51,6 +57,9 @@ export function RNASUMDatasetSelect({
     >
       <div className='relative'>
         <ComboboxInput
+          id={inputId}
+          aria-describedby={ariaDescribedBy}
+          aria-invalid={ariaInvalid}
           className={cn(
             'w-full rounded-lg border px-3 py-2 pr-9 text-sm',
             'border-neutral-300 bg-white text-neutral-900 placeholder-neutral-400',

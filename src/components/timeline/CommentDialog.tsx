@@ -7,14 +7,6 @@ import { toast } from 'sonner';
 import { cn } from '@/utils/cn';
 import { TimelineCommentSeverityEnum, type CommentFormData } from './timeline.type';
 import { TimelineDialogFrame } from './TimelineDialogFrame';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/form/form';
 
 const commentSchema = z.object({
   timestamp: z.string().min(1, 'Timestamp is required'),
@@ -74,7 +66,7 @@ export function CommentDialog({
     register,
     handleSubmit,
     reset,
-    formState: { isSubmitting },
+    formState: { errors, isSubmitting },
   } = form;
 
   const commentValue = useWatch({
@@ -113,115 +105,134 @@ export function CommentDialog({
   };
 
   return (
-    <Form {...form}>
-      <TimelineDialogFrame
-        isOpen={isOpen}
-        onClose={handleClose}
-        title={dialogTitle}
-        icon={<MessageCircle className='h-5 w-5' />}
-        actorEmail={actorEmail}
-        actorTimestamp={actorTimestamp}
-        footer={
-          <>
-            <button
-              type='button'
-              onClick={handleClose}
-              className={cn(
-                'cursor-pointer rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition-colors',
-                'hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50',
-                'focus:ring-2 focus:ring-blue-500 focus:outline-none',
-                'dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-[#9dabb9] dark:hover:bg-[#2d3540]'
-              )}
-            >
-              Close
-            </button>
-            <button
-              type='submit'
-              form='timeline-comment-form'
-              disabled={isSubmitDisabled}
-              className={cn(
-                'cursor-pointer rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors',
-                'hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:outline-none',
-                'disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#137fec] dark:hover:bg-blue-600'
-              )}
-            >
-              {isSubmitting ? 'Saving...' : actionLabel}
-            </button>
-          </>
-        }
-      >
-        <form
-          id='timeline-comment-form'
-          onSubmit={(e) => void handleSubmit(handleFormSubmit)(e)}
-          className='space-y-5'
-        >
-          {hideTimestamp && <input type='hidden' {...register('timestamp')} />}
-          {hideSeverity && <input type='hidden' {...register('severity')} />}
-
-          {!hideTimestamp && (
-            <FormField
-              control={control}
-              name='timestamp'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Timestamp</FormLabel>
-                  <FormControl>
-                    <input
-                      type='datetime-local'
-                      {...field}
-                      className='w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-100 dark:focus:ring-[#137fec]'
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
-
-          {!hideSeverity && (
-            <FormField
-              control={control}
-              name='severity'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Severity</FormLabel>
-                  <FormControl>
-                    <select
-                      {...field}
-                      className='w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-100 dark:focus:ring-[#137fec]'
-                    >
-                      <option value={TimelineCommentSeverityEnum.DEBUG}>Debug</option>
-                      <option value={TimelineCommentSeverityEnum.INFO}>Info</option>
-                      <option value={TimelineCommentSeverityEnum.WARNING}>Warning</option>
-                      <option value={TimelineCommentSeverityEnum.ERROR}>Error</option>
-                    </select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
-
-          <FormField
-            control={control}
-            name='comment'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Comment</FormLabel>
-                <FormControl>
-                  <textarea
-                    rows={5}
-                    {...field}
-                    placeholder='Write your comment here...'
-                    className='min-h-35 w-full resize-none rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 shadow-sm placeholder:text-neutral-400 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-100 dark:placeholder-[#9dabb9] dark:focus:ring-[#137fec]'
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+    <TimelineDialogFrame
+      isOpen={isOpen}
+      onClose={handleClose}
+      title={dialogTitle}
+      icon={<MessageCircle className='h-5 w-5' />}
+      actorEmail={actorEmail}
+      actorTimestamp={actorTimestamp}
+      footer={
+        <>
+          <button
+            type='button'
+            onClick={handleClose}
+            className={cn(
+              'cursor-pointer rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition-colors',
+              'hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50',
+              'focus:ring-2 focus:ring-blue-500 focus:outline-none',
+              'dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-[#9dabb9] dark:hover:bg-[#2d3540]'
             )}
+          >
+            Close
+          </button>
+          <button
+            type='submit'
+            form='timeline-comment-form'
+            disabled={isSubmitDisabled}
+            className={cn(
+              'cursor-pointer rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors',
+              'hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:outline-none',
+              'disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#137fec] dark:hover:bg-blue-600'
+            )}
+          >
+            {isSubmitting ? 'Saving...' : actionLabel}
+          </button>
+        </>
+      }
+    >
+      <form
+        id='timeline-comment-form'
+        onSubmit={(e) => void handleSubmit(handleFormSubmit)(e)}
+        className='space-y-5'
+      >
+        {hideTimestamp && <input type='hidden' {...register('timestamp')} />}
+        {hideSeverity && <input type='hidden' {...register('severity')} />}
+
+        {!hideTimestamp && (
+          <div className='space-y-2'>
+            <label
+              htmlFor='timeline-comment-timestamp'
+              className='text-sm font-medium text-neutral-700 dark:text-neutral-300'
+            >
+              Timestamp
+            </label>
+            <input
+              id='timeline-comment-timestamp'
+              type='datetime-local'
+              aria-invalid={!!errors.timestamp}
+              aria-describedby={errors.timestamp ? 'timeline-comment-timestamp-error' : undefined}
+              {...register('timestamp')}
+              className='w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-100 dark:focus:ring-[#137fec]'
+            />
+            {errors.timestamp && (
+              <p
+                id='timeline-comment-timestamp-error'
+                className='text-sm font-medium text-red-500 dark:text-red-400'
+              >
+                {errors.timestamp.message}
+              </p>
+            )}
+          </div>
+        )}
+
+        {!hideSeverity && (
+          <div className='space-y-2'>
+            <label
+              htmlFor='timeline-comment-severity'
+              className='text-sm font-medium text-neutral-700 dark:text-neutral-300'
+            >
+              Severity
+            </label>
+            <select
+              id='timeline-comment-severity'
+              aria-invalid={!!errors.severity}
+              aria-describedby={errors.severity ? 'timeline-comment-severity-error' : undefined}
+              {...register('severity')}
+              className='w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-100 dark:focus:ring-[#137fec]'
+            >
+              <option value={TimelineCommentSeverityEnum.DEBUG}>Debug</option>
+              <option value={TimelineCommentSeverityEnum.INFO}>Info</option>
+              <option value={TimelineCommentSeverityEnum.WARNING}>Warning</option>
+              <option value={TimelineCommentSeverityEnum.ERROR}>Error</option>
+            </select>
+            {errors.severity && (
+              <p
+                id='timeline-comment-severity-error'
+                className='text-sm font-medium text-red-500 dark:text-red-400'
+              >
+                {errors.severity.message}
+              </p>
+            )}
+          </div>
+        )}
+
+        <div className='space-y-2'>
+          <label
+            htmlFor='timeline-comment-comment'
+            className='text-sm font-medium text-neutral-700 dark:text-neutral-300'
+          >
+            Comment
+          </label>
+          <textarea
+            id='timeline-comment-comment'
+            rows={5}
+            aria-invalid={!!errors.comment}
+            aria-describedby={errors.comment ? 'timeline-comment-comment-error' : undefined}
+            {...register('comment')}
+            placeholder='Write your comment here...'
+            className='min-h-35 w-full resize-none rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 shadow-sm placeholder:text-neutral-400 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-100 dark:placeholder-[#9dabb9] dark:focus:ring-[#137fec]'
           />
-        </form>
-      </TimelineDialogFrame>
-    </Form>
+          {errors.comment && (
+            <p
+              id='timeline-comment-comment-error'
+              className='text-sm font-medium text-red-500 dark:text-red-400'
+            >
+              {errors.comment.message}
+            </p>
+          )}
+        </div>
+      </form>
+    </TimelineDialogFrame>
   );
 }

@@ -8,7 +8,7 @@ interface ApiErrorStateProps extends Omit<ComponentProps<'div'>, 'title'> {
   title?: string;
   message?: string;
   error?: unknown;
-  onRetry?: () => void;
+  onRetry?: () => void | Promise<void>;
 }
 
 function resolveErrorDetails(error: unknown): {
@@ -151,7 +151,7 @@ export function ApiErrorState({
         {onRetry && (
           <button
             type='button'
-            onClick={onRetry}
+            onClick={() => void onRetry()}
             className='mt-5 inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-700 shadow-sm transition-all hover:bg-slate-50 hover:shadow dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-[#9dabb9] dark:hover:bg-[#252d38]'
           >
             <RefreshCw className='h-3.5 w-3.5' />
