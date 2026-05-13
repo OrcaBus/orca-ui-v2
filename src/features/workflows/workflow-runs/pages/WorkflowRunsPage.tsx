@@ -47,7 +47,6 @@ export function WorkflowRunsPage() {
   const {
     data: workflowStatusCountsData,
     isLoading: isLoadingWorkflowStatusCounts,
-    isFetching: isFetchingWorkflowStatusCounts,
     isError: isErrorWorkflowStatusCounts,
     error: workflowStatusCountsError,
     refetch: refetchWorkflowRunStatusCounts,
@@ -78,7 +77,6 @@ export function WorkflowRunsPage() {
           onStatusCardClick={handleStatusCardClick}
           workflowStatusCountsData={workflowStatusCountsData}
           isLoadingWorkflowStatusCounts={isLoadingWorkflowStatusCounts}
-          isFetchingWorkflowStatusCounts={isFetchingWorkflowStatusCounts}
           isErrorWorkflowStatusCounts={isErrorWorkflowStatusCounts}
           workflowStatusCountsError={workflowStatusCountsError}
           onRetry={refreshWorkflowRunStatusCounts}

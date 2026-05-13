@@ -23,7 +23,7 @@ const SequenceRunsTable = () => {
 
   const {
     data: sequenceRunsData,
-    isFetching: isFetchingSequenceRuns,
+    isRefetching: isRefetchingSequenceRuns,
     isLoading: isLoadingSequenceRuns,
     isError: isSequenceError,
     error: sequenceError,
@@ -175,7 +175,7 @@ const SequenceRunsTable = () => {
         keyExtractor={(sequenceRun) => sequenceRun.instrumentRunId ?? '-'}
         subRowsExtractor={(sequenceRun) => sequenceRun.items ?? []}
         subKeyExtractor={(run) => run.sequenceRunId ?? '-'}
-        isLoading={isLoadingSequenceRuns || isFetchingSequenceRuns}
+        isLoading={isLoadingSequenceRuns || isRefetchingSequenceRuns}
         onRefresh={() => void refetchSequenceRuns()}
         paginationProps={{
           page: sequenceRunsData?.pagination.page || 1,

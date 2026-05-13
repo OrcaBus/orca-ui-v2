@@ -37,7 +37,6 @@ export function WorkflowTypesStatusCards({
   const {
     data: workflowStatusCountsData,
     isLoading: isLoadingWorkflowStatusCounts,
-    isFetching: isFetchingWorkflowStatusCounts,
     isError: isErrorWorkflowStatusCounts,
     error: workflowStatusCountsError,
   } = useGroupedWorkflowStatusCountModel({
@@ -64,12 +63,11 @@ export function WorkflowTypesStatusCards({
     failed: workflowStatusCountsData?.failed ?? 0,
   };
 
-  const showLoadingCards = isFetchingWorkflowStatusCounts || isLoadingWorkflowStatusCounts;
   const total = counts.all;
 
   return (
     <div className='mb-6 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4'>
-      {showLoadingCards
+      {isLoadingWorkflowStatusCounts
         ? statusCards.map((card) => <StatusCard key={card.status} label='' value={0} isLoading />)
         : statusCards.map((card) => {
             const count = counts[card.countKey];

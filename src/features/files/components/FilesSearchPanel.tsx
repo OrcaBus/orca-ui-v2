@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Folder, Search, SlidersHorizontal, X, ChevronUp, Filter } from 'lucide-react';
-import { WORKFLOW_PATTERNS, FILE_EXTENSIONS } from '../constants';
+import { WORKFLOW_PATTERNS, FILE_EXTENSIONS } from '@/utils/constants';
 import { useFilesQueryParams, type FilterOp } from '../hooks/useFilesQueryParams';
 import { PillTag } from '@/components/ui/PillTag';
 import { useDebounce } from '@/hooks/useDebounce';

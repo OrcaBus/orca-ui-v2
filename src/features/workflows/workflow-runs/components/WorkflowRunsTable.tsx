@@ -33,8 +33,8 @@ const WorkflowRunsTable = ({ onBatchStateTransitionSuccess }: WorkflowRunsTableP
 
   const {
     data: workflowRuns,
-    isLoading,
-    isFetching,
+    isLoading: isLoadingWorkflowRuns,
+    isRefetching: isRefetchingWorkflowRuns,
     isError,
     error,
     refetch: refetchWorkflowRuns,
@@ -126,7 +126,7 @@ const WorkflowRunsTable = ({ onBatchStateTransitionSuccess }: WorkflowRunsTableP
       <DataTable
         data={workflowRuns?.results || []}
         columns={columns}
-        isLoading={isLoading || isFetching}
+        isLoading={isLoadingWorkflowRuns || isRefetchingWorkflowRuns}
         selectable
         onRefresh={() => void refetchWorkflowRuns()}
         emptyMessage='No workflow runs found'

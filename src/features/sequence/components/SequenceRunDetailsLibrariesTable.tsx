@@ -38,7 +38,7 @@ export function SequenceRunDetailsLibrariesTable() {
   } = useSequenceRunDetailsLibrariesQueryParams(lastLinkedLibraries);
 
   const {
-    isFetching: isFetchingLibraries,
+    isRefetching: isRefetchingLibraries,
     isLoading: isLoadingLibraries,
     isError: isErrorLibraries,
     error: errorLibraries,
@@ -257,7 +257,7 @@ export function SequenceRunDetailsLibrariesTable() {
     );
   }
 
-  const isLoading = isLoadingSequenceRun || isLoadingLibraries || isFetchingLibraries;
+  const isLoading = isLoadingSequenceRun || isLoadingLibraries || isRefetchingLibraries;
 
   return (
     <>

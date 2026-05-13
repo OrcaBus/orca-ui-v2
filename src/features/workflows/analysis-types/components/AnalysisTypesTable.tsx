@@ -15,7 +15,7 @@ const AnalysisTypesTable = () => {
   const { selectedAnalysisTypeId, openDetail, closeDetail } = useAnalysisTypeDetailDrawer();
   const {
     data: analysisData,
-    isFetching: isFetchingAnalysisData,
+    isRefetching: isRefetchingAnalysisData,
     isLoading: isLoadingAnalysisData,
     isError,
     error,
@@ -120,7 +120,7 @@ const AnalysisTypesTable = () => {
       <DataTable
         data={analysisData?.results || []}
         columns={columns}
-        isLoading={isLoadingAnalysisData || isFetchingAnalysisData}
+        isLoading={isLoadingAnalysisData || isRefetchingAnalysisData}
         onRefresh={() => void refetchAnalysis()}
         emptyMessage='No analysis types found'
         paginationProps={{

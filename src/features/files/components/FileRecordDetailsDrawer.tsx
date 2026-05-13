@@ -72,14 +72,11 @@ export function FileRecordDetailsDrawer({ file, onClose }: FileRecordDetailsDraw
   const {
     data: url,
     isLoading,
-    isFetching,
     refetch,
   } = useFilePresignedURLModel({
     params: { path: { id: file.s3ObjectId }, query: { responseContentDisposition: 'attachment' } },
     reactQuery: { enabled: false },
   });
-
-  const isPending = isLoading || isFetching;
 
   const handleDownload = useCallback(async () => {
     if (url) {
@@ -263,16 +260,16 @@ export function FileRecordDetailsDrawer({ file, onClose }: FileRecordDetailsDraw
         <div className='space-y-2.5 border-t border-neutral-200 pt-6 dark:border-neutral-700'>
           <button
             type='button'
-            disabled={isPending}
+            disabled={isLoading}
             onClick={() => void handleDownload()}
             className='flex w-full items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50'
           >
-            {isPending ? <Spinner className='h-4 w-4' /> : <Download className='h-4 w-4' />}
+            {isLoading ? <Spinner className='h-4 w-4' /> : <Download className='h-4 w-4' />}
             Download
           </button>
           <button
             type='button'
-            disabled={isPending}
+            disabled={isLoading}
             onClick={() => void handleCopyPresignUrl()}
             className='flex w-full items-center justify-center gap-2 rounded-md bg-neutral-100 px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-200 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700'
           >
@@ -281,7 +278,7 @@ export function FileRecordDetailsDrawer({ file, onClose }: FileRecordDetailsDraw
                 <Check className='h-4 w-4 text-green-600' />
                 Presigned URL Copied!
               </>
-            ) : isPending ? (
+            ) : isLoading ? (
               <>
                 <Spinner className='h-4 w-4' />
                 Generating link…

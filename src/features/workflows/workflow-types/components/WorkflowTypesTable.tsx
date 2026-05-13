@@ -19,7 +19,7 @@ const WorkflowTypesTable = () => {
   const { selectedWorkflowTypeId, openDetail, closeDetail } = useWorkflowTypeDetailDrawer();
   const {
     data: workflowData,
-    isFetching: isFetchingWorkflowsData,
+    isRefetching: isRefetchingWorkflowsData,
     isLoading: isLoadingWorkflowsData,
     isError,
     error,
@@ -126,7 +126,7 @@ const WorkflowTypesTable = () => {
       <DataTable
         data={workflowData?.results || []}
         columns={columns}
-        isLoading={isLoadingWorkflowsData || isFetchingWorkflowsData}
+        isLoading={isLoadingWorkflowsData || isRefetchingWorkflowsData}
         onRefresh={() => void refetchWorkflows()}
         emptyMessage='No workflow types found'
         paginationProps={{

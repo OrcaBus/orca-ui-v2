@@ -23,7 +23,6 @@ export function AnalysisRunDetailsWorkflowRunsTable() {
     useAnalysisRunDetailsWorkflowRunsQueryParams(analysisRunOrcabusId);
   const {
     data: analysisRunWorkflowRuns,
-    isFetching: isFetchingAnalysisRunWorkflowRuns,
     isLoading: isLoadingAnalysisRunWorkflowRuns,
     isError: isErrorAnalysisRunWorkflowRuns,
     error: errorAnalysisRunWorkflowRuns,
@@ -111,11 +110,7 @@ export function AnalysisRunDetailsWorkflowRunsTable() {
       <DataTable
         data={analysisRunWorkflowRuns?.results || []}
         columns={columns}
-        isLoading={
-          isLoadingAnalysisRunDetail ||
-          isLoadingAnalysisRunWorkflowRuns ||
-          isFetchingAnalysisRunWorkflowRuns
-        }
+        isLoading={isLoadingAnalysisRunDetail || isLoadingAnalysisRunWorkflowRuns}
         selectable
         onRefresh={() => void refetchAnalysisRunWorkflowRuns()}
         emptyMessage='No workflow runs found'

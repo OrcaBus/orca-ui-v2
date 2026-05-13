@@ -1,5 +1,5 @@
 import { Loader2, Play } from 'lucide-react';
-import type { LoggingLevel } from '../types';
+import type { LoggingLevel } from '../api/sschecker.api';
 import { FormatTipCard } from './FormatTipCard';
 import { LoggingLevelSelect } from './LoggingLevelSelect';
 import { SampleSheetFileInput } from './SampleSheetFileInput';

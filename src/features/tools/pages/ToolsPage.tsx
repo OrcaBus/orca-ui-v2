@@ -46,7 +46,7 @@ export function ToolsPage() {
           return (
             <div
               key={tool.id}
-              className={`rounded-lg border-2 border-neutral-200 bg-white p-6 transition-all dark:border-neutral-700 dark:bg-neutral-900 ${tool.hoverBorder} group hover:shadow-lg`}
+              className={`rounded-lg border-2 border-neutral-200 bg-white p-6 transition-all dark:border-neutral-700 dark:bg-neutral-900 ${tool.hoverBorder} group hover:shadow-xl`}
             >
               {/* Tool Header */}
               <div className='mb-4 flex items-start gap-4'>

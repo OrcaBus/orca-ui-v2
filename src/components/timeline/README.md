@@ -287,7 +287,7 @@ Displays workflow state payloads. It provides a selectable state carousel, a str
   selectedStateEventId={selectedPayloadStateEventId}
   onSelectedStateEventIdChange={setSelectedPayloadStateEventId}
   payload={payloadViewerPayload}
-  isLoading={isFetchingSelectedWorkflowPayload}
+  isLoading={isLoadingSelectedWorkflowPayload}
 />
 ```
 

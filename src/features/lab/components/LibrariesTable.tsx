@@ -29,8 +29,8 @@ export function LibrariesTable() {
     setOrderBy,
   } = useLabQueryParams();
   const {
-    isFetching,
-    isLoading,
+    isRefetching: isRefetchingLibraries,
+    isLoading: isLoadingLibraries,
     isError,
     error,
     data: libraries,
@@ -248,7 +248,7 @@ export function LibrariesTable() {
     <DataTable
       data={libraries?.results || []}
       columns={columns}
-      isLoading={isLoading || isFetching}
+      isLoading={isLoadingLibraries || isRefetchingLibraries}
       selectable
       onRefresh={() => void refetchLibraries()}
       toolbarActions={toolbarActions}

@@ -36,7 +36,6 @@ export function AnalysisRunDetailsLibrariesTable() {
   } = useAnalysisRunDetailsLibrariesQueryParams(libraryIds);
 
   const {
-    isFetching: isFetchingAnalysisRunLibraries,
     isLoading: isLoadingAnalysisRunLibraries,
     isError: isErrorAnalysisRunLibraries,
     error: errorAnalysisRunLibraries,
@@ -251,8 +250,7 @@ export function AnalysisRunDetailsLibrariesTable() {
     );
   }
 
-  const isLoading =
-    isLoadingAnalysisRunDetail || isLoadingAnalysisRunLibraries || isFetchingAnalysisRunLibraries;
+  const isLoading = isLoadingAnalysisRunDetail || isLoadingAnalysisRunLibraries;
 
   return (
     <>

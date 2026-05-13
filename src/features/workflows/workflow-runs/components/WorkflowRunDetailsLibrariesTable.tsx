@@ -35,7 +35,6 @@ export function WorkflowRunDetailsLibrariesTable() {
     getOrderDirection,
   } = useWorkflowRunDetailsLibrariesQueryParams(libraryIds);
   const {
-    isFetching: isFetchingWorkflowRunLibraries,
     isLoading: isLoadingWorkflowRunLibraries,
     isError: isErrorWorkflowRunLibraries,
     error: errorWorkflowRunLibraries,
@@ -250,8 +249,7 @@ export function WorkflowRunDetailsLibrariesTable() {
     );
   }
 
-  const isLoading =
-    isLoadingWorkflowRunDetail || isLoadingWorkflowRunLibraries || isFetchingWorkflowRunLibraries;
+  const isLoading = isLoadingWorkflowRunDetail || isLoadingWorkflowRunLibraries;
 
   return (
     <>
