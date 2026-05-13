@@ -289,7 +289,7 @@ export function WorkflowRunDetailsTimeline() {
       ? activePayloadViewerState.payloadId
       : null;
 
-  const { data: selectedWorkflowPayloadData, isFetching: isFetchingSelectedWorkflowPayload } =
+  const { data: selectedWorkflowPayloadData, isLoading: isLoadingSelectedWorkflowPayload } =
     useWorkflowRunPayloadModel({
       params: {
         path: {
@@ -553,7 +553,7 @@ export function WorkflowRunDetailsTimeline() {
         selectedStateEventId={selectedPayloadStateEventId}
         onSelectedStateEventIdChange={setSelectedPayloadStateEventId}
         payload={payloadViewerPayload}
-        isLoading={isFetchingSelectedWorkflowPayload}
+        isLoading={isLoadingSelectedWorkflowPayload}
       />
     </>
   );

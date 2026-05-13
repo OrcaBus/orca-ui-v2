@@ -25,7 +25,7 @@ export function SequenceRunDetailsSampleSheetsTab() {
   const {
     data: sequenceRunSampleSheetData,
     isLoading: isLoadingSequenceRunSampleSheets,
-    isFetching: isFetchingSequenceRunSampleSheets,
+    isRefetching: isRefetchingSequenceRunSampleSheets,
     isError: isErrorSequenceRunSampleSheets,
     error: sequenceRunSampleSheetError,
     refetch: refetchSequenceRunSampleSheet,
@@ -143,7 +143,7 @@ export function SequenceRunDetailsSampleSheetsTab() {
           (a, b) =>
             new Date(b.associationTimestamp).getTime() - new Date(a.associationTimestamp).getTime()
         )}
-        isLoading={isLoadingSequenceRunSampleSheets || isFetchingSequenceRunSampleSheets}
+        isLoading={isLoadingSequenceRunSampleSheets || isRefetchingSequenceRunSampleSheets}
         emptyMessage='No sample sheets found for this sequence run.'
       />
 

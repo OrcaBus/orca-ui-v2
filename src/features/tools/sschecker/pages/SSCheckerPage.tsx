@@ -2,7 +2,7 @@ import { FileText } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { SSCheckerBreadcrumb } from '../components/SSCheckerBreadcrumb';
 import { SSCheckerInputsPanel } from '../components/SSCheckerInputsPanel';
-import { SSCheckerResultsLog } from '../components/SSCheckerResultsLog';
+import { SSCheckerResultsLogPanel } from '../components/SSCheckerResultsLogPanel';
 import { useSSChecker } from '../hooks/useSSChecker';
 
 export function SSCheckerPage() {
@@ -10,8 +10,8 @@ export function SSCheckerPage() {
     selectedFile,
     loggingLevel,
     isChecking,
-    validationResults,
-    validationStatus,
+    validationResponse,
+    error,
     copied,
     handleFileSelect,
     handleFileClear,
@@ -19,6 +19,7 @@ export function SSCheckerPage() {
     handleCheck,
     handleCopyLog,
     handleDownloadLog,
+    handleDownloadV2SampleSheet,
   } = useSSChecker();
 
   return (
@@ -42,14 +43,17 @@ export function SSCheckerPage() {
           onCheck={() => void handleCheck()}
         />
 
-        <SSCheckerResultsLog
+        <SSCheckerResultsLogPanel
           isChecking={isChecking}
-          validationResults={validationResults}
-          validationStatus={validationStatus}
+          selectedFileName={selectedFile?.name}
+          validationResponse={validationResponse}
+          error={error}
           loggingLevel={loggingLevel}
           copied={copied}
           onCopyLog={handleCopyLog}
           onDownloadLog={handleDownloadLog}
+          onDownloadV2SampleSheet={handleDownloadV2SampleSheet}
+          onRetry={() => void handleCheck()}
         />
       </div>
     </div>

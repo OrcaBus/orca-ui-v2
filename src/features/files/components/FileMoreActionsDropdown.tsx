@@ -65,7 +65,6 @@ export function FileMoreActionsDropdown({ s3Record, onViewDetails }: Props) {
   const {
     data: inlineUrl,
     isLoading: isInlineLoading,
-    isFetching: isInlineFetching,
     refetch: refetchInline,
   } = useFilePresignedURLModel({
     params: { path: { id: s3ObjectId }, query: { responseContentDisposition: 'inline' } },
@@ -75,7 +74,6 @@ export function FileMoreActionsDropdown({ s3Record, onViewDetails }: Props) {
   const {
     data: attachUrl,
     isLoading: isAttachLoading,
-    isFetching: isAttachFetching,
     refetch: refetchAttach,
   } = useFilePresignedURLModel({
     params: { path: { id: s3ObjectId }, query: { responseContentDisposition: 'attachment' } },
@@ -116,9 +114,6 @@ export function FileMoreActionsDropdown({ s3Record, onViewDetails }: Props) {
     });
   }, [bucket, s3Key]);
 
-  const isPendingInline = isInlineLoading || isInlineFetching;
-  const isPendingAttach = isAttachLoading || isAttachFetching;
-
   return (
     <div ref={dropdownRef} className='relative'>
       <button
@@ -137,7 +132,7 @@ export function FileMoreActionsDropdown({ s3Record, onViewDetails }: Props) {
           {isDownloadable && (
             <MenuItem
               icon={
-                isPendingInline ? (
+                isInlineLoading ? (
                   <Spinner className='h-4 w-4' />
                 ) : (
                   <ExternalLink className='h-4 w-4' />
@@ -145,13 +140,13 @@ export function FileMoreActionsDropdown({ s3Record, onViewDetails }: Props) {
               }
               label='Open in browser tab'
               onClick={() => void handleOpenInTab()}
-              disabled={isPendingInline}
+              disabled={isInlineLoading}
             />
           )}
           {isDownloadable && (
             <MenuItem
               icon={
-                isPendingAttach ? (
+                isAttachLoading ? (
                   <Spinner className='h-4 w-4' />
                 ) : copiedPresign ? (
                   <Check className='h-4 w-4 text-green-600' />
@@ -161,7 +156,7 @@ export function FileMoreActionsDropdown({ s3Record, onViewDetails }: Props) {
               }
               label='Generate download link'
               onClick={() => void handleCopyPresign()}
-              disabled={isPendingAttach}
+              disabled={isAttachLoading}
             />
           )}
           <MenuItem

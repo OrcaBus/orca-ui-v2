@@ -131,7 +131,6 @@ export function WorkflowRunsBatchStateTransitionModal({
   const {
     data: workflowRunStateCreationValidMapData,
     isLoading: isLoadingValidationMap,
-    isFetching: isFetchingValidationMap,
     isError: hasValidationMapError,
     refetch: refetchValidationMap,
   } = useWorkflowRunStateCreationValidMapModel({
@@ -226,12 +225,11 @@ export function WorkflowRunsBatchStateTransitionModal({
     }
   };
 
-  const isValidationMapLoading = isLoadingValidationMap || isFetchingValidationMap;
   const hasSelectedWorkflowRuns = workflowRunOrcabusIds.length > 0;
   const hasSelectableStates = availableStateOptions.length > 0;
   const isSubmitDisabled =
     isSubmitting ||
-    isValidationMapLoading ||
+    isLoadingValidationMap ||
     hasValidationMapError ||
     !hasSelectedWorkflowRuns ||
     !hasSelectableStates ||
@@ -328,7 +326,7 @@ export function WorkflowRunsBatchStateTransitionModal({
           )}
         </div>
 
-        {isValidationMapLoading ? (
+        {isLoadingValidationMap ? (
           <div className='min-h-36 rounded-md border border-neutral-200 dark:border-[#2d3540]'>
             <SpinnerWithText text='Loading state transitions...' />
           </div>

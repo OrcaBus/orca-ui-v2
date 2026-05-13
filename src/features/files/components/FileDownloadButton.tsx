@@ -10,7 +10,6 @@ export const FileDownloadButton = ({ s3Record }: { s3Record: S3Record }) => {
   const {
     data: url,
     isLoading,
-    isFetching,
     refetch,
   } = useFilePresignedURLModel({
     params: { path: { id: s3ObjectId }, query: { responseContentDisposition: 'attachment' } },
@@ -32,17 +31,15 @@ export const FileDownloadButton = ({ s3Record }: { s3Record: S3Record }) => {
     }
   }, [url, refetch]);
 
-  const isPending = isLoading || isFetching;
-
   return (
     <button
       type='button'
-      disabled={isPending}
+      disabled={isLoading}
       onClick={() => void handleDownload()}
       className='rounded p-1.5 transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-[#2d3540]'
       title='Download file'
     >
-      {isPending ? (
+      {isLoading ? (
         <Spinner className='h-4 w-4 text-neutral-600 dark:text-[#8892a2]' />
       ) : (
         <Download className='h-4 w-4 text-neutral-600 dark:text-[#8892a2]' />

@@ -62,7 +62,6 @@ export function SequenceRunsStatusCards({
   // get sequence run status count
   const {
     data: sequenceRunStatsStatusCountsData,
-    isFetching: isFetchingSequenceRunStatsStatusCounts,
     isLoading: isLoadingSequenceRunStatsStatusCounts,
     isError: isErrorSequenceRunStatsStatusCounts,
     error: sequenceRunStatsStatusCountsError,
@@ -105,8 +104,7 @@ export function SequenceRunsStatusCards({
 
   const totalRuns = counts.all;
   const showLoadingCards =
-    isFetchingSequenceRunStatsStatusCounts ||
-    (isLoadingSequenceRunStatsStatusCounts && !sequenceRunStatsStatusCountsData);
+    isLoadingSequenceRunStatsStatusCounts && !sequenceRunStatsStatusCountsData;
 
   return (
     <div className='mb-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-6'>

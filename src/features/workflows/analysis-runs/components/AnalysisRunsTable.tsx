@@ -18,7 +18,7 @@ const AnalysisRunsTable = () => {
 
   const {
     data: analysisRunsData,
-    isFetching: isFetchingAnalysisRuns,
+    isRefetching: isRefetchingAnalysisRuns,
     isLoading: isLoadingAnalysisRuns,
     isError,
     error,
@@ -113,7 +113,7 @@ const AnalysisRunsTable = () => {
     <DataTable
       data={analysisRunsData?.results || []}
       columns={columns}
-      isLoading={isLoadingAnalysisRuns || isFetchingAnalysisRuns}
+      isLoading={isLoadingAnalysisRuns || isRefetchingAnalysisRuns}
       selectable
       onRefresh={() => void refetchAnalysisRuns()}
       emptyMessage='No analysis runs found'

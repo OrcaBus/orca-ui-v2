@@ -12,7 +12,7 @@ import { SpinnerWithText } from '@/components/ui/Spinner';
 export function LibraryIdRedirect() {
   const { libraryId } = useParams<{ libraryId: string }>();
 
-  const { data, isFetching, isError } = useQueryMetadataLibraryModel({
+  const { data, isLoading, isError } = useQueryMetadataLibraryModel({
     params: {
       query: {
         page: 1,
@@ -29,7 +29,7 @@ export function LibraryIdRedirect() {
     return <Navigate to='/lab' replace />;
   }
 
-  if (isFetching) {
+  if (isLoading) {
     return (
       <div className='flex h-screen items-center justify-center'>
         <SpinnerWithText text='Resolving library...' />

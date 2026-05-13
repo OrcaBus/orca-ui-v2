@@ -39,7 +39,6 @@ export function AnalysisRunsStatusCards({
   const {
     data: analysisRunStatusCountsData,
     isLoading: isLoadingAnalysisRunStatusCounts,
-    isFetching: isFetchingAnalysisRunStatusCounts,
     isError: isErrorAnalysisRunStatusCounts,
     error: analysisRunStatusCountsError,
   } = useAnalysisRunStatusCountModel({
@@ -71,12 +70,11 @@ export function AnalysisRunsStatusCards({
     deprecated: analysisRunStatusCountsData?.deprecated ?? 0,
   };
 
-  const showLoadingCards = isFetchingAnalysisRunStatusCounts || isLoadingAnalysisRunStatusCounts;
   const total = counts.all;
 
   return (
     <div className='mb-6 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-6'>
-      {showLoadingCards
+      {isLoadingAnalysisRunStatusCounts
         ? statusCards.map((card) => <StatusCard key={card.status} label='' value={0} isLoading />)
         : statusCards.map((card) => {
             const count = counts[card.status];

@@ -9,7 +9,6 @@ interface WorkflowRunsStatsCardsProps {
   onStatusCardClick: (status: WorkflowRunStatus) => void;
   workflowStatusCountsData?: WorkflowRunStatsStatusCountModel;
   isLoadingWorkflowStatusCounts: boolean;
-  isFetchingWorkflowStatusCounts: boolean;
   isErrorWorkflowStatusCounts: boolean;
   workflowStatusCountsError: unknown;
   onRetry: () => void;
@@ -34,7 +33,6 @@ export function WorkflowRunsStatsCards({
   onStatusCardClick,
   workflowStatusCountsData,
   isLoadingWorkflowStatusCounts,
-  isFetchingWorkflowStatusCounts,
   isErrorWorkflowStatusCounts,
   workflowStatusCountsError,
   onRetry,
@@ -54,7 +52,7 @@ export function WorkflowRunsStatsCards({
     deprecated: workflowStatusCountsData?.deprecated ?? 0,
   };
 
-  const showLoadingCards = isFetchingWorkflowStatusCounts || isLoadingWorkflowStatusCounts;
+  const showLoadingCards = isLoadingWorkflowStatusCounts;
   const total = counts.all;
 
   return (

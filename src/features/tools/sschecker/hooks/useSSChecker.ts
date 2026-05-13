@@ -1,92 +1,116 @@
 import { useState, useCallback } from 'react';
-import type { LoggingLevel, ValidationResult, ValidationStatus } from '../types';
-import { LEVEL_ORDER, MOCK_RESULTS } from '../constants';
+import {
+  useSSCheckPostMutation,
+  type LoggingLevel,
+  type SSCheckRequest,
+} from '../api/sschecker.api';
+
+function downloadTextFile({
+  content,
+  filename,
+  type,
+}: {
+  content: string;
+  filename: string;
+  type: string;
+}) {
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function buildSSCheckerFormData(file: File, loggingLevel: LoggingLevel): FormData {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('logLevel', loggingLevel);
+  return formData;
+}
 
 export function useSSChecker() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [loggingLevel, setLoggingLevel] = useState<LoggingLevel>('info');
-  const [isChecking, setIsChecking] = useState(false);
-  const [validationResults, setValidationResults] = useState<ValidationResult[] | null>(null);
-  const [validationStatus, setValidationStatus] = useState<ValidationStatus | null>(null);
+  const [loggingLevel, setLoggingLevel] = useState<LoggingLevel>('ERROR');
   const [copied, setCopied] = useState(false);
 
-  const handleFileSelect = useCallback((file: File) => {
-    setSelectedFile(file);
-    setValidationResults(null);
-    setValidationStatus(null);
-  }, []);
+  const {
+    data: validationResponse,
+    error,
+    isPending: isChecking,
+    mutateAsync: validateSampleSheet,
+    reset,
+  } = useSSCheckPostMutation();
+
+  const resetValidation = useCallback(() => {
+    reset();
+    setCopied(false);
+  }, [reset]);
+
+  const handleFileSelect = useCallback(
+    (file: File) => {
+      setSelectedFile(file);
+      resetValidation();
+    },
+    [resetValidation]
+  );
 
   const handleFileClear = useCallback(() => {
     setSelectedFile(null);
-    setValidationResults(null);
-    setValidationStatus(null);
-  }, []);
+    resetValidation();
+  }, [resetValidation]);
 
   const handleCheck = useCallback(async () => {
     if (!selectedFile) return;
-    setIsChecking(true);
 
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    const formData = buildSSCheckerFormData(selectedFile, loggingLevel);
 
-    const selectedLevelIndex = LEVEL_ORDER.indexOf(loggingLevel);
-    const filteredResults = MOCK_RESULTS.filter(
-      (r) => LEVEL_ORDER.indexOf(r.severity) >= selectedLevelIndex
-    );
-
-    setValidationResults(filteredResults);
-
-    const hasErrors = filteredResults.some(
-      (r) => r.severity === 'error' || r.severity === 'critical'
-    );
-    const hasWarnings = filteredResults.some((r) => r.severity === 'warning');
-
-    if (hasErrors) {
-      setValidationStatus('failed');
-    } else if (hasWarnings) {
-      setValidationStatus('warnings');
-    } else {
-      setValidationStatus('passed');
+    try {
+      await validateSampleSheet({ body: formData as unknown as SSCheckRequest });
+    } catch {
+      // React Query keeps the error state for inline rendering.
     }
-
-    setIsChecking(false);
-  }, [selectedFile, loggingLevel]);
-
-  const formatResultsAsText = useCallback((results: ValidationResult[]) => {
-    return results
-      .map(
-        (r) =>
-          `[${r.severity.toUpperCase()}]${r.line ? ` Line ${r.line}` : ''}${r.location ? ` (${r.location})` : ''}: ${r.message}`
-      )
-      .join('\n');
-  }, []);
+  }, [loggingLevel, selectedFile, validateSampleSheet]);
 
   const handleCopyLog = useCallback(() => {
-    if (!validationResults) return;
-    const text = formatResultsAsText(validationResults);
-    void navigator.clipboard.writeText(text).then(() => {
+    const logFile = validationResponse?.log_file;
+    if (!logFile) return;
+
+    void navigator.clipboard.writeText(logFile).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
-  }, [validationResults, formatResultsAsText]);
+  }, [validationResponse?.log_file]);
 
   const handleDownloadLog = useCallback(() => {
-    if (!validationResults) return;
-    const text = formatResultsAsText(validationResults);
-    const blob = new Blob([text], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'sschecker-results.log';
-    a.click();
-    URL.revokeObjectURL(url);
-  }, [validationResults, formatResultsAsText]);
+    const logFile = validationResponse?.log_file;
+    if (!logFile) return;
+
+    downloadTextFile({
+      content: logFile,
+      filename: 'sschecker-results.log',
+      type: 'text/plain;charset=utf-8',
+    });
+  }, [validationResponse?.log_file]);
+
+  const handleDownloadV2SampleSheet = useCallback(() => {
+    const sampleSheet = validationResponse?.v2_sample_sheet;
+    if (!sampleSheet) return;
+
+    downloadTextFile({
+      content: sampleSheet,
+      filename: 'sampleSheet_v2.csv',
+      type: 'text/csv;charset=utf-8',
+    });
+  }, [validationResponse?.v2_sample_sheet]);
 
   return {
     selectedFile,
     loggingLevel,
     isChecking,
-    validationResults,
-    validationStatus,
+    validationResponse,
+    error,
     copied,
     handleFileSelect,
     handleFileClear,
@@ -94,5 +118,6 @@ export function useSSChecker() {
     handleCheck,
     handleCopyLog,
     handleDownloadLog,
+    handleDownloadV2SampleSheet,
   };
 }

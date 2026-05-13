@@ -12,7 +12,7 @@ import { SpinnerWithText } from '@/components/ui/Spinner';
 export function WorkflowRunPortalRedirect() {
   const { portalRunId } = useParams<{ portalRunId: string }>();
 
-  const { data, isFetching, isError } = useWorkflowRunListModel({
+  const { data, isLoading, isError } = useWorkflowRunListModel({
     params: {
       query: {
         page: 1,
@@ -30,10 +30,10 @@ export function WorkflowRunPortalRedirect() {
     return <Navigate to='/workflows/workflow-runs' replace />;
   }
 
-  if (isFetching) {
+  if (isLoading) {
     return (
       <div className='flex h-screen items-center justify-center'>
-        <SpinnerWithText text='Resolving workflow run...' />
+        <SpinnerWithText text='Redirecting to workflow run...' />
       </div>
     );
   }

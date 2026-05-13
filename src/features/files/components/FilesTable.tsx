@@ -28,7 +28,6 @@ export function FilesTable() {
   const {
     data: filesData,
     isLoading: isLoadingFilesData,
-    isFetching: isFetchingFilesData,
     isError: isErrorFilesData,
     error: filesError,
     refetch: refetchFilesData,
@@ -181,7 +180,7 @@ export function FilesTable() {
       <DataTable
         data={filesData?.results ?? []}
         columns={columns}
-        isLoading={isLoadingFilesData || isFetchingFilesData}
+        isLoading={isLoadingFilesData}
         onRefresh={() => void refetchFilesData()}
         emptyMessage='No files found. Try adjusting your search or filters?'
         paginationProps={{
