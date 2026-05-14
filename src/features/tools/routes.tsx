@@ -24,7 +24,7 @@ const UnderDevelopmentPage = lazy(() =>
 export function SystemCatalogMapListRoute() {
   const { environment } = useEnvironment();
 
-  if (environment !== 'prod') {
+  if (environment !== 'dev') {
     return (
       <UnderDevelopmentPage
         featureName='System Catalog'

@@ -19,7 +19,7 @@ const UnderDevelopmentPage = lazy(() =>
 export function CaseRoute() {
   const { environment } = useEnvironment();
 
-  if (environment !== 'prod') {
+  if (environment !== 'dev') {
     return <UnderDevelopmentPage featureName='Cases' devUrl='portal.dev.umccr.org/v2/cases' />;
   }
 
