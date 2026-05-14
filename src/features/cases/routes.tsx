@@ -1,6 +1,7 @@
 import { lazy } from 'react';
 import { Outlet, useParams, type RouteObject } from 'react-router';
 import { useEnvironment } from '@/context/environment-context';
+import { useEnvironment } from '@/context/environment-context';
 
 const CasesPage = lazy(() => import('./pages/CasesPage').then((m) => ({ default: m.CasesPage })));
 const CaseDetailsPage = lazy(() =>
@@ -32,6 +33,7 @@ const Routes: RouteObject = {
   children: [
     {
       index: true,
+      element: <CaseRoute />,
       element: <CaseRoute />,
     },
     {
