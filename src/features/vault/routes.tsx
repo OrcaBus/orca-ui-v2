@@ -10,7 +10,7 @@ const UnderDevelopmentPage = lazy(() =>
 export function VaultRoute() {
   const { environment } = useEnvironment();
 
-  if (environment !== 'prod') {
+  if (environment !== 'dev') {
     return <UnderDevelopmentPage featureName='Vault' devUrl='portal.dev.umccr.org/v2/vault' />;
   }
 
