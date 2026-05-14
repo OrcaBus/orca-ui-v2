@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useLocation, Link, Outlet } from 'react-router';
 import {
-  LayoutDashboard,
   Briefcase,
   Database,
   Activity,
@@ -34,9 +33,8 @@ export function Root() {
     icon: typeof Briefcase;
     sublabel?: string;
   }> = [
-    { path: '/', label: 'Overview', icon: LayoutDashboard },
     { path: '/cases', label: 'Cases', icon: Briefcase },
-    { path: '/lab', label: 'Lab', icon: Database },
+    { path: '/', label: 'Lab', icon: Database },
     { path: '/sequence', label: 'Sequence', icon: Activity },
     { path: '/workflows', label: 'Workflows', icon: GitBranch },
     { path: '/files', label: 'Files', icon: FileText },

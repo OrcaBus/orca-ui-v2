@@ -21,9 +21,15 @@ interface FilesBucketSelectProps {
   values: string[];
   onChange: (values: string[]) => void;
   className?: string;
+  triggerClassName?: string;
 }
 
-export function FilesBucketSelect({ values, onChange, className }: FilesBucketSelectProps) {
+export function FilesBucketSelect({
+  values,
+  onChange,
+  className,
+  triggerClassName,
+}: FilesBucketSelectProps) {
   return (
     <MultiSelect
       values={values}
@@ -31,6 +37,8 @@ export function FilesBucketSelect({ values, onChange, className }: FilesBucketSe
       options={BUCKET_OPTIONS}
       placeholder='Select buckets…'
       className={className}
+      triggerClassName={triggerClassName}
+      maxVisibleTags={1}
     />
   );
 }

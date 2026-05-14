@@ -1,5 +1,6 @@
 import { lazy } from 'react';
 import { Outlet, type RouteObject } from 'react-router';
+import { useEnvironment } from '@/context/environment-context';
 
 const ToolsPage = lazy(() => import('./pages/ToolsPage').then((m) => ({ default: m.ToolsPage })));
 const SSCheckerPage = lazy(() =>
@@ -15,6 +16,25 @@ const SystemCatalogPage = lazy(() =>
     default: m.SystemCatalogPage,
   }))
 );
+
+const UnderDevelopmentPage = lazy(() =>
+  import('../errors/pages/UnderDevelopmentPage').then((m) => ({ default: m.UnderDevelopmentPage }))
+);
+
+export function SystemCatalogMapListRoute() {
+  const { environment } = useEnvironment();
+
+  if (environment !== 'prod') {
+    return (
+      <UnderDevelopmentPage
+        featureName='System Catalog'
+        devUrl='portal.dev.umccr.org/v2/tools/system-catalog'
+      />
+    );
+  }
+
+  return <MapListPage />;
+}
 
 const Routes: RouteObject = {
   path: '/tools',
@@ -34,7 +54,7 @@ const Routes: RouteObject = {
       children: [
         {
           index: true,
-          element: <MapListPage />,
+          element: <SystemCatalogMapListRoute />,
         },
         {
           path: ':mapId',
