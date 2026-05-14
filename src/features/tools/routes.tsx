@@ -1,7 +1,6 @@
 import { lazy } from 'react';
 import { Outlet, type RouteObject } from 'react-router';
 import { useEnvironment } from '@/context/environment-context';
-import { useEnvironment } from '@/context/environment-context';
 
 const ToolsPage = lazy(() => import('./pages/ToolsPage').then((m) => ({ default: m.ToolsPage })));
 const SSCheckerPage = lazy(() =>
@@ -55,7 +54,6 @@ const Routes: RouteObject = {
       children: [
         {
           index: true,
-          element: <SystemCatalogMapListRoute />,
           element: <SystemCatalogMapListRoute />,
         },
         {

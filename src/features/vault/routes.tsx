@@ -1,7 +1,6 @@
 import { lazy } from 'react';
 import type { RouteObject } from 'react-router';
 import { useEnvironment } from '@/context/environment-context';
-import { useEnvironment } from '@/context/environment-context';
 
 const VaultPage = lazy(() => import('./pages/VaultPage').then((m) => ({ default: m.VaultPage })));
 const UnderDevelopmentPage = lazy(() =>
@@ -20,7 +19,6 @@ export function VaultRoute() {
 
 const Routes: RouteObject = {
   path: '/vault',
-  element: <VaultRoute />,
   element: <VaultRoute />,
 };
 
