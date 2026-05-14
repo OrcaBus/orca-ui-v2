@@ -6,8 +6,8 @@ import authRoutes from '@/features/auth/routes';
 
 import routeRegistry from './route-registry';
 
-const OverviewPage = lazy(() =>
-  import('@/features/overview/pages/OverviewPage').then((m) => ({ default: m.OverviewPage }))
+const LabPage = lazy(() =>
+  import('@/features/lab/pages/LabPage').then((m) => ({ default: m.LabPage }))
 );
 const NotFoundPage = lazy(() =>
   import('@/features/errors/pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage }))
@@ -25,7 +25,7 @@ export const router = createBrowserRouter(
         {
           path: '/',
           Component: Root,
-          children: [{ index: true, Component: OverviewPage }, ...routeRegistry],
+          children: [{ index: true, Component: LabPage }, ...routeRegistry],
         },
       ],
     },

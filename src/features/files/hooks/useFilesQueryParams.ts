@@ -7,21 +7,28 @@ const PARAM_PORTAL_RUN_ID = 'portalRunId';
 const PARAM_KEY = 'key';
 const PARAM_KEY_OP = 'keyOp';
 const PARAM_BUCKET = 'bucket';
+// Legacy URL param. Bucket filters are now always sent as bucket[or][].
 const PARAM_BUCKET_OP = 'bucketOp';
 
 export type FilterOp = 'and' | 'or';
+type FilesQueryParams = Record<string, string | string[] | undefined>;
 
 export interface FilesFilters {
   /** Portal run IDs to filter by (OR match). */
   portalRunIds: string[];
   /** S3 key patterns; matched with keyOp logic. */
   keys: string[];
-  /** How multiple key patterns are combined. Default: 'or'. */
+  /** How multiple key patterns are combined. Default: 'and'. */
   keyOp: FilterOp;
-  /** Bucket names to filter by; matched with bucketOp logic. */
+  /** Bucket names to filter by (OR match). */
   buckets: string[];
-  /** How multiple bucket names are combined. Default: 'or'. */
-  bucketOp: FilterOp;
+}
+
+interface CreateFileListQueryParamsArgs {
+  filters: FilesFilters;
+  search: string;
+  pagination: { page: number; rowsPerPage: number };
+  orderBy: string;
 }
 
 export interface UseFilesQueryParamsReturn {
@@ -41,7 +48,7 @@ export interface UseFilesQueryParamsReturn {
   /**
    * API-ready query params derived from current URL state.
    *
-   * URL:  ?key=*%2Foncoanalyser*&key=*%2Frnasum*&keyOp=and&bucket=bucket1&portalRunId=abc
+   * URL:  ?key=*%2Foncoanalyser*&key=*%2Frnasum*&bucket=bucket1&portalRunId=abc
    * API:  key[and][]=*%2Foncoanalyser*&key[and][]=*%2Frnasum*&bucket[or][]=bucket1
    *       &attributes[portalRunId][]=abc&page=1&rowsPerPage=10
    */
@@ -53,15 +60,43 @@ function toArray(value: string | string[] | undefined): string[] {
   return Array.isArray(value) ? value : [value];
 }
 
-function toOp(value: string | string[] | undefined): FilterOp {
+function toOp(value: string | string[] | undefined, defaultOp: FilterOp): FilterOp {
   const v = Array.isArray(value) ? value[0] : value;
-  return v === 'and' ? 'and' : 'or';
+  if (v === 'and' || v === 'or') return v;
+  return defaultOp;
+}
+
+export function createFilesFilters(params: FilesQueryParams): FilesFilters {
+  return {
+    portalRunIds: toArray(params[PARAM_PORTAL_RUN_ID]),
+    keys: toArray(params[PARAM_KEY]),
+    keyOp: toOp(params[PARAM_KEY_OP], 'and'),
+    buckets: toArray(params[PARAM_BUCKET]),
+  };
+}
+
+export function createFileListQueryParams({
+  filters,
+  search,
+  pagination,
+  orderBy,
+}: CreateFileListQueryParamsArgs): Record<string, string | string[] | number> {
+  const p: Record<string, string | string[] | number> = {
+    page: pagination.page | 1,
+    rowsPerPage: pagination.rowsPerPage || DEFAULT_PAGE_SIZE,
+    ordering: orderBy || '-timestamp',
+  };
+  if (search) p['search'] = search;
+  if (filters.keys.length > 0) p[`key[${filters.keyOp}][]`] = filters.keys;
+  if (filters.buckets.length > 0) p['bucket[or][]'] = filters.buckets;
+  if (filters.portalRunIds.length > 0) p['attributes[portalRunId][]'] = filters.portalRunIds;
+  return p;
 }
 
 /**
  * Files page state driven by URL query params.
  *
- * URL params: search, portalRunId[], key[], keyOp, bucket[], bucketOp, page, rowsPerPage
+ * URL params: search, portalRunId[], key[], keyOp, bucket[], page, rowsPerPage
  */
 export function useFilesQueryParams(): UseFilesQueryParamsReturn {
   const {
@@ -77,29 +112,19 @@ export function useFilesQueryParams(): UseFilesQueryParamsReturn {
     getOrderDirection,
   } = useQueryParams();
 
-  const filters = useMemo<FilesFilters>(
-    () => ({
-      portalRunIds: toArray(params[PARAM_PORTAL_RUN_ID]),
-      keys: toArray(params[PARAM_KEY]),
-      keyOp: toOp(params[PARAM_KEY_OP]),
-      buckets: toArray(params[PARAM_BUCKET]),
-      bucketOp: toOp(params[PARAM_BUCKET_OP]),
-      search: search,
-    }),
-    [params, search]
-  );
+  const filters = useMemo<FilesFilters>(() => createFilesFilters(params), [params]);
 
   const setFilters = useCallback(
     (patch: Partial<FilesFilters>) => {
-      const next: Record<string, string | string[] | undefined> = {};
+      const next: Record<string, string | string[] | undefined> = {
+        [PARAM_BUCKET_OP]: undefined,
+      };
       if ('portalRunIds' in patch)
         next[PARAM_PORTAL_RUN_ID] = patch.portalRunIds?.length ? patch.portalRunIds : undefined;
       if ('keys' in patch) next[PARAM_KEY] = patch.keys?.length ? patch.keys : undefined;
-      if ('keyOp' in patch) next[PARAM_KEY_OP] = patch.keyOp === 'or' ? undefined : patch.keyOp;
+      if ('keyOp' in patch) next[PARAM_KEY_OP] = patch.keyOp === 'and' ? undefined : patch.keyOp;
       if ('buckets' in patch)
         next[PARAM_BUCKET] = patch.buckets?.length ? patch.buckets : undefined;
-      if ('bucketOp' in patch)
-        next[PARAM_BUCKET_OP] = patch.bucketOp === 'or' ? undefined : patch.bucketOp;
       setParams(next);
     },
     [setParams]
@@ -126,18 +151,10 @@ export function useFilesQueryParams(): UseFilesQueryParamsReturn {
     filters.buckets.length > 0;
 
   // API query params from current URL
-  const fileListQueryParams = useMemo<Record<string, string | string[] | number>>(() => {
-    const p: Record<string, string | string[] | number> = {
-      page: pagination.page | 1,
-      rowsPerPage: pagination.rowsPerPage || DEFAULT_PAGE_SIZE,
-      ordering: orderBy || '-timestamp',
-    };
-    if (search) p['search'] = search;
-    if (filters.keys.length > 0) p[`key[${filters.keyOp}][]`] = filters.keys;
-    if (filters.buckets.length > 0) p[`bucket[${filters.bucketOp}][]`] = filters.buckets;
-    if (filters.portalRunIds.length > 0) p['attributes[portalRunId][]'] = filters.portalRunIds;
-    return p;
-  }, [search, filters, pagination, orderBy]);
+  const fileListQueryParams = useMemo<Record<string, string | string[] | number>>(
+    () => createFileListQueryParams({ filters, search, pagination, orderBy }),
+    [search, filters, pagination, orderBy]
+  );
 
   return {
     search,

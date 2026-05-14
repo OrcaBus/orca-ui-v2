@@ -14,6 +14,7 @@ interface MultiSelectProps {
   placeholder?: string;
   className?: string;
   triggerClassName?: string;
+  maxVisibleTags?: number;
 }
 
 export function MultiSelect({
@@ -23,6 +24,7 @@ export function MultiSelect({
   placeholder = 'Select…',
   className,
   triggerClassName,
+  maxVisibleTags = 2,
 }: MultiSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -62,16 +64,16 @@ export function MultiSelect({
           triggerClassName
         )}
       >
-        <span className='flex min-h-5 flex-1 flex-wrap items-center gap-1'>
+        <span className='flex min-h-5 min-w-0 flex-1 flex-wrap items-center gap-1'>
           {selectedLabels.length === 0 ? (
             <span className='text-neutral-500 dark:text-[#9dabb9]'>{placeholder}</span>
-          ) : selectedLabels.length <= 2 ? (
+          ) : selectedLabels.length <= maxVisibleTags ? (
             selectedLabels.map((opt) => (
               <span
                 key={opt.value}
-                className='inline-flex items-center gap-0.5 rounded bg-blue-50 px-1.5 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-500/10 dark:text-blue-400'
+                className='inline-flex max-w-full items-center gap-0.5 rounded bg-blue-50 px-1.5 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-500/10 dark:text-blue-400'
               >
-                {opt.label}
+                <span className='truncate'>{opt.label}</span>
                 <X
                   className='h-3 w-3 cursor-pointer hover:text-blue-900 dark:hover:text-blue-200'
                   onClick={(e) => removeValue(opt.value, e)}

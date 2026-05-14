@@ -1,15 +1,50 @@
-import { useEffect, useRef, useState } from 'react';
+import {
+  useEffect,
+  useRef,
+  useState,
+  type Dispatch,
+  type KeyboardEvent,
+  type SetStateAction,
+} from 'react';
 import { Folder, Search, SlidersHorizontal, X, ChevronUp, Filter } from 'lucide-react';
 import { WORKFLOW_PATTERNS, FILE_EXTENSIONS } from '@/utils/constants';
 import { useFilesQueryParams, type FilterOp } from '../hooks/useFilesQueryParams';
 import { PillTag } from '@/components/ui/PillTag';
 import { useDebounce } from '@/hooks/useDebounce';
 import { FilesBucketSelect } from './FilesBucketSelect';
+import { appendKeyPattern, removeKeyPattern } from '../utils/keyPatterns';
 
-function appendOrSetPattern(current: string, extension: string): string {
-  if (!current.trim()) return extension;
-  const withoutExtension = current.replace(/\*\.[a-zA-Z0-9.]+$/, '').trim();
-  return withoutExtension ? `${withoutExtension}${extension}` : extension;
+interface AdvancedFilterDraft {
+  portalRunId: string;
+  buckets: string[];
+  keys: string[];
+  keyDraft: string;
+  keyOp: FilterOp;
+}
+
+function createDraftFromFilters(filters: {
+  portalRunIds: string[];
+  buckets: string[];
+  keys: string[];
+  keyOp: FilterOp;
+}): AdvancedFilterDraft {
+  return {
+    portalRunId: filters.portalRunIds[0] ?? '',
+    buckets: filters.buckets,
+    keys: filters.keys,
+    keyDraft: '',
+    keyOp: filters.keyOp,
+  };
+}
+
+function createClearedDraft(): AdvancedFilterDraft {
+  return {
+    portalRunId: '',
+    buckets: [],
+    keys: [],
+    keyDraft: '',
+    keyOp: 'and',
+  };
 }
 
 // Compact AND / OR toggle used next to multi-value filter fields
@@ -39,6 +74,118 @@ function OpToggle({ value, onChange }: { value: FilterOp; onChange: (op: FilterO
   );
 }
 
+interface FilesAdvancedFilterFieldsProps {
+  tempValues: AdvancedFilterDraft;
+  setTempValues: Dispatch<SetStateAction<AdvancedFilterDraft>>;
+  inputClass: string;
+  labelClass: string;
+}
+
+export function FilesAdvancedFilterFields({
+  tempValues,
+  setTempValues,
+  inputClass,
+  labelClass,
+}: FilesAdvancedFilterFieldsProps) {
+  const commitKeyDraft = () => {
+    setTempValues((prev) => ({
+      ...prev,
+      keys: appendKeyPattern(prev.keys, prev.keyDraft),
+      keyDraft: '',
+    }));
+  };
+
+  const handleKeyDraftKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      commitKeyDraft();
+      return;
+    }
+
+    if (e.key === 'Backspace' && tempValues.keyDraft === '' && tempValues.keys.length > 0) {
+      setTempValues((prev) => ({
+        ...prev,
+        keys: removeKeyPattern(prev.keys, prev.keys.length - 1),
+      }));
+    }
+  };
+
+  return (
+    <div className='space-y-4'>
+      <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
+        {/* Bucket */}
+        <div>
+          <label className={labelClass} htmlFor='adv-bucket'>
+            Bucket Name
+          </label>
+          <FilesBucketSelect
+            values={tempValues.buckets}
+            onChange={(buckets) => setTempValues((prev) => ({ ...prev, buckets }))}
+            triggerClassName={inputClass}
+          />
+        </div>
+
+        {/* Portal Run ID */}
+        <div>
+          <label htmlFor='adv-portalRunId' className={labelClass}>
+            Portal Run ID
+          </label>
+          <input
+            type='text'
+            id='adv-portalRunId'
+            value={tempValues.portalRunId}
+            onChange={(e) => setTempValues((prev) => ({ ...prev, portalRunId: e.target.value }))}
+            placeholder='Filter by portal run ID'
+            className={inputClass}
+          />
+        </div>
+      </div>
+
+      {/* S3 Key Pattern */}
+      <div>
+        <div className='mb-1.5 flex items-center justify-between'>
+          <label
+            htmlFor='adv-s3Key'
+            className='text-xs font-medium tracking-wide text-neutral-500 uppercase dark:text-[#9dabb9]'
+          >
+            S3 Key Pattern
+          </label>
+          <OpToggle
+            value={tempValues.keyOp}
+            onChange={(op) => setTempValues((prev) => ({ ...prev, keyOp: op }))}
+          />
+        </div>
+        <div className='flex min-h-10 w-full flex-wrap items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-2 py-1.5 text-sm text-neutral-900 focus-within:border-transparent focus-within:ring-2 focus-within:ring-blue-500 dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-100 dark:focus-within:ring-[#137fec]'>
+          {tempValues.keys.map((key, index) => (
+            <PillTag
+              key={`${key}-${index}`}
+              variant='blue'
+              onRemove={() =>
+                setTempValues((prev) => ({
+                  ...prev,
+                  keys: removeKeyPattern(prev.keys, index),
+                }))
+              }
+            >
+              {key}
+            </PillTag>
+          ))}
+          <input
+            type='text'
+            id='adv-s3Key'
+            value={tempValues.keyDraft}
+            onChange={(e) => setTempValues((prev) => ({ ...prev, keyDraft: e.target.value }))}
+            onKeyDown={handleKeyDraftKeyDown}
+            onBlur={commitKeyDraft}
+            placeholder='Enter S3 key pattern (wildcard supported)'
+            className='min-w-64 flex-1 bg-transparent px-1 py-0.5 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none dark:text-slate-100 dark:placeholder-[#9dabb9]'
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function FilesSearchPanel() {
   const { search: searchValue, filters, setSearch, setFilters, clearAll } = useFilesQueryParams();
 
@@ -50,13 +197,9 @@ export function FilesSearchPanel() {
   const prevDebouncedRef = useRef(debouncedSearch);
 
   // Draft state for the accordion — only committed on "Apply"
-  const [tempValues, setTempValues] = useState({
-    portalRunId: filters.portalRunIds[0] ?? '',
-    buckets: filters.buckets,
-    key: filters.keys[0] ?? '',
-    keyOp: filters.keyOp,
-    bucketOp: filters.bucketOp,
-  });
+  const [tempValues, setTempValues] = useState<AdvancedFilterDraft>(() =>
+    createDraftFromFilters(filters)
+  );
 
   // Sync local search input when external clear resets it
   useEffect(() => {
@@ -74,41 +217,31 @@ export function FilesSearchPanel() {
   // Sync draft from committed filters when opening the accordion
   const handleToggleOpen = () => {
     if (!isOpen) {
-      setTempValues({
-        portalRunId: filters.portalRunIds[0] ?? '',
-        buckets: filters.buckets,
-        key: filters.keys[0] ?? '',
-        keyOp: filters.keyOp,
-        bucketOp: filters.bucketOp,
-      });
+      setTempValues(createDraftFromFilters(filters));
     }
     setIsOpen(!isOpen);
   };
 
   const handleApply = () => {
+    const keys = appendKeyPattern(tempValues.keys, tempValues.keyDraft);
+    setTempValues((prev) => ({ ...prev, keys, keyDraft: '' }));
     setFilters({
       portalRunIds: tempValues.portalRunId.trim() ? [tempValues.portalRunId.trim()] : [],
-      keys: tempValues.key.trim() ? [tempValues.key.trim()] : [],
+      keys,
       keyOp: tempValues.keyOp,
       buckets: tempValues.buckets,
-      bucketOp: tempValues.bucketOp,
     });
   };
 
   const handleReset = () => {
-    const cleared = {
-      portalRunId: '',
-      buckets: [] as string[],
-      key: '',
-      keyOp: 'or' as FilterOp,
-      bucketOp: 'or' as FilterOp,
-    };
+    const cleared = createClearedDraft();
     setTempValues(cleared);
-    setFilters({ portalRunIds: [], keys: [], keyOp: 'or', buckets: [], bucketOp: 'or' });
+    setFilters({ portalRunIds: [], keys: [], keyOp: 'and', buckets: [] });
   };
 
   const handleClearAll = () => {
     setLocalSearch('');
+    setTempValues(createClearedDraft());
     clearAll();
   };
 
@@ -141,7 +274,11 @@ export function FilesSearchPanel() {
       type: 'filter',
       label: 'Portal Run ID',
       value: id,
-      onRemove: () => setFilters({ portalRunIds: filters.portalRunIds.filter((_, j) => j !== i) }),
+      onRemove: () => {
+        const portalRunIds = filters.portalRunIds.filter((_, j) => j !== i);
+        setTempValues((prev) => ({ ...prev, portalRunId: portalRunIds[0] ?? '' }));
+        setFilters({ portalRunIds });
+      },
     });
   });
 
@@ -151,7 +288,14 @@ export function FilesSearchPanel() {
       type: 'filter',
       label: 'Bucket',
       value: bucket,
-      onRemove: () => setFilters({ buckets: filters.buckets.filter((_, j) => j !== i) }),
+      onRemove: () => {
+        const buckets = filters.buckets.filter((_, j) => j !== i);
+        setTempValues((prev) => ({
+          ...prev,
+          buckets: prev.buckets.filter((value) => value !== bucket),
+        }));
+        setFilters({ buckets });
+      },
     });
   });
 
@@ -161,7 +305,14 @@ export function FilesSearchPanel() {
       type: 'filter',
       label: 'S3 Key',
       value: key,
-      onRemove: () => setFilters({ keys: filters.keys.filter((_, j) => j !== i) }),
+      onRemove: () => {
+        const keys = filters.keys.filter((_, j) => j !== i);
+        setTempValues((prev) => ({
+          ...prev,
+          keys: prev.keys.filter((value) => value !== key),
+        }));
+        setFilters({ keys });
+      },
     });
   });
 
@@ -169,7 +320,7 @@ export function FilesSearchPanel() {
   const hasActiveFilters = activeCount > 0;
 
   const inputClass =
-    'h-10 w-full rounded-md border border-neutral-300 bg-slate-50 px-3 text-sm text-neutral-900 placeholder-neutral-400 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-100 dark:placeholder-[#9dabb9] dark:focus:ring-[#137fec]';
+    'h-10 w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-0 text-sm text-neutral-900 shadow-none placeholder-neutral-400 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-100 dark:placeholder-[#9dabb9] dark:focus:ring-[#137fec]';
   const labelClass =
     'mb-1.5 block text-xs font-medium tracking-wide text-neutral-500 uppercase dark:text-[#9dabb9]';
 
@@ -241,65 +392,12 @@ export function FilesSearchPanel() {
 
           <div className='px-4 py-3'>
             {/* Field inputs */}
-            <div className='grid grid-cols-1 gap-4 md:grid-cols-3'>
-              {/* Bucket */}
-              <div>
-                <div className='mb-1.5 flex items-center justify-between'>
-                  <span className='text-xs font-medium tracking-wide text-neutral-500 uppercase dark:text-[#9dabb9]'>
-                    Bucket Name
-                  </span>
-                  <OpToggle
-                    value={tempValues.bucketOp}
-                    onChange={(op) => setTempValues((prev) => ({ ...prev, bucketOp: op }))}
-                  />
-                </div>
-                <FilesBucketSelect
-                  values={tempValues.buckets}
-                  onChange={(buckets) => setTempValues((prev) => ({ ...prev, buckets }))}
-                />
-              </div>
-
-              {/* Portal Run ID */}
-              <div>
-                <label htmlFor='adv-portalRunId' className={labelClass}>
-                  Portal Run ID
-                </label>
-                <input
-                  type='text'
-                  id='adv-portalRunId'
-                  value={tempValues.portalRunId}
-                  onChange={(e) =>
-                    setTempValues((prev) => ({ ...prev, portalRunId: e.target.value }))
-                  }
-                  placeholder='Filter by portal run ID'
-                  className={inputClass}
-                />
-              </div>
-
-              {/* S3 Key Pattern */}
-              <div>
-                <div className='mb-1.5 flex items-center justify-between'>
-                  <label
-                    htmlFor='adv-s3Key'
-                    className='text-xs font-medium tracking-wide text-neutral-500 uppercase dark:text-[#9dabb9]'
-                  >
-                    S3 Key Pattern
-                  </label>
-                  <OpToggle
-                    value={tempValues.keyOp}
-                    onChange={(op) => setTempValues((prev) => ({ ...prev, keyOp: op }))}
-                  />
-                </div>
-                <input
-                  type='text'
-                  id='adv-s3Key'
-                  value={tempValues.key}
-                  onChange={(e) => setTempValues((prev) => ({ ...prev, key: e.target.value }))}
-                  placeholder='e.g. /123456/ or *.bam (supports *)'
-                  className={inputClass}
-                />
-              </div>
-            </div>
+            <FilesAdvancedFilterFields
+              tempValues={tempValues}
+              setTempValues={setTempValues}
+              inputClass={inputClass}
+              labelClass={labelClass}
+            />
 
             {/* Shortcut Filters */}
             <div className='mt-4 border-t border-dashed border-neutral-100 pt-3 dark:border-[#2d3540]'>
@@ -321,12 +419,17 @@ export function FilesSearchPanel() {
                 </div>
                 <div className='flex flex-wrap gap-2'>
                   {WORKFLOW_PATTERNS.map((pattern) => {
-                    const isActive = tempValues.key === pattern;
+                    const isActive = tempValues.keys.includes(pattern);
                     return (
                       <button
                         key={pattern}
                         type='button'
-                        onClick={() => setTempValues((prev) => ({ ...prev, key: pattern }))}
+                        onClick={() =>
+                          setTempValues((prev) => ({
+                            ...prev,
+                            keys: appendKeyPattern(prev.keys, pattern),
+                          }))
+                        }
                         className={`rounded-md px-3 py-1.5 font-mono text-xs transition-colors ${
                           isActive
                             ? 'bg-purple-600 text-white'
@@ -352,7 +455,7 @@ export function FilesSearchPanel() {
                 </div>
                 <div className='flex flex-wrap gap-2'>
                   {FILE_EXTENSIONS.map((extension) => {
-                    const isActive = tempValues.key.includes(extension);
+                    const isActive = tempValues.keys.includes(extension);
                     return (
                       <button
                         key={extension}
@@ -360,7 +463,7 @@ export function FilesSearchPanel() {
                         onClick={() =>
                           setTempValues((prev) => ({
                             ...prev,
-                            key: appendOrSetPattern(prev.key, extension),
+                            keys: appendKeyPattern(prev.keys, extension),
                           }))
                         }
                         className={`rounded-md px-3 py-1.5 font-mono text-xs transition-colors ${
