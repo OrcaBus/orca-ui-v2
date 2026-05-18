@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { EnvironmentIndicator } from './header/EnvironmentIndicator';
 import { GlobalSearch } from './header/GlobalSearch';
-import { NotificationsMenu } from './header/NotificationsMenu';
+// import { NotificationsMenu } from './header/NotificationsMenu';
 import { UserMenu } from './header/UserMenu';
 
 export function Root() {
@@ -120,11 +120,12 @@ export function Root() {
               </>
             )}
           </button>
-          {!sidebarCollapsed && (
+          {/* todo: add version info or system info */}
+          {/* {!sidebarCollapsed && (
             <div className='mt-2 text-center text-[11px] text-slate-400 dark:text-[#9dabb9]/60'>
               v2.4.1 • Build 2847
             </div>
-          )}
+          )} */}
         </div>
       </aside>
 
@@ -141,8 +142,8 @@ export function Root() {
             <EnvironmentIndicator />
 
             <div className='hidden h-6 w-px bg-slate-200 sm:block dark:bg-[#2d3540]' />
-
-            <NotificationsMenu />
+            {/* todo: implement global notifications menu */}
+            {/* <NotificationsMenu /> */}
             <UserMenu />
           </div>
         </header>
