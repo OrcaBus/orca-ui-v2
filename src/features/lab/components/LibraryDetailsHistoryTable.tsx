@@ -1,35 +1,37 @@
 import { PillTag } from '@/components/ui/PillTag';
 import { DataTable, type Column } from '@/components/tables/DataTable';
-import { useTablePagination } from '@/components/tables/useTablePagination';
+import { useLibraryDetails } from '../context/LibraryDetailsContext';
+import { useQueryMetadataDetailLibraryHistoryModel, type LibraryHistoryType } from '../api/lab.api';
+import { ApiErrorState } from '@/components/ui/ApiErrorState';
+import { useLibraryDetailsHistoryQueryParams } from '../hooks/useLibraryDetailsHistoryQueryParams';
 
-export interface LibraryHistoryRecord {
-  historyId: string;
-  projectSet: string;
-  orcabusId: string;
-  libraryId: string;
-  phenotype: string;
-  workflow: string;
-  quality: number;
-  type: string;
-  assay: string;
-  coverage: number;
-  overrideCycles: string;
-  historyUserId: string;
-  historyDate: string;
-  historyChangeReason: string;
-  historyType: 'INSERT' | 'UPDATE' | 'DELETE';
-  sample: string;
-  subject: string;
-}
+export function LibraryDetailsHistoryTable() {
+  const { libraryDetail, isLoadingLibraryDetail } = useLibraryDetails();
 
-interface LibraryHistoryTabProps {
-  history: LibraryHistoryRecord[];
-}
+  const { pagination, setPage, setRowsPerPage } = useLibraryDetailsHistoryQueryParams();
 
-export function LibraryHistoryTab({ history }: LibraryHistoryTabProps) {
-  const pagination = useTablePagination(1, 20, history.length);
+  const {
+    data: libraryHistory,
+    isLoading: isLibraryHistoryLoading,
+    isError: isLibraryHistoryError,
+    error: libraryHistoryError,
+    refetch: refetchLibraryHistory,
+  } = useQueryMetadataDetailLibraryHistoryModel({
+    params: {
+      path: {
+        orcabusId: libraryDetail?.orcabusId,
+      },
+      query: {
+        page: pagination.page,
+        rowsPerPage: pagination.rowsPerPage,
+      },
+    },
+    reactQuery: {
+      enabled: !!libraryDetail && !isLoadingLibraryDetail,
+    },
+  });
 
-  const historyColumns: Column<LibraryHistoryRecord>[] = [
+  const historyColumns: Column<LibraryHistoryType>[] = [
     {
       key: 'historyId',
       header: 'History ID',
@@ -83,7 +85,7 @@ export function LibraryHistoryTab({ history }: LibraryHistoryTabProps) {
       header: 'Quality',
       sortable: true,
       render: (h) => (
-        <span className='text-sm text-neutral-900 dark:text-white'>{h.quality.toFixed(1)}</span>
+        <span className='text-sm text-neutral-900 dark:text-white'>{h.quality ?? '-'}</span>
       ),
     },
     {
@@ -152,12 +154,10 @@ export function LibraryHistoryTab({ history }: LibraryHistoryTabProps) {
       sortable: true,
       render: (h) => (
         <PillTag
-          variant={
-            h.historyType === 'INSERT' ? 'green' : h.historyType === 'UPDATE' ? 'blue' : 'red'
-          }
+          variant={h.historyType === '+' ? 'green' : h.historyType === '~' ? 'blue' : 'red'}
           size='sm'
         >
-          {h.historyType}
+          {h.historyType === '+' ? 'INSERT' : h.historyType === '~' ? 'UPDATE' : 'DELETE'}
         </PillTag>
       ),
     },
@@ -179,5 +179,30 @@ export function LibraryHistoryTab({ history }: LibraryHistoryTabProps) {
     },
   ];
 
-  return <DataTable data={history} columns={historyColumns} paginationProps={pagination} />;
+  if (isLibraryHistoryError) {
+    return (
+      <ApiErrorState
+        error={libraryHistoryError}
+        onRetry={() => {
+          void refetchLibraryHistory();
+        }}
+      />
+    );
+  }
+
+  return (
+    <DataTable
+      data={libraryHistory?.results ?? []}
+      columns={historyColumns}
+      isLoading={isLibraryHistoryLoading}
+      onRefresh={() => void refetchLibraryHistory()}
+      paginationProps={{
+        page: libraryHistory?.pagination.page ?? pagination.page,
+        pageSize: libraryHistory?.pagination.rowsPerPage ?? pagination.rowsPerPage,
+        onPageChange: (page) => setPage(page),
+        onPageSizeChange: (pageSize) => setRowsPerPage(pageSize),
+        totalItems: libraryHistory?.pagination.count ?? 0,
+      }}
+    />
+  );
 }
