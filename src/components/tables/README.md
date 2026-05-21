@@ -80,6 +80,7 @@ const pagination = useTablePagination(1, 20, libraries.length);
 | `selectable`          | Enables page-level and row-level selection checkboxes.                                  |
 | `isLoading`           | Shows skeleton placeholder rows.                                                        |
 | `loadingRows`         | Skeleton row count. Defaults to `8`.                                                    |
+| `persistSettings`     | Opts into local persistence for table settings using a stable shared table key.         |
 
 ### Columns
 
@@ -107,6 +108,27 @@ Notes:
 - `copyable` adds a copy button that copies the raw `item[column.key]` value.
 - `csvValue` is not used by `DataTable` directly; feature-level CSV exporters can use it when building toolbar actions.
 - `defaultVisible` exists on the type, but current initial visibility uses all columns.
+
+### Persisted Settings
+
+Column visibility can be saved to localStorage by passing a stable table key:
+
+```tsx
+<DataTable
+  data={libraries}
+  columns={columns}
+  paginationProps={pagination}
+  persistSettings={{
+    key: 'library.workflowrun.filestable',
+  }}
+/>
+```
+
+Persistence is opt-in. Without `persistSettings`, column visibility remains in memory for the current mounted table only.
+
+Choose a stable key for the kind of table whose settings should be shared, such as `library.workflowtype.workflowrunstable` or `library.workflowtype.workflowrun.filestable`. Every table using the same key reads and writes the same localStorage entry, while different keys are isolated from each other. The stored key is namespaced under `orcabus:data-table:<key>:settings:v1`.
+
+Saved settings store only the current column keys plus hidden column keys. On open, the table renews `columnKeys`, removes hidden keys that no longer exist, and applies the remaining hidden keys. New or renamed columns show by default. Malformed settings from older schemas reset once to all columns visible.
 
 ### Pagination Behavior
 

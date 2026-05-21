@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect, ReactNode, MouseEvent } from 'react';
+/* eslint-disable react-refresh/only-export-components -- Pure persistence helpers are exported for focused unit tests. */
+import { useState, useRef, useEffect, ReactNode, MouseEvent, useMemo } from 'react';
 import {
   ChevronDown,
   ChevronUp,
@@ -17,6 +18,8 @@ import Skeleton from 'react-loading-skeleton';
 import { Pagination } from './Pagination';
 import { usePaginationDefaults, type OptionalPaginationProps } from './useTablePagination';
 import { toast } from 'sonner';
+import { compareStringArrays } from '@/utils/array';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
 
 export interface Column<T> {
   key: string;
@@ -34,6 +37,111 @@ export interface Column<T> {
 
 /** Full pagination props (e.g. from useTablePagination). Partial props are allowed; defaults applied via usePaginationDefaults. */
 export type DataTablePaginationProps = OptionalPaginationProps;
+
+export type DataTablePersistedSettings = {
+  columnKeys: string[];
+  hiddenColumnKeys: string[];
+};
+
+export interface DataTablePersistSettings {
+  /** Stable unique key for this table's local settings, for example `lab.libraries`. */
+  key: string;
+}
+
+export function getDataTableSettingsStorageKey(tableKey: string): string {
+  return `orcabus:data-table:${tableKey}:settings`;
+}
+
+export function createDataTablePersistedSettings<T extends { key: string }>(
+  columns: T[],
+  visibleColumns: Set<string>
+): DataTablePersistedSettings {
+  const columnKeys = getColumnKeys(columns);
+  const visibleColumnKeys = new Set(columnKeys.filter((key) => visibleColumns.has(key)));
+
+  return createPersistedSettings(
+    columnKeys,
+    columnKeys.filter((key) => !visibleColumnKeys.has(key))
+  );
+}
+
+export function normalizeDataTablePersistedSettings<T extends { key: string }>(
+  settings: unknown,
+  columns: T[]
+): DataTablePersistedSettings {
+  const columnKeys = getColumnKeys(columns);
+
+  if (!isDataTablePersistedSettings(settings)) {
+    return createPersistedSettings(columnKeys, []);
+  }
+
+  const columnKeyComparison = compareStringArrays(settings.columnKeys, columnKeys);
+  const hiddenColumnKeys = columnKeys.filter((key) => settings.hiddenColumnKeys.includes(key));
+  const hiddenKeyComparison = compareStringArrays(settings.hiddenColumnKeys, hiddenColumnKeys);
+
+  if (
+    columnKeyComparison.isEqual &&
+    hiddenKeyComparison.isEqual &&
+    !hasExtraPersistedSettingsKeys(settings)
+  ) {
+    return {
+      columnKeys: settings.columnKeys,
+      hiddenColumnKeys: settings.hiddenColumnKeys,
+    };
+  }
+
+  return createPersistedSettings(columnKeys, hiddenColumnKeys);
+}
+
+export function getVisibleColumnKeysFromPersistedSettings<T extends { key: string }>(
+  settings: DataTablePersistedSettings,
+  columns: T[]
+): Set<string> {
+  const hiddenColumnKeys = new Set(settings.hiddenColumnKeys);
+  return new Set(getColumnKeys(columns).filter((key) => !hiddenColumnKeys.has(key)));
+}
+
+function areDataTablePersistedSettingsEqual(
+  previous: unknown,
+  next: DataTablePersistedSettings
+): boolean {
+  return (
+    isDataTablePersistedSettings(previous) &&
+    compareStringArrays(previous.columnKeys, next.columnKeys).isEqual &&
+    compareStringArrays(previous.hiddenColumnKeys, next.hiddenColumnKeys).isEqual &&
+    !hasExtraPersistedSettingsKeys(previous)
+  );
+}
+
+function getColumnKeys<T extends { key: string }>(columns: T[]): string[] {
+  return columns.map((column) => column.key);
+}
+
+function createPersistedSettings(
+  columnKeys: string[],
+  hiddenColumnKeys: string[]
+): DataTablePersistedSettings {
+  return {
+    columnKeys,
+    hiddenColumnKeys,
+  };
+}
+
+function isDataTablePersistedSettings(value: unknown): value is DataTablePersistedSettings {
+  if (typeof value !== 'object' || value === null) return false;
+
+  const settings = value as Partial<DataTablePersistedSettings>;
+  return (
+    Array.isArray(settings.columnKeys) &&
+    settings.columnKeys.every((key) => typeof key === 'string') &&
+    Array.isArray(settings.hiddenColumnKeys) &&
+    settings.hiddenColumnKeys.every((key) => typeof key === 'string')
+  );
+}
+
+function hasExtraPersistedSettingsKeys(settings: DataTablePersistedSettings): boolean {
+  return Object.keys(settings).some((key) => key !== 'columnKeys' && key !== 'hiddenColumnKeys');
+}
 
 export type DataTableActionContext<T> = {
   /** Full table dataset provided to the DataTable. */
@@ -87,6 +195,8 @@ interface DataTableProps<T> {
   isLoading?: boolean;
   /** Number of skeleton rows to show while loading. Default 8. */
   loadingRows?: number;
+  /** Opt-in persistence for table settings such as visible columns. */
+  persistSettings?: DataTablePersistSettings;
 }
 
 export function DataTable<T>({
@@ -104,13 +214,32 @@ export function DataTable<T>({
   selectable = false,
   isLoading = false,
   loadingRows = 8,
+  persistSettings,
 }: DataTableProps<T>) {
   const [density, setDensity] = useState<'comfortable' | 'compact'>('comfortable');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [pendingToolbarActionId, setPendingToolbarActionId] = useState<string | null>(null);
-  const [visibleColumns, setVisibleColumns] = useState<Set<string>>(
-    new Set(columns.map((c) => c.key))
+  const persistSettingsKey = persistSettings?.key;
+  const columnVisibilitySettingsStorageKey = getDataTableSettingsStorageKey(
+    persistSettingsKey ?? '__disabled__'
   );
+  const [savedColumnVisibilitySettings, setSavedColumnVisibilitySettings] =
+    useLocalStorage<DataTablePersistedSettings | null>(columnVisibilitySettingsStorageKey, null);
+  const currentColumnKeys = useMemo(() => getColumnKeys(columns), [columns]);
+  const [hiddenColumnKeys, setHiddenColumnKeys] = useState<Set<string>>(() => new Set());
+  const normalizedPersistedSettings = useMemo(
+    () => normalizeDataTablePersistedSettings(savedColumnVisibilitySettings, columns),
+    [columns, savedColumnVisibilitySettings]
+  );
+  const persistedVisibleColumns = useMemo(
+    () => getVisibleColumnKeysFromPersistedSettings(normalizedPersistedSettings, columns),
+    [columns, normalizedPersistedSettings]
+  );
+  const inMemoryVisibleColumns = useMemo(
+    () => new Set(currentColumnKeys.filter((key) => !hiddenColumnKeys.has(key))),
+    [currentColumnKeys, hiddenColumnKeys]
+  );
+  const visibleColumns = persistSettingsKey ? persistedVisibleColumns : inMemoryVisibleColumns;
   const [showColumnChooser, setShowColumnChooser] = useState(false);
   const [copiedCell, setCopiedCell] = useState<string | null>(null);
   const columnChooserRef = useRef<HTMLDivElement>(null);
@@ -143,6 +272,38 @@ export function DataTable<T>({
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (!persistSettingsKey) return;
+    if (
+      areDataTablePersistedSettingsEqual(savedColumnVisibilitySettings, normalizedPersistedSettings)
+    ) {
+      return;
+    }
+
+    setSavedColumnVisibilitySettings(normalizedPersistedSettings);
+  }, [
+    persistSettingsKey,
+    normalizedPersistedSettings,
+    savedColumnVisibilitySettings,
+    setSavedColumnVisibilitySettings,
+  ]);
+
+  const setVisibleColumns = (
+    updater: Set<string> | ((prevVisibleColumns: Set<string>) => Set<string>)
+  ) => {
+    const nextVisibleColumns = typeof updater === 'function' ? updater(visibleColumns) : updater;
+    if (persistSettingsKey) {
+      setSavedColumnVisibilitySettings(
+        createDataTablePersistedSettings(columns, nextVisibleColumns)
+      );
+      return;
+    }
+
+    setHiddenColumnKeys(
+      new Set(createDataTablePersistedSettings(columns, nextVisibleColumns).hiddenColumnKeys)
+    );
+  };
 
   const { page, pageSize, onPageChange, onPageSizeChange, totalItemsProp } =
     usePaginationDefaults(paginationProps);

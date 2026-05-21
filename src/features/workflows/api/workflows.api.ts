@@ -4,6 +4,7 @@ import {
   ApiClient,
   getVersionedPath,
   createQueryHook,
+  createQueryModel,
   createSuspenseQueryHook,
   createPostMutationHook,
   createPatchMutationHook,
@@ -70,6 +71,7 @@ export const useWorkflowDetailModel = createQueryHook(workflowApi, '/api/v1/work
 export const useWorkflowGroupedModel = createQueryHook(workflowApi, '/api/v1/workflow/grouped/');
 
 // workflow run model
+export const workflowRunListModel = createQueryModel(workflowApi, '/api/v1/workflowrun/');
 export const useWorkflowRunListModel = createQueryHook(workflowApi, '/api/v1/workflowrun/');
 export const useWorkflowRunDetailModel = createQueryHook(
   workflowApi,

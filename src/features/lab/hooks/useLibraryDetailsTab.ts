@@ -1,36 +1,42 @@
 import { useMemo, useCallback } from 'react';
-import { useNavigate, useParams } from 'react-router';
+import { useQueryParams } from '@/hooks/useQueryParams';
 
-export const LIBRARY_DETAILS_TAB_VALUES = ['workflows', 'files', 'related', 'history'] as const;
-export type LibraryDetailsTabId = (typeof LIBRARY_DETAILS_TAB_VALUES)[number];
+export enum LibraryDetailsTabValues {
+  WorkflowRuns = 'workflowRuns',
+  RelatedLibraries = 'relatedLibraries',
+  History = 'history',
+}
 
-function parseTabPathSegment(value: string | undefined): LibraryDetailsTabId {
-  if (value && LIBRARY_DETAILS_TAB_VALUES.includes(value as LibraryDetailsTabId)) {
-    return value as LibraryDetailsTabId;
+export const TAB_VALUES = Object.values(LibraryDetailsTabValues);
+
+export function parseLibraryDetailsTabParam(value: string | undefined): LibraryDetailsTabValues {
+  if (value === 'files') {
+    return LibraryDetailsTabValues.WorkflowRuns;
   }
-  return 'workflows';
+
+  if (value && TAB_VALUES.includes(value as LibraryDetailsTabValues)) {
+    return value as LibraryDetailsTabValues;
+  }
+  return LibraryDetailsTabValues.WorkflowRuns;
 }
 
 /**
- * Controls the library details page tab via URL path segment `:tab`.
- * - /lab/libraries/:libraryOrcabusId (or /lab/libraries/:libraryOrcabusId/workflows) → Workflow Runs
- * - /lab/libraries/:libraryOrcabusId/files → Files
- * - /lab/libraries/:libraryOrcabusId/related → Related Libraries
- * - /lab/libraries/:libraryOrcabusId/history → History
+ * Controls the library details page tab via URL query param `tab`.
+ * - ?tab=workflowRuns (or no param) → Workflow Runs
+ * - ?tab=files → Workflow Runs (legacy)
+ * - ?tab=relatedLibraries → Related Libraries
+ * - ?tab=history → History
  */
 export function useLibraryDetailsTab() {
-  const { libraryOrcabusId, tab } = useParams<{ libraryOrcabusId?: string; tab?: string }>();
-  const navigate = useNavigate();
-  const activeTab = useMemo(() => parseTabPathSegment(tab), [tab]);
-
+  const { getParam, setParams } = useQueryParams({ paginationKeys: [] });
+  const tabParam = getParam('tab');
+  const activeTab = useMemo(() => parseLibraryDetailsTabParam(tabParam), [tabParam]);
   const setActiveTab = useCallback(
     (id: string) => {
-      const nextTab = parseTabPathSegment(id);
-      if (!libraryOrcabusId) return;
-      void navigate(`/lab/libraries/${libraryOrcabusId}/${nextTab}`);
+      const tab = parseLibraryDetailsTabParam(id);
+      setParams({ tab });
     },
-    [navigate, libraryOrcabusId]
+    [setParams]
   );
-
   return { activeTab, setActiveTab };
 }

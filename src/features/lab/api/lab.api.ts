@@ -28,6 +28,7 @@ export type ContactListQueryParams = operations['contactList']['parameters']['qu
 export type ProjectListQueryParams = operations['projectList']['parameters']['query'];
 
 export type LibraryDetailType = components['schemas']['LibraryDetail'];
+export type LibraryHistoryType = components['schemas']['LibraryHistory'];
 
 export const useQueryMetadataSubjectModel = createQueryHook(metadataApi, '/api/v1/subject/');
 export const useQueryMetadataLibraryModel = createQueryHook(metadataApi, '/api/v1/library/');
