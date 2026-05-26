@@ -1,8 +1,5 @@
 import { FilterBar } from '@/components/tables/FilterBar';
-import { DetailedErrorBoundary } from '@/components/ui/DetailedErrorBoundary';
-import { SpinnerWithText } from '@/components/ui/Spinner';
-import { Suspense } from 'react';
-import { useWorkflowTypesQueryParams } from '../hooks/useWorkflowTypesQueryParams';
+import { useWorkflowTypesListQueryParams } from '../hooks/useWorkflowTypesListQueryParams';
 import WorkflowTypesTable from '../components/WorkflowTypesTable';
 import { WorkflowTypesStatusCards } from '../components/WorkflowTypesStatusCards';
 
@@ -14,20 +11,14 @@ export function WorkflowTypesPage() {
     validationState,
     setValidationState,
     clearAllFilters,
-  } = useWorkflowTypesQueryParams();
+  } = useWorkflowTypesListQueryParams();
 
   return (
     <div>
-      <DetailedErrorBoundary errorTitle='Unable to load workflow type status'>
-        <Suspense fallback={<SpinnerWithText text='Loading workflow type status...' />}>
-          <WorkflowTypesStatusCards
-            status={validationState}
-            onStatusCardClick={(state) =>
-              setValidationState(validationState === state ? 'all' : state)
-            }
-          />
-        </Suspense>
-      </DetailedErrorBoundary>
+      <WorkflowTypesStatusCards
+        status={validationState}
+        onStatusCardClick={(state) => setValidationState(validationState === state ? 'all' : state)}
+      />
 
       <FilterBar
         searchValue={search}
@@ -37,11 +28,7 @@ export function WorkflowTypesPage() {
         onClearAll={activeFilterBadges.length > 0 ? clearAllFilters : undefined}
       />
 
-      <DetailedErrorBoundary errorTitle='Unable to load workflow types'>
-        <Suspense fallback={<SpinnerWithText text='Loading workflow types...' />}>
-          <WorkflowTypesTable />
-        </Suspense>
-      </DetailedErrorBoundary>
+      <WorkflowTypesTable />
     </div>
   );
 }

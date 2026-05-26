@@ -32,7 +32,7 @@ export type WorkflowTypesFilterPatch = Partial<{
   wtExecutionEngine: string | string[];
 }>;
 
-export interface UseWorkflowTypesQueryParamsOptions {
+export interface UseWorkflowTypesListQueryParamsOptions {
   workflowTypes?: WorkflowTypeDefinition[];
 }
 
@@ -45,7 +45,9 @@ function toFirstString(value: string | string[] | undefined): string {
  * Workflow types list page state driven by URL query params.
  * Filter params: wtValidationState, wtTypeName, wtExecutionEngine. Shared: search, orderBy, pagination.
  */
-export function useWorkflowTypesQueryParams(options: UseWorkflowTypesQueryParamsOptions = {}) {
+export function useWorkflowTypesListQueryParams(
+  options: UseWorkflowTypesListQueryParamsOptions = {}
+) {
   const {
     params,
     setParams,

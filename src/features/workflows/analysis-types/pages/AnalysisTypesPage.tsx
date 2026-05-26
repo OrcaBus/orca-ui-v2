@@ -1,18 +1,16 @@
-import { Suspense, useCallback } from 'react';
+import { useCallback } from 'react';
 import { FilterBar } from '@/components/tables/FilterBar';
 import { Select } from '@/components/ui/Select';
-import { DetailedErrorBoundary } from '@/components/ui/DetailedErrorBoundary';
-import { SpinnerWithText } from '@/components/ui/Spinner';
 import {
-  useAnalysisTypesQueryParams,
+  useAnalysisTypesListQueryParams,
   type AnalysisTypeStatus,
-} from '../hooks/useAnalysisTypesQueryParams';
+} from '../hooks/useAnalysisTypesListQueryParams';
 import AnalysisTypesTable from '../components/AnalysisTypesTable';
 import { AnalysisTypesStatusCards } from '../components/AnalysisTypesStatusCards';
 
 export function AnalysisTypesPage() {
   const { search, setSearchQuery, status, setStatus, clearAllFilters, activeFilterBadges } =
-    useAnalysisTypesQueryParams();
+    useAnalysisTypesListQueryParams();
 
   const handleAtStatusCardClick = useCallback(
     (s: AnalysisTypeStatus) => setStatus(status === s ? 'all' : s),
@@ -21,11 +19,7 @@ export function AnalysisTypesPage() {
 
   return (
     <div>
-      <DetailedErrorBoundary errorTitle='Unable to load analysis type status'>
-        <Suspense fallback={<SpinnerWithText text='Loading analysis type status...' />}>
-          <AnalysisTypesStatusCards status={status} onStatusCardClick={handleAtStatusCardClick} />
-        </Suspense>
-      </DetailedErrorBoundary>
+      <AnalysisTypesStatusCards status={status} onStatusCardClick={handleAtStatusCardClick} />
 
       <FilterBar
         searchValue={search}
@@ -46,11 +40,7 @@ export function AnalysisTypesPage() {
         onClearAll={activeFilterBadges.length > 0 ? clearAllFilters : undefined}
       />
 
-      <DetailedErrorBoundary errorTitle='Unable to load analysis types'>
-        <Suspense fallback={<SpinnerWithText text='Loading analysis types...' />}>
-          <AnalysisTypesTable />
-        </Suspense>
-      </DetailedErrorBoundary>
+      <AnalysisTypesTable />
     </div>
   );
 }

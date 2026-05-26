@@ -1,8 +1,8 @@
 import { Column, DataTable } from '@/components/tables/DataTable';
 import {
-  useWorkflowTypesQueryParams,
+  useWorkflowTypesListQueryParams,
   type ValidationState,
-} from '../hooks/useWorkflowTypesQueryParams';
+} from '../hooks/useWorkflowTypesListQueryParams';
 import { useWorkflowGroupedModel, type WorkflowListModel } from '../../api/workflows.api';
 import { useMemo } from 'react';
 import { PillTag } from '@/components/ui/PillTag';
@@ -15,7 +15,7 @@ import { useWorkflowTypeDetailDrawer } from '../hooks/useWorkflowTypeDetailDrawe
 import { getExecutionEnginePillVariant } from '../../shared/utils/executionEnginePill';
 
 const WorkflowTypesTable = () => {
-  const { workflowTypesQueryParams, setPage, setRowsPerPage } = useWorkflowTypesQueryParams();
+  const { workflowTypesQueryParams, setPage, setRowsPerPage } = useWorkflowTypesListQueryParams();
   const { selectedWorkflowTypeId, openDetail, closeDetail } = useWorkflowTypeDetailDrawer();
   const {
     data: workflowData,

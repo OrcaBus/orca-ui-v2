@@ -1,10 +1,3 @@
-import { mockLibraries } from '@/data/mockData';
-import type { Library as mockLibrary } from '../types/library.types';
-
-export function getLibraries(): mockLibrary[] {
-  return mockLibraries as mockLibrary[];
-}
-
 import config from '@/app/config';
 import type { paths, components, operations } from '@/api/types/metadata.openapi.d.ts';
 import { ApiClient, createQueryHook, createPostMutationHook } from '@/api/client';

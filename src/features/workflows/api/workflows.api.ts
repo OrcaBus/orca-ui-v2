@@ -19,6 +19,12 @@ const workflowApi = new ApiClient<paths>({
   getPath: (path) => getVersionedPath(path, apiVersion),
 });
 
+// path constants for invalidating react query caches after mutations
+export const WORKFLOWRUNS_LIST_PATH = workflowApi.resolvePath('/api/v1/workflowrun/');
+export const WORKFLOWRUNS_STATUS_COUNT_PATH = workflowApi.resolvePath(
+  '/api/v1/stats/workflow_run/status_counts/'
+);
+
 // export component types for consumers
 export type ExecutionEngineEnum = components['schemas']['ExecutionEngineEnum'];
 export type RunContext = components['schemas']['RunContext'];

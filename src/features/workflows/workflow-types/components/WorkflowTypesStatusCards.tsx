@@ -7,9 +7,9 @@ import {
 } from '../../api/workflows.api';
 import { getValidationStateIcon } from '../../shared/utils/statusIcons';
 import {
-  useWorkflowTypesQueryParams,
+  useWorkflowTypesListQueryParams,
   type ValidationState,
-} from '../hooks/useWorkflowTypesQueryParams';
+} from '../hooks/useWorkflowTypesListQueryParams';
 
 interface WorkflowTypesStatusCardsProps {
   status: ValidationState | 'all';
@@ -32,7 +32,7 @@ export function WorkflowTypesStatusCards({
   status,
   onStatusCardClick,
 }: WorkflowTypesStatusCardsProps) {
-  const { search } = useWorkflowTypesQueryParams();
+  const { search } = useWorkflowTypesListQueryParams();
 
   const {
     data: workflowStatusCountsData,

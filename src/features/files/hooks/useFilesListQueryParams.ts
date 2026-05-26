@@ -31,7 +31,7 @@ interface CreateFileListQueryParamsArgs {
   orderBy: string;
 }
 
-export interface UseFilesQueryParamsReturn {
+export interface UseFilesListQueryParamsReturn {
   /** General free-text search (matches portalRunId, bucket, s3Key). */
   search: string;
   filters: FilesFilters;
@@ -98,7 +98,7 @@ export function createFileListQueryParams({
  *
  * URL params: search, portalRunId[], key[], keyOp, bucket[], page, rowsPerPage
  */
-export function useFilesQueryParams(): UseFilesQueryParamsReturn {
+export function useFilesListQueryParams(): UseFilesListQueryParamsReturn {
   const {
     params,
     setParams,

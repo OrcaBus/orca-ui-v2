@@ -7,9 +7,9 @@ import {
 } from '../../api/workflows.api';
 import { getAnalysisTypeIcon } from '../../shared/utils/statusIcons';
 import {
-  useAnalysisTypesQueryParams,
+  useAnalysisTypesListQueryParams,
   type AnalysisTypeStatus,
-} from '../hooks/useAnalysisTypesQueryParams';
+} from '../hooks/useAnalysisTypesListQueryParams';
 
 interface AnalysisTypesStatusCardsProps {
   status: AnalysisTypeStatus | 'all';
@@ -29,7 +29,7 @@ export function AnalysisTypesStatusCards({
   status,
   onStatusCardClick,
 }: AnalysisTypesStatusCardsProps) {
-  const { search } = useAnalysisTypesQueryParams();
+  const { search } = useAnalysisTypesListQueryParams();
 
   const {
     data: analysisStatusCountsData,

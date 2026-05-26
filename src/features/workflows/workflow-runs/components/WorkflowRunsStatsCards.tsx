@@ -1,17 +1,17 @@
+import { keepPreviousData } from '@tanstack/react-query';
 import { ApiErrorState } from '@/components/ui/ApiErrorState';
 import { StatusCard } from '@/components/ui/StatusCard';
-import { type WorkflowRunStatsStatusCountModel } from '../../api/workflows.api';
+import { useWorkflowRunStatusCountModel } from '../../api/workflows.api';
+import { toLocalStartOfDay } from '@/utils/timeFormat';
 import { getRunsStatusIcon } from '../../shared/utils/statusIcons';
-import { type WorkflowRunStatus } from '../hooks/useWorkflowRunListQueryParams';
+import {
+  useWorkflowRunListQueryParams,
+  type WorkflowRunStatus,
+} from '../hooks/useWorkflowRunListQueryParams';
 
 interface WorkflowRunsStatsCardsProps {
   status: WorkflowRunStatus | 'all';
   onStatusCardClick: (status: WorkflowRunStatus) => void;
-  workflowStatusCountsData?: WorkflowRunStatsStatusCountModel;
-  isLoadingWorkflowStatusCounts: boolean;
-  isErrorWorkflowStatusCounts: boolean;
-  workflowStatusCountsError: unknown;
-  onRetry: () => void;
 }
 
 const statusCards: Array<{
@@ -28,20 +28,34 @@ const statusCards: Array<{
   { label: 'Ongoing', status: 'ongoing', variant: 'warning' },
 ];
 
-export function WorkflowRunsStatsCards({
-  status,
-  onStatusCardClick,
-  workflowStatusCountsData,
-  isLoadingWorkflowStatusCounts,
-  isErrorWorkflowStatusCounts,
-  workflowStatusCountsError,
-  onRetry,
-}: WorkflowRunsStatsCardsProps) {
+export function WorkflowRunsStatsCards({ status, onStatusCardClick }: WorkflowRunsStatsCardsProps) {
+  const { search, dateFrom, dateTo, filterValues } = useWorkflowRunListQueryParams();
+
+  const {
+    data: workflowStatusCountsData,
+    isLoading: isLoadingWorkflowStatusCounts,
+    isError: isErrorWorkflowStatusCounts,
+    error: workflowStatusCountsError,
+  } = useWorkflowRunStatusCountModel({
+    params: {
+      query: {
+        search: search ? search : undefined,
+        start_time: dateFrom ? toLocalStartOfDay(dateFrom) : undefined,
+        end_time: dateTo ? toLocalStartOfDay(dateTo) : undefined,
+        workflow: filterValues.wfType || undefined,
+      },
+    },
+    reactQuery: {
+      enabled: true,
+      placeholderData: keepPreviousData,
+    },
+  });
+
   if (isErrorWorkflowStatusCounts) {
-    return <ApiErrorState error={workflowStatusCountsError} onRetry={onRetry} className='mb-4' />;
+    return <ApiErrorState error={workflowStatusCountsError} className='mb-4' />;
   }
 
-  const counts: Required<WorkflowRunStatsStatusCountModel> = {
+  const counts = {
     all: workflowStatusCountsData?.all ?? 0,
     succeeded: workflowStatusCountsData?.succeeded ?? 0,
     aborted: workflowStatusCountsData?.aborted ?? 0,
@@ -52,7 +66,7 @@ export function WorkflowRunsStatsCards({
     deprecated: workflowStatusCountsData?.deprecated ?? 0,
   };
 
-  const showLoadingCards = isLoadingWorkflowStatusCounts;
+  const showLoadingCards = isLoadingWorkflowStatusCounts && !workflowStatusCountsData;
   const total = counts.all;
 
   return (

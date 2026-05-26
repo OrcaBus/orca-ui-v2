@@ -1,45 +1,81 @@
-import { Edit, Trash2 } from 'lucide-react';
-import { PageBreadcrumb } from '../../../components/ui/PageBreadcrumb';
-import type { Case } from '../types/case.types';
+import { useState } from 'react';
+import { Copy, Edit } from 'lucide-react';
+import { toast } from 'sonner';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { PillTag } from '@/components/ui/PillTag';
+import { useCaseDetailsContext } from '../context/CaseDetailsContext';
+import { EditCaseModal } from './EditCaseModal';
 
-interface CaseDetailsPageHeaderProps {
-  case_: Case;
-  onEdit: () => void;
-  onDelete: () => void;
-}
+export function CaseDetailsPageHeader() {
+  const { caseDetail, isLoadingCaseDetail } = useCaseDetailsContext();
+  const [isEditOpen, setIsEditOpen] = useState(false);
 
-export function CaseDetailsPageHeader({ case_, onEdit, onDelete }: CaseDetailsPageHeaderProps) {
+  const handleCopyOrcabusId = (e: React.MouseEvent | React.KeyboardEvent) => {
+    e.stopPropagation();
+    void navigator.clipboard.writeText(caseDetail?.orcabusId ?? '');
+    toast.success('Orcabus ID copied to clipboard');
+  };
+
   return (
     <>
-      <PageBreadcrumb items={[{ label: 'Cases', href: '/cases' }, { label: case_.title }]} />
-      <div className='mb-6 flex items-start justify-between'>
-        <div>
-          <h1 className='text-2xl font-semibold text-neutral-900 dark:text-neutral-100'>
-            {case_.title}
-            {case_.alias && (
-              <span className='ml-3 font-mono text-lg font-normal text-neutral-500 dark:text-neutral-400'>
-                {case_.alias}
+      <div className='mt-4 mb-6 flex items-start justify-between'>
+        <div className='flex flex-col gap-1'>
+          <div className='flex items-center gap-3'>
+            {isLoadingCaseDetail ? (
+              <Skeleton className='h-7 w-64' />
+            ) : (
+              <>
+                <h1 className='text-xl font-semibold text-neutral-900 dark:text-white'>
+                  {caseDetail?.requestFormId ?? '—'}
+                </h1>
+                {caseDetail?.type && (
+                  <PillTag variant='blue' size='sm'>
+                    {caseDetail.type.toUpperCase()}
+                  </PillTag>
+                )}
+                {caseDetail?.alias && caseDetail.alias.length > 0 && (
+                  <span className='font-mono text-sm font-normal text-neutral-500 dark:text-neutral-400'>
+                    {caseDetail.alias.join(', ')}
+                  </span>
+                )}
+              </>
+            )}
+          </div>
+          <div className='flex items-center gap-4 text-sm text-neutral-600 dark:text-[#9dabb9]'>
+            {isLoadingCaseDetail ? (
+              <Skeleton className='h-4 w-48' />
+            ) : (
+              <span className='flex items-center gap-1.5'>
+                Orcabus ID: <span className='font-mono'>{caseDetail?.orcabusId ?? '—'}</span>
+                {caseDetail?.orcabusId && (
+                  <span
+                    role='button'
+                    tabIndex={0}
+                    onClick={handleCopyOrcabusId}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') handleCopyOrcabusId(e);
+                    }}
+                    className='rounded p-0.5 transition-colors hover:bg-neutral-200 dark:hover:bg-[#2d3540]'
+                  >
+                    <Copy className='h-3.5 w-3.5 text-neutral-400 hover:text-neutral-600 dark:text-[#9dabb9] dark:hover:text-white' />
+                  </span>
+                )}
               </span>
             )}
-          </h1>
+          </div>
         </div>
         <div className='flex items-center gap-2'>
           <button
-            onClick={onEdit}
+            onClick={() => setIsEditOpen(true)}
             className='flex items-center gap-2 rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-neutral-600 dark:bg-[#1e252e] dark:text-neutral-200 dark:hover:bg-neutral-700/50'
           >
             <Edit className='h-4 w-4' />
             Edit Case
           </button>
-          <button
-            onClick={onDelete}
-            className='flex items-center gap-2 rounded-md border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 dark:border-red-500/50 dark:bg-[#1e252e] dark:text-red-400 dark:hover:bg-red-500/10'
-          >
-            <Trash2 className='h-4 w-4' />
-            Delete Case
-          </button>
         </div>
       </div>
+
+      <EditCaseModal isOpen={isEditOpen} onClose={() => setIsEditOpen(false)} />
     </>
   );
 }

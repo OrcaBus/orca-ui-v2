@@ -4,7 +4,7 @@ import { FileDownloadButton } from './FileDownloadButton';
 import { DataTable, type Column } from '@/components/tables/DataTable';
 import { getFileTypeBadgeStyle, formatBytes, getFilename, getFileExtension } from '@/utils/files';
 import { useFileObjectListModel, type S3Record } from '../api/files.api';
-import { useFilesQueryParams } from '../hooks/useFilesQueryParams';
+import { useFilesListQueryParams } from '../hooks/useFilesListQueryParams';
 import { ApiErrorState } from '@/components/ui/ApiErrorState';
 import { DEFAULT_PAGE_SIZE } from '@/utils/constants';
 import { formatTableDate } from '@/utils/timeFormat';
@@ -19,7 +19,7 @@ import { FileMoreActionsDropdown } from './FileMoreActionsDropdown';
 
 export function FilesTable() {
   const { fileListQueryParams, setPage, setRowsPerPage, hasSearchORFilters } =
-    useFilesQueryParams();
+    useFilesListQueryParams();
 
   const [selectedFile, setSelectedFile] = useState<S3Record | null>(null);
 

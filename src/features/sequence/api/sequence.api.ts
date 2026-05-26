@@ -30,7 +30,7 @@ export type SequenceRunListByInstrumentRunIdModel =
 export type SequenceRunItemListByInstrumentRunIdModel = NonNullable<
   SequenceRunListByInstrumentRunIdModel['items']
 >[number];
-export type SequenceRunStatusEnum = components['schemas']['StatusEnum'];
+export type SequenceRunStatusType = components['schemas']['StatusEnum'];
 export type CommentTargetTypeEnum = components['schemas']['TargetTypeEnum'];
 export type SequenceRunStatsStatusCountsModel = components['schemas']['SequenceRunCountByStatus'];
 

@@ -180,6 +180,7 @@ function LibraryDetailsWorkflowRunsTabContent() {
       className='flex overflow-hidden rounded-xl border border-neutral-200 bg-white dark:border-[#2d3540] dark:bg-[#111418]'
       style={{ minHeight: '480px' }}
     >
+      {/* left panel */}
       <div className='flex w-72 shrink-0 flex-col border-r border-neutral-200 bg-neutral-50 dark:border-[#2d3540] dark:bg-[#0d1117]'>
         <div className='flex items-center justify-between border-b border-neutral-200 px-4 py-3 dark:border-[#2d3540]'>
           <h3 className='text-sm font-semibold text-neutral-900 dark:text-white'>Workflow Types</h3>

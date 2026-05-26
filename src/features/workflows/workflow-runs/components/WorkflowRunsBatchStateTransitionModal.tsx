@@ -11,7 +11,10 @@ import {
   useWorkflowRunStateCreationValidMapModel,
   useWorkflowRunsBatchStateTransitionModel,
   type WorkflowRunListModel,
+  WORKFLOWRUNS_LIST_PATH,
+  WORKFLOWRUNS_STATUS_COUNT_PATH,
 } from '../../api/workflows.api';
+import { useQueryClient } from '@tanstack/react-query';
 
 type ValidationRule =
   | string[]
@@ -96,13 +99,13 @@ export function WorkflowRunsBatchStateTransitionModal({
   isOpen,
   onClose,
   workflowRuns,
-  onSuccess,
 }: WorkflowRunsBatchStateTransitionModalProps) {
   const firstWorkflowRunOrcabusId = workflowRuns[0]?.orcabusId ?? '';
   const workflowRunOrcabusIds = useMemo(
     () => workflowRuns.map((workflowRun) => workflowRun.orcabusId),
     [workflowRuns]
   );
+  const queryClient = useQueryClient();
 
   const {
     control,
@@ -218,7 +221,11 @@ export function WorkflowRunsBatchStateTransitionModal({
       toast.success(
         `Created ${createdCount} state ${pluralize(createdCount, 'transition')} successfully`
       );
-      onSuccess?.();
+      // invalidate both workflow runs list and status counts to reflect the state changes
+      batchStateTransition.reset();
+      await queryClient.invalidateQueries({ queryKey: ['get', WORKFLOWRUNS_LIST_PATH] });
+      await queryClient.invalidateQueries({ queryKey: ['get', WORKFLOWRUNS_STATUS_COUNT_PATH] });
+
       handleClose();
     } catch {
       toast.error('Failed to transition workflow runs');

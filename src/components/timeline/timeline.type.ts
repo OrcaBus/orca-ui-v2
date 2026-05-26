@@ -88,8 +88,12 @@ export interface TimelineEventAction {
 
 interface TimelineBaseEvent {
   eventId: string;
+  title?: string;
   timestamp: string;
   createdBy?: string;
+  isArchived?: boolean;
+  archivedAt?: string | null;
+  archivedBy?: string | null;
   sourceType: TimelineEventSourceTypes;
   actions?: TimelineEventAction[];
 

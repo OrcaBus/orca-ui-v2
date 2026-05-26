@@ -1,7 +1,7 @@
 import type { SequenceRun } from '../../../data/mockData';
-import type { SequenceRunStatusEnum } from '../api/sequence.api';
+import type { SequenceRunStatusType } from '../api/sequence.api';
 
-export type InstrumentRunStatus = SequenceRunStatusEnum;
+export type InstrumentRunStatus = SequenceRunStatusType;
 
 export interface InstrumentRun {
   instrumentRunId: string;

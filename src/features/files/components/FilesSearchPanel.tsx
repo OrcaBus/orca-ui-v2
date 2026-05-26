@@ -8,7 +8,7 @@ import {
 } from 'react';
 import { Folder, Search, SlidersHorizontal, X, ChevronUp, Filter } from 'lucide-react';
 import { WORKFLOW_PATTERNS, FILE_EXTENSIONS } from '@/utils/constants';
-import { useFilesQueryParams, type FilterOp } from '../hooks/useFilesQueryParams';
+import { useFilesListQueryParams, type FilterOp } from '../hooks/useFilesListQueryParams';
 import { PillTag } from '@/components/ui/PillTag';
 import { useDebounce } from '@/hooks/useDebounce';
 import { FilesBucketSelect } from './FilesBucketSelect';
@@ -187,7 +187,13 @@ export function FilesAdvancedFilterFields({
 }
 
 export function FilesSearchPanel() {
-  const { search: searchValue, filters, setSearch, setFilters, clearAll } = useFilesQueryParams();
+  const {
+    search: searchValue,
+    filters,
+    setSearch,
+    setFilters,
+    clearAll,
+  } = useFilesListQueryParams();
 
   const [isOpen, setIsOpen] = useState(false);
 

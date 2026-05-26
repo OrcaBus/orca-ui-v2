@@ -31,7 +31,7 @@ export type AnalysisTypesFilterPatch = Partial<{
   atAnalysisVersion: string | string[];
 }>;
 
-export interface UseAnalysisTypesQueryParamsOptions {
+export interface UseAnalysisTypesListQueryParamsOptions {
   analysisTypes?: AnalysisType[];
 }
 
@@ -44,7 +44,9 @@ function toFirstString(value: string | string[] | undefined): string {
  * Analysis types list state driven by URL query params.
  * Filter params: atStatus, atAnalysisName, atAnalysisVersion. Shared: search, orderBy, pagination.
  */
-export function useAnalysisTypesQueryParams(options: UseAnalysisTypesQueryParamsOptions = {}) {
+export function useAnalysisTypesListQueryParams(
+  options: UseAnalysisTypesListQueryParamsOptions = {}
+) {
   const {
     params,
     setParams,

@@ -1,9 +1,5 @@
-import { Suspense, useCallback, useMemo } from 'react';
-import { keepPreviousData } from '@tanstack/react-query';
+import { useCallback, useMemo } from 'react';
 import { FilterBar } from '@/components/tables/FilterBar';
-import { DetailedErrorBoundary } from '@/components/ui/DetailedErrorBoundary';
-import { SpinnerWithText } from '@/components/ui/Spinner';
-import { useWorkflowRunStatusCountModel } from '../../api/workflows.api';
 import {
   useWorkflowRunListQueryParams,
   type WorkflowRunStatus,
@@ -11,7 +7,6 @@ import {
 import WorkflowRunsTable from '../components/WorkflowRunsTable';
 import { buildWorkflowRunsFilterBadges } from '../utils/buildWorkflowRunsFilterBadges';
 import { WorkflowRunsStatsCards } from '../components/WorkflowRunsStatsCards';
-import { toLocalStartOfDay } from '@/utils/timeFormat';
 
 export function WorkflowRunsPage() {
   const {
@@ -44,44 +39,9 @@ export function WorkflowRunsPage() {
     [status, setStatus]
   );
 
-  const {
-    data: workflowStatusCountsData,
-    isLoading: isLoadingWorkflowStatusCounts,
-    isError: isErrorWorkflowStatusCounts,
-    error: workflowStatusCountsError,
-    refetch: refetchWorkflowRunStatusCounts,
-  } = useWorkflowRunStatusCountModel({
-    params: {
-      query: {
-        search: search ? search : undefined,
-        start_time: dateFrom ? toLocalStartOfDay(dateFrom) : undefined,
-        end_time: dateTo ? toLocalStartOfDay(dateTo) : undefined,
-        workflow: filterValues.wfType || undefined,
-      },
-    },
-    reactQuery: {
-      enabled: true,
-      placeholderData: keepPreviousData,
-    },
-  });
-
-  const refreshWorkflowRunStatusCounts = () => {
-    void refetchWorkflowRunStatusCounts();
-  };
-
   return (
     <div>
-      <DetailedErrorBoundary errorTitle='Unable to load workflow run status'>
-        <WorkflowRunsStatsCards
-          status={status}
-          onStatusCardClick={handleStatusCardClick}
-          workflowStatusCountsData={workflowStatusCountsData}
-          isLoadingWorkflowStatusCounts={isLoadingWorkflowStatusCounts}
-          isErrorWorkflowStatusCounts={isErrorWorkflowStatusCounts}
-          workflowStatusCountsError={workflowStatusCountsError}
-          onRetry={refreshWorkflowRunStatusCounts}
-        />
-      </DetailedErrorBoundary>
+      <WorkflowRunsStatsCards status={status} onStatusCardClick={handleStatusCardClick} />
 
       <FilterBar
         searchValue={search}
@@ -122,11 +82,8 @@ export function WorkflowRunsPage() {
         activeFilterBadges={activeFilterBadges}
         onClearAll={activeFilterBadges.length > 0 ? clearAllFilters : undefined}
       />
-      <DetailedErrorBoundary errorTitle='Unable to load workflow runs'>
-        <Suspense fallback={<SpinnerWithText text='Loading workflow runs...' />}>
-          <WorkflowRunsTable onBatchStateTransitionSuccess={refreshWorkflowRunStatusCounts} />
-        </Suspense>
-      </DetailedErrorBoundary>
+
+      <WorkflowRunsTable />
     </div>
   );
 }

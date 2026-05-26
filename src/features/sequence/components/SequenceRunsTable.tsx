@@ -7,6 +7,7 @@ import {
   useSequenceRunListByInstrumentRunIdModel,
   type SequenceRunListByInstrumentRunIdModel,
   type SequenceRunItemListByInstrumentRunIdModel,
+  type SequenceRunStatusType,
 } from '../api/sequence.api';
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router';
@@ -14,12 +15,12 @@ import { StatusBadge } from '@/components/ui/StatusBadge';
 import { formatTableDate } from '@/utils/timeFormat';
 import { DEFAULT_PAGE_SIZE } from '@/utils/constants';
 import { ApiErrorState } from '@/components/ui/ApiErrorState';
-import { useSequenceQueryParams, SequenceStatus } from '../hooks/useSequenceQueryParams';
+import { useSequenceListQueryParams } from '../hooks/useSequenceListQueryParams';
 import { ExternalLink, FileText } from 'lucide-react';
 
 const SequenceRunsTable = () => {
   const navigate = useNavigate();
-  const { sequenceListQueryParams, setPage, setRowsPerPage } = useSequenceQueryParams();
+  const { sequenceListQueryParams, setPage, setRowsPerPage } = useSequenceListQueryParams();
 
   const {
     data: sequenceRunsData,
@@ -58,7 +59,9 @@ const SequenceRunsTable = () => {
         key: 'status',
         header: 'Status',
         sortable: true,
-        render: (instrumentRun) => <StatusBadge status={instrumentRun.status as SequenceStatus} />,
+        render: (instrumentRun) => (
+          <StatusBadge status={instrumentRun.status as SequenceRunStatusType} />
+        ),
       },
       {
         key: 'startTime',
@@ -136,7 +139,7 @@ const SequenceRunsTable = () => {
         key: 'status',
         header: 'Status',
         width: 'w-32',
-        render: (run) => <StatusBadge status={run.status} size='sm' />,
+        render: (run) => <StatusBadge status={run.status as SequenceRunStatusType} size='sm' />,
       },
       {
         key: 'startDate',

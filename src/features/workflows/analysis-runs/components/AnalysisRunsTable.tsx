@@ -1,8 +1,8 @@
 import { Column, DataTable } from '@/components/tables/DataTable';
 import {
-  useAnalysisRunsQueryParams,
+  useAnalysisRunsListQueryParams,
   type AnalysisRunStatus,
-} from '../hooks/useAnalysisRunsQueryParams';
+} from '../hooks/useAnalysisRunsListQueryParams';
 import { useAnalysisRunListModel, type AnalysisRunListModel } from '../../api/workflows.api';
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router';
@@ -14,7 +14,7 @@ import { ApiErrorState } from '@/components/ui/ApiErrorState';
 
 const AnalysisRunsTable = () => {
   const navigate = useNavigate();
-  const { analysisRunListQueryParams, setPage, setRowsPerPage } = useAnalysisRunsQueryParams();
+  const { analysisRunListQueryParams, setPage, setRowsPerPage } = useAnalysisRunsListQueryParams();
 
   const {
     data: analysisRunsData,
