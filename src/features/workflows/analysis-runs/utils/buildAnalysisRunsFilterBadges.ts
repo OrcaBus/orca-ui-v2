@@ -1,5 +1,5 @@
 import type { FilterBadge } from '@/components/tables/FilterBar';
-import type { AnalysisRunsFilterPatch } from '../hooks/useAnalysisRunsQueryParams';
+import type { AnalysisRunsFilterPatch } from '../hooks/useAnalysisRunsListQueryParams';
 
 const PARAM_STATUS = 'arStatus';
 const PARAM_TYPE = 'arType';

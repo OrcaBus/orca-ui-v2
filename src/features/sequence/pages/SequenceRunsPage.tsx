@@ -1,9 +1,7 @@
-import { Suspense, useMemo } from 'react';
+import { useMemo } from 'react';
 import { FilterBar } from '../../../components/tables/FilterBar';
 import { PageHeader } from '../../../components/layout/PageHeader';
-import { DetailedErrorBoundary } from '@/components/ui/DetailedErrorBoundary';
-import { SpinnerWithText } from '@/components/ui/Spinner';
-import { useSequenceQueryParams, type SequenceStatus } from '../hooks/useSequenceQueryParams';
+import { useSequenceListQueryParams } from '../hooks/useSequenceListQueryParams';
 import type { InstrumentRunStatus } from '../utils/groupByInstrumentRun';
 import { buildSequenceRunsFilterBadges } from '../utils/buildSequenceRunsFilterBadges';
 import { SequenceRunsStatusCards } from '../components/SequenceRunsStatusCards';
@@ -20,10 +18,10 @@ export function SequenceRunsPage() {
     dateTo: startTimeTo,
     setDateTo: setStartTimeTo,
     clearAllFilters,
-  } = useSequenceQueryParams();
+  } = useSequenceListQueryParams();
 
   const handleStatusCardClick = (clickedStatus: InstrumentRunStatus) => {
-    const asSeqStatus = clickedStatus.toUpperCase() as SequenceStatus;
+    const asSeqStatus = clickedStatus.toUpperCase() as InstrumentRunStatus;
     if (statusFilter === asSeqStatus) {
       setStatusFilter('all');
     } else {
@@ -111,11 +109,7 @@ export function SequenceRunsPage() {
         onClearAll={activeFilterBadges.length > 0 ? clearAllFilters : undefined}
       />
 
-      <DetailedErrorBoundary errorTitle='Unable to load sequence runs'>
-        <Suspense fallback={<SpinnerWithText text='Loading sequence runs...' />}>
-          <SequenceRunsTable />
-        </Suspense>
-      </DetailedErrorBoundary>
+      <SequenceRunsTable />
     </div>
   );
 }

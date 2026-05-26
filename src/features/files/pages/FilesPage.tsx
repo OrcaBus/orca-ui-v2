@@ -1,6 +1,3 @@
-import { Suspense } from 'react';
-import { DetailedErrorBoundary } from '@/components/ui/DetailedErrorBoundary';
-import { SpinnerWithText } from '@/components/ui/Spinner';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { FilesSearchPanel, FilesTable } from '../components';
 
@@ -14,11 +11,7 @@ export function FilesPage() {
 
       <FilesSearchPanel />
 
-      <DetailedErrorBoundary errorTitle='Unable to load files'>
-        <Suspense fallback={<SpinnerWithText text='Loading files...' />}>
-          <FilesTable />
-        </Suspense>
-      </DetailedErrorBoundary>
+      <FilesTable />
     </div>
   );
 }

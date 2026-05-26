@@ -50,7 +50,7 @@ function splitTypes(arType: string): string[] {
  * Analysis runs list page state driven by URL query params.
  * Filter params: arStatus, arType, arFrom, arTo. Shared: search, orderBy, pagination.
  */
-export function useAnalysisRunsQueryParams() {
+export function useAnalysisRunsListQueryParams() {
   const {
     params,
     getArrayParam,

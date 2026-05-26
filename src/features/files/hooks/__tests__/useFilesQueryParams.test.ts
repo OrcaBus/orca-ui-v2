@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createFileListQueryParams, createFilesFilters } from '../useFilesQueryParams';
+import { createFileListQueryParams, createFilesFilters } from '../useFilesListQueryParams';
 
 describe('createFilesFilters', () => {
   it('defaults S3 key pattern filters to AND when keyOp is absent', () => {

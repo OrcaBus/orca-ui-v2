@@ -2,10 +2,8 @@ import { useMemo, useCallback } from 'react';
 import { useQueryParams } from '@/hooks/useQueryParams';
 import { PARAM_ORDER_BY, PARAM_SEARCH } from '@/utils/constants';
 import { toLocalStartOfDay } from '@/utils/timeFormat';
-import type { SequenceRunStatusEnum } from '../api/sequence.api';
+import type { SequenceRunStatusType } from '../api/sequence.api';
 import { toFirstString } from '@/utils/queryParams';
-
-export type SequenceStatus = SequenceRunStatusEnum;
 
 const PARAM_STATUS = 'seqStatus';
 const PARAM_FROM = 'seqFrom';
@@ -31,7 +29,7 @@ export type SequenceFilterPatch = Partial<{
  * Sequence list page state driven by URL query params.
  * Filter params: seqStatus, seqFrom, seqTo. Shared: search, orderBy, pagination.
  */
-export function useSequenceQueryParams() {
+export function useSequenceListQueryParams() {
   const {
     params,
     setParams,
@@ -77,7 +75,7 @@ export function useSequenceQueryParams() {
   const sequenceListQueryParams = useMemo(() => {
     const statusRaw = filterValues[PARAM_STATUS];
     const statusForApi =
-      !statusRaw || statusRaw === 'all' ? undefined : (statusRaw as SequenceStatus);
+      !statusRaw || statusRaw === 'all' ? undefined : (statusRaw as SequenceRunStatusType);
 
     return {
       page: pagination.page,
@@ -102,10 +100,10 @@ export function useSequenceQueryParams() {
     !filterValues[PARAM_STATUS] || filterValues[PARAM_STATUS] === 'all'
       ? 'all'
       : filterValues[PARAM_STATUS]
-  ) as SequenceStatus | 'all';
+  ) as SequenceRunStatusType | 'all';
 
   const setStatus = useCallback(
-    (v: SequenceStatus | 'all') => setFilterValues({ seqStatus: v === 'all' ? '' : v }),
+    (v: SequenceRunStatusType | 'all') => setFilterValues({ seqStatus: v === 'all' ? '' : v }),
     [setFilterValues]
   );
 

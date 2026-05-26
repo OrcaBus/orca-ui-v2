@@ -1,8 +1,6 @@
-import { Suspense, useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { keepPreviousData } from '@tanstack/react-query';
 import { FilterBar } from '@/components/tables/FilterBar';
-import { DetailedErrorBoundary } from '@/components/ui/DetailedErrorBoundary';
-import { SpinnerWithText } from '@/components/ui/Spinner';
 import { useWorkflowRunStatusCountModel } from '../../api/workflows.api';
 import {
   useWorkflowRunListQueryParams,
@@ -71,17 +69,15 @@ export function WorkflowRunsPage() {
 
   return (
     <div>
-      <DetailedErrorBoundary errorTitle='Unable to load workflow run status'>
-        <WorkflowRunsStatsCards
-          status={status}
-          onStatusCardClick={handleStatusCardClick}
-          workflowStatusCountsData={workflowStatusCountsData}
-          isLoadingWorkflowStatusCounts={isLoadingWorkflowStatusCounts}
-          isErrorWorkflowStatusCounts={isErrorWorkflowStatusCounts}
-          workflowStatusCountsError={workflowStatusCountsError}
-          onRetry={refreshWorkflowRunStatusCounts}
-        />
-      </DetailedErrorBoundary>
+      <WorkflowRunsStatsCards
+        status={status}
+        onStatusCardClick={handleStatusCardClick}
+        workflowStatusCountsData={workflowStatusCountsData}
+        isLoadingWorkflowStatusCounts={isLoadingWorkflowStatusCounts}
+        isErrorWorkflowStatusCounts={isErrorWorkflowStatusCounts}
+        workflowStatusCountsError={workflowStatusCountsError}
+        onRetry={refreshWorkflowRunStatusCounts}
+      />
 
       <FilterBar
         searchValue={search}
@@ -122,11 +118,8 @@ export function WorkflowRunsPage() {
         activeFilterBadges={activeFilterBadges}
         onClearAll={activeFilterBadges.length > 0 ? clearAllFilters : undefined}
       />
-      <DetailedErrorBoundary errorTitle='Unable to load workflow runs'>
-        <Suspense fallback={<SpinnerWithText text='Loading workflow runs...' />}>
-          <WorkflowRunsTable onBatchStateTransitionSuccess={refreshWorkflowRunStatusCounts} />
-        </Suspense>
-      </DetailedErrorBoundary>
+
+      <WorkflowRunsTable onBatchStateTransitionSuccess={refreshWorkflowRunStatusCounts} />
     </div>
   );
 }

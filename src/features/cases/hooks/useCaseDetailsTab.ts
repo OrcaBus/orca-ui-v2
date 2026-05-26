@@ -1,14 +1,20 @@
 import { useMemo, useCallback } from 'react';
 import { useQueryParams } from '../../../hooks/useQueryParams';
 
-export const CASE_DETAILS_TAB_VALUES = ['libraries', 'workflows', 'files'] as const;
-export type CaseDetailsTabId = (typeof CASE_DETAILS_TAB_VALUES)[number];
+export enum CaseDetailsTabValues {
+  TIMELINES = 'timelines',
+  LIBRARIES = 'libraries',
+  WORKFLOWS = 'workflows',
+  USERS = 'users',
+}
 
-function parseTabParam(value: string | undefined): CaseDetailsTabId {
-  if (value && CASE_DETAILS_TAB_VALUES.includes(value as CaseDetailsTabId)) {
-    return value as CaseDetailsTabId;
+export const CASE_DETAILS_TAB_VALUES_ARRAY = Object.values(CaseDetailsTabValues);
+
+function parseTabParam(value: string | undefined): CaseDetailsTabValues {
+  if (value && CASE_DETAILS_TAB_VALUES_ARRAY.includes(value as CaseDetailsTabValues)) {
+    return value as CaseDetailsTabValues;
   }
-  return 'libraries';
+  return CaseDetailsTabValues.LIBRARIES;
 }
 
 /**
@@ -24,7 +30,7 @@ export function useCaseDetailsTab() {
   const setActiveTab = useCallback(
     (id: string) => {
       const tab = parseTabParam(id);
-      setParams({ tab: tab === 'libraries' ? undefined : tab });
+      setParams({ tab: tab === CaseDetailsTabValues.LIBRARIES ? undefined : tab });
     },
     [setParams]
   );

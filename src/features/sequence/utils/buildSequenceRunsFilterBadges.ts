@@ -1,7 +1,7 @@
 import type { FilterBadge } from '@/components/tables/FilterBar';
-import type { SequenceStatus } from '../hooks/useSequenceQueryParams';
+import type { SequenceRunStatusType } from '../api/sequence.api';
 
-const STATUS_LABELS: Record<SequenceStatus, string> = {
+const STATUS_LABELS: Record<SequenceRunStatusType, string> = {
   STARTED: 'Started',
   FAILED: 'Failed',
   SUCCEEDED: 'Succeeded',
@@ -13,8 +13,8 @@ const STATUS_LABELS: Record<SequenceStatus, string> = {
 export interface BuildSequenceRunsFilterBadgesParams {
   search: string;
   setSearchQuery: (value: string) => void;
-  statusFilter: SequenceStatus | 'all';
-  setStatusFilter: (status: SequenceStatus | 'all') => void;
+  statusFilter: SequenceRunStatusType | 'all';
+  setStatusFilter: (status: SequenceRunStatusType | 'all') => void;
   startTimeFrom: string;
   setStartTimeFrom: (value: string) => void;
   startTimeTo: string;

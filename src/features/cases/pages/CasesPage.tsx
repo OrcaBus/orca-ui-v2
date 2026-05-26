@@ -1,59 +1,80 @@
 import { useMemo, useState } from 'react';
-import { Briefcase, Plus, Sparkles } from 'lucide-react';
+import dayjs from 'dayjs';
+import { useQueryClient } from '@tanstack/react-query';
+import { Briefcase, Plus, FolderSync } from 'lucide-react';
 import { FilterBar, type FilterBadge } from '../../../components/tables/FilterBar';
 import { Select } from '../../../components/ui/Select';
 import { PageHeader } from '../../../components/layout/PageHeader';
 import { toast } from 'sonner';
-import { getCases, getLibraries } from '../api/cases.api';
-import { useCasesQueryParams } from '../hooks/useCasesQueryParams';
 import {
-  CasesTable,
-  CaseSummaryDrawer,
-  DeleteCaseConfirmDialog,
+  useCaseCreateModel,
+  CASE_LIST_PATH,
+  useCaseSyncFromRedcapAutoHistoryModel,
+  useCaseSyncFromRedcapAutoModel,
+  type CaseTypeEnum,
+} from '../api/cases.api';
+import { useCasesListQueryParams } from '../hooks/useCasesListQueryParams';
+import {
+  CasesListTable,
   AddCaseModal,
-  AutoGenerateCasesModal,
+  AutoImportFromRedcapDialog,
+  SyncHistoryDialog,
 } from '../components';
 import type { AddCaseFormValues } from '../components/AddCaseModal';
-import type { Case } from '../types/case.types';
 
-const CASE_TYPE_LABELS: Record<string, string> = {
-  clinical: 'Clinical',
-  research: 'Research',
-  validation: 'Validation',
-  qc: 'QC',
+const CASE_TYPE_LABELS: Record<CaseTypeEnum, string> = {
+  wgts: 'WGTS',
+  cttso: 'ctTSO',
+  wgs_n: 'WGS-N',
 };
 
-export function CasesPage() {
-  const cases = getCases();
-  const libraries = getLibraries();
+const CASE_TYPE_OPTIONS: { value: string; label: string }[] = [
+  { value: 'all', label: 'All Types' },
+  { value: 'wgts', label: 'WGTS' },
+  { value: 'cttso', label: 'ctTSO' },
+  { value: 'wgs_n', label: 'WGS-N' },
+];
 
+export function CasesPage() {
   const {
-    searchQuery,
+    search: searchQuery,
     setSearchQuery,
     caseTypeFilter,
     setCaseTypeFilter,
-    dateFromFilter,
-    setDateFromFilter,
-    dateToFilter,
-    setDateToFilter,
     clearAllFilters,
-    filteredCases,
-    selectedCase,
-    setSelectedCase,
-  } = useCasesQueryParams({
-    cases,
-    libraries: libraries.map((l) => ({ id: l.id, name: l.name })),
-  });
+  } = useCasesListQueryParams();
 
-  const [deleteConfirmCase, setDeleteConfirmCase] = useState<Case | null>(null);
   const [showAddCaseModal, setShowAddCaseModal] = useState(false);
-  const [showAutoGenerateModal, setShowAutoGenerateModal] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
+  const [showAutoImportModal, setShowAutoImportModal] = useState(false);
+  const [showSyncHistoryModal, setShowSyncHistoryModal] = useState(false);
 
-  const handleCreateCase = (_values: AddCaseFormValues) => {
-    toast.success('Case created');
-    setShowAddCaseModal(false);
+  const queryClient = useQueryClient();
+  const { mutateAsync: createCase } = useCaseCreateModel();
+  const { mutate: syncFromRedcap, isPending: isSyncing } = useCaseSyncFromRedcapAutoModel();
+
+  const handleCreateCase = async (values: AddCaseFormValues): Promise<void> => {
+    await createCase({ body: values });
+    await queryClient.invalidateQueries({ queryKey: ['get', CASE_LIST_PATH] });
   };
+
+  const { data: casesSyncHistoryData, isLoading: isSyncHistoryLoading } =
+    useCaseSyncFromRedcapAutoHistoryModel();
+  const lastSynced = casesSyncHistoryData?.results?.[0]?.importedAt;
+
+  const lastSyncedDescription =
+    lastSynced && !isSyncHistoryLoading ? (
+      <span>
+        Manage lab cases and link libraries, workflow runs, and files. Last synced at{' '}
+        <button
+          onClick={() => setShowSyncHistoryModal(true)}
+          className='font-medium text-blue-600 underline-offset-2 hover:underline dark:text-blue-400'
+        >
+          {dayjs(lastSynced).format('YYYY-MM-DD HH:mm Z')}
+        </button>
+      </span>
+    ) : (
+      'Manage lab cases and link libraries, workflow runs, and files.'
+    );
 
   const activeFilterBadges = useMemo((): FilterBadge[] => {
     const badges: FilterBadge[] = [];
@@ -70,7 +91,7 @@ export function CasesPage() {
       const typeLabels = caseTypeFilter
         .split(',')
         .map((t) => t.trim())
-        .map((t) => CASE_TYPE_LABELS[t] ?? t);
+        .map((t) => CASE_TYPE_LABELS[t as CaseTypeEnum] ?? t);
       badges.push({
         id: 'caseType',
         type: 'filter',
@@ -79,72 +100,44 @@ export function CasesPage() {
         onRemove: () => setCaseTypeFilter('all'),
       });
     }
-    if (dateFromFilter) {
-      badges.push({
-        id: 'dateFrom',
-        type: 'range',
-        label: 'From',
-        value: dateFromFilter,
-        onRemove: () => setDateFromFilter(''),
-      });
-    }
-    if (dateToFilter) {
-      badges.push({
-        id: 'dateTo',
-        type: 'range',
-        label: 'To',
-        value: dateToFilter,
-        onRemove: () => setDateToFilter(''),
-      });
-    }
     return badges;
-  }, [
-    searchQuery,
-    caseTypeFilter,
-    dateFromFilter,
-    dateToFilter,
-    setSearchQuery,
-    setCaseTypeFilter,
-    setDateFromFilter,
-    setDateToFilter,
-  ]);
+  }, [searchQuery, caseTypeFilter, setSearchQuery, setCaseTypeFilter]);
 
-  const handleClearAllFilters = () => {
-    clearAllFilters();
-    console.log('clearAllFilters');
-  };
+  // const handleClearAllFilters = () => {
+  //   clearAllFilters();
+  //   console.log('clearAllFilters');
+  // };
 
-  const getLinkedLibrariesForCase = (case_: Case) =>
-    libraries.filter((lib) => case_.linkedLibraries.includes(lib.id));
-
-  const handleAutoGenerate = () => {
-    setIsGenerating(true);
-    setShowAutoGenerateModal(false);
-    setTimeout(() => {
-      setIsGenerating(false);
-      toast.success('Cases generated');
-    }, 2000);
-  };
-
-  const handleDeleteConfirm = () => {
-    setDeleteConfirmCase(null);
-    toast.success('Case deleted successfully!');
+  const handleAutoImport = () => {
+    syncFromRedcap(
+      {},
+      {
+        onSuccess: () => {
+          setShowAutoImportModal(false);
+          toast.success('Cases imported from REDCap');
+          void queryClient.invalidateQueries({ queryKey: ['get', CASE_LIST_PATH] });
+        },
+        onError: () => {
+          toast.error('Failed to import cases from REDCap');
+        },
+      }
+    );
   };
 
   return (
     <div className='min-h-screen bg-white p-6 dark:bg-[#101922]'>
       <PageHeader
         title='Cases'
-        description='Manage lab cases and link libraries, workflow runs, and files.'
+        description={lastSyncedDescription}
         icon={<Briefcase className='h-6 w-6' />}
         actions={
           <div className='flex items-center gap-2'>
             <button
               className='flex items-center gap-2 rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-200 dark:hover:bg-[#2d3540]'
-              onClick={() => setShowAutoGenerateModal(true)}
+              onClick={() => setShowAutoImportModal(true)}
             >
-              <Sparkles className='h-4 w-4' />
-              Auto-generate Cases
+              <FolderSync className='h-4 w-4' />
+              Auto Import from REDCap
             </button>
             <button
               className='flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 dark:bg-[#137fec] dark:hover:bg-blue-600'
@@ -168,91 +161,33 @@ export function CasesPage() {
             <Select
               value={caseTypeFilter}
               onChange={setCaseTypeFilter}
-              options={[
-                { value: 'all', label: 'All Types' },
-                { value: 'clinical', label: 'Clinical' },
-                { value: 'research', label: 'Research' },
-                { value: 'validation', label: 'Validation' },
-                { value: 'qc', label: 'QC' },
-              ]}
+              options={CASE_TYPE_OPTIONS}
             />
-            <div className='flex items-center gap-2'>
-              <label
-                htmlFor='cases-date-from'
-                className='text-sm text-neutral-600 dark:text-[#9dabb9]'
-              >
-                From:
-              </label>
-              <input
-                id='cases-date-from'
-                type='date'
-                value={dateFromFilter}
-                onChange={(e) => setDateFromFilter(e.target.value)}
-                className='rounded-md border border-neutral-300 bg-white px-3 py-1.5 text-sm text-neutral-900 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-100 dark:focus:ring-[#137fec]'
-              />
-            </div>
-            <div className='flex items-center gap-2'>
-              <label
-                htmlFor='cases-date-to'
-                className='text-sm text-neutral-600 dark:text-[#9dabb9]'
-              >
-                To:
-              </label>
-              <input
-                id='cases-date-to'
-                type='date'
-                value={dateToFilter}
-                onChange={(e) => setDateToFilter(e.target.value)}
-                className='rounded-md border border-neutral-300 bg-white px-3 py-1.5 text-sm text-neutral-900 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-100 dark:focus:ring-[#137fec]'
-              />
-            </div>
           </>
         }
         activeFilterBadges={activeFilterBadges}
-        onClearAll={activeFilterBadges?.length > 0 ? handleClearAllFilters : undefined}
+        onClearAll={activeFilterBadges?.length > 0 ? clearAllFilters : undefined}
       />
 
-      <CasesTable
-        data={filteredCases}
-        onViewLinked={setSelectedCase}
-        onDelete={setDeleteConfirmCase}
-        emptyMessage='No cases found'
-      />
-
-      {selectedCase && (
-        <CaseSummaryDrawer
-          case_={selectedCase}
-          linkedLibraries={getLinkedLibrariesForCase(selectedCase).map((lib) => ({
-            id: lib.id,
-            name: lib.name,
-            type: lib.type,
-            status: lib.status,
-          }))}
-          onClose={() => setSelectedCase(null)}
-        />
-      )}
-
-      {deleteConfirmCase && (
-        <DeleteCaseConfirmDialog
-          case_={deleteConfirmCase}
-          onConfirm={handleDeleteConfirm}
-          onCancel={() => setDeleteConfirmCase(null)}
-        />
-      )}
+      <CasesListTable />
 
       <AddCaseModal
         key={showAddCaseModal ? 'open' : 'closed'}
         isOpen={showAddCaseModal}
-        libraries={libraries.map((l) => ({ id: l.id, name: l.name }))}
         onClose={() => setShowAddCaseModal(false)}
         onSubmit={handleCreateCase}
       />
 
-      <AutoGenerateCasesModal
-        isOpen={showAutoGenerateModal}
-        isGenerating={isGenerating}
-        onClose={() => setShowAutoGenerateModal(false)}
-        onConfirm={handleAutoGenerate}
+      <SyncHistoryDialog
+        isOpen={showSyncHistoryModal}
+        onClose={() => setShowSyncHistoryModal(false)}
+      />
+
+      <AutoImportFromRedcapDialog
+        isOpen={showAutoImportModal}
+        isLoading={isSyncing}
+        onClose={() => setShowAutoImportModal(false)}
+        onConfirm={handleAutoImport}
       />
     </div>
   );

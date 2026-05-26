@@ -1,5 +1,5 @@
 import { Column, DataTable } from '@/components/tables/DataTable';
-import { useAnalysisTypesQueryParams } from '../hooks/useAnalysisTypesQueryParams';
+import { useAnalysisTypesListQueryParams } from '../hooks/useAnalysisTypesListQueryParams';
 import { useAnalysisListModel, type AnalysisModel } from '../../api/workflows.api';
 import { useMemo } from 'react';
 import { PillTag } from '@/components/ui/PillTag';
@@ -11,7 +11,7 @@ import { useAnalysisTypeDetailDrawer } from '../hooks/useAnalysisTypeDetailDrawe
 import { AnalysisTypeDetailsDrawer } from './AnalysisTypeDetailsDrawer';
 
 const AnalysisTypesTable = () => {
-  const { analysisTypesQueryParams, setPage, setRowsPerPage } = useAnalysisTypesQueryParams();
+  const { analysisTypesQueryParams, setPage, setRowsPerPage } = useAnalysisTypesListQueryParams();
   const { selectedAnalysisTypeId, openDetail, closeDetail } = useAnalysisTypeDetailDrawer();
   const {
     data: analysisData,

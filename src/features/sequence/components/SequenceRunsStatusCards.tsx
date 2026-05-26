@@ -1,10 +1,12 @@
 import { Archive, Ban, CheckCheck, CheckCircle, PlayCircle, XCircle } from 'lucide-react';
 import { StatusCard } from '@/components/ui/StatusCard';
 import { ApiErrorState } from '@/components/ui/ApiErrorState';
-import type { SequenceStatus } from '../hooks/useSequenceQueryParams';
 import type { InstrumentRunStatus } from '../utils/groupByInstrumentRun';
-import { useInstrumentRunStatsStatusCountsModel } from '../api/sequence.api';
-import { useSequenceQueryParams } from '../hooks/useSequenceQueryParams';
+import {
+  useInstrumentRunStatsStatusCountsModel,
+  type SequenceRunStatusType,
+} from '../api/sequence.api';
+import { useSequenceListQueryParams } from '../hooks/useSequenceListQueryParams';
 import { keepPreviousData } from '@tanstack/react-query';
 import { toLocalStartOfDay } from '@/utils/timeFormat';
 
@@ -36,7 +38,7 @@ function getSequenceStatusIcon(status: InstrumentRunStatus) {
 }
 
 interface SequenceRunsStatusCardsProps {
-  statusFilter: SequenceStatus | 'all';
+  statusFilter: SequenceRunStatusType | 'all';
   onStatusCardClick: (status: InstrumentRunStatus) => void;
 }
 
@@ -57,7 +59,7 @@ export function SequenceRunsStatusCards({
   statusFilter,
   onStatusCardClick,
 }: SequenceRunsStatusCardsProps) {
-  const { search, dateFrom, dateTo } = useSequenceQueryParams();
+  const { search, dateFrom, dateTo } = useSequenceListQueryParams();
 
   // get sequence run status count
   const {

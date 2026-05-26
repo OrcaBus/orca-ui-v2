@@ -1,12 +1,10 @@
-import { Suspense, useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { FilterBar } from '@/components/tables/FilterBar';
 // import { MultiSelect } from '@/components/ui/MultiSelect';
-import { DetailedErrorBoundary } from '@/components/ui/DetailedErrorBoundary';
-import { SpinnerWithText } from '@/components/ui/Spinner';
 import {
-  useAnalysisRunsQueryParams,
+  useAnalysisRunsListQueryParams,
   type AnalysisRunStatus,
-} from '../hooks/useAnalysisRunsQueryParams';
+} from '../hooks/useAnalysisRunsListQueryParams';
 import { buildAnalysisRunsFilterBadges } from '../utils/buildAnalysisRunsFilterBadges';
 import AnalysisRunsTable from '../components/AnalysisRunsTable';
 import { AnalysisRunsStatusCards } from '../components/AnalysisRunsStatusCards';
@@ -24,7 +22,7 @@ export function AnalysisRunsPage() {
     dateTo,
     setDateTo,
     clearAllFilters,
-  } = useAnalysisRunsQueryParams();
+  } = useAnalysisRunsListQueryParams();
 
   const activeFilterBadges = useMemo(
     () =>
@@ -44,11 +42,7 @@ export function AnalysisRunsPage() {
 
   return (
     <div>
-      <DetailedErrorBoundary errorTitle='Unable to load analysis run status'>
-        <Suspense fallback={<SpinnerWithText text='Loading analysis run status...' />}>
-          <AnalysisRunsStatusCards status={status} onStatusCardClick={handleStatusCardClick} />
-        </Suspense>
-      </DetailedErrorBoundary>
+      <AnalysisRunsStatusCards status={status} onStatusCardClick={handleStatusCardClick} />
 
       <FilterBar
         searchValue={search}
@@ -91,11 +85,7 @@ export function AnalysisRunsPage() {
         onClearAll={activeFilterBadges.length > 0 ? clearAllFilters : undefined}
       />
 
-      <DetailedErrorBoundary errorTitle='Unable to load analysis runs'>
-        <Suspense fallback={<SpinnerWithText text='Loading analysis runs...' />}>
-          <AnalysisRunsTable />
-        </Suspense>
-      </DetailedErrorBoundary>
+      <AnalysisRunsTable />
     </div>
   );
 }

@@ -5,7 +5,7 @@ import {
   TimelineEventSourceTypes,
   TimelineEventTypes,
   type TimelineEvent,
-} from '../../../components/timeline/timeline.type';
+} from '@/components/timeline/timeline.type';
 
 /**
  * Maps legacy StatusEvent (sequence run statusHistory) to the enhanced TimelineEvent shape.

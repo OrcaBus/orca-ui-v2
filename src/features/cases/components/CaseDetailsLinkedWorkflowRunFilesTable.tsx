@@ -1,44 +1,53 @@
-import { useState, useCallback, useMemo } from 'react';
-import { FileSearch } from 'lucide-react';
-import { FileDownloadButton } from './FileDownloadButton';
+import { useState, useMemo } from 'react';
 import { DataTable, type Column } from '@/components/tables/DataTable';
-import { getFileTypeBadgeStyle, formatBytes, getFilename, getFileExtension } from '@/utils/files';
-import { useFileObjectListModel, type S3Record } from '../api/files.api';
-import { useFilesListQueryParams } from '../hooks/useFilesListQueryParams';
 import { ApiErrorState } from '@/components/ui/ApiErrorState';
-import { DEFAULT_PAGE_SIZE } from '@/utils/constants';
-import { formatTableDate } from '@/utils/timeFormat';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/Tooltip';
-import { FileRecordDetailsDrawer } from './FileRecordDetailsDrawer';
-import { EmptyState } from '@/components/ui/EmptyState';
-import { FilePathSegments } from './FilePathSegments';
-import { FilePreviewButton } from './FilePreviewButton';
-import { FileIgvDesktopButton as IgvDesktopButton } from './FileIgvDesktopButton';
-import { IGV_FILETYPE_LIST, isFileDownloadable } from '@/utils/files';
-import { FileMoreActionsDropdown } from './FileMoreActionsDropdown';
+import { DEFAULT_PAGE_SIZE } from '@/utils/constants';
+import {
+  formatBytes,
+  getFileExtension,
+  getFilename,
+  getFileTypeBadgeStyle,
+  IGV_FILETYPE_LIST,
+  isFileDownloadable,
+} from '@/utils/files';
+import { formatTableDate } from '@/utils/timeFormat';
+import { useFileObjectListModel, type S3Record } from '@/features/files/api/files.api';
+import { FileDownloadButton } from '@/features/files/components/FileDownloadButton';
+import { FileIgvDesktopButton as IgvDesktopButton } from '@/features/files/components/FileIgvDesktopButton';
+import { FileMoreActionsDropdown } from '@/features/files/components/FileMoreActionsDropdown';
+import { FilePathSegments } from '@/features/files/components/FilePathSegments';
+import { FilePreviewButton } from '@/features/files/components/FilePreviewButton';
+import { FileRecordDetailsDrawer } from '@/features/files/components/FileRecordDetailsDrawer';
 
-export function FilesTable() {
-  const { fileListQueryParams, setPage, setRowsPerPage, hasSearchORFilters } =
-    useFilesListQueryParams();
+export interface CaseDetailsLinkedWorkflowRunFilesTableProps {
+  portalRunId: string;
+}
 
+export function CaseDetailsLinkedWorkflowRunFilesTable({
+  portalRunId,
+}: CaseDetailsLinkedWorkflowRunFilesTableProps) {
   const [selectedFile, setSelectedFile] = useState<S3Record | null>(null);
-
-  const closeDetail = useCallback(() => setSelectedFile(null), []);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 
   const {
     data: filesData,
-    isLoading: isLoadingFilesData,
-    isError: isErrorFilesData,
-    error: filesError,
-    refetch: refetchFilesData,
+    isLoading,
+    isRefetching,
+    isError,
+    error,
+    refetch,
   } = useFileObjectListModel({
     params: {
       query: {
-        ...fileListQueryParams,
-        currentState: true, // Only fetch current state for the table view
+        currentState: true,
+        'attributes[portalRunId][]': [portalRunId],
+        page,
+        rowsPerPage: pageSize,
       },
     },
-    enabled: hasSearchORFilters, // Don't fetch until query params are parsed
+    reactQuery: { enabled: !!portalRunId },
   });
 
   const columns: Column<S3Record>[] = useMemo(
@@ -46,13 +55,13 @@ export function FilesTable() {
       {
         key: 'key',
         header: 'File Name',
-        sortable: true,
         render: (file) => {
           const ext = getFileExtension(file.key);
           const name = getFilename(file.key);
           const dir = file.key.includes('/')
             ? file.key.substring(0, file.key.lastIndexOf('/') + 1)
             : '';
+
           return (
             <div className='flex items-center gap-3'>
               <span
@@ -94,12 +103,11 @@ export function FilesTable() {
       {
         key: 'actions',
         header: 'Actions',
-        sortable: false,
         render: (file) => {
           const { key: s3Key, s3ObjectId, bucket } = file;
-
           const isDownloadable = isFileDownloadable(s3Key);
-          const isIgvFile = !!IGV_FILETYPE_LIST.find((f) => s3Key.endsWith(f));
+          const isIgvFile = !!IGV_FILETYPE_LIST.find((fileType) => s3Key.endsWith(fileType));
+
           return (
             <div className='flex items-center gap-1'>
               {isIgvFile && (
@@ -118,7 +126,6 @@ export function FilesTable() {
       {
         key: 'bucket',
         header: 'Bucket Name',
-        sortable: true,
         render: (file) => (
           <Tooltip>
             <TooltipTrigger asChild>
@@ -135,7 +142,6 @@ export function FilesTable() {
       {
         key: 'size',
         header: 'Size',
-        sortable: true,
         render: (file) => (
           <span className='text-sm text-neutral-900 dark:text-[#9dabb9]'>
             {file.size != null ? formatBytes(file.size) : '-'}
@@ -145,7 +151,6 @@ export function FilesTable() {
       {
         key: 'lastModifiedDate',
         header: 'Last Modified',
-        sortable: true,
         render: (file) =>
           file.lastModifiedDate ? (
             <div className='text-sm text-neutral-900 dark:text-[#9dabb9]'>
@@ -156,23 +161,11 @@ export function FilesTable() {
           ),
       },
     ],
-    [setSelectedFile]
+    []
   );
 
-  if (isErrorFilesData) {
-    return <ApiErrorState error={filesError} onRetry={() => void refetchFilesData()} />;
-  }
-
-  if (!hasSearchORFilters) {
-    return (
-      <div className='rounded-lg border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-900'>
-        <EmptyState
-          icon={FileSearch}
-          title='No Search or Filtering Performed'
-          description='Use the search and filters above to search for files. Provide search terms or apply one of the filters.'
-        />
-      </div>
-    );
+  if (isError) {
+    return <ApiErrorState error={error} onRetry={() => void refetch()} />;
   }
 
   return (
@@ -180,18 +173,22 @@ export function FilesTable() {
       <DataTable
         data={filesData?.results ?? []}
         columns={columns}
-        isLoading={isLoadingFilesData}
-        onRefresh={() => void refetchFilesData()}
-        emptyMessage='No files found. Try adjusting your search or filters?'
+        isLoading={isLoading || isRefetching}
+        onRefresh={() => void refetch()}
+        emptyMessage='No files found for this workflow run.'
+        persistSettings={{ key: 'case.workflowrun.filestable' }}
+        inCard
         paginationProps={{
-          page: filesData?.pagination.page || 1,
-          pageSize: filesData?.pagination.rowsPerPage || DEFAULT_PAGE_SIZE,
+          page: filesData?.pagination.page ?? page,
+          pageSize: filesData?.pagination.rowsPerPage ?? pageSize,
           onPageChange: (p) => setPage(p ?? 1),
-          onPageSizeChange: (size) => setRowsPerPage(size),
-          totalItems: filesData?.pagination.count || 0,
+          onPageSizeChange: (size) => setPageSize(size),
+          totalItems: filesData?.pagination.count ?? 0,
         }}
       />
-      {selectedFile && <FileRecordDetailsDrawer file={selectedFile} onClose={closeDetail} />}
+      {selectedFile && (
+        <FileRecordDetailsDrawer file={selectedFile} onClose={() => setSelectedFile(null)} />
+      )}
     </>
   );
 }

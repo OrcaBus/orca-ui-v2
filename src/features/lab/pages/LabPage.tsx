@@ -1,4 +1,4 @@
-import { Suspense, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Database, RefreshCw } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { AdvancedFilterBar } from '@/components/tables/AdvancedFilterBar';
@@ -6,8 +6,6 @@ import { useLabQueryParams } from '../hooks/useLabQueryParams';
 import { LibrariesTable, SyncMetadataModal } from '../components';
 import { LAB_FILTER_FIELDS } from '../utils/labFilterFields';
 import { buildLabActiveFilterBadges } from '../utils/buildLabFilterBadges';
-import { SpinnerWithText } from '@/components/ui/Spinner';
-import { DetailedErrorBoundary } from '@/components/ui/DetailedErrorBoundary';
 
 export function LabPage() {
   const { search, setSearchQuery, filterValues, setFilterValues, clearAllFilters } =
@@ -60,11 +58,7 @@ export function LabPage() {
         onClearAll={clearAllFilters}
       />
 
-      <DetailedErrorBoundary errorTitle='Unable to load libraries'>
-        <Suspense fallback={<SpinnerWithText text='Loading libraries...' />}>
-          <LibrariesTable />
-        </Suspense>
-      </DetailedErrorBoundary>
+      <LibrariesTable />
 
       <SyncMetadataModal isOpen={showSyncModal} onClose={() => setShowSyncModal(false)} />
     </div>

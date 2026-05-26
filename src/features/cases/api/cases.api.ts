@@ -42,15 +42,25 @@ import {
   createPostMutationHook,
   createPatchMutationHook,
   createDeleteMutationHook,
-  createSuspenseQueryHook,
+  createQueryHook,
 } from '@/api/client';
 import { env } from '@/utils/env';
 
-const apiVersion = env.VITE_SEQUENCE_RUN_API_VERSION as string;
+const apiVersion = env.VITE_CASE_API_VERSION as string;
 const caseApi = new ApiClient<paths>({
   baseUrl: config.apiEndpoint.case,
   getPath: (path) => getVersionedPath(path, apiVersion),
 });
+
+export type CaseTypeEnum = components['schemas']['TypeEnum'];
+export type CaseStudyTypeEnum = components['schemas']['StudyTypeEnum'];
+export type CaseStatusEnum = components['schemas']['StatusEnum'];
+export type ExternalServiceEnum = components['schemas']['ExternalServiceEnum'];
+
+export type CaseExternalEntityLinkModel = components['schemas']['CaseExternalEntityLink'];
+export type CaseUserLinkModel = components['schemas']['CaseUserLink'];
+export type CaseStateModel = components['schemas']['State'];
+export type CaseCommentModel = components['schemas']['Comment'];
 
 export type CaseModel = components['schemas']['Case'];
 export type CaseDetailModel = components['schemas']['CaseDetail'];
@@ -58,22 +68,33 @@ export type CaseRequestModel = components['schemas']['CaseDetailRequest'];
 export type PatchedCaseDetailRequestModel = components['schemas']['PatchedCaseDetailRequest'];
 export type CaseExternalEntityLinkCreateRequestModel =
   components['schemas']['CaseExternalEntityLinkCreateRequest'];
-export type CaseExternalEntityLinkModel =
-  components['schemas']['CaseExternalEntityLinkCreateRequest'];
 export type CaseExternalEntityUnlinkModel =
   operations['caseExternalEntityDestroy']['responses']['204']['content'];
+export type ExternalSyncLogModel = components['schemas']['ExternalSyncLog'];
 
 // case models
-export const useCaseListModel = createSuspenseQueryHook(caseApi, '/api/v1/case/');
-export const useCaseDetailModel = createSuspenseQueryHook(caseApi, '/api/v1/case/{orcabusId}/');
+export const CASE_LIST_PATH = caseApi.resolvePath('/api/v1/case/');
+export const useCaseListModel = createQueryHook(caseApi, '/api/v1/case/');
+export const useCaseDetailModel = createQueryHook(caseApi, '/api/v1/case/{orcabusId}/');
 export const useCaseCreateModel = createPostMutationHook(caseApi, '/api/v1/case/');
 export const useCaseUpdateModel = createPatchMutationHook(caseApi, '/api/v1/case/{orcabusId}/');
 
-// case activity and external entities
-export const useCaseActivityModel = createSuspenseQueryHook(
+// case sync
+export const useCaseSyncFromRedcapAutoModel = createPostMutationHook(
   caseApi,
-  '/api/v1/case/{orcabusId}/activity/'
+  '/api/v1/case/sync-from-redcap/auto/'
 );
+export const useCaseSyncFromRedcapAutoHistoryModel = createQueryHook(
+  caseApi,
+  '/api/v1/case/sync-from-redcap/auto/history/'
+);
+export const useCaseSyncFromRedcapModel = createPostMutationHook(
+  caseApi,
+  '/api/v1/case/{orcabusId}/sync-from-redcap/'
+);
+
+// case external entities
+export const useCaseActivityModel = createQueryHook(caseApi, '/api/v1/case/{orcabusId}/activity/');
 export const useCaseExternalEntityCreateModel = createPostMutationHook(
   caseApi,
   '/api/v1/case/{orcabusId}/external-entity/'
@@ -82,8 +103,15 @@ export const useCaseUnlinkEntityModel = createDeleteMutationHook(
   caseApi,
   '/api/v1/case/{orcabusId}/external-entity/{externalEntityOrcabusId}/'
 );
+export const useExternalEntityListModel = createQueryHook(caseApi, '/api/v1/external-entity/');
+export const useCaseExternalEntityDetailModel = createQueryHook(
+  caseApi,
+  '/api/v1/external-entity/{orcabusId}/'
+);
 
 // case user management
+export const useUsersListModel = createQueryHook(caseApi, '/api/v1/user/');
+export const useUserDetailModel = createQueryHook(caseApi, '/api/v1/user/{orcabusId}/');
 export const useCaseAddUserModel = createPostMutationHook(
   caseApi,
   '/api/v1/case/{orcabusId}/user/'
@@ -94,11 +122,20 @@ export const useCaseRemoveUserModel = createDeleteMutationHook(
 );
 
 // case states
-export const useCaseStatesModel = createSuspenseQueryHook(
+export const useStatesListModel = createQueryHook(caseApi, '/api/v1/state/');
+export const useStateDetailModel = createQueryHook(caseApi, '/api/v1/state/{orcabusId}/');
+export const useCaseStatesModel = createQueryHook(caseApi, '/api/v1/case/{orcabusId}/states/');
+export const useStateCreateModel = createPostMutationHook(caseApi, '/api/v1/state/');
+export const useCaseArchiveModel = createPatchMutationHook(
   caseApi,
-  '/api/v1/case/{orcabusId}/states/'
+  '/api/v1/state/{orcabusId}/archive/'
 );
-export const useCaseStateCreateModel = createPostMutationHook(caseApi, '/api/v1/state/');
 
 // case comments
-export const useCaseCommentCreateModel = createPostMutationHook(caseApi, '/api/v1/comment/');
+export const useCommentsListModel = createQueryHook(caseApi, '/api/v1/comment/');
+export const useCommentDetailModel = createQueryHook(caseApi, '/api/v1/comment/{orcabusId}/');
+export const useCaseAddCommentModel = createPostMutationHook(caseApi, '/api/v1/comment/');
+export const useCaseArchiveCommentModel = createPatchMutationHook(
+  caseApi,
+  '/api/v1/comment/{orcabusId}/archive/'
+);

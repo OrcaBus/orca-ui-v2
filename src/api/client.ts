@@ -133,9 +133,20 @@ export class ApiClient<Paths extends PathsRecord> {
 /**
  * Creates a typed `useQuery` hook pre-bound to a GET endpoint.
  *
- * Accepts a single argument `{ params, reactQuery? }` matching the
- * convention used across the codebase.  Extra query-param keys are
- * allowed for DRF filter lookups (`workflow__orcabus_id`, etc.).
+ * Use this for standard component-driven data fetching where the caller
+ * wants to handle loading, error, refetch, pagination, filters, or
+ * conditional execution manually through the returned React Query result.
+ *
+ * The generated hook accepts one argument shaped like the openapi-fetch
+ * init object plus optional `{ reactQuery }` options:
+ *
+ *   useSomeModel({
+ *     params: { path: { id }, query: { page: 1 } },
+ *     reactQuery: { enabled: !!id, placeholderData: keepPreviousData },
+ *   })
+ *
+ * Extra query-param keys are allowed for DRF filter lookups such as
+ * `workflow__orcabus_id`.
  */
 export function createQueryHook<
   Paths extends PathsRecord,
@@ -156,6 +167,20 @@ export function createQueryHook<
   };
 }
 
+/**
+ * Creates a typed `useSuspenseQuery` hook pre-bound to a GET endpoint.
+ *
+ * Use this when the component subtree cannot render meaningful UI until
+ * the data is available.  Initial loading suspends to the nearest
+ * `<Suspense fallback={...}>`, and initial load errors are expected to be
+ * handled by an error boundary around that subtree.
+ *
+ * Once the component renders, `data` is available on the returned result,
+ * so callers usually do not need local `isLoading` branches.  Avoid using
+ * this for optional or conditionally enabled requests; TanStack suspense
+ * queries run with suspense semantics and should be mounted only when the
+ * required params are ready.
+ */
 export function createSuspenseQueryHook<
   Paths extends PathsRecord,
   Path extends PathsWithMethod<Paths, 'get'>,
@@ -179,6 +204,29 @@ export function createSuspenseQueryHook<
 /* Query model factory                */
 /* ---------------------------------- */
 
+/**
+ * Creates a reusable query model for one GET endpoint.
+ *
+ * The model bundles all common query entry points for the same endpoint:
+ * `path`, `queryOptions`, `useQuery`, `useSuspenseQuery`, and `prefetch`.
+ *
+ * Use this when an endpoint needs more than a single component hook, such
+ * as dynamic `useQueries` arrays, route loaders, cache prefetching, or
+ * shared query option construction.  For simple component-only usage,
+ * `createQueryHook` is usually enough.
+ *
+ * Example:
+ *
+ *   export const fileObjectListModel = createQueryModel(fileApi, '/api/v1/s3');
+ *
+ *   const queryOptions = fileObjectListModel.queryOptions({
+ *     params: { query: { bucket: 'example-bucket' } },
+ *   });
+ *
+ *   await fileObjectListModel.prefetch(queryClient, {
+ *     params: { query: { bucket: 'example-bucket' } },
+ *   });
+ */
 export function createQueryModel<
   Paths extends PathsRecord,
   Path extends PathsWithMethod<Paths, 'get'>,
@@ -257,6 +305,9 @@ export function createMutationHook<
     };
   };
 }
+/* ---------------------------------- */
+/* Convenience factories for common methods */
+/* ---------------------------------- */
 
 export const createPostMutationHook = <
   Paths extends PathsRecord,
