@@ -1,5 +1,5 @@
 import { useMemo, useState, type ComponentPropsWithoutRef, type ReactNode } from 'react';
-import { ArrowUpDown, MoreVertical } from 'lucide-react';
+import { Archive, ArrowUpDown, MoreVertical } from 'lucide-react';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 import dayjs from 'dayjs';
 import { toast } from 'sonner';
@@ -52,6 +52,10 @@ function formatLabel(value: string): string {
 }
 
 function getEventTitle(event: TimelineEvent): string {
+  if (event.title) {
+    return String(event.title);
+  }
+
   if (isStateEvent(event)) {
     return 'Workflow State Update';
   }
@@ -232,6 +236,7 @@ export function Timeline({ events, customActions, selectedEventId, onEventSelect
                 : null;
               const shouldShowSeverityBadge =
                 isCommentEvent(event) && severity !== TimelineCommentSeverityEnum.INFO;
+              const archivedTimestamp = event.archivedAt ? formatTimestamp(event.archivedAt) : null;
 
               return (
                 <div
@@ -248,9 +253,11 @@ export function Timeline({ events, customActions, selectedEventId, onEventSelect
                       className={cn(
                         'relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ring-8 ring-white transition-all duration-300 ease-in-out focus:outline-none dark:ring-gray-900',
                         visual.nodeClassName,
-                        isFocused
-                          ? 'scale-110 bg-blue-100 shadow-lg shadow-blue-100/50 ring-blue-50 dark:bg-blue-900/30 dark:shadow-blue-900/20 dark:ring-blue-900/20'
-                          : 'hover:scale-105'
+                        isFocused && event.isArchived
+                          ? 'scale-110 shadow-lg shadow-neutral-100/50 ring-neutral-100 dark:shadow-neutral-900/20 dark:ring-neutral-800'
+                          : isFocused
+                            ? 'scale-110 bg-blue-100 shadow-lg shadow-blue-100/50 ring-blue-50 dark:bg-blue-900/30 dark:shadow-blue-900/20 dark:ring-blue-900/20'
+                            : 'hover:scale-105'
                       )}
                     >
                       <Icon className={cn('h-5 w-5', visual.iconClassName)} />
@@ -329,6 +336,18 @@ export function Timeline({ events, customActions, selectedEventId, onEventSelect
                               {timestamp.date} {timestamp.time}
                             </span>
 
+                            {event.isArchived && (
+                              <span
+                                className={cn(
+                                  'ml-1 inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold tracking-wide uppercase',
+                                  visual.badgeClassName
+                                )}
+                              >
+                                <Archive className='h-3 w-3' />
+                                Archived
+                              </span>
+                            )}
+
                             {isStateEvent(event) && (
                               <span
                                 className={cn(
@@ -357,6 +376,34 @@ export function Timeline({ events, customActions, selectedEventId, onEventSelect
                                 {formatLabel(severity)}
                               </span>
                             )}
+
+                            {event.isArchived && event.archivedBy && (
+                              <>
+                                <span
+                                  className='text-neutral-400 dark:text-neutral-600'
+                                  aria-hidden='true'
+                                >
+                                  ·
+                                </span>
+                                <span className='text-sm font-medium text-neutral-500 dark:text-neutral-400'>
+                                  Archived by {event.archivedBy}
+                                </span>
+                              </>
+                            )}
+
+                            {event.isArchived && archivedTimestamp && (
+                              <>
+                                <span
+                                  className='text-neutral-400 dark:text-neutral-600'
+                                  aria-hidden='true'
+                                >
+                                  ·
+                                </span>
+                                <span className='text-sm font-medium text-neutral-500 dark:text-neutral-400'>
+                                  Archived {archivedTimestamp.date} {archivedTimestamp.time}
+                                </span>
+                              </>
+                            )}
                           </div>
                         </div>
 
@@ -382,7 +429,9 @@ export function Timeline({ events, customActions, selectedEventId, onEventSelect
                                   (typeof action.disabled === 'function'
                                     ? action.disabled(event)
                                     : Boolean(action.disabled));
-                                const isDestructive = action.id.toLowerCase().includes('delete');
+                                const actionId = action.id.toLowerCase();
+                                const isDestructive =
+                                  actionId.includes('delete') || actionId.includes('archive');
 
                                 return (
                                   <MenuItem key={action.id}>
@@ -394,7 +443,7 @@ export function Timeline({ events, customActions, selectedEventId, onEventSelect
                                         void handleActionClick(event, action);
                                       }}
                                       className={cn(
-                                        'flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-sm disabled:cursor-not-allowed disabled:opacity-50 data-[focus]:bg-neutral-100 dark:data-[focus]:bg-neutral-800',
+                                        'flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-sm disabled:cursor-not-allowed disabled:opacity-50 data-focus:bg-neutral-100 dark:data-focus:bg-neutral-800',
                                         isDestructive
                                           ? 'text-red-700 dark:text-red-300'
                                           : 'text-neutral-700 dark:text-neutral-300'

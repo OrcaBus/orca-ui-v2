@@ -25,6 +25,7 @@ export interface CustomStateDialogProps {
   title?: string;
   submitLabel?: string;
   hideTimestamp?: boolean;
+  hideComment?: boolean;
   actorEmail?: string;
   actorTimestamp?: string;
 }
@@ -47,6 +48,7 @@ export function CustomStateDialog({
   title,
   submitLabel,
   hideTimestamp = false,
+  hideComment = false,
   actorEmail,
   actorTimestamp,
 }: CustomStateDialogProps) {
@@ -146,6 +148,7 @@ export function CustomStateDialog({
         className='space-y-5'
       >
         {hideTimestamp && <input type='hidden' {...register('timestamp')} />}
+        {hideComment && <input type='hidden' {...register('comment')} />}
 
         {!hideTimestamp && (
           <div className='space-y-2'>
@@ -246,26 +249,28 @@ export function CustomStateDialog({
           </div>
         )}
 
-        <div className='space-y-2'>
-          <label
-            htmlFor='comment'
-            className='text-sm font-medium text-neutral-700 dark:text-neutral-300'
-          >
-            Comment
-          </label>
-          <textarea
-            id='comment'
-            rows={5}
-            {...register('comment')}
-            placeholder='Write your state comment here...'
-            className='min-h-35 w-full resize-none rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 shadow-sm placeholder:text-neutral-400 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-100 dark:placeholder-[#9dabb9] dark:focus:ring-[#137fec]'
-          />
-          {errors.comment && (
-            <p className='text-sm font-medium text-red-500 dark:text-red-400'>
-              {errors.comment.message}
-            </p>
-          )}
-        </div>
+        {!hideComment && (
+          <div className='space-y-2'>
+            <label
+              htmlFor='comment'
+              className='text-sm font-medium text-neutral-700 dark:text-neutral-300'
+            >
+              Comment
+            </label>
+            <textarea
+              id='comment'
+              rows={5}
+              {...register('comment')}
+              placeholder='Write your state comment here...'
+              className='min-h-35 w-full resize-none rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 shadow-sm placeholder:text-neutral-400 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-100 dark:placeholder-[#9dabb9] dark:focus:ring-[#137fec]'
+            />
+            {errors.comment && (
+              <p className='text-sm font-medium text-red-500 dark:text-red-400'>
+                {errors.comment.message}
+              </p>
+            )}
+          </div>
+        )}
       </form>
     </TimelineDialogFrame>
   );

@@ -1,4 +1,5 @@
 import {
+  AlertTriangle,
   Archive,
   Ban,
   CheckCircle,
@@ -37,6 +38,16 @@ const NEUTRAL_STATE_VISUAL: TimelineVisual = {
   cardClassName:
     'bg-linear-to-r from-blue-50/80 to-white shadow-xs shadow-blue-100/50 ring-1 ring-blue-100/50 dark:from-blue-900/20 dark:to-gray-800/50 dark:shadow-blue-900/20 dark:ring-blue-900/20',
   badgeClassName: 'bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300',
+};
+
+const ARCHIVED_EVENT_VISUAL: TimelineVisual = {
+  icon: Archive,
+  nodeClassName:
+    'border-transparent bg-neutral-200 opacity-80 dark:border-transparent dark:bg-neutral-800',
+  iconClassName: 'text-neutral-700 dark:text-neutral-300',
+  cardClassName:
+    'bg-linear-to-r from-neutral-100/80 to-white shadow-xs shadow-neutral-100/50 ring-1 ring-neutral-200/80 dark:from-neutral-900/50 dark:to-neutral-950/20 dark:shadow-neutral-900/20 dark:ring-neutral-800/80',
+  badgeClassName: 'bg-neutral-200 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-300',
 };
 
 function neutralStateVisual(icon: LucideIcon): TimelineVisual {
@@ -101,6 +112,22 @@ export const STATE_VISUALS: Record<string, TimelineVisual> = {
       'bg-linear-to-r from-neutral-100/80 to-white shadow-xs shadow-neutral-100/50 ring-1 ring-neutral-200/80 dark:from-neutral-900/50 dark:to-neutral-950/20 dark:shadow-neutral-900/20 dark:ring-neutral-800/80',
     badgeClassName: 'bg-neutral-200 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-300',
   },
+  CASE_PARTIALLY_FAILED: {
+    icon: AlertTriangle,
+    nodeClassName: 'border-transparent bg-amber-100 dark:border-transparent dark:bg-amber-950',
+    iconClassName: 'text-amber-700 dark:text-amber-300',
+    cardClassName:
+      'bg-linear-to-r from-amber-50/80 to-white shadow-xs shadow-amber-100/50 ring-1 ring-amber-100/80 dark:from-amber-950/30 dark:to-neutral-950/20 dark:shadow-amber-950/20 dark:ring-amber-900/50',
+    badgeClassName: 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300',
+  },
+  CASE_PHASE_COMPLETED: {
+    icon: CheckCircle,
+    nodeClassName: 'border-transparent bg-purple-100 dark:border-transparent dark:bg-purple-950',
+    iconClassName: 'text-purple-700 dark:text-purple-300',
+    cardClassName:
+      'bg-linear-to-r from-purple-50/80 to-white shadow-xs shadow-purple-100/50 ring-1 ring-purple-100/80 dark:from-purple-950/30 dark:to-neutral-950/20 dark:shadow-purple-950/20 dark:ring-purple-900/50',
+    badgeClassName: 'bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300',
+  },
 };
 
 const STATE_ALIASES: Record<string, string> = {
@@ -115,6 +142,18 @@ const STATE_ALIASES: Record<string, string> = {
   ERROR: 'FAILED',
   CANCELLED: 'ABORTED',
   CANCELED: 'ABORTED',
+  REQUEST_RECEIVED: 'STARTED',
+  SAMPLE_RECEIVED: 'STARTED',
+  LIBRARY_PARTIALLY_FAILED: 'CASE_PARTIALLY_FAILED',
+  SEQUENCING_STARTED: 'STARTED',
+  SEQUENCING_COMPLETED: 'CASE_PHASE_COMPLETED',
+  BIOINFORMATICS_STARTED: 'STARTED',
+  BIOINFORMATICS_COMPLETED: 'CASE_PHASE_COMPLETED',
+  CURATION_STARTED: 'STARTED',
+  CURATION_COMPLETED: 'CASE_PHASE_COMPLETED',
+  LOCKED: 'DEPRECATED',
+  UNLOCKED: 'DEPRECATED',
+  ARCHIVED: 'DEPRECATED',
 };
 
 function normalizeStateKey(state: string): string {
@@ -191,5 +230,9 @@ function getCommentVisual(event: TimelineCommentEvent): TimelineVisual {
 }
 
 export function getTimelineEventVisual(event: TimelineEvent): TimelineVisual {
+  if (event.isArchived) {
+    return ARCHIVED_EVENT_VISUAL;
+  }
+
   return isStateEvent(event) ? getTimelineStateVisual(event.state) : getCommentVisual(event);
 }

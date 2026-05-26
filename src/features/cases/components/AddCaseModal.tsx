@@ -4,8 +4,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Briefcase, Plus } from 'lucide-react';
 import { toast } from 'sonner';
+import { useQueryClient } from '@tanstack/react-query';
 import { cn } from '@/utils/cn';
 import { DialogFrame } from '@/components/modals/DialogFrame';
+import { useCaseCreateModel, CASE_LIST_PATH } from '../api/cases.api';
 import type { CaseRequestModel, CaseTypeEnum, CaseStudyTypeEnum } from '../api/cases.api';
 
 // ─── constants ────────────────────────────────────────────────────────────────
@@ -57,7 +59,7 @@ export type AddCaseFormValues = CaseRequestModel;
 export interface AddCaseModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (values: AddCaseFormValues) => Promise<void>;
+  onSuccess?: () => void;
 }
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
@@ -90,7 +92,10 @@ const errorCls = 'text-sm font-medium text-red-500 dark:text-red-400';
 
 // ─── component ────────────────────────────────────────────────────────────────
 
-export function AddCaseModal({ isOpen, onClose, onSubmit }: AddCaseModalProps) {
+export function AddCaseModal({ isOpen, onClose, onSuccess }: AddCaseModalProps) {
+  const queryClient = useQueryClient();
+  const { mutateAsync: createCase } = useCaseCreateModel();
+
   const {
     register,
     control,
@@ -126,9 +131,11 @@ export function AddCaseModal({ isOpen, onClose, onSubmit }: AddCaseModalProps) {
 
   const handleFormSubmit = async (values: FormValues) => {
     try {
-      await onSubmit(toRequestModel(values));
+      await createCase({ body: toRequestModel(values) });
+      await queryClient.invalidateQueries({ queryKey: ['get', CASE_LIST_PATH] });
       toast.success('Case created successfully');
       handleClose();
+      onSuccess?.();
     } catch (error) {
       toast.error('Failed to create case');
       console.error('Error creating case:', error);

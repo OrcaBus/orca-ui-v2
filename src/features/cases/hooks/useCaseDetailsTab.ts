@@ -14,7 +14,7 @@ function parseTabParam(value: string | undefined): CaseDetailsTabValues {
   if (value && CASE_DETAILS_TAB_VALUES_ARRAY.includes(value as CaseDetailsTabValues)) {
     return value as CaseDetailsTabValues;
   }
-  return CaseDetailsTabValues.LIBRARIES;
+  return CaseDetailsTabValues.TIMELINES;
 }
 
 /**

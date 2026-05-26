@@ -64,6 +64,7 @@ export type CaseCommentModel = components['schemas']['Comment'];
 
 export type CaseModel = components['schemas']['Case'];
 export type CaseDetailModel = components['schemas']['CaseDetail'];
+
 export type CaseRequestModel = components['schemas']['CaseDetailRequest'];
 export type PatchedCaseDetailRequestModel = components['schemas']['PatchedCaseDetailRequest'];
 export type CaseExternalEntityLinkCreateRequestModel =

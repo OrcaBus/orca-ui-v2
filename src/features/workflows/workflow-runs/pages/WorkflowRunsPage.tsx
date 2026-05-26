@@ -1,7 +1,5 @@
 import { useCallback, useMemo } from 'react';
-import { keepPreviousData } from '@tanstack/react-query';
 import { FilterBar } from '@/components/tables/FilterBar';
-import { useWorkflowRunStatusCountModel } from '../../api/workflows.api';
 import {
   useWorkflowRunListQueryParams,
   type WorkflowRunStatus,
@@ -9,7 +7,6 @@ import {
 import WorkflowRunsTable from '../components/WorkflowRunsTable';
 import { buildWorkflowRunsFilterBadges } from '../utils/buildWorkflowRunsFilterBadges';
 import { WorkflowRunsStatsCards } from '../components/WorkflowRunsStatsCards';
-import { toLocalStartOfDay } from '@/utils/timeFormat';
 
 export function WorkflowRunsPage() {
   const {
@@ -42,42 +39,9 @@ export function WorkflowRunsPage() {
     [status, setStatus]
   );
 
-  const {
-    data: workflowStatusCountsData,
-    isLoading: isLoadingWorkflowStatusCounts,
-    isError: isErrorWorkflowStatusCounts,
-    error: workflowStatusCountsError,
-    refetch: refetchWorkflowRunStatusCounts,
-  } = useWorkflowRunStatusCountModel({
-    params: {
-      query: {
-        search: search ? search : undefined,
-        start_time: dateFrom ? toLocalStartOfDay(dateFrom) : undefined,
-        end_time: dateTo ? toLocalStartOfDay(dateTo) : undefined,
-        workflow: filterValues.wfType || undefined,
-      },
-    },
-    reactQuery: {
-      enabled: true,
-      placeholderData: keepPreviousData,
-    },
-  });
-
-  const refreshWorkflowRunStatusCounts = () => {
-    void refetchWorkflowRunStatusCounts();
-  };
-
   return (
     <div>
-      <WorkflowRunsStatsCards
-        status={status}
-        onStatusCardClick={handleStatusCardClick}
-        workflowStatusCountsData={workflowStatusCountsData}
-        isLoadingWorkflowStatusCounts={isLoadingWorkflowStatusCounts}
-        isErrorWorkflowStatusCounts={isErrorWorkflowStatusCounts}
-        workflowStatusCountsError={workflowStatusCountsError}
-        onRetry={refreshWorkflowRunStatusCounts}
-      />
+      <WorkflowRunsStatsCards status={status} onStatusCardClick={handleStatusCardClick} />
 
       <FilterBar
         searchValue={search}
@@ -119,7 +83,7 @@ export function WorkflowRunsPage() {
         onClearAll={activeFilterBadges.length > 0 ? clearAllFilters : undefined}
       />
 
-      <WorkflowRunsTable onBatchStateTransitionSuccess={refreshWorkflowRunStatusCounts} />
+      <WorkflowRunsTable />
     </div>
   );
 }

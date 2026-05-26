@@ -9,12 +9,16 @@ export const CaseDetailsTabs = () => {
 
   const isLoadingDetail = isLoadingCaseDetail || !caseDetail;
   const isLoadingStates = isLoadingCaseStates || !caseStatesData;
+  const isLoadingTimeline = isLoadingDetail || isLoadingStates;
+  const visibleTimelineEventCount =
+    (caseStatesData?.results ?? []).filter((state) => !state.isArchived).length +
+    (caseDetail?.commentSet ?? []).filter((comment) => !comment.isArchived).length;
 
   const tabs: Tab[] = [
     {
       id: CaseDetailsTabValues.TIMELINES,
       label: 'Timeline',
-      count: isLoadingStates ? undefined : caseStatesData.pagination.count,
+      count: isLoadingTimeline ? undefined : visibleTimelineEventCount,
     },
     {
       id: CaseDetailsTabValues.LIBRARIES,

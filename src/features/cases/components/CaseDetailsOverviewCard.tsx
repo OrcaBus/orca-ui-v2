@@ -16,7 +16,7 @@ export function CaseDetailsOverviewCard() {
 
   return (
     <div className='mb-6 rounded-lg border border-neutral-200 bg-white p-6 dark:border-neutral-700 dark:bg-[#111418]'>
-      <div className='grid grid-cols-2 gap-x-8 gap-y-4'>
+      <div className='grid grid-cols-3 gap-x-8 gap-y-4'>
         <div>
           <div className='mb-1 text-sm text-neutral-500 dark:text-[#9dabb9]'>Request Form ID</div>
           {isLoadingCaseDetail ? (
@@ -40,23 +40,27 @@ export function CaseDetailsOverviewCard() {
         </div>
 
         <div>
+          <div className='mb-1 text-sm text-neutral-500 dark:text-[#9dabb9]'>Report Required</div>
+          {isLoadingCaseDetail ? (
+            <Skeleton className='h-5 w-16' />
+          ) : (
+            <PillTag variant={caseDetail?.isReportRequired ? 'green' : 'neutral'} size='sm'>
+              {caseDetail?.isReportRequired == null
+                ? '—'
+                : caseDetail.isReportRequired
+                  ? 'Yes'
+                  : 'No'}
+            </PillTag>
+          )}
+        </div>
+
+        <div>
           <div className='mb-1 text-sm text-neutral-500 dark:text-[#9dabb9]'>Type</div>
           {isLoadingCaseDetail ? (
             <Skeleton className='h-5 w-24' />
           ) : (
             <PillTag variant='blue' size='sm'>
               {TYPE_DISPLAY_LABELS[caseDetail?.type ?? ''] ?? caseDetail?.type ?? '—'}
-            </PillTag>
-          )}
-        </div>
-
-        <div>
-          <div className='mb-1 text-sm text-neutral-500 dark:text-[#9dabb9]'>Study Type</div>
-          {isLoadingCaseDetail ? (
-            <Skeleton className='h-5 w-24' />
-          ) : (
-            <PillTag variant={getCaseTypeVariant(caseDetail?.studyType ?? '')} size='sm'>
-              {caseDetail?.studyType ?? '—'}
             </PillTag>
           )}
         </div>
@@ -80,6 +84,32 @@ export function CaseDetailsOverviewCard() {
         </div>
 
         <div>
+          <div className='mb-1 text-sm text-neutral-500 dark:text-[#9dabb9]'>NATA Accredited</div>
+          {isLoadingCaseDetail ? (
+            <Skeleton className='h-5 w-16' />
+          ) : (
+            <PillTag variant={caseDetail?.isNataAccredited ? 'green' : 'neutral'} size='sm'>
+              {caseDetail?.isNataAccredited == null
+                ? '—'
+                : caseDetail.isNataAccredited
+                  ? 'Yes'
+                  : 'No'}
+            </PillTag>
+          )}
+        </div>
+
+        <div>
+          <div className='mb-1 text-sm text-neutral-500 dark:text-[#9dabb9]'>Study Type</div>
+          {isLoadingCaseDetail ? (
+            <Skeleton className='h-5 w-24' />
+          ) : (
+            <PillTag variant={getCaseTypeVariant(caseDetail?.studyType ?? '')} size='sm'>
+              {caseDetail?.studyType ?? '—'}
+            </PillTag>
+          )}
+        </div>
+
+        <div>
           <div className='mb-1 text-sm text-neutral-500 dark:text-[#9dabb9]'>Last Updated</div>
           {isLoadingCaseDetail ? (
             <Skeleton className='h-4 w-36' />
@@ -89,6 +119,31 @@ export function CaseDetailsOverviewCard() {
                 ? formatDetailDate(caseDetail.latestState.createdAt)
                 : '—'}
             </div>
+          )}
+        </div>
+
+        <div>
+          <div className='mb-1 text-sm text-neutral-500 dark:text-[#9dabb9]'>Links</div>
+          {isLoadingCaseDetail ? (
+            <Skeleton className='h-4 w-48' />
+          ) : caseDetail?.links &&
+            Object.keys(caseDetail.links as Record<string, string>).length > 0 ? (
+            <ul className='space-y-1'>
+              {Object.entries(caseDetail.links as Record<string, string>).map(([name, url]) => (
+                <li key={name}>
+                  <a
+                    href={url}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='text-sm text-blue-600 hover:underline dark:text-blue-400'
+                  >
+                    {name}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className='text-sm text-neutral-500 dark:text-neutral-400'>—</div>
           )}
         </div>
 

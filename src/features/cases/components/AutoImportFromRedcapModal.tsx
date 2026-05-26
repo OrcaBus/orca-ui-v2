@@ -1,18 +1,38 @@
 import { FolderSync, Loader2, X } from 'lucide-react';
+import { toast } from 'sonner';
+import { useQueryClient } from '@tanstack/react-query';
+import { useCaseSyncFromRedcapAutoModel, CASE_LIST_PATH } from '../api/cases.api';
 
-interface AutoImportFromRedcapDialogProps {
+interface AutoImportFromRedcapModalProps {
   isOpen: boolean;
-  isLoading: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  onSuccess?: () => void;
 }
 
-export function AutoImportFromRedcapDialog({
+export function AutoImportFromRedcapModal({
   isOpen,
-  isLoading,
   onClose,
-  onConfirm,
-}: AutoImportFromRedcapDialogProps) {
+  onSuccess,
+}: AutoImportFromRedcapModalProps) {
+  const queryClient = useQueryClient();
+  const { mutate: syncFromRedcap, isPending: isLoading } = useCaseSyncFromRedcapAutoModel();
+
+  const handleConfirm = () => {
+    syncFromRedcap(
+      {},
+      {
+        onSuccess: () => {
+          toast.success('Cases imported from REDCap');
+          void queryClient.invalidateQueries({ queryKey: ['get', CASE_LIST_PATH] });
+          onClose();
+          onSuccess?.();
+        },
+        onError: () => {
+          toast.error('Failed to import cases from REDCap');
+        },
+      }
+    );
+  };
   if (!isOpen) return null;
 
   return (
@@ -54,7 +74,7 @@ export function AutoImportFromRedcapDialog({
               Cancel
             </button>
             <button
-              onClick={onConfirm}
+              onClick={handleConfirm}
               disabled={isLoading}
               className='flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50 dark:bg-[#137fec] dark:hover:bg-blue-600'
             >

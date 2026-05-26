@@ -19,11 +19,7 @@ import { ApiErrorState } from '@/components/ui/ApiErrorState';
 import { ArrowLeftRight } from 'lucide-react';
 import WorkflowRunsBatchStateTransitionModal from './WorkflowRunsBatchStateTransitionModal';
 
-interface WorkflowRunsTableProps {
-  onBatchStateTransitionSuccess?: () => void;
-}
-
-const WorkflowRunsTable = ({ onBatchStateTransitionSuccess }: WorkflowRunsTableProps) => {
+const WorkflowRunsTable = () => {
   const navigate = useNavigate();
   const { workflowRunListQueryParams, setPage, setRowsPerPage } = useWorkflowRunListQueryParams();
   const [isBatchStateTransitionModalOpen, setIsBatchStateTransitionModalOpen] = useState(false);
@@ -143,10 +139,6 @@ const WorkflowRunsTable = ({ onBatchStateTransitionSuccess }: WorkflowRunsTableP
         isOpen={isBatchStateTransitionModalOpen}
         onClose={() => setIsBatchStateTransitionModalOpen(false)}
         workflowRuns={batchStateTransitionWorkflowRuns}
-        onSuccess={() => {
-          void refetchWorkflowRuns();
-          onBatchStateTransitionSuccess?.();
-        }}
       />
     </>
   );

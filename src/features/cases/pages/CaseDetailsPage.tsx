@@ -4,6 +4,7 @@ import {
   CaseDetailsPageBreadcrumb,
   CaseDetailsPageHeader,
   CaseDetailsTabs,
+  CaseDetailsTimeline,
   CaseDetailsLinkedLibrariesTab,
   CaseDetailsLinkedWorkflowRunsTab,
   CaseDetailsUsersTab,
@@ -47,7 +48,7 @@ export function CaseDetailsPage() {
         </div>
 
         <div>
-          {activeTab === CaseDetailsTabValues.TIMELINES && <div>Timeline view coming soon...</div>}
+          {activeTab === CaseDetailsTabValues.TIMELINES && <CaseDetailsTimeline />}
           {activeTab === CaseDetailsTabValues.LIBRARIES && <CaseDetailsLinkedLibrariesTab />}
 
           {activeTab === CaseDetailsTabValues.WORKFLOWS && <CaseDetailsLinkedWorkflowRunsTab />}

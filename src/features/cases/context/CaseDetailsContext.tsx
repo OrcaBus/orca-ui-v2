@@ -6,6 +6,7 @@ import type { FC, PropsWithChildren } from 'react';
 import { useCaseDetailModel, useCaseStatesModel } from '../api/cases.api';
 import { useParams } from 'react-router-dom';
 import { SpinnerWithText } from '@/components/ui/Spinner';
+import { DEFAULT_NON_PAGINATE_PAGE_SIZE } from '@/utils/constants';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -52,7 +53,10 @@ export const CaseDetailsProvider: FC<PropsWithChildren> = ({ children }) => {
     isLoading: isLoadingCaseStates,
     refetch: refetchStates,
   } = useCaseStatesModel({
-    params: { path: { orcabusId: caseOrcabusId ?? '' } },
+    params: {
+      path: { orcabusId: caseOrcabusId ?? '' },
+      query: { rowsPerPage: DEFAULT_NON_PAGINATE_PAGE_SIZE },
+    },
     reactQuery: { enabled: !!caseOrcabusId },
   });
 

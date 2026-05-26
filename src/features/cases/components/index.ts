@@ -1,21 +1,22 @@
 export { CasesListTable } from './CasesListTable';
-// export { CaseSummaryDrawer } from './CaseSummaryDrawer';
-export { CaseDetailsOverviewCard } from './CaseDetailsOverviewCard';
+export { AddCaseModal } from './AddCaseModal';
+export { AutoImportFromRedcapModal } from './AutoImportFromRedcapModal';
+export { SyncHistoryDialog } from './SyncHistoryDialog';
+
+// case details components
 export { CaseDetailsPageBreadcrumb } from './CaseDetailsPageBreadcrumb';
 export { CaseDetailsPageHeader } from './CaseDetailsPageHeader';
+export { EditCaseModal } from './EditCaseModal';
+export { CaseDetailsOverviewCard } from './CaseDetailsOverviewCard';
 export { CaseDetailsTabs } from './CaseDetailsTabs';
-export { LinkedLibrariesTable } from './LinkedLibrariesTable';
+export { CaseDetailsTimeline } from './CaseDetailsTimeline';
 export { CaseDetailsLinkedLibrariesTab } from './CaseDetailsLinkedLibrariesTab';
 export { CaseDetailsLinkedWorkflowRunsTab } from './CaseDetailsLinkedWorkflowRunsTab';
 export { CaseDetailsUsersTab } from './CaseDetailsUsersTab';
 export { CaseDetailsAddUserModal } from './CaseDetailsAddUserModal';
 export { CaseDetailsRemoveUserModal } from './CaseDetailsRemoveUserModal';
 export { CaseDetailsUsersTable } from './CaseDetailsUsersTable';
-export { WorkflowRunsTable } from './WorkflowRunsTable';
-// export { FilesTable } from './FilesTable';
-export { AddCaseModal } from './AddCaseModal';
-export { EditCaseModal } from './EditCaseModal';
-export { AutoImportFromRedcapDialog } from './AutoImportFromRedcapDialog';
-export { SyncHistoryDialog } from './SyncHistoryDialog';
-export { LinkLibrariesModal } from './LinkLibrariesModal';
-//export { AddWorkflowRunsModal } from './AddWorkflowRunsModal';
+
+// deprecated exports - to be removed in a future release
+export { AutoGenerateCasesModal } from './AutoGenerateCasesModal';
+export { CaseSummaryDrawer } from './CaseSummaryDrawer';
