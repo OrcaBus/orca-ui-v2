@@ -21,6 +21,7 @@ import {
 } from '@/components/timeline';
 import { useAuthContext } from '@/context/auth-context';
 import { isEmail } from '@/utils/string';
+import { formatBackendDate, formatDateTimeLocalInputValue } from '@/utils/timeFormat';
 import { SpinnerWithText } from '@/components/ui/Spinner';
 import {
   useWorkflowRunCommentCreateModel,
@@ -57,13 +58,6 @@ function formatStateLabel(value: string): string {
     .replace(/[_-]+/g, ' ')
     .toLowerCase()
     .replace(/\b\w/g, (char) => char.toUpperCase());
-}
-
-function toDateTimeLocal(value?: string | null): string | undefined {
-  if (!value) return undefined;
-
-  const parsed = dayjs(value);
-  return parsed.isValid() ? parsed.format('YYYY-MM-DDTHH:mm') : undefined;
 }
 
 function isStateTransitionAllowed(rule: ValidationRule, currentState?: string | null): boolean {
@@ -136,7 +130,7 @@ export function WorkflowRunDetailsTimeline() {
   const workflowRunOrcabusId = workflowRunDetail?.orcabusId ?? '';
   const currentUserEmail = user?.email ?? '';
   const currentWorkflowState = workflowRunDetail?.currentState?.status ?? null;
-  const dialogActorTimestamp = dayjs().toISOString();
+  const dialogActorTimestamp = formatBackendDate(new Date());
 
   const validationMapEntries = useMemo(
     () =>
@@ -491,7 +485,7 @@ export function WorkflowRunDetailsTimeline() {
           editingState
             ? {
                 stateName: editingState.status,
-                timestamp: toDateTimeLocal(editingState.timestamp),
+                timestamp: formatDateTimeLocalInputValue(editingState.timestamp),
                 comment: editingState.comment ?? '',
               }
             : undefined
@@ -521,7 +515,9 @@ export function WorkflowRunDetailsTimeline() {
         initialValues={
           editingComment
             ? {
-                timestamp: toDateTimeLocal(editingComment.updatedAt ?? editingComment.createdAt),
+                timestamp: formatDateTimeLocalInputValue(
+                  editingComment.updatedAt ?? editingComment.createdAt
+                ),
                 comment: editingComment.text,
                 severity: editingComment.severity ?? TimelineCommentSeverityEnum.INFO,
               }

@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
 import { cn } from '@/utils/cn';
+import { formatDateTimeLocalInputValue } from '@/utils/timeFormat';
 import { TimelineDialogFrame } from './TimelineDialogFrame';
 
 const customStateSchema = z.object({
@@ -33,7 +34,8 @@ export interface CustomStateDialogProps {
 function getDefaultValues(initialValues?: Partial<CustomStateFormData>): CustomStateFormData {
   return {
     stateName: initialValues?.stateName ?? '',
-    timestamp: initialValues?.timestamp ?? new Date().toISOString().slice(0, 16),
+    timestamp:
+      initialValues?.timestamp ?? formatDateTimeLocalInputValue(new Date().toISOString()) ?? '',
     comment: initialValues?.comment ?? '',
   };
 }
@@ -92,7 +94,6 @@ export function CustomStateDialog({
       toast.success(
         mode === 'edit' ? 'Custom state updated successfully' : 'Custom state added successfully'
       );
-      reset(getDefaultValues(initialValues));
       onClose();
     } catch (error) {
       toast.error(mode === 'edit' ? 'Failed to update custom state' : 'Failed to add custom state');
@@ -100,15 +101,10 @@ export function CustomStateDialog({
     }
   };
 
-  const handleClose = () => {
-    reset(getDefaultValues(initialValues));
-    onClose();
-  };
-
   return (
     <TimelineDialogFrame
       isOpen={isOpen}
-      onClose={handleClose}
+      onClose={onClose}
       title={dialogTitle}
       icon={<CirclePlus className='h-5 w-5' />}
       actorEmail={actorEmail}
@@ -117,7 +113,7 @@ export function CustomStateDialog({
         <>
           <button
             type='button'
-            onClick={handleClose}
+            onClick={onClose}
             className={cn(
               'rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition-colors',
               'hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50',

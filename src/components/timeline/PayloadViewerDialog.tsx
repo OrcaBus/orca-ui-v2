@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react';
-import dayjs from 'dayjs';
 import { Copy, Download, FileBracesCorner } from 'lucide-react';
 import { toast } from 'sonner';
 import { DialogFrame } from '@/components/modals/DialogFrame';
@@ -13,6 +12,7 @@ import { Carousel } from '@/components/ui/Carousel';
 import { Spinner } from '@/components/ui/Spinner';
 import { Tabs } from '@/components/ui/Tabs';
 import { cn } from '@/utils/cn';
+import { formatLabel, formatTimelineTimestamp, isPrimitive, isRecord } from './timeline.utils';
 import { getTimelineStateVisual } from './timeline.visuals';
 
 export interface PayloadViewerDialogState {
@@ -30,31 +30,6 @@ export interface PayloadViewerDialogProps {
   onSelectedStateEventIdChange?: (eventId: string) => void;
   payload?: Record<string, unknown> | null;
   isLoading?: boolean;
-}
-
-function formatStateLabel(value: string): string {
-  return value
-    .replace(/[_-]+/g, ' ')
-    .toLowerCase()
-    .replace(/\b\w/g, (char) => char.toUpperCase());
-}
-
-function formatTimestamp(value: string) {
-  const parsed = dayjs(value);
-  return parsed.isValid() ? parsed.format('MM/DD/YY HH:mm') : value;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
-function isPrimitive(value: unknown): value is string | number | boolean | null {
-  return (
-    value === null ||
-    typeof value === 'string' ||
-    typeof value === 'number' ||
-    typeof value === 'boolean'
-  );
 }
 
 function PayloadEmptyState({ message }: { message: string }) {
@@ -304,11 +279,11 @@ export function PayloadViewerDialog({
                           <StateIcon className={cn('h-3 w-3', stateVisual.iconClassName)} />
                         </span>
                         <div className='wrap-break-words min-w-0 text-sm font-semibold text-neutral-900 dark:text-slate-100'>
-                          {formatStateLabel(state.state)}
+                          {formatLabel(state.state)}
                         </div>
                       </div>
                       <div className='text-xs text-neutral-500 dark:text-[#9dabb9]'>
-                        {formatTimestamp(state.timestamp)}
+                        {formatTimelineTimestamp(state.timestamp)}
                       </div>
                     </div>
                   </button>

@@ -16,12 +16,9 @@ import {
   type LucideIcon,
   MessageCircleMore,
 } from 'lucide-react';
-import type { TimelineCommentEvent, TimelineEvent, TimelineStateEvent } from './timeline.type';
-import {
-  TimelineCommentSeverityEnum,
-  TimelineCommentTypes,
-  TimelineEventTypes,
-} from './timeline.type';
+import type { TimelineCommentEvent, TimelineEvent } from './timeline.type';
+import { TimelineCommentSeverityEnum, TimelineCommentTypes } from './timeline.type';
+import { isStateEvent } from './timeline.utils';
 
 export type TimelineVisual = {
   icon: LucideIcon;
@@ -212,10 +209,6 @@ const SAMPLESHEET_VISUAL: TimelineVisual = {
     'bg-linear-to-r from-cyan-50/80 to-white shadow-xs shadow-cyan-100/50 ring-1 ring-cyan-100/80 dark:from-cyan-950/30 dark:to-neutral-950/20 dark:shadow-cyan-950/20 dark:ring-cyan-900/50',
   badgeClassName: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-950 dark:text-cyan-300',
 };
-
-function isStateEvent(event: TimelineEvent): event is TimelineStateEvent {
-  return event.eventType === TimelineEventTypes.STATE;
-}
 
 function getCommentVisual(event: TimelineCommentEvent): TimelineVisual {
   const severity = event.severity ?? TimelineCommentSeverityEnum.INFO;

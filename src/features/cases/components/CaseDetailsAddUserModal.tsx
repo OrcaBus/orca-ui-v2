@@ -39,7 +39,7 @@ const errorCls = 'text-sm font-medium text-red-500 dark:text-red-400';
 export interface CaseDetailsAddUserModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess?: () => void;
 }
 
 export function CaseDetailsAddUserModal({
@@ -66,11 +66,6 @@ export function CaseDetailsAddUserModal({
     if (isOpen) reset(DEFAULT_VALUES);
   }, [isOpen, reset]);
 
-  const handleClose = () => {
-    reset(DEFAULT_VALUES);
-    onClose();
-  };
-
   const handleFormSubmit = async (values: FormValues) => {
     if (!caseOrcabusId) return;
     try {
@@ -82,8 +77,8 @@ export function CaseDetailsAddUserModal({
         },
       });
       toast.success(`User ${values.email} added to case`);
-      onSuccess();
-      handleClose();
+      onSuccess?.();
+      onClose();
     } catch {
       toast.error('Failed to add user');
     }
@@ -92,7 +87,7 @@ export function CaseDetailsAddUserModal({
   return (
     <DialogFrame
       isOpen={isOpen}
-      onClose={handleClose}
+      onClose={onClose}
       title='Add User to Case'
       description='Grant a user access to this case by their email address.'
       icon={<UserPlus className='h-5 w-5' />}
@@ -101,7 +96,7 @@ export function CaseDetailsAddUserModal({
         <div className='flex items-center justify-end gap-3'>
           <button
             type='button'
-            onClick={handleClose}
+            onClick={onClose}
             className={cn(
               'cursor-pointer rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition-colors',
               'hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50',

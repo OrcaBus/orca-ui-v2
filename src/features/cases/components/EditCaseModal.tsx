@@ -45,7 +45,7 @@ function parseLinks(links: unknown): { key: string; value: string }[] {
 
 export function EditCaseModal({ isOpen, onClose }: EditCaseModalProps) {
   const { caseDetail, refresh } = useCaseDetailsContext();
-  const updateMutation = useCaseUpdateModel();
+  const { reset: resetUpdateMutation, mutateAsync: mutateAsyncUpdate } = useCaseUpdateModel();
 
   const form = useForm<EditCaseFormValues>({
     resolver: zodResolver(editCaseSchema),
@@ -85,30 +85,32 @@ export function EditCaseModal({ isOpen, onClose }: EditCaseModalProps) {
   });
 
   useEffect(() => {
-    if (isOpen && caseDetail) {
-      form.reset({
-        requestFormId: caseDetail.requestFormId,
-        type: caseDetail.type,
-        studyType: caseDetail.studyType,
-        isReportRequired: caseDetail.isReportRequired ?? false,
-        isNataAccredited: caseDetail.isNataAccredited ?? false,
-        alias: (caseDetail.alias ?? []).map((v) => ({ value: v })),
-        links: parseLinks(caseDetail.links),
-        description: caseDetail.description ?? '',
-      });
+    if (!isOpen) {
+      return;
     }
-  }, [isOpen, caseDetail, form]);
 
-  const handleClose = () => {
-    form.reset();
-    updateMutation.reset();
-    onClose();
-  };
+    resetUpdateMutation();
+
+    if (!caseDetail) {
+      return;
+    }
+
+    form.reset({
+      requestFormId: caseDetail.requestFormId,
+      type: caseDetail.type,
+      studyType: caseDetail.studyType,
+      isReportRequired: caseDetail.isReportRequired ?? false,
+      isNataAccredited: caseDetail.isNataAccredited ?? false,
+      alias: (caseDetail.alias ?? []).map((v) => ({ value: v })),
+      links: parseLinks(caseDetail.links),
+      description: caseDetail.description ?? '',
+    });
+  }, [isOpen, caseDetail, form, resetUpdateMutation]);
 
   const handleFormSubmit = async (values: EditCaseFormValues) => {
     if (!caseDetail) return;
     try {
-      await updateMutation.mutateAsync({
+      await mutateAsyncUpdate({
         params: { path: { orcabusId: caseDetail.orcabusId } },
         body: {
           requestFormId: values.requestFormId,
@@ -123,7 +125,7 @@ export function EditCaseModal({ isOpen, onClose }: EditCaseModalProps) {
       });
       toast.success('Case updated successfully');
       refresh();
-      handleClose();
+      onClose();
     } catch {
       toast.error('Failed to update case');
     }
@@ -133,7 +135,7 @@ export function EditCaseModal({ isOpen, onClose }: EditCaseModalProps) {
 
   return (
     <div className='fixed inset-0 z-50 flex items-center justify-center'>
-      <div className='absolute inset-0 bg-black/50' onClick={handleClose} />
+      <div className='absolute inset-0 bg-black/50' onClick={onClose} />
 
       <div className='relative flex max-h-[90vh] w-full max-w-2xl flex-col rounded-xl border border-transparent bg-white shadow-2xl dark:border-[#2d3540] dark:bg-[#111418]'>
         {/* Header */}
@@ -152,7 +154,7 @@ export function EditCaseModal({ isOpen, onClose }: EditCaseModalProps) {
             </div>
             <button
               type='button'
-              onClick={handleClose}
+              onClick={onClose}
               className='rounded-lg p-1.5 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-600 dark:text-[#9dabb9] dark:hover:bg-[#1e252e] dark:hover:text-slate-100'
             >
               <X className='h-5 w-5' />
@@ -344,7 +346,7 @@ export function EditCaseModal({ isOpen, onClose }: EditCaseModalProps) {
         <div className='flex items-center justify-end gap-3 border-t border-neutral-200 px-6 py-4 dark:border-[#2d3540]'>
           <button
             type='button'
-            onClick={handleClose}
+            onClick={onClose}
             className='rounded-lg border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-[#2d3540] dark:bg-[#2d3540] dark:text-slate-200 dark:hover:bg-[#2d3540]/80'
           >
             Cancel

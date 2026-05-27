@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
-import dayjs from 'dayjs';
 import { Avatar, AvatarFallback } from '@/components/ui/Avatar';
 import { DialogFrame } from '@/components/modals/DialogFrame';
+import { formatActorTimestamp, getActorInitial } from './timeline.utils';
 
 interface TimelineDialogFrameProps {
   isOpen: boolean;
@@ -12,21 +12,6 @@ interface TimelineDialogFrameProps {
   footer: ReactNode;
   actorEmail?: string;
   actorTimestamp?: string;
-}
-
-function getActorInitial(actorEmail?: string) {
-  return actorEmail?.trim().charAt(0).toUpperCase() || 'U';
-}
-
-function formatActorTimestamp(actorTimestamp?: string) {
-  if (!actorTimestamp) {
-    return dayjs().format('MMM D, YYYY • h:mm A');
-  }
-
-  const parsedTimestamp = dayjs(actorTimestamp);
-  return parsedTimestamp.isValid()
-    ? parsedTimestamp.format('MMM D, YYYY • h:mm A')
-    : actorTimestamp;
 }
 
 export function TimelineDialogFrame({

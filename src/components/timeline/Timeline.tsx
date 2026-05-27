@@ -1,28 +1,23 @@
-import { useMemo, useState, type ComponentPropsWithoutRef, type ReactNode } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { Archive, ArrowUpDown, MoreVertical } from 'lucide-react';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
-import dayjs from 'dayjs';
 import { toast } from 'sonner';
 import { cn } from '@/utils/cn';
-import type {
-  TimelineCommentEvent,
-  TimelineEvent,
-  TimelineEventAction,
-  TimelineStateEvent,
-} from './timeline.type';
+import type { TimelineEvent, TimelineEventAction } from './timeline.type';
+import { TimelineCommentSeverityEnum, TimelineCommentTypes } from './timeline.type';
+import { TimelineFunctionButton } from './TimelineFunctionButton';
 import {
-  TimelineCommentSeverityEnum,
-  TimelineCommentTypes,
-  TimelineEventSourceTypes,
-  TimelineEventTypes,
-} from './timeline.type';
+  formatLabel,
+  formatOptionalTimelineTimestamp,
+  formatTimelineTimestamp,
+  getEventTitle,
+  getSourceMeta,
+  isCommentEvent,
+  isStateEvent,
+  sortTimelineEvents,
+  type TimelineSortOrder,
+} from './timeline.utils';
 import { getTimelineEventVisual } from './timeline.visuals';
-
-type TimelineSourceMeta = {
-  label?: string;
-  isCustomState?: boolean;
-  isSystemComment?: boolean;
-};
 
 export interface TimelineProps {
   events: TimelineEvent[];
@@ -31,137 +26,15 @@ export interface TimelineProps {
   onEventSelect?: (event: TimelineEvent) => void;
 }
 
-export interface TimelineFunctionButtonProps extends ComponentPropsWithoutRef<'button'> {
-  icon?: ReactNode;
-  variant?: 'primary' | 'secondary';
-}
-
-function isStateEvent(event: TimelineEvent): event is TimelineStateEvent {
-  return event.eventType === TimelineEventTypes.STATE;
-}
-
-function isCommentEvent(event: TimelineEvent): event is TimelineCommentEvent {
-  return event.eventType === TimelineEventTypes.COMMENT;
-}
-
-function formatLabel(value: string): string {
-  return value
-    .replace(/[_-]+/g, ' ')
-    .toLowerCase()
-    .replace(/\b\w/g, (char) => char.toUpperCase());
-}
-
-function getEventTitle(event: TimelineEvent): string {
-  if (event.title) {
-    return String(event.title);
-  }
-
-  if (isStateEvent(event)) {
-    return 'Workflow State Update';
-  }
-
-  if (event.commentType === TimelineCommentTypes.SAMPLESHEET) {
-    return 'Sample Sheet Uploaded';
-  }
-
-  return 'Comment Added';
-}
-
-function getSourceMeta(event: TimelineEvent): TimelineSourceMeta {
-  if (isCommentEvent(event) && event.sourceType === TimelineEventSourceTypes.SYSTEM) {
-    return {
-      label: event.createdBy ? event.createdBy : 'System',
-      isSystemComment: true,
-    };
-  }
-
-  if (event.sourceType === TimelineEventSourceTypes.SYSTEM) {
-    return {};
-  }
-
-  if (event.sourceType === TimelineEventSourceTypes.USER) {
-    if (!event.createdBy) {
-      return { label: 'User' };
-    }
-
-    return {
-      label: isCommentEvent(event) ? event.createdBy : `User: ${event.createdBy}`,
-    };
-  }
-
-  return {
-    label: event.createdBy,
-    isCustomState: isStateEvent(event),
-  };
-}
-
-function formatTimestamp(timestamp: string) {
-  const date = new Date(timestamp);
-
-  if (Number.isNaN(date.getTime())) {
-    return { date: 'Invalid date', time: '--:--' };
-  }
-
-  return {
-    time: date.toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-    }),
-    date: date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    }),
-  };
-}
-
-export function TimelineFunctionButton({
-  icon,
-  variant = 'secondary',
-  type = 'button',
-  className,
-  children,
-  ...props
-}: TimelineFunctionButtonProps) {
-  return (
-    <button
-      type={type}
-      className={cn(
-        'inline-flex min-h-8 cursor-pointer items-center justify-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium shadow-sm transition-colors focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:focus:ring-blue-600',
-        variant === 'primary'
-          ? 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-offset-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-offset-neutral-950'
-          : 'border border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800',
-        className
-      )}
-      {...props}
-    >
-      {icon && <span className='flex h-4 w-4 items-center justify-center'>{icon}</span>}
-      {children}
-    </button>
-  );
-}
-
 export function Timeline({ events, customActions, selectedEventId, onEventSelect }: TimelineProps) {
   const [internalFocusedEventId, setInternalFocusedEventId] = useState<string | null>(null);
   const [pendingActionKey, setPendingActionKey] = useState<string | null>(null);
 
-  const [sortOrder, setSortOrder] = useState<'latest' | 'oldest'>('latest');
+  const [sortOrder, setSortOrder] = useState<TimelineSortOrder>('latest');
   const isSelectionControlled = selectedEventId !== undefined;
   const focusedEventId = isSelectionControlled ? (selectedEventId ?? null) : internalFocusedEventId;
 
-  const sortedEvents = useMemo(() => {
-    return [...events].sort((a, b) => {
-      const dateA = dayjs(a.timestamp);
-      const dateB = dayjs(b.timestamp);
-
-      if (dateA.isSame(dateB)) {
-        return 0;
-      }
-
-      const isAfter = dateA.isAfter(dateB);
-      return sortOrder === 'latest' ? (isAfter ? -1 : 1) : isAfter ? 1 : -1;
-    });
-  }, [events, sortOrder]);
+  const sortedEvents = useMemo(() => sortTimelineEvents(events, sortOrder), [events, sortOrder]);
 
   const handleActionClick = async (event: TimelineEvent, action: TimelineEventAction) => {
     const actionKey = `${event.eventId}:${action.id}`;
@@ -226,7 +99,7 @@ export function Timeline({ events, customActions, selectedEventId, onEventSelect
               const isLast = index === sortedEvents.length - 1;
               const visual = getTimelineEventVisual(event);
               const Icon = visual.icon;
-              const timestamp = formatTimestamp(event.timestamp);
+              const timestamp = formatTimelineTimestamp(event.timestamp);
               const isFocused = focusedEventId === event.eventId;
               const eventActions = event.actions ?? [];
               const hasEventMenuActions = eventActions.length > 0;
@@ -236,7 +109,7 @@ export function Timeline({ events, customActions, selectedEventId, onEventSelect
                 : null;
               const shouldShowSeverityBadge =
                 isCommentEvent(event) && severity !== TimelineCommentSeverityEnum.INFO;
-              const archivedTimestamp = event.archivedAt ? formatTimestamp(event.archivedAt) : null;
+              const archivedTimestamp = formatOptionalTimelineTimestamp(event.archivedAt);
 
               return (
                 <div
@@ -333,7 +206,7 @@ export function Timeline({ events, customActions, selectedEventId, onEventSelect
                               ·
                             </span>
                             <span className='text-sm font-medium text-neutral-500 dark:text-neutral-400'>
-                              {timestamp.date} {timestamp.time}
+                              {timestamp}
                             </span>
 
                             {event.isArchived && (
@@ -400,7 +273,7 @@ export function Timeline({ events, customActions, selectedEventId, onEventSelect
                                   ·
                                 </span>
                                 <span className='text-sm font-medium text-neutral-500 dark:text-neutral-400'>
-                                  Archived {archivedTimestamp.date} {archivedTimestamp.time}
+                                  Archived {archivedTimestamp}
                                 </span>
                               </>
                             )}

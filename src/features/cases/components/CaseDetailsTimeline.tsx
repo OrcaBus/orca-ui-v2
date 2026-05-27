@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react';
-import dayjs from 'dayjs';
 import { Archive, Eye, EyeOff, MessageCircle, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -19,6 +18,7 @@ import { TimelineDialogFrame } from '@/components/timeline/TimelineDialogFrame';
 import { useAuthContext } from '@/context/auth-context';
 import { SpinnerWithText } from '@/components/ui/Spinner';
 import { isEmail } from '@/utils/string';
+import { formatBackendDate } from '@/utils/timeFormat';
 import {
   useCaseAddCommentModel,
   useCaseArchiveCommentModel,
@@ -131,7 +131,7 @@ export function CaseDetailsTimeline() {
 
   const caseOrcabusId = caseDetail?.orcabusId ?? '';
   const currentUserEmail = user?.email ?? '';
-  const dialogActorTimestamp = dayjs().toISOString();
+  const dialogActorTimestamp = formatBackendDate(new Date());
 
   const availableStateOptions = useMemo(
     () =>

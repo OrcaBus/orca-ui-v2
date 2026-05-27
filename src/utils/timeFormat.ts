@@ -7,6 +7,7 @@
  * - Backend/API/storage: 2026-02-05T03:09:00Z (UTC ISO 8601)
  * - UI table cells (sortable): 2026-02-05 14:09 +11:00
  * - UI detail display (human-friendly): 05 Feb 2026, 14:09 (UTC+11:00)
+ * - Native datetime-local inputs: 2026-02-05T14:09
  */
 
 import dayjs from 'dayjs';
@@ -54,6 +55,19 @@ export function formatDetailDate(isoString: string): string {
  */
 export function formatBackendDate(date: Date): string {
   return dayjs.utc(date).toISOString();
+}
+
+/**
+ * Format an ISO date for native datetime-local inputs in the display timezone.
+ * @returns e.g. "2026-02-05T14:09", or undefined when input is empty/invalid.
+ */
+export function formatDateTimeLocalInputValue(
+  isoString: string | null | undefined
+): string | undefined {
+  if (!isoString) return undefined;
+  const d = parseInDisplayZone(isoString);
+  if (!d.isValid()) return undefined;
+  return d.format('YYYY-MM-DDTHH:mm');
 }
 
 /**
