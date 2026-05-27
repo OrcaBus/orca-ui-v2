@@ -15,18 +15,20 @@ Reusable timeline components for Orcabus operational details pages. The timeline
 
 ## Files
 
-| File                      | Purpose                                                         |
-| ------------------------- | --------------------------------------------------------------- |
-| `Timeline.tsx`            | Main timeline UI and `TimelineFunctionButton`.                  |
-| `CustomStateDialog.tsx`   | Create/edit dialog for custom state events.                     |
-| `CommentDialog.tsx`       | Create/edit dialog for comment events.                          |
-| `DeleteCommentDialog.tsx` | Confirmation dialog for comment deletion.                       |
-| `PayloadViewerDialog.tsx` | State payload carousel, structured payload view, and JSON view. |
-| `TimelineDialogFrame.tsx` | Shared dialog shell for state/comment forms.                    |
-| `timeline.type.ts`        | Event, form, source, severity, and action types.                |
-| `timeline.constants.ts`   | Event label/icon configuration.                                 |
-| `timeline.visuals.ts`     | State/comment icon and color mappings.                          |
-| `index.ts`                | Public exports.                                                 |
+| File                         | Purpose                                                         |
+| ---------------------------- | --------------------------------------------------------------- |
+| `Timeline.tsx`               | Main timeline UI.                                               |
+| `TimelineFunctionButton.tsx` | Shared header action button for timeline controls.              |
+| `CustomStateDialog.tsx`      | Create/edit dialog for custom state events.                     |
+| `CommentDialog.tsx`          | Create/edit dialog for comment events.                          |
+| `DeleteCommentDialog.tsx`    | Confirmation dialog for comment deletion.                       |
+| `PayloadViewerDialog.tsx`    | State payload carousel, structured payload view, and JSON view. |
+| `TimelineDialogFrame.tsx`    | Shared dialog shell for state/comment forms.                    |
+| `timeline.type.ts`           | Event, form, source, severity, and action types.                |
+| `timeline.constants.ts`      | Event label/icon configuration.                                 |
+| `timeline.utils.ts`          | Timeline type guards, labels, source metadata, and timestamps.  |
+| `timeline.visuals.ts`        | State/comment icon and color mappings.                          |
+| `index.ts`                   | Public exports.                                                 |
 
 ## Main Component
 
@@ -148,6 +150,16 @@ Each rendered event includes:
 | Menu     | Optional event actions from `event.actions`.                                |
 
 System events intentionally omit a source label in the row. User and custom events can display `createdBy`.
+
+## Time Formatting
+
+Timeline display timestamps use `formatDetailDate` from `src/utils/timeFormat.ts`, so event rows,
+archived metadata, payload-state cards, and dialog actor timestamps all render in the shared detail
+format: `05 Feb 2026, 14:09 (UTC+11:00)`.
+
+Native `datetime-local` inputs cannot show timezone offsets, so dialog form values use
+`formatDateTimeLocalInputValue` from `src/utils/timeFormat.ts`. That converts ISO timestamps into the
+same display timezone before rendering values such as `2026-02-05T14:09`.
 
 ## Visual Reference
 

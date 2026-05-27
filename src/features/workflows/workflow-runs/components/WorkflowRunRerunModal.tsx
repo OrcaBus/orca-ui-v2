@@ -69,22 +69,16 @@ export function WorkflowRunRerunModal({
     try {
       await onSubmit(data);
       toast.success('Workflow rerun triggered successfully');
-      reset(getDefaultValues());
       onClose();
     } catch {
       toast.error('Failed to trigger workflow rerun');
     }
   };
 
-  const handleClose = () => {
-    reset(getDefaultValues());
-    onClose();
-  };
-
   return (
     <DialogFrame
       isOpen={isOpen}
-      onClose={handleClose}
+      onClose={onClose}
       title='Rerun Workflow'
       description={workflowRunName}
       icon={<RefreshCw className='h-5 w-5' />}
@@ -93,7 +87,7 @@ export function WorkflowRunRerunModal({
         <>
           <button
             type='button'
-            onClick={handleClose}
+            onClick={onClose}
             className='rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-[#9dabb9] dark:hover:bg-[#2d3540]'
           >
             Close

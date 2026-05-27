@@ -197,11 +197,6 @@ export function WorkflowRunsBatchStateTransitionModal({
     }
   }, [availableStateOptions, selectedStateName, setValue]);
 
-  const handleClose = () => {
-    reset(getDefaultValues());
-    onClose();
-  };
-
   const handleFormSubmit = async (data: BatchStateTransitionFormData) => {
     if (!workflowRunOrcabusIds.length) {
       toast.error('Select at least one workflow run');
@@ -226,7 +221,7 @@ export function WorkflowRunsBatchStateTransitionModal({
       await queryClient.invalidateQueries({ queryKey: ['get', WORKFLOWRUNS_LIST_PATH] });
       await queryClient.invalidateQueries({ queryKey: ['get', WORKFLOWRUNS_STATUS_COUNT_PATH] });
 
-      handleClose();
+      onClose();
     } catch {
       toast.error('Failed to transition workflow runs');
     }
@@ -246,7 +241,7 @@ export function WorkflowRunsBatchStateTransitionModal({
   return (
     <DialogFrame
       isOpen={isOpen}
-      onClose={handleClose}
+      onClose={onClose}
       title='Batch State Transition'
       icon={<ArrowLeftRight className='h-5 w-5' />}
       size='lg'
@@ -254,7 +249,7 @@ export function WorkflowRunsBatchStateTransitionModal({
         <>
           <button
             type='button'
-            onClick={handleClose}
+            onClick={onClose}
             className={cn(
               'rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition-colors',
               'hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50',

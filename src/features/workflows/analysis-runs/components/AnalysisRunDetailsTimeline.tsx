@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react';
-import dayjs from 'dayjs';
 import { MessageCircle, SquarePen, Trash } from 'lucide-react';
 import {
   CommentDialog,
@@ -14,6 +13,7 @@ import {
   type AddCommentFormData,
 } from '@/components/timeline';
 import { useAuthContext } from '@/context/auth-context';
+import { formatBackendDate, formatDateTimeLocalInputValue } from '@/utils/timeFormat';
 import { SpinnerWithText } from '@/components/ui/Spinner';
 import {
   useAnalysisRunCommentCreateModel,
@@ -26,12 +26,6 @@ import { useAnalysisRunDetailsContext } from '../context/AnalysisRunDetailsConte
 // ---------------------------------------------------------------------------
 // Helpers (scoped to this module)
 // ---------------------------------------------------------------------------
-
-function toDateTimeLocal(value?: string | null): string | undefined {
-  if (!value) return undefined;
-  const parsed = dayjs(value);
-  return parsed.isValid() ? parsed.format('YYYY-MM-DDTHH:mm') : undefined;
-}
 
 // ---------------------------------------------------------------------------
 // Component
@@ -48,7 +42,7 @@ export function AnalysisRunDetailsTimeline() {
 
   const analysisRunOrcabusId = analysisRunDetail?.orcabusId ?? '';
   const currentUserEmail = user?.email ?? '';
-  const dialogActorTimestamp = dayjs().toISOString();
+  const dialogActorTimestamp = formatBackendDate(new Date());
 
   const createAnalysisRunComment = useAnalysisRunCommentCreateModel();
   const updateAnalysisRunComment = useAnalysisRunCommentUpdateModel();
@@ -224,7 +218,9 @@ export function AnalysisRunDetailsTimeline() {
         initialValues={
           editingComment
             ? {
-                timestamp: toDateTimeLocal(editingComment.updatedAt ?? editingComment.createdAt),
+                timestamp: formatDateTimeLocalInputValue(
+                  editingComment.updatedAt ?? editingComment.createdAt
+                ),
                 comment: editingComment.text,
                 severity: editingComment.severity ?? TimelineCommentSeverityEnum.INFO,
               }

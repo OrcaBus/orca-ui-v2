@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
   formatBackendDate,
+  formatDateTimeLocalInputValue,
   formatDetailDate,
   formatTableDate,
   getRelativeTime,
@@ -28,6 +29,19 @@ describe('formatBackendDate', () => {
   it('returns UTC ISO 8601 output', () => {
     const date = new Date('2026-02-05T03:09:00Z');
     expect(formatBackendDate(date)).toBe('2026-02-05T03:09:00.000Z');
+  });
+});
+
+describe('formatDateTimeLocalInputValue', () => {
+  it('formats ISO dates for datetime-local inputs in the display timezone', () => {
+    expect(formatDateTimeLocalInputValue('2026-02-05T03:09:00Z')).toBe('2026-02-05T14:09');
+  });
+
+  it('returns undefined for empty or invalid input', () => {
+    expect(formatDateTimeLocalInputValue('')).toBeUndefined();
+    expect(formatDateTimeLocalInputValue(undefined)).toBeUndefined();
+    expect(formatDateTimeLocalInputValue(null)).toBeUndefined();
+    expect(formatDateTimeLocalInputValue('not-a-date')).toBeUndefined();
   });
 });
 

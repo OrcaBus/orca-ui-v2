@@ -17,6 +17,7 @@ import {
 } from '@/components/timeline';
 import { useAuthContext } from '@/context/auth-context';
 import { isEmail } from '@/utils/string';
+import { formatBackendDate, formatDateTimeLocalInputValue } from '@/utils/timeFormat';
 import { SpinnerWithText } from '@/components/ui/Spinner';
 import {
   useSequenceRunStateCreateModel,
@@ -56,12 +57,6 @@ function formatStateLabel(value: string): string {
     .replace(/[_-]+/g, ' ')
     .toLowerCase()
     .replace(/\b\w/g, (char) => char.toUpperCase());
-}
-
-function toDateTimeLocal(value?: string | null): string | undefined {
-  if (!value) return undefined;
-  const parsed = dayjs(value);
-  return parsed.isValid() ? parsed.format('YYYY-MM-DDTHH:mm') : undefined;
 }
 
 function isStateTransitionAllowed(rule: ValidationRule, currentState?: string | null): boolean {
@@ -121,7 +116,7 @@ export function SequenceRunDetailsTimeline() {
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
 
   const currentUserEmail = user?.email ?? '';
-  const dialogActorTimestamp = dayjs().toISOString();
+  const dialogActorTimestamp = formatBackendDate(new Date());
 
   // Use the latest sequence run's orcabusId for create mutations
   const latestSequenceRun = useMemo(() => {
@@ -396,7 +391,7 @@ export function SequenceRunDetailsTimeline() {
           editingState
             ? {
                 stateName: editingState.status,
-                timestamp: toDateTimeLocal(editingState.timestamp) ?? '',
+                timestamp: formatDateTimeLocalInputValue(editingState.timestamp) ?? '',
                 comment: editingState.comment ?? '',
               }
             : undefined
@@ -427,7 +422,9 @@ export function SequenceRunDetailsTimeline() {
           editingComment
             ? {
                 timestamp:
-                  toDateTimeLocal(editingComment.updatedAt ?? editingComment.createdAt) ?? '',
+                  formatDateTimeLocalInputValue(
+                    editingComment.updatedAt ?? editingComment.createdAt
+                  ) ?? '',
                 comment: editingComment.comment,
                 severity: TimelineCommentSeverityEnum.INFO,
               }

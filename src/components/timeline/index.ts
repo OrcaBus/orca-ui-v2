@@ -16,8 +16,10 @@
  */
 
 // Main component
-export { Timeline, TimelineFunctionButton } from './Timeline';
-export type { TimelineFunctionButtonProps, TimelineProps } from './Timeline';
+export { Timeline } from './Timeline';
+export type { TimelineProps } from './Timeline';
+export { TimelineFunctionButton } from './TimelineFunctionButton';
+export type { TimelineFunctionButtonProps } from './TimelineFunctionButton';
 
 // Dialog components
 export { CustomStateDialog } from './CustomStateDialog';

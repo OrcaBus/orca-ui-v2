@@ -124,18 +124,13 @@ export function AddCaseModal({ isOpen, onClose, onSuccess }: AddCaseModalProps) 
     if (isOpen) reset(DEFAULT_VALUES);
   }, [isOpen, reset]);
 
-  const handleClose = () => {
-    reset(DEFAULT_VALUES);
-    onClose();
-  };
-
   const handleFormSubmit = async (values: FormValues) => {
     try {
       await createCase({ body: toRequestModel(values) });
       await queryClient.invalidateQueries({ queryKey: ['get', CASE_LIST_PATH] });
       toast.success('Case created successfully');
-      handleClose();
       onSuccess?.();
+      onClose();
     } catch (error) {
       toast.error('Failed to create case');
       console.error('Error creating case:', error);
@@ -145,7 +140,7 @@ export function AddCaseModal({ isOpen, onClose, onSuccess }: AddCaseModalProps) 
   return (
     <DialogFrame
       isOpen={isOpen}
-      onClose={handleClose}
+      onClose={onClose}
       title='Create New Case'
       description='Fill in the details below to create a new case.'
       icon={<Briefcase className='h-5 w-5' />}
@@ -154,7 +149,7 @@ export function AddCaseModal({ isOpen, onClose, onSuccess }: AddCaseModalProps) 
         <div className='flex items-center justify-end gap-3'>
           <button
             type='button'
-            onClick={handleClose}
+            onClick={onClose}
             className={cn(
               'cursor-pointer rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition-colors',
               'hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50',
