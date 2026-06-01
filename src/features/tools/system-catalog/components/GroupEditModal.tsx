@@ -90,8 +90,10 @@ export function GroupEditModal({
     useWatch({ control, name: 'nodeIds', defaultValue: initialData.nodeIds }) ?? [];
 
   useEffect(() => {
-    if (isOpen) reset(initialData);
-  }, [isOpen, initialData, reset]);
+    if (isOpen && !isSubmitting) {
+      reset(initialData);
+    }
+  }, [isOpen, initialData, isSubmitting, reset]);
 
   if (!isOpen) return null;
 

@@ -121,8 +121,10 @@ export function AddCaseModal({ isOpen, onClose, onSuccess }: AddCaseModalProps) 
   } = useFieldArray({ control, name: 'alias' });
 
   useEffect(() => {
-    if (isOpen) reset(DEFAULT_VALUES);
-  }, [isOpen, reset]);
+    if (isOpen && !isSubmitting) {
+      reset(DEFAULT_VALUES);
+    }
+  }, [isOpen, isSubmitting, reset]);
 
   const handleFormSubmit = async (values: FormValues) => {
     try {

@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { cn } from '@/utils/cn';
 import { DialogFrame } from '@/components/modals/DialogFrame';
 import { useCaseAddUserModel } from '../api/cases.api';
+import { useCaseDetailsContext } from '../context/CaseDetailsContext';
 
 // ─── schema ───────────────────────────────────────────────────────────────────
 
@@ -48,6 +49,7 @@ export function CaseDetailsAddUserModal({
   onSuccess,
 }: CaseDetailsAddUserModalProps) {
   const { caseOrcabusId } = useParams<{ caseOrcabusId: string }>();
+  const { refresh } = useCaseDetailsContext();
 
   const addUserMutation = useCaseAddUserModel();
 
@@ -63,8 +65,10 @@ export function CaseDetailsAddUserModal({
   });
 
   useEffect(() => {
-    if (isOpen) reset(DEFAULT_VALUES);
-  }, [isOpen, reset]);
+    if (isOpen && !isSubmitting) {
+      reset(DEFAULT_VALUES);
+    }
+  }, [isOpen, isSubmitting, reset]);
 
   const handleFormSubmit = async (values: FormValues) => {
     if (!caseOrcabusId) return;
@@ -78,6 +82,7 @@ export function CaseDetailsAddUserModal({
       });
       toast.success(`User ${values.email} added to case`);
       onSuccess?.();
+      refresh();
       onClose();
     } catch {
       toast.error('Failed to add user');

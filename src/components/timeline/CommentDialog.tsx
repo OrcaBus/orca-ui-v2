@@ -78,10 +78,10 @@ export function CommentDialog({
   });
 
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && !isSubmitting) {
       reset(getDefaultValues(initialValues));
     }
-  }, [initialValues, isOpen, reset]);
+  }, [initialValues, isOpen, isSubmitting, reset]);
 
   const isSubmitDisabled = isSubmitting || commentValue.trim().length === 0;
   const dialogTitle = title ?? (mode === 'edit' ? 'Edit Comment' : 'Add a new comment');

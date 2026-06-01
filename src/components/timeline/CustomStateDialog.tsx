@@ -74,10 +74,10 @@ export function CustomStateDialog({
   });
 
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && !isSubmitting) {
       reset(getDefaultValues(initialValues));
     }
-  }, [initialValues, isOpen, reset]);
+  }, [initialValues, isOpen, isSubmitting, reset]);
 
   const usesProvidedStateOptions = Array.isArray(availableStates);
   const hasSelectableStates = (availableStates?.length ?? 0) > 0;

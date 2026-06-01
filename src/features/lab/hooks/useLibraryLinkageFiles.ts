@@ -5,7 +5,7 @@ import {
   workflowRunListModel,
   type WorkflowRunListModel,
   type WorkflowRunPaginatedModel,
-} from '@/features/workflows/api/workflows.api';
+} from '@/features/runs/api/workflows.api';
 import type { LibraryDetailType } from '../api/lab.api';
 import {
   buildLatestWorkflowRunQueryParams,

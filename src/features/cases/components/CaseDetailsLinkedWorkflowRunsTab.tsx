@@ -4,7 +4,7 @@ import { Link as LinkIcon, ListFilter, ArrowLeft, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { ApiErrorState } from '@/components/ui/ApiErrorState';
 import { DEFAULT_NON_PAGINATE_PAGE_SIZE } from '@/utils/constants';
-import { useWorkflowRunListModel } from '@/features/workflows/api/workflows.api';
+import { useWorkflowRunListModel } from '@/features/runs/api/workflows.api';
 import { useCaseUnlinkEntityModel } from '../api/cases.api';
 import { useCaseDetailsContext } from '../context/CaseDetailsContext';
 import { CaseDetailsLinkWorkflowRunsModal } from './CaseDetailsLinkWorkflowRunsModal';

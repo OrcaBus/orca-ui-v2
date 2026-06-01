@@ -279,6 +279,7 @@ function TooltipContent({
   sideOffset = 8,
   side = 'top',
   align = 'center',
+  showArrow = true,
   variant,
   size,
   children,
@@ -288,6 +289,8 @@ function TooltipContent({
   sideOffset?: number;
   side?: Side;
   align?: Align;
+  /** Whether to render the tooltip arrow. */
+  showArrow?: boolean;
   /** Override the provider variant. */
   variant?: TooltipVariant;
   /** Override the provider size. */
@@ -391,7 +394,7 @@ function TooltipContent({
         isVisible ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
       )}
     >
-      <span aria-hidden style={arrowStyle} className={arrowClasses} />
+      {showArrow && <span aria-hidden style={arrowStyle} className={arrowClasses} />}
       <div
         data-slot='tooltip-content'
         data-side={actualSide}

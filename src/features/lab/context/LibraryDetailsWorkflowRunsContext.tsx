@@ -8,7 +8,7 @@ import {
   type PropsWithChildren,
 } from 'react';
 import { DEFAULT_NON_PAGINATE_PAGE_SIZE } from '@/utils/constants';
-import { useWorkflowModel, type WorkflowModel } from '@/features/workflows/api/workflows.api';
+import { useWorkflowModel, type WorkflowModel } from '@/features/runs/api/workflows.api';
 import { useLibraryDetails } from './LibraryDetailsContext';
 import { useLibraryDetailsWorkflowRunsQueryParams } from '../hooks/useLibraryDetailsWorkflowRunsQueryParams';
 
