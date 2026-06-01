@@ -85,27 +85,21 @@ export function EditCaseModal({ isOpen, onClose }: EditCaseModalProps) {
   });
 
   useEffect(() => {
-    if (!isOpen) {
-      return;
+    if (!caseDetail) return;
+
+    if (isOpen || !isSubmitting) {
+      form.reset({
+        requestFormId: caseDetail.requestFormId,
+        type: caseDetail.type,
+        studyType: caseDetail.studyType,
+        isReportRequired: caseDetail.isReportRequired ?? false,
+        isNataAccredited: caseDetail.isNataAccredited ?? false,
+        alias: (caseDetail.alias ?? []).map((v) => ({ value: v })),
+        links: parseLinks(caseDetail.links),
+        description: caseDetail.description ?? '',
+      });
     }
-
-    resetUpdateMutation();
-
-    if (!caseDetail) {
-      return;
-    }
-
-    form.reset({
-      requestFormId: caseDetail.requestFormId,
-      type: caseDetail.type,
-      studyType: caseDetail.studyType,
-      isReportRequired: caseDetail.isReportRequired ?? false,
-      isNataAccredited: caseDetail.isNataAccredited ?? false,
-      alias: (caseDetail.alias ?? []).map((v) => ({ value: v })),
-      links: parseLinks(caseDetail.links),
-      description: caseDetail.description ?? '',
-    });
-  }, [isOpen, caseDetail, form, resetUpdateMutation]);
+  }, [isOpen, caseDetail, form, isSubmitting]);
 
   const handleFormSubmit = async (values: EditCaseFormValues) => {
     if (!caseDetail) return;
@@ -124,6 +118,7 @@ export function EditCaseModal({ isOpen, onClose }: EditCaseModalProps) {
         },
       });
       toast.success('Case updated successfully');
+      resetUpdateMutation();
       refresh();
       onClose();
     } catch {

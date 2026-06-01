@@ -10,7 +10,7 @@ import { formatTableDate } from '@/utils/timeFormat';
 import {
   useWorkflowRunListModel,
   type WorkflowRunListModel,
-} from '@/features/workflows/api/workflows.api';
+} from '@/features/runs/api/workflows.api';
 import { useLibraryDetails } from '../context/LibraryDetailsContext';
 import { useLibraryDetailsWorkflowRuns } from '../context/LibraryDetailsWorkflowRunsContext';
 import { useLibraryDetailsWorkflowRunsQueryParams } from '../hooks/useLibraryDetailsWorkflowRunsQueryParams';
@@ -68,7 +68,7 @@ export function LibraryDetailsWorkflowRunsTable() {
           <button
             type='button'
             onClick={() => {
-              void navigate(`/workflows/workflow-runs/${workflowRun.orcabusId}`);
+              void navigate(`/runs/workflow-runs/${workflowRun.orcabusId}`);
             }}
             className='text-left text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline dark:text-blue-400 dark:hover:text-blue-300'
           >

@@ -6,7 +6,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { useTablePagination } from '@/components/tables/useTablePagination';
 import { formatTableDate } from '@/utils/timeFormat';
 import { DEFAULT_PAGE_SIZE } from '@/utils/constants';
-import { type WorkflowRunListModel } from '@/features/workflows/api/workflows.api';
+import { type WorkflowRunListModel } from '@/features/runs/api/workflows.api';
 
 interface CaseDetailsLinkedWorkflowRunsTableProps {
   runs: WorkflowRunListModel[];
@@ -37,7 +37,7 @@ export function CaseDetailsLinkedWorkflowRunsTable({
         <button
           onClick={(e) => {
             e.stopPropagation();
-            void navigate(`/workflows/workflow-runs/${run.orcabusId}`);
+            void navigate(`/runs/workflow-runs/${run.orcabusId}`);
           }}
           className='cursor-pointer font-mono text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline dark:text-[#137fec] dark:hover:text-blue-400'
         >

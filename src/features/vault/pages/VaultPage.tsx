@@ -1,4 +1,4 @@
-import { Database } from 'lucide-react';
+import { Warehouse } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Tabs } from '@/components/ui/Tabs';
 import { useVaultTab } from '../shared/hooks/useVaultTab';
@@ -22,7 +22,7 @@ export function VaultPage() {
       <PageHeader
         title='Vault'
         description='Trace relationships across sequencing, workflows, and stored outputs.'
-        icon={<Database className='h-6 w-6' />}
+        icon={<Warehouse className='h-6 w-6' />}
       />
 
       <div className='mb-6'>

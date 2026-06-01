@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { WorkflowModel } from '@/features/workflows/api/workflows.api';
+import type { WorkflowModel } from '@/features/runs/api/workflows.api';
 import {
   groupLibraryDetailsWorkflowsByName,
   resolveLibraryDetailsWorkflowTypeGroup,

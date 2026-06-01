@@ -94,8 +94,10 @@ export function MapEditModal({
   const tagsJson = useWatch({ control, name: 'tagsJson', defaultValue: '{}' }) ?? '{}';
 
   useEffect(() => {
-    if (isOpen) reset(initialData);
-  }, [isOpen, initialData, reset]);
+    if (isOpen && !isSubmitting) {
+      reset(initialData);
+    }
+  }, [isOpen, initialData, isSubmitting, reset]);
 
   const [tagKey, setTagKey] = useState('');
   const [tagValue, setTagValue] = useState('');

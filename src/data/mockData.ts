@@ -3076,7 +3076,11 @@ export const mockWorkflowRunDetails: Record<string, WorkflowRunDetail> = {
             priority: 'normal',
           },
           inputs: [
-            { name: 'sequencing_run', value: '240201_HGJK2DSXY', link: '/sequence/SEQ001' },
+            {
+              name: 'sequencing_run',
+              value: '240201_HGJK2DSXY',
+              link: '/runs/sequence-runs/SEQ001',
+            },
             { name: 'sample_sheet', value: 'SampleSheet_240201_v1.csv' },
           ],
           tags: ['wgs', 'batch12', 'production'],

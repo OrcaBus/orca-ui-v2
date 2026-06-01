@@ -48,7 +48,7 @@ export function VaultWorkflowsPage() {
         sortable: true,
         render: (wf) => (
           <Link
-            to={`/workflows/workflow-runs/${wf.id}`}
+            to={`/runs/workflow-runs/${wf.id}`}
             className='text-sm text-blue-600 hover:underline dark:text-blue-400'
           >
             {wf.name}

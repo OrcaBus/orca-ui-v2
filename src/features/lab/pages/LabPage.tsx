@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Database, RefreshCw } from 'lucide-react';
+import { LibraryBig, RefreshCw } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { AdvancedFilterBar } from '@/components/tables/AdvancedFilterBar';
 import { useLabQueryParams } from '../hooks/useLabQueryParams';
@@ -34,7 +34,7 @@ export function LabPage() {
       <PageHeader
         title='Lab Metadata'
         description='Browse and manage library metadata.'
-        icon={<Database className='h-6 w-6' />}
+        icon={<LibraryBig className='h-6 w-6' />}
         actions={
           <button
             type='button'
