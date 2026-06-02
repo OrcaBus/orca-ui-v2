@@ -25,25 +25,22 @@ const WFR_PAGINATION_KEYS = [WFR_PARAM_PAGE, WFR_PARAM_ROWS_PER_PAGE];
  */
 export function useAnalysisRunDetailsWorkflowRunsQueryParams(analysisRunOrcabusId: string) {
   const { getParam, setParams } = useQueryParams({ paginationKeys: [] });
+  const pageParam = getParam(WFR_PARAM_PAGE);
+  const rowsPerPageParam = getParam(WFR_PARAM_ROWS_PER_PAGE);
+  const searchParam = getParam(WFR_PARAM_SEARCH);
+  const orderBy = getParam(WFR_PARAM_ORDER_BY) ?? '';
 
   // ---- Derived state ----
 
   const pagination = useMemo(
     () => ({
-      page: Number(getParam(WFR_PARAM_PAGE)) || 1,
-      rowsPerPage: Number(getParam(WFR_PARAM_ROWS_PER_PAGE)) || DEFAULT_PAGE_SIZE,
+      page: Number(pageParam) || 1,
+      rowsPerPage: Number(rowsPerPageParam) || DEFAULT_PAGE_SIZE,
     }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [getParam(WFR_PARAM_PAGE), getParam(WFR_PARAM_ROWS_PER_PAGE)]
+    [pageParam, rowsPerPageParam]
   );
 
-  const search = useMemo(
-    () => toSearchDisplayValue(getParam(WFR_PARAM_SEARCH)),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [getParam(WFR_PARAM_SEARCH)]
-  );
-
-  const orderBy = getParam(WFR_PARAM_ORDER_BY) ?? '';
+  const search = toSearchDisplayValue(searchParam);
 
   // ---- Setters ----
 

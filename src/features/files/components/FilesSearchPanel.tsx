@@ -1,16 +1,9 @@
-import {
-  useEffect,
-  useRef,
-  useState,
-  type Dispatch,
-  type KeyboardEvent,
-  type SetStateAction,
-} from 'react';
+import { useState, type Dispatch, type KeyboardEvent, type SetStateAction } from 'react';
 import { Folder, Search, SlidersHorizontal, X, ChevronUp, Filter } from 'lucide-react';
 import { WORKFLOW_PATTERNS, FILE_EXTENSIONS } from '@/utils/constants';
 import { useFilesListQueryParams, type FilterOp } from '../hooks/useFilesListQueryParams';
 import { PillTag } from '@/components/ui/PillTag';
-import { useDebounce } from '@/hooks/useDebounce';
+import { useDebouncedSearchInput } from '@/hooks/useDebouncedSearchInput';
 import { FilesBucketSelect } from './FilesBucketSelect';
 import { appendKeyPattern, removeKeyPattern } from '../utils/keyPatterns';
 
@@ -197,28 +190,16 @@ export function FilesSearchPanel() {
 
   const [isOpen, setIsOpen] = useState(false);
 
-  // Local (uncontrolled) general search — debounced before committing to URL
-  const [localSearch, setLocalSearch] = useState(searchValue);
-  const debouncedSearch = useDebounce(localSearch, 400);
-  const prevDebouncedRef = useRef(debouncedSearch);
+  const { inputRef, handleInputChange, resetInput, clearInput } = useDebouncedSearchInput({
+    value: searchValue,
+    onChange: setSearch,
+    delayMs: 400,
+  });
 
   // Draft state for the accordion — only committed on "Apply"
   const [tempValues, setTempValues] = useState<AdvancedFilterDraft>(() =>
     createDraftFromFilters(filters)
   );
-
-  // Sync local search input when external clear resets it
-  useEffect(() => {
-    setLocalSearch(searchValue);
-  }, [searchValue]);
-
-  // Auto-search when debounced value changes
-  useEffect(() => {
-    if (debouncedSearch === prevDebouncedRef.current) return;
-    prevDebouncedRef.current = debouncedSearch;
-    if (debouncedSearch === searchValue) return;
-    setSearch(debouncedSearch);
-  }, [debouncedSearch, searchValue, setSearch]);
 
   // Sync draft from committed filters when opening the accordion
   const handleToggleOpen = () => {
@@ -246,7 +227,7 @@ export function FilesSearchPanel() {
   };
 
   const handleClearAll = () => {
-    setLocalSearch('');
+    resetInput('');
     setTempValues(createClearedDraft());
     clearAll();
   };
@@ -268,8 +249,7 @@ export function FilesSearchPanel() {
       label: 'Search',
       value: searchValue,
       onRemove: () => {
-        setLocalSearch('');
-        setSearch('');
+        clearInput();
       },
     });
   }
@@ -343,26 +323,22 @@ export function FilesSearchPanel() {
             aria-hidden='true'
           />
           <input
+            ref={inputRef}
             id='files-general-search'
             type='text'
             placeholder='Search by portal run ID, bucket, or S3 key…'
-            value={localSearch}
-            onChange={(e) => setLocalSearch(e.target.value)}
-            className='w-full rounded-md border border-slate-200 bg-slate-50 py-2 pr-10 pl-10 text-sm text-neutral-900 placeholder-neutral-400 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-100 dark:placeholder-[#9dabb9] dark:focus:ring-[#137fec]'
+            defaultValue={searchValue}
+            onChange={handleInputChange}
+            className='peer w-full rounded-md border border-slate-200 bg-slate-50 py-2 pr-10 pl-10 text-sm text-neutral-900 placeholder-neutral-400 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-100 dark:placeholder-[#9dabb9] dark:focus:ring-[#137fec]'
           />
-          {localSearch && (
-            <button
-              type='button'
-              onClick={() => {
-                setLocalSearch('');
-                setSearch('');
-              }}
-              className='absolute top-1/2 right-3 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 dark:text-[#9dabb9] dark:hover:text-white'
-              aria-label='Clear search'
-            >
-              <X className='h-4 w-4' aria-hidden='true' />
-            </button>
-          )}
+          <button
+            type='button'
+            onClick={clearInput}
+            className='absolute top-1/2 right-3 -translate-y-1/2 text-neutral-400 peer-placeholder-shown:hidden hover:text-neutral-600 dark:text-[#9dabb9] dark:hover:text-white'
+            aria-label='Clear search'
+          >
+            <X className='h-4 w-4' aria-hidden='true' />
+          </button>
         </div>
 
         <button

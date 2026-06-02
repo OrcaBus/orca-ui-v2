@@ -152,7 +152,11 @@ export function DrawerFrame({
                 {showCloseButton && (
                   <button
                     type='button'
-                    onClick={onClose}
+                    onClick={(e) => {
+                      // By calling e.currentTarget.blur() before onClose(), focus moves to <body> before the portal is marked aria-hidden.  Headless UI separately tracks the opener element and restores focus to it after the transition finishes, so focus return still works correctly.
+                      e.currentTarget.blur();
+                      onClose();
+                    }}
                     className={cn(
                       'rounded-lg p-2 text-neutral-400 transition-colors',
                       'hover:bg-neutral-100 hover:text-neutral-600',

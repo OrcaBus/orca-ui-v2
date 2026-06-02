@@ -100,33 +100,17 @@ export function useLabQueryParams() {
   const filterValues = useMemo<Record<string, string>>(
     () => ({
       ...DEFAULT_FILTER_VALUES,
-      [PARAM_ORCABUS_ID]: toFilterDisplayValue(
-        params[PARAM_ORCABUS_ID] as string | string[] | undefined
-      ),
-      [PARAM_LIBRARY_ID]: toFilterDisplayValue(
-        params[PARAM_LIBRARY_ID] as string | string[] | undefined
-      ),
-      [PARAM_ASSAY]: toFilterDisplayValue(params[PARAM_ASSAY] as string | string[] | undefined),
-      [PARAM_INDIVIDUAL_ID]: toFilterDisplayValue(
-        params[PARAM_INDIVIDUAL_ID] as string | string[] | undefined
-      ),
-      [PARAM_PROJECT_ID]: toFilterDisplayValue(
-        params[PARAM_PROJECT_ID] as string | string[] | undefined
-      ),
-      [PARAM_PHENOTYPE]: toFilterDisplayValue(
-        params[PARAM_PHENOTYPE] as string | string[] | undefined
-      ),
-      [PARAM_QUALITY]: toFilterDisplayValue(params[PARAM_QUALITY] as string | string[] | undefined),
-      [PARAM_TYPE]: toFilterDisplayValue(params[PARAM_TYPE] as string | string[] | undefined),
-      [PARAM_WORKFLOW]: toFilterDisplayValue(
-        params[PARAM_WORKFLOW] as string | string[] | undefined
-      ),
-      [PARAM_COVERAGE_MIN]: toCoverageValue(
-        params[PARAM_COVERAGE_MIN] as string | string[] | undefined
-      ),
-      [PARAM_COVERAGE_MAX]: toCoverageValue(
-        params[PARAM_COVERAGE_MAX] as string | string[] | undefined
-      ),
+      [PARAM_ORCABUS_ID]: toFilterDisplayValue(params[PARAM_ORCABUS_ID]),
+      [PARAM_LIBRARY_ID]: toFilterDisplayValue(params[PARAM_LIBRARY_ID]),
+      [PARAM_ASSAY]: toFilterDisplayValue(params[PARAM_ASSAY]),
+      [PARAM_INDIVIDUAL_ID]: toFilterDisplayValue(params[PARAM_INDIVIDUAL_ID]),
+      [PARAM_PROJECT_ID]: toFilterDisplayValue(params[PARAM_PROJECT_ID]),
+      [PARAM_PHENOTYPE]: toFilterDisplayValue(params[PARAM_PHENOTYPE]),
+      [PARAM_QUALITY]: toFilterDisplayValue(params[PARAM_QUALITY]),
+      [PARAM_TYPE]: toFilterDisplayValue(params[PARAM_TYPE]),
+      [PARAM_WORKFLOW]: toFilterDisplayValue(params[PARAM_WORKFLOW]),
+      [PARAM_COVERAGE_MIN]: toCoverageValue(params[PARAM_COVERAGE_MIN]),
+      [PARAM_COVERAGE_MAX]: toCoverageValue(params[PARAM_COVERAGE_MAX]),
     }),
     [params]
   );

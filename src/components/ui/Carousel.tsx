@@ -184,7 +184,7 @@ export function Carousel({
         <div
           ref={viewportRef}
           className={cn(
-            'min-w-0 overflow-x-auto scroll-smooth py-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
+            'min-w-0 scrollbar-none overflow-x-auto scroll-smooth py-1 [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden',
             viewportClassName
           )}
         >

@@ -5,7 +5,7 @@
  * by the `tab` query param (e.g. ?tab=workflowruns).
  */
 
-import { useRef, useEffect } from 'react';
+import { useMemo, useRef, useEffect } from 'react';
 import {
   LibraryDetailsPageHeader,
   LibraryDetailsOverviewCard,
@@ -13,10 +13,31 @@ import {
   LibraryDetailsRelatedLibrariesTable,
   LibraryDetailsHistoryTable,
 } from '../components';
+import { useAppShellHeader } from '@/context/app-shell-context';
 import { useLibraryDetailsTab, LibraryDetailsTabValues } from '../hooks/useLibraryDetailsTab';
-import { LibraryDetailsProvider } from '../context/LibraryDetailsContext';
-import { LibraryDetailsPageBreadcrumb } from '../components/LibraryDetailsPageBreadcrumb';
+import { LibraryDetailsProvider, useLibraryDetails } from '../context/LibraryDetailsContext';
 import { LibraryDetailsTabs } from '../components/LibraryDetailsTabs';
+
+function LibraryDetailsAppShellHeader() {
+  const { libraryDetail, isLoadingLibraryDetail } = useLibraryDetails();
+  const headerConfig = useMemo(
+    () => ({
+      mode: 'detail' as const,
+      breadcrumbs: [
+        { label: 'Lab', href: '/lab' },
+        { label: 'Libraries', href: '/lab/libraries' },
+        {
+          label: libraryDetail?.libraryId || 'Loading...',
+          isLoading: isLoadingLibraryDetail,
+        },
+      ],
+    }),
+    [isLoadingLibraryDetail, libraryDetail?.libraryId]
+  );
+
+  useAppShellHeader(headerConfig);
+  return null;
+}
 
 export function LibraryDetailsPage() {
   const { activeTab } = useLibraryDetailsTab();
@@ -42,8 +63,8 @@ export function LibraryDetailsPage() {
 
   return (
     <LibraryDetailsProvider>
-      <div className='p-6'>
-        <LibraryDetailsPageBreadcrumb />
+      <LibraryDetailsAppShellHeader />
+      <div className='px-6'>
         <LibraryDetailsPageHeader />
         <LibraryDetailsOverviewCard />
 

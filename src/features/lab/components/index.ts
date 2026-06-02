@@ -1,4 +1,5 @@
 export { LibrariesTable } from './LibrariesTable';
+export { LabInfoDrawer } from './LabInfoDrawer';
 export { SyncMetadataModal } from './SyncMetadataModal';
 export { LibraryDetailsPageHeader } from './LibraryDetailsPageHeader';
 export { LibraryDetailsOverviewCard } from './LibraryDetailsOverviewCard';

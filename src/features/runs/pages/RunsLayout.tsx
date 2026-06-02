@@ -1,18 +1,21 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { Outlet, useLocation } from 'react-router';
-import { SecondarySidebar, SecondarySidebarMobileNav } from '@/components/layout/SecondarySidebar';
-import { useTemporarySidebarCollapse } from '@/components/layout/sidebar-context';
+import { SecondarySidebarMobileNav } from '@/components/layout/SecondarySidebar';
+import {
+  useAppShellSecondarySidebar,
+  useTemporarySidebarCollapse,
+} from '@/context/app-shell-context';
 import { getRunsSecondaryNavigation } from '../shared/utils/runsNavigation';
 
 export function RunsLayout() {
   const location = useLocation();
   const contentScrollRef = useRef<HTMLDivElement>(null);
-  const [secondarySidebarCollapsed, setSecondarySidebarCollapsed] = useState(false);
   const secondaryNavigation = useMemo(
     () => getRunsSecondaryNavigation(location.pathname),
     [location.pathname]
   );
 
+  useAppShellSecondarySidebar(secondaryNavigation);
   useTemporarySidebarCollapse();
 
   useEffect(() => {
@@ -21,14 +24,6 @@ export function RunsLayout() {
 
   return (
     <div className='flex h-full min-h-0 min-w-0 overflow-hidden'>
-      {secondaryNavigation && (
-        <SecondarySidebar
-          {...secondaryNavigation}
-          collapsed={secondarySidebarCollapsed}
-          onCollapsedChange={setSecondarySidebarCollapsed}
-        />
-      )}
-
       <div className='flex min-h-0 min-w-0 flex-1 flex-col'>
         {secondaryNavigation && <SecondarySidebarMobileNav {...secondaryNavigation} />}
         <div ref={contentScrollRef} className='min-h-0 min-w-0 flex-1 overflow-auto'>

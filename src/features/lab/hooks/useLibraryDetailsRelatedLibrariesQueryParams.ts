@@ -16,19 +16,19 @@ const PARAM_ORDER_BY = 'relLibOrdering';
  */
 export function useLibraryDetailsRelatedLibrariesQueryParams() {
   const { getParam, setParams } = useQueryParams({ paginationKeys: [] });
+  const pageParam = getParam(PARAM_PAGE);
+  const rowsPerPageParam = getParam(PARAM_ROWS_PER_PAGE);
+  const orderBy = getParam(PARAM_ORDER_BY) ?? '';
 
   // ---- Derived state ----
 
   const pagination = useMemo(
     () => ({
-      page: Number(getParam(PARAM_PAGE)) || 1,
-      rowsPerPage: Number(getParam(PARAM_ROWS_PER_PAGE)) || DEFAULT_PAGE_SIZE,
+      page: Number(pageParam) || 1,
+      rowsPerPage: Number(rowsPerPageParam) || DEFAULT_PAGE_SIZE,
     }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [getParam(PARAM_PAGE), getParam(PARAM_ROWS_PER_PAGE)]
+    [pageParam, rowsPerPageParam]
   );
-
-  const orderBy = getParam(PARAM_ORDER_BY) ?? '';
 
   // ---- Setters ----
 

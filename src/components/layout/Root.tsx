@@ -1,10 +1,10 @@
 import { useEffect, useRef } from 'react';
 import { Outlet, useLocation } from 'react-router';
 import { Header } from './Header';
+import { SecondarySidebar } from './SecondarySidebar';
 import { Sidebar } from './Sidebar';
-import { SidebarProvider } from './SidebarProvider';
 
-function RootShell() {
+export function Root() {
   const location = useLocation();
   const mainRef = useRef<HTMLElement>(null);
 
@@ -18,6 +18,8 @@ function RootShell() {
     <div className='flex h-screen bg-slate-50 dark:bg-[#101922]'>
       <Sidebar />
 
+      <SecondarySidebar />
+
       <div className='flex min-w-0 flex-1 flex-col overflow-hidden'>
         <Header />
 
@@ -26,13 +28,5 @@ function RootShell() {
         </main>
       </div>
     </div>
-  );
-}
-
-export function Root() {
-  return (
-    <SidebarProvider>
-      <RootShell />
-    </SidebarProvider>
   );
 }

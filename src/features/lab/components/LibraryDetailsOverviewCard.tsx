@@ -142,7 +142,7 @@ export function LibraryDetailsOverviewCard() {
 
   if (isLoadingLibraryDetail) {
     return (
-      <div className='mb-6 rounded-lg border border-neutral-200 bg-white p-6 dark:border-[#2d3540] dark:bg-[#1e252e]'>
+      <div className='mb-4 rounded-lg border border-neutral-200 bg-white p-6 dark:border-[#2d3540] dark:bg-[#1e252e]'>
         <LoadingBlock />
       </div>
     );
@@ -153,7 +153,7 @@ export function LibraryDetailsOverviewCard() {
     .filter(Boolean);
 
   return (
-    <div className='mb-6 rounded-lg border border-neutral-200 bg-white p-6 dark:border-[#2d3540] dark:bg-[#1e252e]'>
+    <div className='rounded-lg border border-neutral-200 bg-white p-6 dark:border-[#2d3540] dark:bg-[#1e252e]'>
       <div className='flex flex-col gap-6 xl:flex-row'>
         <div className='min-w-0 flex-1'>
           <h3 className='mb-4 font-medium text-neutral-900 dark:text-white'>Library Details</h3>

@@ -1,4 +1,5 @@
 export { CasesListTable } from './CasesListTable';
+export { CasesInfoDrawer } from './CasesInfoDrawer';
 export { AddCaseModal } from './AddCaseModal';
 export { AutoImportFromRedcapModal } from './AutoImportFromRedcapModal';
 export { SyncHistoryDialog } from './SyncHistoryDialog';

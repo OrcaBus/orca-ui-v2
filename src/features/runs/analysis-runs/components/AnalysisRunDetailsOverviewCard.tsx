@@ -13,7 +13,7 @@ export function AnalysisRunDetailsOverviewCard() {
   const analysis = ar?.analysis;
 
   return (
-    <div className='mb-6 rounded-lg border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900'>
+    <div className='rounded-lg border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900'>
       <div className='flex divide-x divide-neutral-200 dark:divide-neutral-700'>
         {/* Analysis Run Fields */}
         <div className='flex-1 pr-8'>

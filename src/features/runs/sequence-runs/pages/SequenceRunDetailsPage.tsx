@@ -1,4 +1,6 @@
-import { useRef, useEffect } from 'react';
+import { useMemo, useRef, useEffect } from 'react';
+import { useParams } from 'react-router';
+import { useAppShellHeader } from '@/context/app-shell-context';
 import {
   SequenceRunDetailsPageHeader,
   SequenceRunDetailsOverviewCard,
@@ -11,7 +13,32 @@ import {
   useSequenceRunDetailsTab,
   SequenceRunDetailsTabValues,
 } from '../hooks/useSequenceRunDetailsTab';
-import { SequenceRunDetailsProvider } from '../context/SequenceRunDetailsContext';
+import {
+  SequenceRunDetailsProvider,
+  useSequenceRunDetailsContext,
+} from '../context/SequenceRunDetailsContext';
+
+function SequenceRunDetailsAppShellHeader() {
+  const { instrumentRunId } = useParams<{ instrumentRunId: string }>();
+  const { isLoadingSequenceRun } = useSequenceRunDetailsContext();
+  const headerConfig = useMemo(
+    () => ({
+      mode: 'detail' as const,
+      breadcrumbs: [
+        { label: 'Runs', href: '/runs' },
+        { label: 'Sequence Runs', href: '/runs/sequence-runs' },
+        {
+          label: instrumentRunId ?? 'Loading...',
+          isLoading: isLoadingSequenceRun,
+        },
+      ],
+    }),
+    [instrumentRunId, isLoadingSequenceRun]
+  );
+
+  useAppShellHeader(headerConfig);
+  return null;
+}
 
 export function SequenceRunDetailsPage() {
   const { activeTab } = useSequenceRunDetailsTab();
@@ -29,7 +56,8 @@ export function SequenceRunDetailsPage() {
 
   return (
     <SequenceRunDetailsProvider>
-      <div className='p-6'>
+      <SequenceRunDetailsAppShellHeader />
+      <div className='px-6'>
         <SequenceRunDetailsPageHeader />
         <SequenceRunDetailsOverviewCard />
 

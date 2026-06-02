@@ -369,7 +369,7 @@ export function ExpandableTable<T, S>({
       )}
 
       {/* Table */}
-      <div className='scrollbar-thin max-h-[600px] overflow-x-auto overflow-y-auto'>
+      <div className='max-h-150 scrollbar-thin overflow-x-auto overflow-y-auto'>
         <table className='w-full'>
           <thead className='sticky top-0 z-10 border-b border-neutral-200 bg-neutral-50 dark:border-[#2d3540] dark:bg-[#111418]'>
             <tr>

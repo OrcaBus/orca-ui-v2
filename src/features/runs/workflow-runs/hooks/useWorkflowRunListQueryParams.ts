@@ -66,10 +66,10 @@ export function useWorkflowRunListQueryParams() {
     const typeParts = getArrayParam(PARAM_TYPE);
     return {
       ...DEFAULT_FILTER_VALUES,
-      [PARAM_STATUS]: toFirstString(params[PARAM_STATUS] as string | string[] | undefined),
+      [PARAM_STATUS]: toFirstString(params[PARAM_STATUS]),
       [PARAM_TYPE]: typeParts.join(','),
-      [PARAM_FROM]: toFirstString(params[PARAM_FROM] as string | string[] | undefined),
-      [PARAM_TO]: toFirstString(params[PARAM_TO] as string | string[] | undefined),
+      [PARAM_FROM]: toFirstString(params[PARAM_FROM]),
+      [PARAM_TO]: toFirstString(params[PARAM_TO]),
     };
   }, [params, getArrayParam]);
 

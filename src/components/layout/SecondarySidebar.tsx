@@ -1,5 +1,6 @@
 import { PanelLeftClose, PanelLeftOpen, type LucideIcon } from 'lucide-react';
 import { cn } from '@/utils/cn';
+import { useAppShell } from '@/context/app-shell-context';
 import { SidebarNavLink } from './SidebarNavLink';
 
 export interface SecondarySidebarItem {
@@ -23,7 +24,7 @@ export interface SecondarySidebarProps {
   onCollapsedChange?: (collapsed: boolean) => void;
 }
 
-export function SecondarySidebar({
+function SecondarySidebarContent({
   ariaLabel,
   items = [],
   groups,
@@ -109,6 +110,21 @@ export function SecondarySidebar({
         </div>
       )}
     </aside>
+  );
+}
+
+export function SecondarySidebar() {
+  const { secondarySidebarConfig, secondarySidebarCollapsed, setSecondarySidebarCollapsed } =
+    useAppShell();
+
+  if (!secondarySidebarConfig) return null;
+
+  return (
+    <SecondarySidebarContent
+      {...secondarySidebarConfig}
+      collapsed={secondarySidebarCollapsed}
+      onCollapsedChange={setSecondarySidebarCollapsed}
+    />
   );
 }
 

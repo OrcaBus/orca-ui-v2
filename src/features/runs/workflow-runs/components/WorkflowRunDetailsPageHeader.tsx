@@ -77,7 +77,7 @@ export function WorkflowRunDetailsPageHeader() {
   const status = workflowRunDetail?.currentState?.status ?? 'unknown';
 
   return (
-    <div className='mb-6'>
+    <div className='my-4'>
       <div className='mb-3 flex items-start justify-between gap-3'>
         <div className='flex items-center gap-3'>
           {isLoadingWorkflowRunDetail ? (

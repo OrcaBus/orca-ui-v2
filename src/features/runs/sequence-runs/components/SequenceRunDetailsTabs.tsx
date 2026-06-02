@@ -26,7 +26,7 @@ export const SequenceRunDetailsTabs = () => {
   ];
 
   return (
-    <div className='mb-6'>
+    <div className='mt-4 mb-6'>
       <Tabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
     </div>
   );
