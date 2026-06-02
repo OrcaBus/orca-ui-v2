@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type { ReactNode } from 'react';
 import { Sidebar } from '../Sidebar';
 import { SecondarySidebar } from '../SecondarySidebar';
-import { SidebarContext, type SidebarContextValue } from '../sidebar-context';
+import { AppShellContext, type AppShellContextValue } from '../../../context/app-shell-context';
 
 vi.mock('@/components/ui/Tooltip', () => ({
   Tooltip: ({ children }: { children: ReactNode }) => <span data-slot='tooltip'>{children}</span>,
@@ -27,28 +27,36 @@ vi.mock('@/components/ui/Tooltip', () => ({
   ),
 }));
 
-function renderWithSidebarContext(children: ReactNode, value: Partial<SidebarContextValue> = {}) {
-  const contextValue: SidebarContextValue = {
-    userCollapsed: true,
-    isCollapsed: true,
-    temporaryCollapseRequestCount: 0,
-    temporaryCollapseExpandedOverride: false,
+function renderWithAppShellContext(children: ReactNode, value: Partial<AppShellContextValue> = {}) {
+  const contextValue: AppShellContextValue = {
+    headerConfig: null,
+    setHeaderConfig: vi.fn(),
+    clearHeaderConfig: vi.fn(),
+    secondarySidebarConfig: null,
+    setSecondarySidebarConfig: vi.fn(),
+    clearSecondarySidebarConfig: vi.fn(),
+    secondarySidebarCollapsed: false,
+    setSecondarySidebarCollapsed: vi.fn(),
+    userSidebarCollapsed: true,
+    isSidebarCollapsed: true,
+    temporarySidebarCollapseRequestCount: 0,
+    temporarySidebarCollapseExpandedOverride: false,
     toggleSidebar: vi.fn(),
     setSidebarCollapsed: vi.fn(),
-    requestTemporaryCollapse: vi.fn(() => vi.fn()),
+    requestTemporarySidebarCollapse: vi.fn(() => vi.fn()),
     ...value,
   };
 
   return renderToStaticMarkup(
     <MemoryRouter initialEntries={['/runs/overview']}>
-      <SidebarContext.Provider value={contextValue}>{children}</SidebarContext.Provider>
+      <AppShellContext.Provider value={contextValue}>{children}</AppShellContext.Provider>
     </MemoryRouter>
   );
 }
 
 describe('collapsed navigation tooltips', () => {
   it('renders primary sidebar item labels as right-side tooltips when collapsed', () => {
-    const markup = renderWithSidebarContext(<Sidebar />);
+    const markup = renderWithAppShellContext(<Sidebar />);
 
     expect(markup).toContain('data-slot="tooltip-content"');
     expect(markup).toContain('data-side="right"');
@@ -57,36 +65,34 @@ describe('collapsed navigation tooltips', () => {
   });
 
   it('renders secondary sidebar item labels as right-side tooltips when collapsed', () => {
-    const markup = renderToStaticMarkup(
-      <MemoryRouter initialEntries={['/runs/overview']}>
-        <SecondarySidebar
-          ariaLabel='Runs navigation'
-          collapsed
-          activeItemId='overview'
-          items={[
-            {
-              id: 'overview',
-              label: 'Overview',
-              to: '/runs/overview',
-              icon: Activity,
-            },
-          ]}
-          groups={[
-            {
-              label: 'Runs',
-              items: [
-                {
-                  id: 'cases',
-                  label: 'Cases',
-                  to: '/',
-                  icon: Briefcase,
-                },
-              ],
-            },
-          ]}
-        />
-      </MemoryRouter>
-    );
+    const markup = renderWithAppShellContext(<SecondarySidebar />, {
+      secondarySidebarCollapsed: true,
+      secondarySidebarConfig: {
+        ariaLabel: 'Runs navigation',
+        activeItemId: 'overview',
+        items: [
+          {
+            id: 'overview',
+            label: 'Overview',
+            to: '/runs/overview',
+            icon: Activity,
+          },
+        ],
+        groups: [
+          {
+            label: 'Runs',
+            items: [
+              {
+                id: 'cases',
+                label: 'Cases',
+                to: '/',
+                icon: Briefcase,
+              },
+            ],
+          },
+        ],
+      },
+    });
 
     expect(markup).toContain('data-slot="tooltip-content"');
     expect(markup).toContain('data-side="right"');

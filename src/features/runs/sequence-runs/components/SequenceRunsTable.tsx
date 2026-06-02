@@ -7,7 +7,6 @@ import {
   useSequenceRunListByInstrumentRunIdModel,
   type SequenceRunListByInstrumentRunIdModel,
   type SequenceRunItemListByInstrumentRunIdModel,
-  type SequenceRunStatusType,
 } from '../../api/sequence.api';
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router';
@@ -59,9 +58,7 @@ const SequenceRunsTable = () => {
         key: 'status',
         header: 'Status',
         sortable: true,
-        render: (instrumentRun) => (
-          <StatusBadge status={instrumentRun.status as SequenceRunStatusType} />
-        ),
+        render: (instrumentRun) => <StatusBadge status={instrumentRun.status} />,
       },
       {
         key: 'startTime',
@@ -139,7 +136,7 @@ const SequenceRunsTable = () => {
         key: 'status',
         header: 'Status',
         width: 'w-32',
-        render: (run) => <StatusBadge status={run.status as SequenceRunStatusType} size='sm' />,
+        render: (run) => <StatusBadge status={run.status} size='sm' />,
       },
       {
         key: 'startDate',

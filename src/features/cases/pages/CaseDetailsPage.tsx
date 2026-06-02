@@ -1,7 +1,6 @@
-import { useRef, useEffect } from 'react';
+import { useMemo, useRef, useEffect } from 'react';
 import {
   CaseDetailsOverviewCard,
-  CaseDetailsPageBreadcrumb,
   CaseDetailsPageHeader,
   CaseDetailsTabs,
   CaseDetailsTimeline,
@@ -9,12 +8,34 @@ import {
   CaseDetailsLinkedWorkflowRunsTab,
   CaseDetailsUsersTab,
 } from '../components';
+import { useAppShellHeader } from '@/context/app-shell-context';
 import { useCaseDetailsTab, CaseDetailsTabValues } from '../hooks/useCaseDetailsTab';
-import { CaseDetailsProvider } from '../context/CaseDetailsContext';
+import { CaseDetailsProvider, useCaseDetailsContext } from '../context/CaseDetailsContext';
+
+const CasesDetailsAppShellHeader = () => {
+  const { caseDetail, isLoadingCaseDetail } = useCaseDetailsContext();
+  const headerConfig = useMemo(
+    () => ({
+      mode: 'detail' as const,
+      breadcrumbs: [
+        { label: 'Cases', href: '/cases' },
+        {
+          label: caseDetail?.requestFormId ?? 'Loading...',
+          isLoading: isLoadingCaseDetail,
+        },
+      ],
+    }),
+    [caseDetail?.requestFormId, isLoadingCaseDetail]
+  );
+
+  useAppShellHeader(headerConfig);
+  return null;
+};
 
 export function CaseDetailsPage() {
   const { activeTab } = useCaseDetailsTab();
 
+  // Scroll to top of tabs when active tab changes, but only on genuine user-initiated tab changes, not on initial mount or Strict Mode remount.
   const tabsRef = useRef<HTMLDivElement>(null);
   // Track the last-seen tab value so scroll only fires on genuine user-initiated
   // tab changes, not on the initial mount (works correctly in React 18 Strict Mode
@@ -37,8 +58,8 @@ export function CaseDetailsPage() {
 
   return (
     <CaseDetailsProvider>
-      <div className='p-6'>
-        <CaseDetailsPageBreadcrumb />
+      <CasesDetailsAppShellHeader />
+      <div className='px-6'>
         <CaseDetailsPageHeader />
 
         <CaseDetailsOverviewCard />

@@ -1,4 +1,4 @@
-import type { MutableRefObject, Ref } from 'react';
+import type { Ref } from 'react';
 
 /** Merge multiple refs (callback refs or RefObjects) into a single callback ref */
 export function composeRefs(
@@ -9,7 +9,7 @@ export function composeRefs(
       if (typeof ref === 'function') {
         ref(node);
       } else if (ref != null) {
-        (ref as MutableRefObject<unknown>).current = node;
+        ref.current = node;
       }
     });
   };

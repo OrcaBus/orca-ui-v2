@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { resolveSidebarCollapsed } from '../sidebar-context';
+import { resolveSidebarCollapsed } from '../../../context/app-shell-context';
 
 describe('resolveSidebarCollapsed', () => {
   it('keeps the sidebar expanded when the user has not collapsed it and no feature requests collapse', () => {

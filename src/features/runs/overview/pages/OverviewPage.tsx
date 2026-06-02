@@ -1,5 +1,8 @@
+import { useMemo } from 'react';
 import { LayoutDashboard } from 'lucide-react';
-import { PageHeader } from '@/components/layout/PageHeader';
+import { useAppShellHeader } from '@/context/app-shell-context';
+import { RunsInfoDrawer } from '../../components/RunsInfoDrawer';
+import { useRunsOverviewPageQueryParams } from '../hooks/useRunsOverviewPageQueryParams';
 import { useOverviewStats } from '../hooks/useOverviewStats';
 import { buildOverviewStats } from '../utils/overviewStatsConfig';
 import {
@@ -9,6 +12,9 @@ import {
 } from '../components';
 
 export function OverviewPage() {
+  const title = 'Runs Overview';
+  const description = 'Monitor active runs and system-wide metrics';
+  const { isInfoDrawerOpen, openInfoDrawer, closeInfoDrawer } = useRunsOverviewPageQueryParams();
   const {
     activeSequenceRuns,
     activeWorkflowRuns,
@@ -24,21 +30,37 @@ export function OverviewPage() {
     successRate,
     failedLast24h,
   });
+  const headerConfig = useMemo(
+    () => ({
+      mode: 'main' as const,
+      title,
+      icon: <LayoutDashboard className='h-6 w-6' />,
+      info: {
+        onOpen: openInfoDrawer,
+      },
+    }),
+    [openInfoDrawer, title]
+  );
+
+  useAppShellHeader(headerConfig);
 
   return (
-    <div className='p-6'>
-      <PageHeader
-        title='Overview'
-        description='Monitor active runs and system-wide metrics'
-        icon={<LayoutDashboard className='h-6 w-6' />}
-      />
+    <>
+      <div className='p-6'>
+        <OverviewStatsStrip stats={stats} />
 
-      <OverviewStatsStrip stats={stats} />
-
-      <div className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
-        <OverviewSequenceRunsCard runs={recentSequenceRuns} />
-        <OverviewWorkflowRunsCard runs={recentWorkflowRuns} />
+        <div className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
+          <OverviewSequenceRunsCard runs={recentSequenceRuns} />
+          <OverviewWorkflowRunsCard runs={recentWorkflowRuns} />
+        </div>
       </div>
-    </div>
+
+      <RunsInfoDrawer
+        isOpen={isInfoDrawerOpen}
+        onClose={closeInfoDrawer}
+        title={title}
+        description={description}
+      />
+    </>
   );
 }

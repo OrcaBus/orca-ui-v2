@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useReducer, useMemo, type ReactNode } from 'react';
+import { Suspense, use, useCallback, useEffect, useReducer, useMemo, type ReactNode } from 'react';
 import {
   fetchUserAttributes,
   signInWithRedirect,
@@ -28,6 +28,10 @@ Amplify.configure({
 const COGNITO_STORAGE_PREFIX = 'CognitoIdentityServiceProvider';
 
 function hasCognitoSession(): boolean {
+  if (typeof localStorage === 'undefined') {
+    return false;
+  }
+
   return Object.keys(localStorage).some((key) => key.startsWith(COGNITO_STORAGE_PREFIX));
 }
 
@@ -53,12 +57,38 @@ type AuthAction =
 function authReducer(state: AuthState, action: AuthAction): AuthState {
   switch (action.type) {
     case 'AUTHENTICATED':
-      return { ...state, isAuthenticated: true, user: action.user };
+      return { ...state, isAuthenticated: true, user: action.user, isLoading: false };
     case 'UNAUTHENTICATED':
-      return { ...state, isAuthenticated: false, user: {} };
+      return { ...state, isAuthenticated: false, user: {}, isLoading: false };
     case 'SET_LOADING':
       return { ...state, isLoading: action.isLoading };
   }
+}
+
+async function resolveCurrentAuthState(): Promise<AuthState> {
+  if (!hasCognitoSession()) {
+    return initialState;
+  }
+
+  try {
+    const user = await fetchUserAttributes();
+    return { ...initialState, isAuthenticated: true, user };
+  } catch (error) {
+    console.error('Failed to initialize auth:', error);
+    toast.error('Failed to authenticate user');
+    return initialState;
+  }
+}
+
+let initialAuthStatePromise: Promise<AuthState> | null = null;
+
+function getInitialAuthStatePromise(): Promise<AuthState> {
+  initialAuthStatePromise ??= resolveCurrentAuthState();
+  return initialAuthStatePromise;
+}
+
+function cacheInitialAuthState(state: AuthState) {
+  initialAuthStatePromise = Promise.resolve(state);
 }
 
 // ---------- Loading screen ----------
@@ -77,24 +107,25 @@ function AuthLoadingScreen() {
 // ---------- Provider ----------
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(authReducer, initialState);
-  const [isInitializing, setIsInitializing] = useState(true);
+  return (
+    <Suspense fallback={<AuthLoadingScreen />}>
+      <ResolvedAuthProvider>{children}</ResolvedAuthProvider>
+    </Suspense>
+  );
+}
+
+function ResolvedAuthProvider({ children }: { children: ReactNode }) {
+  const initialAuthState = use(getInitialAuthStatePromise());
+  const [state, dispatch] = useReducer(authReducer, initialAuthState);
 
   const initializeAuth = useCallback(async () => {
-    if (!hasCognitoSession()) {
-      setIsInitializing(false);
-      return;
-    }
+    const nextState = await resolveCurrentAuthState();
+    cacheInitialAuthState(nextState);
 
-    try {
-      const user = await fetchUserAttributes();
-      dispatch({ type: 'AUTHENTICATED', user });
-    } catch (error) {
-      console.error('Failed to initialize auth:', error);
-      toast.error('Failed to authenticate user');
+    if (nextState.isAuthenticated) {
+      dispatch({ type: 'AUTHENTICATED', user: nextState.user });
+    } else {
       dispatch({ type: 'UNAUTHENTICATED' });
-    } finally {
-      setIsInitializing(false);
     }
   }, []);
 
@@ -113,8 +144,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           break;
       }
     });
-
-    void initializeAuth();
 
     return unsubscribe;
   }, [initializeAuth]);
@@ -140,6 +169,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       toast.error('Failed to sign out');
     } finally {
       localStorage.clear();
+      cacheInitialAuthState(initialState);
       dispatch({ type: 'UNAUTHENTICATED' });
     }
   }, []);
@@ -148,10 +178,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     () => ({ ...state, signInWithGoogle, logout }),
     [state, signInWithGoogle, logout]
   );
-
-  if (isInitializing) {
-    return <AuthLoadingScreen />;
-  }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

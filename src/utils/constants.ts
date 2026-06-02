@@ -9,6 +9,7 @@ export const PARAM_PAGE = 'page';
 export const PARAM_ROWS_PER_PAGE = 'rowsPerPage';
 export const PARAM_ORDER_BY = 'ordering';
 export const PARAM_SEARCH = 'search';
+export const PARAM_INFO = 'info';
 
 export type ValidationStatus = 'passed' | 'failed';
 

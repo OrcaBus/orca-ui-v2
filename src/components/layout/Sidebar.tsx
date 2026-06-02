@@ -12,7 +12,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { SidebarNavLink } from './SidebarNavLink';
-import { useSidebar } from './sidebar-context';
+import { useAppShell } from '../../context/app-shell-context';
 
 interface PrimaryNavItem {
   path: string;
@@ -38,7 +38,7 @@ function isNavItemActive(pathname: string, path: string) {
 
 export function Sidebar() {
   const location = useLocation();
-  const { isCollapsed, toggleSidebar } = useSidebar();
+  const { isSidebarCollapsed: isCollapsed, toggleSidebar } = useAppShell();
 
   return (
     <aside

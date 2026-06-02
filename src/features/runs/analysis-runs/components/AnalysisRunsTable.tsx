@@ -1,8 +1,5 @@
 import { Column, DataTable } from '@/components/tables/DataTable';
-import {
-  useAnalysisRunsListQueryParams,
-  type AnalysisRunStatus,
-} from '../hooks/useAnalysisRunsListQueryParams';
+import { useAnalysisRunsListQueryParams } from '../hooks/useAnalysisRunsListQueryParams';
 import { useAnalysisRunListModel, type AnalysisRunListModel } from '../../api/workflows.api';
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router';
@@ -64,9 +61,7 @@ const AnalysisRunsTable = () => {
         key: 'status',
         header: 'State',
         sortable: true,
-        render: (ar) => (
-          <StatusBadge status={ar.currentState?.status?.toLowerCase() as AnalysisRunStatus} />
-        ),
+        render: (ar) => <StatusBadge status={ar.currentState?.status?.toLowerCase()} />,
       },
       {
         key: 'comment',

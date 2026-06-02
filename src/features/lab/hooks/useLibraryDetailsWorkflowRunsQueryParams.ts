@@ -143,30 +143,30 @@ export function useLibraryDetailsWorkflowRunsQueryParams({
 
   const workflowTypeName = getParam(PARAM_WORKFLOW_TYPE) ?? '';
   const portalRunId = getParam(PARAM_PORTAL_RUN_ID) ?? '';
+  const workflowRunPageParam = getParam(PARAM_RUN_PAGE);
+  const workflowRunRowsPerPageParam = getParam(PARAM_RUN_ROWS_PER_PAGE);
+  const workflowRunSearch = getParam(PARAM_RUN_SEARCH) ?? '';
+  const workflowRunOrderBy = getParam(PARAM_RUN_ORDER_BY) ?? '';
+  const workflowRunFilePageParam = getParam(PARAM_FILE_PAGE);
+  const workflowRunFileRowsPerPageParam = getParam(PARAM_FILE_ROWS_PER_PAGE);
+  const workflowRunFileSearch = getParam(PARAM_FILE_SEARCH) ?? '';
+  const workflowRunFileOrderBy = getParam(PARAM_FILE_ORDER_BY) ?? '';
 
   const workflowRunPagination = useMemo(
     () => ({
-      page: Number(getParam(PARAM_RUN_PAGE)) || 1,
-      rowsPerPage: Number(getParam(PARAM_RUN_ROWS_PER_PAGE)) || DEFAULT_PAGE_SIZE,
+      page: Number(workflowRunPageParam) || 1,
+      rowsPerPage: Number(workflowRunRowsPerPageParam) || DEFAULT_PAGE_SIZE,
     }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [getParam(PARAM_RUN_PAGE), getParam(PARAM_RUN_ROWS_PER_PAGE)]
+    [workflowRunPageParam, workflowRunRowsPerPageParam]
   );
-
-  const workflowRunSearch = getParam(PARAM_RUN_SEARCH) ?? '';
-  const workflowRunOrderBy = getParam(PARAM_RUN_ORDER_BY) ?? '';
 
   const workflowRunFilePagination = useMemo(
     () => ({
-      page: Number(getParam(PARAM_FILE_PAGE)) || 1,
-      rowsPerPage: Number(getParam(PARAM_FILE_ROWS_PER_PAGE)) || DEFAULT_PAGE_SIZE,
+      page: Number(workflowRunFilePageParam) || 1,
+      rowsPerPage: Number(workflowRunFileRowsPerPageParam) || DEFAULT_PAGE_SIZE,
     }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [getParam(PARAM_FILE_PAGE), getParam(PARAM_FILE_ROWS_PER_PAGE)]
+    [workflowRunFilePageParam, workflowRunFileRowsPerPageParam]
   );
-
-  const workflowRunFileSearch = getParam(PARAM_FILE_SEARCH) ?? '';
-  const workflowRunFileOrderBy = getParam(PARAM_FILE_ORDER_BY) ?? '';
 
   const clearWorkflowRunTableParams = useCallback(() => {
     setParams(Object.fromEntries(WORKFLOW_RUN_TABLE_PARAM_KEYS.map((key) => [key, undefined])), {

@@ -36,9 +36,28 @@ interface PaginationState {
   rowsPerPage: number;
 }
 
+const DEFAULT_PAGINATION_KEYS = [PARAM_PAGE, PARAM_ROWS_PER_PAGE];
+const normalizedPaginationKeysCache = new Map<string, string[]>();
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
+
+export function getPaginationKeysCacheKey(paginationKeys: readonly string[]): string {
+  return paginationKeys.join('\0');
+}
+
+export function getEffectivePaginationKeys(paginationKeys?: readonly string[]): readonly string[] {
+  if (!paginationKeys) return DEFAULT_PAGINATION_KEYS;
+
+  const cacheKey = getPaginationKeysCacheKey(paginationKeys);
+  const cachedPaginationKeys = normalizedPaginationKeysCache.get(cacheKey);
+  if (cachedPaginationKeys) return cachedPaginationKeys;
+
+  const normalizedPaginationKeys = [...paginationKeys];
+  normalizedPaginationKeysCache.set(cacheKey, normalizedPaginationKeys);
+  return normalizedPaginationKeys;
+}
 
 /** Parse URLSearchParams into a plain object, collapsing duplicate keys into arrays. */
 function parseSearchParams(searchParams: URLSearchParams): ParsedParams {
@@ -74,10 +93,8 @@ function serializeParams(params: Record<string, ParamValue>): Record<string, str
 // ---------------------------------------------------------------------------
 
 export function useQueryParams(options: UseQueryParamsOptions = {}) {
-  const {
-    defaultPageSize = DEFAULT_PAGE_SIZE,
-    paginationKeys = [PARAM_PAGE, PARAM_ROWS_PER_PAGE],
-  } = options;
+  const { defaultPageSize = DEFAULT_PAGE_SIZE } = options;
+  const paginationKeys = getEffectivePaginationKeys(options.paginationKeys);
 
   const [searchParams, setSearchParams] = useSearchParams();
 

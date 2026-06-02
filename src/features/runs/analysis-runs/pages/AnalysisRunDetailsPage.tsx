@@ -4,9 +4,9 @@
  * Tab selection is driven by the `tab` query param (e.g. ?tab=libraries).
  */
 
-import { useRef, useEffect } from 'react';
+import { useMemo, useRef, useEffect } from 'react';
+import { useAppShellHeader } from '@/context/app-shell-context';
 import {
-  AnalysisRunDetailsPageBreadcrumb,
   AnalysisRunDetailsPageHeader,
   AnalysisRunDetailsOverviewCard,
   AnalysisRunDetailsTabs,
@@ -16,8 +16,32 @@ import {
   AnalysisRunDetailsRunContextTable,
   AnalysisRunDetailsReadsetsTable,
 } from '../components';
-import { AnalysisRunDetailsProvider } from '../context/AnalysisRunDetailsContext';
+import {
+  AnalysisRunDetailsProvider,
+  useAnalysisRunDetailsContext,
+} from '../context/AnalysisRunDetailsContext';
 import { useAnalysisRunDetailsTab } from '../hooks/useAnalysisRunDetailsTab';
+
+function AnalysisRunDetailsAppShellHeader() {
+  const { analysisRunDetail, isLoadingAnalysisRunDetail } = useAnalysisRunDetailsContext();
+  const headerConfig = useMemo(
+    () => ({
+      mode: 'detail' as const,
+      breadcrumbs: [
+        { label: 'Runs', href: '/runs' },
+        { label: 'Analysis Runs', href: '/runs/analysis-runs' },
+        {
+          label: analysisRunDetail?.analysisRunName || 'Loading...',
+          isLoading: isLoadingAnalysisRunDetail,
+        },
+      ],
+    }),
+    [analysisRunDetail?.analysisRunName, isLoadingAnalysisRunDetail]
+  );
+
+  useAppShellHeader(headerConfig);
+  return null;
+}
 
 export function AnalysisRunDetailsPage() {
   const { activeTab } = useAnalysisRunDetailsTab();
@@ -35,8 +59,8 @@ export function AnalysisRunDetailsPage() {
 
   return (
     <AnalysisRunDetailsProvider>
-      <div className='p-6'>
-        <AnalysisRunDetailsPageBreadcrumb />
+      <AnalysisRunDetailsAppShellHeader />
+      <div className='px-6'>
         <AnalysisRunDetailsPageHeader />
         <AnalysisRunDetailsOverviewCard />
 

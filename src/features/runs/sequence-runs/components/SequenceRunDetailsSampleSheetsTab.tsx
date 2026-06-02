@@ -130,7 +130,7 @@ export function SequenceRunDetailsSampleSheetsTab() {
         </h3>
         <button
           onClick={() => setIsUploadModalOpen(true)}
-          className='flex items-center gap-1 rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 dark:bg-[#137fec] dark:hover:bg-blue-600'
+          className='flex items-center gap-2 rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 dark:bg-[#137fec] dark:hover:bg-blue-600'
         >
           <Upload className='h-4 w-4' />
           Upload Sample Sheet

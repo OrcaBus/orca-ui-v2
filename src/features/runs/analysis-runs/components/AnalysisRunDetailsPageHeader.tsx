@@ -24,7 +24,7 @@ export function AnalysisRunDetailsPageHeader() {
   const status = analysisRunDetail?.currentState?.status ?? 'unknown';
 
   return (
-    <div className='mb-6'>
+    <div className='my-4'>
       <div className='mb-3 flex items-center gap-3'>
         {isLoadingAnalysisRunDetail ? (
           <>

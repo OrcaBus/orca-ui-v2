@@ -1,8 +1,5 @@
 import { Column, DataTable } from '@/components/tables/DataTable';
-import {
-  useWorkflowTypesListQueryParams,
-  type ValidationState,
-} from '../hooks/useWorkflowTypesListQueryParams';
+import { useWorkflowTypesListQueryParams } from '../hooks/useWorkflowTypesListQueryParams';
 import { useWorkflowGroupedModel, type WorkflowListModel } from '../../api/workflows.api';
 import { useMemo } from 'react';
 import { PillTag } from '@/components/ui/PillTag';
@@ -94,9 +91,7 @@ const WorkflowTypesTable = () => {
         key: 'validationState',
         header: 'Validation State',
         sortable: true,
-        render: (_wt) => (
-          <StatusBadge status={_wt?.validationState?.toLowerCase() as ValidationState} />
-        ),
+        render: (_wt) => <StatusBadge status={_wt?.validationState?.toLowerCase()} />,
       },
       {
         key: 'actions',

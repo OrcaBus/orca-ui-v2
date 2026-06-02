@@ -5,22 +5,46 @@
  * by the `tab` query param (e.g. ?tab=libraries).
  */
 
-import { useRef, useEffect } from 'react';
+import { useMemo, useRef, useEffect } from 'react';
+import { useAppShellHeader } from '@/context/app-shell-context';
 import {
   WorkflowRunDetailsPageHeader,
   WorkflowRunDetailsOverviewCard,
   WorkflowRunDetailsLibrariesTable,
   WorkflowRunDetailsRunContextTable,
   WorkflowRunDetailsReadsetsTable,
-  WorkflowRunDetailsPageBreadcrumb,
   WorkflowRunDetailsTimeline,
   WorkflowRunDetailsTabs,
 } from '../components';
-import { WorkflowRunDetailsProvider } from '../context/WorkflowRunDetailsContext';
+import {
+  WorkflowRunDetailsProvider,
+  useWorkflowRunDetailsContext,
+} from '../context/WorkflowRunDetailsContext';
 import {
   useWorkflowRunDetailsTab,
   WorkflowRunDetailsTabValues,
 } from '../hooks/useWorkflowRunDetailsTab';
+
+function WorkflowRunDetailsAppShellHeader() {
+  const { workflowRunDetail, isLoadingWorkflowRunDetail } = useWorkflowRunDetailsContext();
+  const headerConfig = useMemo(
+    () => ({
+      mode: 'detail' as const,
+      breadcrumbs: [
+        { label: 'Runs', href: '/runs' },
+        { label: 'Workflow Runs', href: '/runs/workflow-runs' },
+        {
+          label: workflowRunDetail?.workflowRunName || 'Loading...',
+          isLoading: isLoadingWorkflowRunDetail,
+        },
+      ],
+    }),
+    [isLoadingWorkflowRunDetail, workflowRunDetail?.workflowRunName]
+  );
+
+  useAppShellHeader(headerConfig);
+  return null;
+}
 
 export function WorkflowRunDetailsPage() {
   const { activeTab } = useWorkflowRunDetailsTab();
@@ -47,8 +71,8 @@ export function WorkflowRunDetailsPage() {
 
   return (
     <WorkflowRunDetailsProvider>
-      <div className='p-6'>
-        <WorkflowRunDetailsPageBreadcrumb />
+      <WorkflowRunDetailsAppShellHeader />
+      <div className='px-6'>
         <WorkflowRunDetailsPageHeader />
         <WorkflowRunDetailsOverviewCard />
 

@@ -21,25 +21,22 @@ const LIB_PAGINATION_KEYS = [LIB_PARAM_PAGE, LIB_PARAM_ROWS_PER_PAGE];
  */
 export function useWorkflowRunDetailsLibrariesQueryParams(libraryIds: string[]) {
   const { getParam, setParams } = useQueryParams({ paginationKeys: [] });
+  const pageParam = getParam(LIB_PARAM_PAGE);
+  const rowsPerPageParam = getParam(LIB_PARAM_ROWS_PER_PAGE);
+  const searchParam = getParam(LIB_PARAM_SEARCH);
+  const orderBy = getParam(LIB_PARAM_ORDER_BY) ?? '';
 
   // ---- Derived state ----
 
   const pagination = useMemo(
     () => ({
-      page: Number(getParam(LIB_PARAM_PAGE)) || 1,
-      rowsPerPage: Number(getParam(LIB_PARAM_ROWS_PER_PAGE)) || DEFAULT_PAGE_SIZE,
+      page: Number(pageParam) || 1,
+      rowsPerPage: Number(rowsPerPageParam) || DEFAULT_PAGE_SIZE,
     }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [getParam(LIB_PARAM_PAGE), getParam(LIB_PARAM_ROWS_PER_PAGE)]
+    [pageParam, rowsPerPageParam]
   );
 
-  const search = useMemo(
-    () => toSearchDisplayValue(getParam(LIB_PARAM_SEARCH)),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [getParam(LIB_PARAM_SEARCH)]
-  );
-
-  const orderBy = getParam(LIB_PARAM_ORDER_BY) ?? '';
+  const search = toSearchDisplayValue(searchParam);
 
   // ---- Setters ----
 

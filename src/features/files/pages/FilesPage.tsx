@@ -1,19 +1,35 @@
-import { PageHeader } from '@/components/layout/PageHeader';
-import { FilesSearchPanel, FilesTable } from '../components';
+import { useMemo } from 'react';
+import { useAppShellHeader } from '@/context/app-shell-context';
+import { FilesInfoDrawer, FilesSearchPanel, FilesTable } from '../components';
 import { FileText } from 'lucide-react';
+import { useFilesPageQueryParams } from '../hooks/useFilesPageQueryParams';
 
 export function FilesPage() {
+  const { isInfoDrawerOpen, openInfoDrawer, closeInfoDrawer } = useFilesPageQueryParams();
+
+  const headerConfig = useMemo(
+    () => ({
+      mode: 'main' as const,
+      title: 'Files',
+      icon: <FileText className='h-6 w-6' />,
+      info: {
+        onOpen: openInfoDrawer,
+      },
+    }),
+    [openInfoDrawer]
+  );
+
+  useAppShellHeader(headerConfig);
+
   return (
-    <div className='p-6'>
-      <PageHeader
-        title='Files'
-        description='Search and manage stored outputs by Portal Run, bucket, and S3 key pattern.'
-        icon={<FileText className='h-6 w-6' />}
-      />
+    <>
+      <div className='p-6'>
+        <FilesSearchPanel />
 
-      <FilesSearchPanel />
+        <FilesTable />
+      </div>
 
-      <FilesTable />
-    </div>
+      <FilesInfoDrawer isOpen={isInfoDrawerOpen} onClose={closeInfoDrawer} />
+    </>
   );
 }

@@ -143,6 +143,28 @@ function hasExtraPersistedSettingsKeys(settings: DataTablePersistedSettings): bo
   return Object.keys(settings).some((key) => key !== 'columnKeys' && key !== 'hiddenColumnKeys');
 }
 
+function formatCopyValue(value: unknown): string {
+  if (value === null || value === undefined) return '';
+
+  switch (typeof value) {
+    case 'string':
+      return value;
+    case 'number':
+    case 'boolean':
+    case 'bigint':
+      return String(value);
+    case 'object':
+      if (value instanceof Date) return value.toISOString();
+      try {
+        return JSON.stringify(value) ?? '';
+      } catch {
+        return '';
+      }
+    default:
+      return '';
+  }
+}
+
 export type DataTableActionContext<T> = {
   /** Full table dataset provided to the DataTable. */
   data: T[];
@@ -625,7 +647,7 @@ export function DataTable<T>({
       )}
 
       {/* Table */}
-      <div className='scrollbar-thin max-h-150 overflow-x-auto overflow-y-auto'>
+      <div className='max-h-150 scrollbar-thin overflow-x-auto overflow-y-auto'>
         <table className='w-full'>
           <thead className='sticky top-0 z-10 border-b border-neutral-200 bg-neutral-50 dark:border-[#2d3540] dark:bg-[#111418]'>
             <tr>
@@ -759,10 +781,7 @@ export function DataTable<T>({
                     {visibleColumnsList.map((column) => {
                       const cellKey = `row-${index}-${column.key}`;
                       const rawValue = (item as Record<string, unknown>)[column.key];
-                      const copyValue =
-                        rawValue !== undefined && rawValue !== null
-                          ? String(rawValue as string)
-                          : '';
+                      const copyValue = formatCopyValue(rawValue);
                       const isCopied = copiedCell === cellKey;
 
                       return (

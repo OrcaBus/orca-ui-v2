@@ -15,7 +15,7 @@ export function LibraryDetailsPageHeader() {
   const displayName = libraryDetail?.libraryId ?? '—';
 
   return (
-    <div className='mt-4 mb-6 flex flex-col items-start gap-1'>
+    <div className='my-4 flex flex-col items-start gap-1'>
       <div className='flex items-center gap-3'>
         <h1 className='text-xl font-semibold text-neutral-900 dark:text-white'>{displayName}</h1>
         {libraryDetail?.type && (
