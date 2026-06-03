@@ -9,6 +9,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/Accordion';
 import { Carousel } from '@/components/ui/Carousel';
+import { CodeViewer } from '@/components/ui/CodeViewer';
 import { Spinner } from '@/components/ui/Spinner';
 import { Tabs } from '@/components/ui/Tabs';
 import { cn } from '@/utils/cn';
@@ -38,6 +39,10 @@ function PayloadEmptyState({ message }: { message: string }) {
       {message}
     </div>
   );
+}
+
+export function PayloadJsonView({ formattedJson }: { formattedJson: string }) {
+  return <CodeViewer code={formattedJson} language='json' showHeader={false} />;
 }
 
 function PayloadValue({ value }: { value: unknown }) {
@@ -366,9 +371,7 @@ export function PayloadViewerDialog({
                   </div>
                 </div>
               ) : payload ? (
-                <pre className='overflow-x-auto rounded-lg bg-gray-50/50 p-4 font-mono text-sm text-neutral-800 dark:bg-gray-800/50 dark:text-neutral-200'>
-                  {formattedJson}
-                </pre>
+                <PayloadJsonView formattedJson={formattedJson} />
               ) : (
                 <PayloadEmptyState message='No payload data found for this state' />
               )}

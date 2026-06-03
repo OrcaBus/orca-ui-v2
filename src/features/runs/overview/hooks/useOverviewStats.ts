@@ -1,55 +1,121 @@
 import { useMemo } from 'react';
-import { mockSequenceRuns, mockWorkflowRuns } from '@/data/mockData';
-import type { SequenceRun, WorkflowRun } from '@/data/mockData';
+import { keepPreviousData } from '@tanstack/react-query';
+import {
+  useSequenceRunListModel,
+  useSequenceRunStatsStatusCountsModel,
+} from '../../api/sequence.api';
+import { useWorkflowRunStatusCountModel, workflowRunListModel } from '../../api/workflows.api';
+import {
+  calculateOverviewStats,
+  mapOverviewSequenceRuns,
+  mapOverviewWorkflowRuns,
+} from '../utils/overviewData';
 
 const RECENT_LIMIT = 5;
 
 export function useOverviewStats() {
-  return useMemo(() => {
-    const activeSequenceRuns = mockSequenceRuns.filter((run) => run.status === 'pending').length;
-    const activeWorkflowRuns = mockWorkflowRuns.filter((wf) => wf.status === 'ongoing').length;
+  const {
+    data: sequenceStatusCounts,
+    isLoading: isLoadingSequenceStatusCounts,
+    isError: isSequenceStatusCountsError,
+    error: sequenceStatusCountsError,
+    refetch: refetchSequenceStatusCounts,
+  } = useSequenceRunStatsStatusCountsModel({
+    params: { query: {} },
+    reactQuery: { placeholderData: keepPreviousData, throwOnError: false },
+  });
 
-    const completedSequenceRuns = mockSequenceRuns.filter(
-      (run) => run.status === 'completed' || run.status === 'failed'
-    );
-    const completedWorkflowRuns = mockWorkflowRuns.filter(
-      (wf) => wf.status === 'succeeded' || wf.status === 'failed'
-    );
+  const {
+    data: workflowStatusCounts,
+    isLoading: isLoadingWorkflowStatusCounts,
+    isError: isWorkflowStatusCountsError,
+    error: workflowStatusCountsError,
+    refetch: refetchWorkflowStatusCounts,
+  } = useWorkflowRunStatusCountModel({
+    params: { query: {} },
+    reactQuery: { placeholderData: keepPreviousData, throwOnError: false },
+  });
 
-    const totalCompleted = completedSequenceRuns.length + completedWorkflowRuns.length;
-    const totalSucceeded =
-      completedSequenceRuns.filter((r) => r.status === 'completed').length +
-      completedWorkflowRuns.filter((w) => w.status === 'succeeded').length;
-    const successRate =
-      totalCompleted > 0 ? Math.round((totalSucceeded / totalCompleted) * 100) : 0;
+  const {
+    data: sequenceRunsData,
+    isLoading: isLoadingSequenceRuns,
+    isError: isSequenceRunsError,
+    error: sequenceRunsError,
+    refetch: refetchSequenceRuns,
+  } = useSequenceRunListModel({
+    params: {
+      query: {
+        page: 1,
+        rows_per_page: RECENT_LIMIT,
+        ordering: '-start_time',
+      },
+    },
+    reactQuery: { placeholderData: keepPreviousData, throwOnError: false },
+  });
 
-    const now = new Date();
-    const last24h = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-    const failedLast24h = [
-      ...mockSequenceRuns.filter(
-        (run) =>
-          run.status === 'failed' && run.completedDate && new Date(run.completedDate) > last24h
-      ),
-      ...mockWorkflowRuns.filter(
-        (wf) => wf.status === 'failed' && wf.endTime && new Date(wf.endTime) > last24h
-      ),
-    ].length;
+  const {
+    data: workflowRunsData,
+    isLoading: isLoadingWorkflowRuns,
+    isError: isWorkflowRunsError,
+    error: workflowRunsError,
+    refetch: refetchWorkflowRuns,
+  } = workflowRunListModel.useQuery({
+    params: {
+      query: {
+        page: 1,
+        rows_per_page: RECENT_LIMIT,
+        ordering: '-timestamp',
+      },
+    },
+    reactQuery: { placeholderData: keepPreviousData, throwOnError: false },
+  });
 
-    const recentSequenceRuns: SequenceRun[] = mockSequenceRuns
-      .toSorted((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())
-      .slice(0, RECENT_LIMIT);
+  const stats = useMemo(
+    () =>
+      calculateOverviewStats({
+        sequenceCounts: sequenceStatusCounts,
+        workflowCounts: workflowStatusCounts,
+      }),
+    [sequenceStatusCounts, workflowStatusCounts]
+  );
 
-    const recentWorkflowRuns: WorkflowRun[] = mockWorkflowRuns
-      .toSorted((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime())
-      .slice(0, RECENT_LIMIT);
+  const recentSequenceRuns = useMemo(
+    () => mapOverviewSequenceRuns(sequenceRunsData?.results),
+    [sequenceRunsData]
+  );
 
-    return {
-      activeSequenceRuns,
-      activeWorkflowRuns,
-      successRate,
-      failedLast24h,
-      recentSequenceRuns,
-      recentWorkflowRuns,
-    };
-  }, []);
+  const recentWorkflowRuns = useMemo(
+    () => mapOverviewWorkflowRuns(workflowRunsData?.results),
+    [workflowRunsData]
+  );
+
+  const isStatsLoading =
+    (isLoadingSequenceStatusCounts && !sequenceStatusCounts) ||
+    (isLoadingWorkflowStatusCounts && !workflowStatusCounts);
+
+  const statsError = sequenceStatusCountsError ?? workflowStatusCountsError;
+
+  return {
+    ...stats,
+    recentSequenceRuns,
+    recentWorkflowRuns,
+    isStatsLoading,
+    isStatsError: isSequenceStatusCountsError || isWorkflowStatusCountsError,
+    statsError,
+    refetchStats: () => {
+      void Promise.all([refetchSequenceStatusCounts(), refetchWorkflowStatusCounts()]);
+    },
+    isSequenceRunsLoading: isLoadingSequenceRuns && !sequenceRunsData,
+    isSequenceRunsError,
+    sequenceRunsError,
+    refetchSequenceRuns: () => {
+      void refetchSequenceRuns();
+    },
+    isWorkflowRunsLoading: isLoadingWorkflowRuns && !workflowRunsData,
+    isWorkflowRunsError,
+    workflowRunsError,
+    refetchWorkflowRuns: () => {
+      void refetchWorkflowRuns();
+    },
+  };
 }

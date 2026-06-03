@@ -30,6 +30,7 @@ export interface DialogFrameProps {
   headerClassName?: string;
   bodyClassName?: string;
   footerClassName?: string;
+  closeDisabled?: boolean;
 }
 
 const sizeClassName: Record<DialogFrameSize, string> = {
@@ -59,9 +60,14 @@ export function DialogFrame({
   headerClassName,
   bodyClassName,
   footerClassName,
+  closeDisabled = false,
 }: DialogFrameProps) {
   return (
-    <HeadlessDialog open={isOpen} onClose={onClose} className='relative z-50'>
+    <HeadlessDialog
+      open={isOpen}
+      onClose={closeDisabled ? () => undefined : onClose}
+      className='relative z-50'
+    >
       <DialogBackdrop
         transition
         className={cn(
@@ -94,7 +100,9 @@ export function DialogFrame({
               )}
             >
               <div className='flex items-start justify-between gap-3'>
-                <div className='flex min-w-0 items-start gap-3'>
+                <div
+                  className={cn('flex min-w-0 gap-3', description ? 'items-start' : 'items-center')}
+                >
                   {icon && (
                     <div
                       className={cn(
@@ -128,8 +136,11 @@ export function DialogFrame({
                     {showCloseButton && (
                       <button
                         type='button'
+                        disabled={closeDisabled}
                         onClick={(e) => {
-                          // // By calling e.currentTarget.blur() before onClose(), focus moves to <body> before the portal is marked aria-hidden.  Headless UI separately tracks the opener element and restores focus to it after the transition finishes, so focus return still works correctly.
+                          if (closeDisabled) return;
+                          // Move focus to the body before the portal is marked aria-hidden.
+                          // Headless UI restores focus to the opener after the transition.
                           e.currentTarget.blur();
                           onClose();
                         }}
@@ -137,6 +148,7 @@ export function DialogFrame({
                           'rounded-md p-2 text-neutral-600 transition-colors',
                           'hover:bg-neutral-100 hover:text-neutral-900',
                           'focus:ring-2 focus:ring-blue-500 focus:outline-none',
+                          'disabled:cursor-not-allowed disabled:opacity-50',
                           'dark:text-[#9dabb9] dark:hover:bg-[#1e252e] dark:hover:text-slate-100'
                         )}
                         aria-label={closeLabel}
