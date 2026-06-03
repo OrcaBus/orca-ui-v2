@@ -19,7 +19,8 @@ function parseTabParam(value: string | undefined): CaseDetailsTabValues {
 
 /**
  * Controls the case details page tab via URL query param `tab`.
- * - ?tab=libraries (or no param) → Libraries
+ * - ?tab=timelines (or no param) → Timelines
+ * - ?tab=libraries → Libraries
  * - ?tab=workflows → Workflow Runs
  * - ?tab=files → Files
  */
@@ -30,7 +31,7 @@ export function useCaseDetailsTab() {
   const setActiveTab = useCallback(
     (id: string) => {
       const tab = parseTabParam(id);
-      setParams({ tab: tab === CaseDetailsTabValues.LIBRARIES ? undefined : tab });
+      setParams({ tab: tab === CaseDetailsTabValues.TIMELINES ? undefined : tab });
     },
     [setParams]
   );
