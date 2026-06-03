@@ -1,14 +1,24 @@
 import { Link } from 'react-router';
 import { ArrowRight } from 'lucide-react';
+import Skeleton from 'react-loading-skeleton';
+import { ApiErrorState } from '@/components/ui/ApiErrorState';
 import { StatusBadge } from '@/components/ui/StatusBadge';
-import { getRelativeTime } from '@/utils/timeFormat';
-import type { WorkflowRun } from '@/data/mockData';
+import { formatTableDate } from '@/utils/timeFormat';
+import type { OverviewWorkflowRun } from '../utils/overviewData';
 
 interface OverviewWorkflowRunsCardProps {
-  runs: WorkflowRun[];
+  runs: OverviewWorkflowRun[];
+  isLoading?: boolean;
+  error?: unknown;
+  onRetry?: () => void | Promise<void>;
 }
 
-export function OverviewWorkflowRunsCard({ runs }: OverviewWorkflowRunsCardProps) {
+export function OverviewWorkflowRunsCard({
+  runs,
+  isLoading = false,
+  error,
+  onRetry,
+}: OverviewWorkflowRunsCardProps) {
   return (
     <div className='overflow-hidden rounded-lg border border-slate-200 bg-white dark:border-[#2d3540] dark:bg-[#111418]'>
       <div className='flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-[#2d3540]'>
@@ -16,7 +26,7 @@ export function OverviewWorkflowRunsCard({ runs }: OverviewWorkflowRunsCardProps
           Recent Workflow Runs
         </h2>
         <Link
-          to='/runs/workflow-runs'
+          to='/runs/workflow-runs/'
           className='flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300'
         >
           View all
@@ -31,49 +41,69 @@ export function OverviewWorkflowRunsCard({ runs }: OverviewWorkflowRunsCardProps
                 Run Name
               </th>
               <th className='px-4 py-2 text-left text-[11px] font-semibold tracking-wider text-slate-500 uppercase dark:text-[#9dabb9]'>
-                Workflow Type
-              </th>
-              <th className='px-4 py-2 text-left text-[11px] font-semibold tracking-wider text-slate-500 uppercase dark:text-[#9dabb9]'>
                 Status
               </th>
               <th className='px-4 py-2 text-left text-[11px] font-semibold tracking-wider text-slate-500 uppercase dark:text-[#9dabb9]'>
-                Started
+                Start time
               </th>
             </tr>
           </thead>
           <tbody className='divide-y divide-slate-100 dark:divide-[#2d3540]'>
-            {runs.map((workflow) => (
-              <tr
-                key={workflow.id}
-                className='transition-colors hover:bg-slate-50 dark:hover:bg-[#1e252e]/50'
-              >
-                <td className='px-4 py-3'>
-                  <Link
-                    to={`/runs/workflow-runs/${workflow.id}`}
-                    className='block text-[13px] text-blue-600 hover:underline dark:text-blue-400'
-                  >
-                    {workflow.name}
-                  </Link>
-                  <div className='mt-0.5 font-mono text-[11px] text-slate-400 dark:text-[#6b7a8d]'>
-                    {workflow.workflowId}
-                  </div>
+            {error ? (
+              <tr>
+                <td colSpan={3} className='p-4'>
+                  <ApiErrorState error={error} onRetry={onRetry} />
                 </td>
-                <td className='px-4 py-3 text-[13px] text-slate-600 dark:text-[#9dabb9]'>
-                  {workflow.workflowType}
-                </td>
-                <td className='px-4 py-3'>
-                  <StatusBadge status={workflow.status} size='sm' />
-                </td>
-                <td className='px-4 py-3'>
-                  <div className='text-[13px] text-slate-800 dark:text-slate-200'>
-                    {new Date(workflow.startTime).toLocaleDateString()}
-                  </div>
-                  <div className='text-[11px] text-slate-400 dark:text-[#6b7a8d]'>
-                    {getRelativeTime(workflow.startTime)}
+              </tr>
+            ) : isLoading ? (
+              <tr>
+                <td colSpan={3} className='px-4 py-8 text-center'>
+                  <div className='sr-only'>Loading recent workflow runs</div>
+                  <div aria-hidden='true' className='space-y-3'>
+                    {Array.from({ length: 3 }).map((_, index) => (
+                      <Skeleton key={index} height={16} borderRadius={4} />
+                    ))}
                   </div>
                 </td>
               </tr>
-            ))}
+            ) : runs.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={3}
+                  className='px-4 py-8 text-center text-sm text-slate-500 dark:text-[#9dabb9]'
+                >
+                  No recent workflow runs
+                </td>
+              </tr>
+            ) : (
+              runs.map((workflow) => (
+                <tr
+                  key={workflow.id}
+                  className='transition-colors hover:bg-slate-50 dark:hover:bg-[#1e252e]/50'
+                >
+                  <td className='px-4 py-3'>
+                    <Link
+                      to={`/runs/workflow-runs/${workflow.id}`}
+                      className='block text-[13px] text-blue-600 hover:underline dark:text-blue-400'
+                    >
+                      {workflow.runName}
+                    </Link>
+                  </td>
+                  <td className='px-4 py-3'>
+                    <StatusBadge status={workflow.status} size='sm' />
+                  </td>
+                  <td className='px-4 py-3'>
+                    {workflow.startTime ? (
+                      <div className='text-[13px] text-slate-800 dark:text-slate-200'>
+                        {formatTableDate(workflow.startTime)}
+                      </div>
+                    ) : (
+                      <span className='text-[13px] text-slate-500 dark:text-[#9dabb9]'>-</span>
+                    )}
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

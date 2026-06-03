@@ -18,17 +18,47 @@ export function OverviewPage() {
   const {
     activeSequenceRuns,
     activeWorkflowRuns,
+    sequenceTotal,
+    workflowTotal,
+    totalRuns,
+    sequenceSucceeded,
+    workflowSucceeded,
+    totalSucceeded,
+    sequenceFailed,
+    workflowFailed,
+    totalFailed,
     successRate,
-    failedLast24h,
+    failedRate,
     recentSequenceRuns,
     recentWorkflowRuns,
+    isStatsLoading,
+    isStatsError,
+    statsError,
+    refetchStats,
+    isSequenceRunsLoading,
+    isSequenceRunsError,
+    sequenceRunsError,
+    refetchSequenceRuns,
+    isWorkflowRunsLoading,
+    isWorkflowRunsError,
+    workflowRunsError,
+    refetchWorkflowRuns,
   } = useOverviewStats();
 
   const stats = buildOverviewStats({
     activeSequenceRuns,
     activeWorkflowRuns,
+    sequenceTotal,
+    workflowTotal,
+    totalRuns,
+    sequenceSucceeded,
+    workflowSucceeded,
+    totalSucceeded,
+    sequenceFailed,
+    workflowFailed,
+    totalFailed,
     successRate,
-    failedLast24h,
+    failedRate,
   });
   const headerConfig = useMemo(
     () => ({
@@ -47,11 +77,26 @@ export function OverviewPage() {
   return (
     <>
       <div className='p-6'>
-        <OverviewStatsStrip stats={stats} />
+        <OverviewStatsStrip
+          stats={stats}
+          isLoading={isStatsLoading}
+          error={isStatsError ? statsError : undefined}
+          onRetry={refetchStats}
+        />
 
         <div className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
-          <OverviewSequenceRunsCard runs={recentSequenceRuns} />
-          <OverviewWorkflowRunsCard runs={recentWorkflowRuns} />
+          <OverviewSequenceRunsCard
+            runs={recentSequenceRuns}
+            isLoading={isSequenceRunsLoading}
+            error={isSequenceRunsError ? sequenceRunsError : undefined}
+            onRetry={refetchSequenceRuns}
+          />
+          <OverviewWorkflowRunsCard
+            runs={recentWorkflowRuns}
+            isLoading={isWorkflowRunsLoading}
+            error={isWorkflowRunsError ? workflowRunsError : undefined}
+            onRetry={refetchWorkflowRuns}
+          />
         </div>
       </div>
 
