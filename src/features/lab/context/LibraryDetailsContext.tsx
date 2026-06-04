@@ -6,6 +6,7 @@ import type { FC, PropsWithChildren } from 'react';
 import { useQueryMetadataDetailLibraryModel, type LibraryDetailType } from '../api/lab.api';
 import { useParams } from 'react-router-dom';
 import { SpinnerWithText } from '@/components/ui/Spinner';
+import { ApiErrorState } from '@/components/ui/ApiErrorState';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -35,6 +36,7 @@ export const LibraryDetailsProvider: FC<PropsWithChildren> = ({ children }) => {
     data: libraryDetail,
     isLoading: isLoadingLibraryDetail,
     isError: isErrorLibraryDetail,
+    error: libraryDetailError,
     refetch,
   } = useQueryMetadataDetailLibraryModel({
     params: {
@@ -59,7 +61,18 @@ export const LibraryDetailsProvider: FC<PropsWithChildren> = ({ children }) => {
   }
 
   if (isErrorLibraryDetail || !libraryDetail) {
-    return <div>Error loading library detail</div>;
+    return (
+      <div className='p-6'>
+        <ApiErrorState
+          title='Unable to load library details'
+          message={
+            !isErrorLibraryDetail ? 'The requested library details could not be loaded.' : undefined
+          }
+          error={libraryDetailError}
+          onRetry={() => void refetch()}
+        />
+      </div>
+    );
   }
 
   return (

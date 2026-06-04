@@ -1,10 +1,8 @@
 import { useMemo } from 'react';
-import dayjs from 'dayjs';
 import { Briefcase } from 'lucide-react';
 import { FilterBar } from '@/components/tables/FilterBar';
 import { Select } from '@/components/ui/Select';
 import { useAppShellHeader } from '@/context/app-shell-context';
-import { useCaseSyncFromRedcapAutoHistoryModel } from '../api/cases.api';
 import { useCasesPageQueryParams } from '../hooks/useCasesPageQueryParams';
 import { buildCasesActiveFilterBadges } from '../utils/buildCasesFilterBadges';
 import { CasesListTable, CasesInfoDrawer } from '../components';
@@ -27,14 +25,6 @@ export function CasesPage() {
     openInfoDrawer,
     closeInfoDrawer,
   } = useCasesPageQueryParams();
-
-  const { data: casesSyncHistoryData, isLoading: isSyncHistoryLoading } =
-    useCaseSyncFromRedcapAutoHistoryModel();
-  const lastSynced = casesSyncHistoryData?.results?.[0]?.importedAt;
-  const lastSyncedLabel =
-    lastSynced && !isSyncHistoryLoading
-      ? dayjs(lastSynced).format('YYYY-MM-DD HH:mm Z')
-      : undefined;
 
   const activeFilterBadges = useMemo(
     () =>
@@ -86,11 +76,7 @@ export function CasesPage() {
         <CasesListTable />
       </div>
 
-      <CasesInfoDrawer
-        isOpen={isInfoDrawerOpen}
-        onClose={closeInfoDrawer}
-        lastSyncedLabel={lastSyncedLabel}
-      />
+      <CasesInfoDrawer isOpen={isInfoDrawerOpen} onClose={closeInfoDrawer} />
     </>
   );
 }

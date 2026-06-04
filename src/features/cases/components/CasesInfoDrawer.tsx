@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import dayjs from 'dayjs';
 import { Briefcase, FolderSync, Plus } from 'lucide-react';
 import { DrawerFrame } from '@/components/modals/DrawerFrame';
+import { useCaseSyncFromRedcapAutoHistoryModel } from '../api/cases.api';
 import { AddCaseModal } from './AddCaseModal';
 import { AutoImportFromRedcapModal } from './AutoImportFromRedcapModal';
 import { SyncHistoryDialog } from './SyncHistoryDialog';
@@ -8,13 +10,26 @@ import { SyncHistoryDialog } from './SyncHistoryDialog';
 interface CasesInfoDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  lastSyncedLabel?: string;
 }
 
-export function CasesInfoDrawer({ isOpen, onClose, lastSyncedLabel }: CasesInfoDrawerProps) {
+export function CasesInfoDrawer({ isOpen, onClose }: CasesInfoDrawerProps) {
   const [showAddCaseModal, setShowAddCaseModal] = useState(false);
   const [showAutoImportModal, setShowAutoImportModal] = useState(false);
   const [showSyncHistoryModal, setShowSyncHistoryModal] = useState(false);
+
+  const {
+    data: syncHistoryData,
+    isLoading: isSyncHistoryLoading,
+    isError: isSyncHistoryError,
+  } = useCaseSyncFromRedcapAutoHistoryModel({
+    params: { query: { page: 1, rowsPerPage: 1 } },
+    reactQuery: { enabled: isOpen },
+  });
+  const lastSynced = syncHistoryData?.results?.[0]?.importedAt;
+  const lastSyncedLabel =
+    lastSynced && !isSyncHistoryLoading && !isSyncHistoryError
+      ? dayjs(lastSynced).format('YYYY-MM-DD HH:mm Z')
+      : undefined;
 
   return (
     <DrawerFrame

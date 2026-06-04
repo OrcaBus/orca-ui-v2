@@ -6,6 +6,7 @@ import type { FC, PropsWithChildren } from 'react';
 import { useCaseDetailModel, useCaseStatesModel } from '../api/cases.api';
 import { useParams } from 'react-router-dom';
 import { SpinnerWithText } from '@/components/ui/Spinner';
+import { ApiErrorState } from '@/components/ui/ApiErrorState';
 import { DEFAULT_NON_PAGINATE_PAGE_SIZE } from '@/utils/constants';
 
 // ---------------------------------------------------------------------------
@@ -42,6 +43,8 @@ export const CaseDetailsProvider: FC<PropsWithChildren> = ({ children }) => {
   const {
     data: caseDetail,
     isLoading: isLoadingCaseDetail,
+    isError: isErrorCaseDetail,
+    error: caseDetailError,
     refetch: refetchDetail,
   } = useCaseDetailModel({
     params: { path: { orcabusId: caseOrcabusId ?? '' } },
@@ -70,6 +73,21 @@ export const CaseDetailsProvider: FC<PropsWithChildren> = ({ children }) => {
     return (
       <div className='h-screen'>
         <SpinnerWithText text='Loading...' />
+      </div>
+    );
+  }
+
+  if (isErrorCaseDetail || !caseDetail) {
+    return (
+      <div className='p-6'>
+        <ApiErrorState
+          title='Unable to load case details'
+          message={
+            !isErrorCaseDetail ? 'The requested case details could not be loaded.' : undefined
+          }
+          error={caseDetailError}
+          onRetry={() => void refetchDetail()}
+        />
       </div>
     );
   }

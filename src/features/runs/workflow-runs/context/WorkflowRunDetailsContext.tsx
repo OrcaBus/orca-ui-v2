@@ -12,6 +12,7 @@ import {
 } from '../../api/workflows.api';
 import { useParams } from 'react-router-dom';
 import { SpinnerWithText } from '@/components/ui/Spinner';
+import { ApiErrorState } from '@/components/ui/ApiErrorState';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -58,6 +59,8 @@ export const WorkflowRunDetailsProvider: FC<PropsWithChildren> = ({ children }) 
   const {
     data: workflowRunDetail,
     isLoading: isLoadingWorkflowRunDetail,
+    isError: isErrorWorkflowRunDetail,
+    error: workflowRunDetailError,
     refetch: refetchDetail,
   } = useWorkflowRunDetailModel({
     params: { path: { orcabusId: workflowRunOrcabusId ?? '' } },
@@ -107,6 +110,23 @@ export const WorkflowRunDetailsProvider: FC<PropsWithChildren> = ({ children }) 
     return (
       <div className='h-screen'>
         <SpinnerWithText text='Loading...' />
+      </div>
+    );
+  }
+
+  if (isErrorWorkflowRunDetail || !workflowRunDetail) {
+    return (
+      <div className='p-6'>
+        <ApiErrorState
+          title='Unable to load workflow run details'
+          message={
+            !isErrorWorkflowRunDetail
+              ? 'The requested workflow run details could not be loaded.'
+              : undefined
+          }
+          error={workflowRunDetailError}
+          onRetry={() => void refetchDetail()}
+        />
       </div>
     );
   }
