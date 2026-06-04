@@ -6,6 +6,7 @@ import type { FC, PropsWithChildren } from 'react';
 import { useAnalysisRunDetailModel, useAnalysisRunCommentListModel } from '../../api/workflows.api';
 import { useParams } from 'react-router-dom';
 import { SpinnerWithText } from '@/components/ui/Spinner';
+import { ApiErrorState } from '@/components/ui/ApiErrorState';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -43,6 +44,8 @@ export const AnalysisRunDetailsProvider: FC<PropsWithChildren> = ({ children }) 
   const {
     data: analysisRunDetail,
     isLoading: isLoadingAnalysisRunDetail,
+    isError: isErrorAnalysisRunDetail,
+    error: analysisRunDetailError,
     refetch: refetchDetail,
   } = useAnalysisRunDetailModel({
     params: { path: { orcabusId: analysisRunOrcabusId ?? '' } },
@@ -68,6 +71,23 @@ export const AnalysisRunDetailsProvider: FC<PropsWithChildren> = ({ children }) 
     return (
       <div className='h-screen'>
         <SpinnerWithText text='Loading...' />
+      </div>
+    );
+  }
+
+  if (isErrorAnalysisRunDetail || !analysisRunDetail) {
+    return (
+      <div className='p-6'>
+        <ApiErrorState
+          title='Unable to load analysis run details'
+          message={
+            !isErrorAnalysisRunDetail
+              ? 'The requested analysis run details could not be loaded.'
+              : undefined
+          }
+          error={analysisRunDetailError}
+          onRetry={() => void refetchDetail()}
+        />
       </div>
     );
   }

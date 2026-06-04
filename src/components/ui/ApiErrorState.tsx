@@ -1,8 +1,7 @@
 import type { ComponentProps } from 'react';
 import { AlertTriangle, RefreshCw, WifiOff, ShieldAlert, ServerCrash } from 'lucide-react';
 import { cn } from '@/utils/cn';
-
-type ErrorKind = 'network' | 'forbidden' | 'server' | 'generic';
+import { resolveApiErrorDetails, type ApiErrorKind } from '@/api/api-error-details';
 
 interface ApiErrorStateProps extends Omit<ComponentProps<'div'>, 'title'> {
   title?: string;
@@ -11,54 +10,8 @@ interface ApiErrorStateProps extends Omit<ComponentProps<'div'>, 'title'> {
   onRetry?: () => void | Promise<void>;
 }
 
-function resolveErrorDetails(error: unknown): {
-  kind: ErrorKind;
-  statusCode?: number;
-  detail: string;
-} {
-  if (error instanceof Error) {
-    const msg = error.message.toLowerCase();
-    if (msg.includes('network') || msg.includes('fetch') || msg.includes('timeout')) {
-      return { kind: 'network', detail: error.message };
-    }
-  }
-
-  if (typeof error === 'object' && error !== null) {
-    const obj = error as Record<string, unknown>;
-    const status =
-      typeof obj.status === 'number'
-        ? obj.status
-        : typeof obj.statusCode === 'number'
-          ? obj.statusCode
-          : undefined;
-
-    if (status !== undefined) {
-      const msg =
-        typeof obj.message === 'string'
-          ? obj.message
-          : typeof obj.detail === 'string'
-            ? obj.detail
-            : '';
-
-      if (status === 403 || status === 401) {
-        return { kind: 'forbidden', statusCode: status, detail: msg };
-      }
-      if (status >= 500) {
-        return { kind: 'server', statusCode: status, detail: msg };
-      }
-      return { kind: 'generic', statusCode: status, detail: msg };
-    }
-  }
-
-  if (error instanceof Error) {
-    return { kind: 'generic', detail: error.message };
-  }
-
-  return { kind: 'generic', detail: typeof error === 'string' ? error : 'Unknown error' };
-}
-
 const kindConfig: Record<
-  ErrorKind,
+  ApiErrorKind,
   {
     icon: typeof AlertTriangle;
     label: string;
@@ -90,16 +43,26 @@ const kindConfig: Record<
   server: {
     icon: ServerCrash,
     label: 'Server error',
-    description: 'The server encountered an unexpected error. Please try again later.',
+    description: 'The server encountered an unexpected error.\nPlease try again later.',
     accent: 'text-red-600 dark:text-red-400',
     bg: 'border-red-200/60 bg-red-50/30 dark:border-red-500/20 dark:bg-red-500/5',
     iconBg: 'bg-red-100 dark:bg-red-500/15',
     badge: 'bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-300',
   },
+  unavailable: {
+    icon: ServerCrash,
+    label: 'Service unavailable',
+    description:
+      'This page depends on a service that is not currently available.\nPlease try again later.',
+    accent: 'text-amber-600 dark:text-amber-400',
+    bg: 'border-amber-200/60 bg-amber-50/30 dark:border-amber-500/20 dark:bg-amber-500/5',
+    iconBg: 'bg-amber-100 dark:bg-amber-500/15',
+    badge: 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300',
+  },
   generic: {
     icon: AlertTriangle,
     label: 'Something went wrong',
-    description: 'An unexpected error occurred while loading data.',
+    description: 'An unexpected error occurred while loading data.\nPlease try again later.',
     accent: 'text-red-600 dark:text-red-400',
     bg: 'border-red-200/60 bg-red-50/30 dark:border-red-500/20 dark:bg-red-500/5',
     iconBg: 'bg-red-100 dark:bg-red-500/15',
@@ -115,7 +78,7 @@ export function ApiErrorState({
   className,
   ...props
 }: ApiErrorStateProps) {
-  const { kind, statusCode, detail } = resolveErrorDetails(error);
+  const { kind, statusCode, detail } = resolveApiErrorDetails(error);
   const config = kindConfig[kind];
   const Icon = config.icon;
 
@@ -143,7 +106,7 @@ export function ApiErrorState({
               </span>
             )}
           </div>
-          <p className='mx-auto max-w-sm text-xs leading-relaxed text-slate-500 dark:text-[#9dabb9]'>
+          <p className='mx-auto max-w-sm text-xs leading-relaxed whitespace-pre-line text-slate-500 dark:text-[#9dabb9]'>
             {displayMessage}
           </p>
         </div>

@@ -12,6 +12,7 @@ import {
 } from '../../api/sequence.api';
 import { useParams } from 'react-router-dom';
 import { SpinnerWithText } from '@/components/ui/Spinner';
+import { ApiErrorState } from '@/components/ui/ApiErrorState';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -63,6 +64,8 @@ export const SequenceRunDetailsProvider: FC<PropsWithChildren> = ({ children }) 
   const {
     data: sequenceRunData,
     isLoading: isLoadingSequenceRun,
+    isError: isErrorSequenceRun,
+    error: sequenceRunError,
     refetch: refetchSequenceRun,
   } = useSequenceRunByInstrumentRunIdModel({
     params: { path: { instrumentRunId: instrumentRunId ?? '' } },
@@ -111,6 +114,18 @@ export const SequenceRunDetailsProvider: FC<PropsWithChildren> = ({ children }) 
     return (
       <div className='h-screen'>
         <SpinnerWithText text='Loading...' />
+      </div>
+    );
+  }
+
+  if (isErrorSequenceRun) {
+    return (
+      <div className='p-6'>
+        <ApiErrorState
+          title='Unable to load sequence run details'
+          error={sequenceRunError}
+          onRetry={() => void refetchSequenceRun()}
+        />
       </div>
     );
   }

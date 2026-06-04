@@ -70,6 +70,8 @@ type HookArg<I, Opts> = undefined extends I
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyFn = (...args: any[]) => any;
 
+type QueryStateDefault<Opts> = Opts & { throwOnError?: boolean };
+
 // Mutation result where variables are optional (pre-bound via baseInit at hook-call time).
 type BoundMutationResult<D, E, V, C = unknown> = Omit<
   UseMutationResult<D, E, V, C>,
@@ -96,6 +98,13 @@ export function assertOk<T>(data: T | undefined, error: unknown, response: Respo
     throw error instanceof Error ? error : new Error(`Request failed: ${response.status}`);
   }
   return data as T;
+}
+
+function withQueryStateDefault<Opts>(reactQuery?: Opts): QueryStateDefault<Opts> {
+  return {
+    throwOnError: false,
+    ...(reactQuery && typeof reactQuery === 'object' ? reactQuery : {}),
+  } as QueryStateDefault<Opts>;
 }
 
 /* ---------------------------------- */
@@ -159,11 +168,18 @@ export function createQueryHook<
   type Opts = Omit<UseQueryOptions<R['data'], R['error']>, 'queryKey' | 'queryFn'>;
 
   return (arg?: HookArg<I, Opts>): UseQueryResult<R['data'], R['error']> => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    if (!arg) return (api.rq.useQuery as AnyFn)('get', resolved);
+    if (!arg) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+      return (api.rq.useQuery as AnyFn)('get', resolved, undefined, withQueryStateDefault<Opts>());
+    }
     const { reactQuery, ...init } = arg as Record<string, unknown>;
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return (api.rq.useQuery as AnyFn)('get', resolved, init, reactQuery);
+    return (api.rq.useQuery as AnyFn)(
+      'get',
+      resolved,
+      init,
+      withQueryStateDefault<Opts>(reactQuery as Opts | undefined)
+    );
   };
 }
 

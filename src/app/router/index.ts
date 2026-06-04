@@ -1,8 +1,9 @@
-import { lazy } from 'react';
+import { createElement, lazy } from 'react';
 import { createBrowserRouter } from 'react-router';
 import { Root } from '@/components/layout/Root';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import authRoutes from '@/features/auth/routes';
+import { RouteErrorFallbackPage } from '@/features/errors/pages/RouteErrorFallbackPage';
 
 import routeRegistry from './route-registry';
 
@@ -26,7 +27,14 @@ export const router = createBrowserRouter(
         {
           path: '/',
           Component: Root,
-          children: [{ index: true, Component: CasesPage }, ...routeRegistry],
+          children: [
+            {
+              index: true,
+              Component: CasesPage,
+              errorElement: createElement(RouteErrorFallbackPage, { featureName: 'Cases' }),
+            },
+            ...routeRegistry,
+          ],
         },
       ],
     },

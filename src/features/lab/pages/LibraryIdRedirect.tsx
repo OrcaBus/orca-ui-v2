@@ -1,6 +1,7 @@
 import { useParams, Navigate, Link } from 'react-router-dom';
 import { useQueryMetadataLibraryModel } from '../api/lab.api';
 import { SpinnerWithText } from '@/components/ui/Spinner';
+import { ApiErrorState } from '@/components/ui/ApiErrorState';
 
 /**
  * Resolves a human-readable library ID (e.g. "L2400001") to the internal orcabusId
@@ -12,7 +13,7 @@ import { SpinnerWithText } from '@/components/ui/Spinner';
 export function LibraryIdRedirect() {
   const { libraryId } = useParams<{ libraryId: string }>();
 
-  const { data, isLoading, isError } = useQueryMetadataLibraryModel({
+  const { data, isLoading, isError, error, refetch } = useQueryMetadataLibraryModel({
     params: {
       query: {
         page: 1,
@@ -37,7 +38,19 @@ export function LibraryIdRedirect() {
     );
   }
 
-  if (isError || !data?.results?.length) {
+  if (isError) {
+    return (
+      <div className='p-6'>
+        <ApiErrorState
+          title='Unable to resolve library'
+          error={error}
+          onRetry={() => void refetch()}
+        />
+      </div>
+    );
+  }
+
+  if (!data?.results?.length) {
     return (
       <div className='flex h-screen flex-col items-center justify-center gap-2 text-gray-600 dark:text-gray-400'>
         <p>Library not found for Library ID: {libraryId}</p>
