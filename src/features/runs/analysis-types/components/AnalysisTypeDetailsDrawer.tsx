@@ -1,5 +1,9 @@
 import { useMemo } from 'react';
-import type { AnalysisModel, ComputeContextModel, WorkflowModel } from '../../api/workflows.api';
+import type {
+  AnalysisModel,
+  ComputeContextModel,
+  WorkflowModel,
+} from '../../shared/api/workflows.api';
 import { DrawerFrame } from '@/components/modals/DrawerFrame';
 import { PillTag } from '@/components/ui/PillTag';
 import { StatusBadge } from '@/components/ui/StatusBadge';

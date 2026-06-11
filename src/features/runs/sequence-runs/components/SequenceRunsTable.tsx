@@ -7,7 +7,7 @@ import {
   useSequenceRunListByInstrumentRunIdModel,
   type SequenceRunListByInstrumentRunIdModel,
   type SequenceRunItemListByInstrumentRunIdModel,
-} from '../../api/sequence.api';
+} from '../../shared/api/sequence.api';
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router';
 import { StatusBadge } from '@/components/ui/StatusBadge';

@@ -3,7 +3,7 @@ import { useQueryParams } from '@/hooks/useQueryParams';
 import { DEFAULT_PAGE_SIZE } from '@/utils/constants';
 import { toSearchApiQueryValue, toSearchDisplayValue } from '@/utils/queryParams';
 import type { SortDirection } from '@/hooks/useQueryParams';
-import type { WorkflowRunListParamsModel } from '../../api/workflows.api';
+import type { WorkflowRunListParamsModel } from '../../shared/api/workflows.api';
 import { WorkflowRunStatus } from '@/features/runs/workflow-runs/hooks/useWorkflowRunListQueryParams';
 
 // Workflow run status type

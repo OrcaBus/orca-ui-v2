@@ -3,7 +3,7 @@ import { FileBraces } from 'lucide-react';
 import { FilterBar } from '@/components/tables/FilterBar';
 import { Select } from '@/components/ui/Select';
 import { useAppShellHeader } from '@/context/app-shell-context';
-import { RunsInfoDrawer } from '../../components/RunsInfoDrawer';
+import { RunsInfoDrawer } from '../../shared/components/RunsInfoDrawer';
 import AnalysisContextsTable from '../components/AnalysisContextsTable';
 import { AnalysisContextsStatusCards } from '../components/AnalysisContextsStatusCards';
 import type { AnalysisContextStatus } from '../hooks/useAnalysisContextsListQueryParams';

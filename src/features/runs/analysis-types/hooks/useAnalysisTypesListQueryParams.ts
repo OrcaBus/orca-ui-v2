@@ -3,7 +3,7 @@ import { useQueryParams } from '@/hooks/useQueryParams';
 import { DEFAULT_PAGE_SIZE, PARAM_ORDER_BY, PARAM_SEARCH } from '@/utils/constants';
 import type { FilterBadge } from '@/components/tables/FilterBar';
 import type { AnalysisType } from '@/data/mockData';
-import type { ListAnalysisModel } from '../../api/workflows.api';
+import type { ListAnalysisModel } from '../../shared/api/workflows.api';
 
 export type AnalysisTypeStatus = 'ACTIVE' | 'INACTIVE';
 

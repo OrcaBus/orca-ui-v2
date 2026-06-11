@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router';
 import { Copy, Check } from 'lucide-react';
 import { SimpleTable, SimpleTableColumn } from '@/components/tables/SimpleTable';
 import { useAnalysisRunDetailsContext } from '../context/AnalysisRunDetailsContext';
-import type { Readset } from '@/features/runs/api/workflows.api';
+import type { Readset } from '@/features/runs/shared/api/workflows.api';
 import { toast } from 'sonner';
 
 export function AnalysisRunDetailsReadsetsTable() {

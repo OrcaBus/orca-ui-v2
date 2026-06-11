@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { LayoutDashboard } from 'lucide-react';
 import { useAppShellHeader } from '@/context/app-shell-context';
-import { RunsInfoDrawer } from '../../components/RunsInfoDrawer';
+import { RunsInfoDrawer } from '../../shared/components/RunsInfoDrawer';
 import { useRunsOverviewPageQueryParams } from '../hooks/useRunsOverviewPageQueryParams';
 import { useOverviewStats } from '../hooks/useOverviewStats';
 import { buildOverviewStats } from '../utils/overviewStatsConfig';

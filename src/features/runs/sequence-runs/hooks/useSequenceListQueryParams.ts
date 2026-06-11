@@ -2,7 +2,7 @@ import { useMemo, useCallback } from 'react';
 import { useQueryParams } from '@/hooks/useQueryParams';
 import { PARAM_ORDER_BY, PARAM_SEARCH } from '@/utils/constants';
 import { toLocalStartOfDay } from '@/utils/timeFormat';
-import type { SequenceRunStatusType } from '../../api/sequence.api';
+import type { SequenceRunStatusType } from '../../shared/api/sequence.api';
 import { toFirstString } from '@/utils/queryParams';
 
 const PARAM_STATUS = 'seqStatus';

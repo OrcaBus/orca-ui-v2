@@ -27,7 +27,7 @@ import {
   useSequenceRunCommentDeleteModel,
   type SequenceRunStateModel,
   type SequenceRunCommentModel,
-} from '../../api/sequence.api';
+} from '../../shared/api/sequence.api';
 import { useSequenceRunDetailsContext } from '../context/SequenceRunDetailsContext';
 
 // ---------------------------------------------------------------------------

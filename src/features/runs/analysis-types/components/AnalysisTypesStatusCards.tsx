@@ -4,7 +4,7 @@ import { StatusCard } from '@/components/ui/StatusCard';
 import {
   useAnalysisStatusCountModel,
   type AnalysisStatusCountModel,
-} from '../../api/workflows.api';
+} from '../../shared/api/workflows.api';
 import { getAnalysisTypeIcon } from '../../shared/utils/statusIcons';
 import {
   useAnalysisTypesListQueryParams,

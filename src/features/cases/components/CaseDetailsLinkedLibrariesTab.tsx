@@ -12,7 +12,7 @@ import {
   useQueryMetadataLibraryModel,
   type LibraryDetailType,
   type QualityEnum,
-} from '@/features/lab/api/lab.api';
+} from '@/features/lab/shared/api/lab.api';
 import { useCaseExternalEntityCreateModel, useCaseUnlinkEntityModel } from '../api/cases.api';
 import { useCaseDetailsContext } from '../context/CaseDetailsContext';
 

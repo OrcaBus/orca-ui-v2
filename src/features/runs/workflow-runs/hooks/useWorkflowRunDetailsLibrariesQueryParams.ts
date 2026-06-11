@@ -3,7 +3,7 @@ import { useQueryParams } from '@/hooks/useQueryParams';
 import { DEFAULT_PAGE_SIZE } from '@/utils/constants';
 import { toSearchApiQueryValue, toSearchDisplayValue, toStringOrArray } from '@/utils/queryParams';
 import type { SortDirection } from '@/hooks/useQueryParams';
-import type { LibraryListQueryParams } from '@/features/lab/api/lab.api';
+import type { LibraryListQueryParams } from '@/features/lab/shared/api/lab.api';
 
 // Prefixed params to avoid collisions with other tables on the same details page
 // (e.g. run-context table, readsets table).

@@ -167,10 +167,6 @@ export function BamsPage() {
         onClearAll={activeFilterBadges.length > 0 ? clearAllFilters : undefined}
       />
 
-      <div className='mb-4 text-sm text-neutral-600 dark:text-neutral-400'>
-        Showing {filteredBams.length} of {BAM_FILES.length} BAM files
-      </div>
-
       {filteredBams.length > 0 ? (
         <DataTable
           data={filteredBams}

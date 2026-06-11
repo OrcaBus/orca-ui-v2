@@ -207,10 +207,6 @@ export function VaultWorkflowsPage() {
         onClearAll={activeFilterBadges.length > 0 ? clearAllFilters : undefined}
       />
 
-      <div className='mb-4 text-sm text-neutral-600 dark:text-neutral-400'>
-        Showing {filteredWorkflows.length} of {mockWorkflowRuns.length} workflows
-      </div>
-
       <DataTable
         data={filteredWorkflows}
         columns={columns}

@@ -6,7 +6,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { useTablePagination } from '@/components/tables/useTablePagination';
 import { formatTableDate } from '@/utils/timeFormat';
 import { DEFAULT_PAGE_SIZE } from '@/utils/constants';
-import { type WorkflowRunListModel } from '@/features/runs/api/workflows.api';
+import { type WorkflowRunListModel } from '@/features/runs/shared/api/workflows.api';
 
 interface CaseDetailsLinkedWorkflowRunsTableProps {
   runs: WorkflowRunListModel[];

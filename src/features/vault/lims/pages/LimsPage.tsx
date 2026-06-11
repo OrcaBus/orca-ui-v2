@@ -174,10 +174,6 @@ export function LimsPage() {
         onClearAll={activeFilterBadges.length > 0 ? clearAllFilters : undefined}
       />
 
-      <div className='mb-4 text-sm text-neutral-600 dark:text-neutral-400'>
-        Showing {filteredLibraries.length} of {mockLibraries.length} libraries
-      </div>
-
       <DataTable
         data={filteredLibraries}
         columns={columns}
