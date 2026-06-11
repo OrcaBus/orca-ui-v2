@@ -11,7 +11,7 @@ VITE_FILE_URL ?= https://file.dev.umccr.org
 VITE_SSCHECK_URL ?= https://sscheck-orcabus.dev.umccr.org
 VITE_HTSGET_URL ?= https://htsget-file.dev.umccr.org
 VITE_CASE_URL ?= https://case.dev.umccr.org
-VITE_SYSTEM_CATALOG_URL ?= http://localhost:8000
+VITE_SYSTEM_CATALOG_URL ?= https://system-catalog.dev.umccr.org
 
 # Dev server port (Vite). Override when 3000 is in use, e.g. `make start PORT=3001` or `make start-3001`.
 PORT ?= 3000
