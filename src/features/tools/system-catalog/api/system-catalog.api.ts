@@ -14,6 +14,7 @@ const systemCatalogApi = new ApiClient<paths>({
   baseUrl: config.apiEndpoint.systemCatalog || '',
 });
 
+export type SystemCatalogMapStatus = components['schemas']['MapStatus'];
 export type SystemCatalogMapSummary = components['schemas']['MapSummary'];
 export type SystemCatalogMapFull = components['schemas']['MapFull'];
 export type SystemCatalogMapNode = components['schemas']['MapNode'];

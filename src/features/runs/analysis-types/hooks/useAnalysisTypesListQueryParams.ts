@@ -30,10 +30,6 @@ export type AnalysisTypesFilterPatch = Partial<{
   atAnalysisVersion: string | string[];
 }>;
 
-export interface UseAnalysisTypesListQueryParamsOptions {
-  analysisTypes?: AnalysisStatusEnum[];
-}
-
 function toFirstString(value: string | string[] | undefined): string {
   if (value == null) return '';
   return Array.isArray(value) ? (value[0] ?? '') : value;

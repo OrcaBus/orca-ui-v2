@@ -1,15 +1,10 @@
 import { useCallback } from 'react';
 import { useQueryParams } from '@/hooks/useQueryParams';
 import { PARAM_INFO } from '@/utils/constants';
-import {
-  useAnalysisTypesListQueryParams,
-  type UseAnalysisTypesListQueryParamsOptions,
-} from './useAnalysisTypesListQueryParams';
+import { useAnalysisTypesListQueryParams } from './useAnalysisTypesListQueryParams';
 
-export function useAnalysisTypesPageQueryParams(
-  options: UseAnalysisTypesListQueryParamsOptions = {}
-) {
-  const analysisTypesQueryParams = useAnalysisTypesListQueryParams(options);
+export function useAnalysisTypesPageQueryParams() {
+  const analysisTypesQueryParams = useAnalysisTypesListQueryParams();
   const { getBooleanParam, setParams } = useQueryParams();
 
   const openInfoDrawer = useCallback(() => {

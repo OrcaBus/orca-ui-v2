@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { X, Plus, ChevronDown } from 'lucide-react';
-import type { MapStatus } from '../data/dynamodb-schema';
+import { X, Plus, ChevronDown, NotebookText } from 'lucide-react';
+import type { SystemCatalogMapStatus } from '../api/system-catalog.api';
+import { DialogFrame } from '@/components/modals/DialogFrame';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -50,11 +51,12 @@ export type MapFormData = z.infer<typeof mapFormSchema>;
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
-const STATUS_OPTIONS: Array<{ value: MapStatus; label: string; description: string }> = [
-  { value: 'draft', label: 'Draft', description: 'Work in progress' },
-  { value: 'active', label: 'Active', description: 'Production ready' },
-  { value: 'archived', label: 'Archived', description: 'No longer in use' },
-];
+const STATUS_OPTIONS: Array<{ value: SystemCatalogMapStatus; label: string; description: string }> =
+  [
+    { value: 'draft', label: 'Draft', description: 'Work in progress' },
+    { value: 'active', label: 'Active', description: 'Production ready' },
+    { value: 'archived', label: 'Archived', description: 'No longer in use' },
+  ];
 
 const inputClassName =
   'w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 transition-all placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-white dark:placeholder:text-[#9dabb9] dark:focus:border-blue-400';
@@ -65,7 +67,7 @@ interface MapEditModalProps {
   isOpen: boolean;
   initialData: MapFormData;
   isEditing: boolean;
-  onSubmit: (data: MapFormData) => void;
+  onSubmit: (data: MapFormData) => void | Promise<void>;
   onClose: () => void;
 }
 
@@ -101,8 +103,6 @@ export function MapEditModal({
 
   const [tagKey, setTagKey] = useState('');
   const [tagValue, setTagValue] = useState('');
-
-  if (!isOpen) return null;
 
   const formatTagsJson = () => {
     const pretty = tryPrettyTagsJson(tagsJson);
@@ -145,221 +145,205 @@ export function MapEditModal({
   };
 
   return (
-    <div className='fixed inset-0 z-50 flex items-center justify-center'>
-      <div className='absolute inset-0 bg-black/40 backdrop-blur-sm' onClick={handleClose} />
-      <div className='relative flex max-h-[calc(100vh-4rem)] w-full max-w-lg flex-col rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-[#2d3540] dark:bg-[#111418]'>
-        <form onSubmit={(e) => void handleSubmit(onSubmit)(e)} className='contents'>
-          {/* Header */}
-          <div className='flex shrink-0 items-start justify-between px-6 pt-6 pb-2'>
-            <div>
-              <h2 className='text-lg font-bold text-slate-900 dark:text-white'>
-                {isEditing ? 'Edit Map' : 'Create New Map'}
-              </h2>
-              <p className='mt-0.5 text-sm text-slate-500 dark:text-[#9dabb9]'>
-                {isEditing ? 'Update map properties.' : 'Set up a new map from scratch.'}
-              </p>
-            </div>
-            <button
-              type='button'
-              onClick={handleClose}
-              className='rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-[#1e252e] dark:hover:text-white'
+    <DialogFrame
+      isOpen={isOpen}
+      onClose={handleClose}
+      title={isEditing ? 'Edit Map' : 'Create New Map'}
+      description={isEditing ? 'Update map properties.' : 'Set up a new map from scratch.'}
+      icon={<NotebookText className='h-5 w-5' />}
+      size='md'
+      closeDisabled={isSubmitting}
+      footer={
+        <div className='flex items-center justify-end gap-3'>
+          <button
+            type='button'
+            onClick={handleClose}
+            className='rounded-lg px-4 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 dark:text-[#9dabb9] dark:hover:bg-[#1e252e]'
+          >
+            Cancel
+          </button>
+          <button
+            type='submit'
+            form='map-edit-form'
+            disabled={!isValid || isSubmitting}
+            className='inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-blue-500 dark:hover:bg-blue-600'
+          >
+            <Plus className='h-3.5 w-3.5' />
+            {isEditing ? 'Save Changes' : 'Create Map'}
+          </button>
+        </div>
+      }
+    >
+      <form
+        id='map-edit-form'
+        onSubmit={(e) => void handleSubmit(onSubmit)(e)}
+        className='space-y-4'
+      >
+        {/* Name */}
+        <div>
+          <label
+            htmlFor='map-name'
+            className='mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300'
+          >
+            Map Name <span className='text-red-500'>*</span>
+          </label>
+          <input
+            id='map-name'
+            type='text'
+            placeholder='Enter map name'
+            {...register('name')}
+            className={`${inputClassName} ${errors.name ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''}`}
+          />
+          {errors.name && (
+            <p className='mt-1 text-sm text-red-600 dark:text-red-400'>{errors.name.message}</p>
+          )}
+        </div>
+
+        {/* Status */}
+        <div>
+          <label
+            htmlFor='map-status'
+            className='mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300'
+          >
+            Status
+          </label>
+          <div className='relative'>
+            <select
+              id='map-status'
+              {...register('status')}
+              className={inputClassName + ' appearance-none pr-8'}
             >
-              <X className='h-4 w-4' />
-            </button>
+              {STATUS_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label} — {opt.description}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className='pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-slate-400' />
           </div>
+        </div>
 
-          {/* Form fields — scrollable area */}
-          <div className='overflow-y-auto px-6 py-4'>
-            <div className='space-y-4'>
-              {/* Name */}
-              <div>
-                <label
-                  htmlFor='map-name'
-                  className='mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300'
+        {/* Description */}
+        <div>
+          <label
+            htmlFor='map-description'
+            className='mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300'
+          >
+            Description
+          </label>
+          <textarea
+            id='map-description'
+            placeholder='Describe the purpose and scope of this map...'
+            rows={3}
+            {...register('description')}
+            className={inputClassName + ' resize-none'}
+          />
+        </div>
+
+        {/* Tags — visual pill manager */}
+        <div>
+          <label className='mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300'>
+            Tags
+          </label>
+
+          {/* Existing tags as pills */}
+          {Object.keys(parsedTags).length > 0 && (
+            <div className='mb-2 flex flex-wrap gap-1.5'>
+              {Object.entries(parsedTags).map(([key, value]) => (
+                <span
+                  key={key}
+                  className='inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 py-0.5 pr-1.5 pl-2.5 text-xs font-medium text-slate-600 dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-[#9dabb9]'
                 >
-                  Map Name <span className='text-red-500'>*</span>
-                </label>
-                <input
-                  id='map-name'
-                  type='text'
-                  placeholder='Enter map name'
-                  {...register('name')}
-                  className={`${inputClassName} ${errors.name ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''}`}
-                />
-                {errors.name && (
-                  <p className='mt-1 text-sm text-red-600 dark:text-red-400'>
-                    {errors.name.message}
-                  </p>
-                )}
-              </div>
-
-              {/* Status */}
-              <div>
-                <label
-                  htmlFor='map-status'
-                  className='mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300'
-                >
-                  Status
-                </label>
-                <div className='relative'>
-                  <select
-                    id='map-status'
-                    {...register('status')}
-                    className={inputClassName + ' appearance-none pr-8'}
-                  >
-                    {STATUS_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label} — {opt.description}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className='pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-slate-400' />
-                </div>
-              </div>
-
-              {/* Description */}
-              <div>
-                <label
-                  htmlFor='map-description'
-                  className='mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300'
-                >
-                  Description
-                </label>
-                <textarea
-                  id='map-description'
-                  placeholder='Describe the purpose and scope of this map...'
-                  rows={3}
-                  {...register('description')}
-                  className={inputClassName + ' resize-none'}
-                />
-              </div>
-
-              {/* Tags — visual pill manager */}
-              <div>
-                <label className='mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300'>
-                  Tags
-                </label>
-
-                {/* Existing tags as pills */}
-                {Object.keys(parsedTags).length > 0 && (
-                  <div className='mb-2 flex flex-wrap gap-1.5'>
-                    {Object.entries(parsedTags).map(([key, value]) => (
-                      <span
-                        key={key}
-                        className='inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 py-0.5 pr-1.5 pl-2.5 text-xs font-medium text-slate-600 dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-[#9dabb9]'
-                      >
-                        <span className='text-slate-900 dark:text-white'>{key}</span>
-                        <span className='text-slate-400 dark:text-[#6b7a8d]'>:</span>
-                        <span>{value}</span>
-                        <button
-                          type='button'
-                          onClick={() => removeTag(key)}
-                          className='ml-0.5 rounded-full p-0.5 text-slate-300 transition-colors hover:bg-slate-200 hover:text-slate-500 dark:text-[#4a5568] dark:hover:bg-[#2d3540] dark:hover:text-white'
-                        >
-                          <X className='h-3 w-3' />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                )}
-
-                {/* Add tag inline input */}
-                <div className='flex items-center gap-2'>
-                  <input
-                    type='text'
-                    placeholder='Key'
-                    value={tagKey}
-                    onChange={(e) => setTagKey(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        addTag();
-                      }
-                    }}
-                    className={inputClassName + ' flex-1'}
-                  />
-                  <input
-                    type='text'
-                    placeholder='Value'
-                    value={tagValue}
-                    onChange={(e) => setTagValue(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        addTag();
-                      }
-                    }}
-                    className={inputClassName + ' flex-1'}
-                  />
+                  <span className='text-slate-900 dark:text-white'>{key}</span>
+                  <span className='text-slate-400 dark:text-[#6b7a8d]'>:</span>
+                  <span>{value}</span>
                   <button
                     type='button'
-                    onClick={addTag}
-                    disabled={!tagKey.trim()}
-                    className='flex h-10.5 w-10.5 shrink-0 items-center justify-center rounded-lg border border-slate-200 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 disabled:cursor-not-allowed disabled:opacity-40 dark:border-[#2d3540] dark:hover:bg-[#1e252e] dark:hover:text-white'
+                    onClick={() => removeTag(key)}
+                    className='ml-0.5 rounded-full p-0.5 text-slate-300 transition-colors hover:bg-slate-200 hover:text-slate-500 dark:text-[#4a5568] dark:hover:bg-[#2d3540] dark:hover:text-white'
                   >
-                    <Plus className='h-4 w-4' />
+                    <X className='h-3 w-3' />
                   </button>
-                </div>
-
-                {/* Raw JSON toggle */}
-                <details className='mt-2'>
-                  <summary className='cursor-pointer text-xs text-slate-400 hover:text-slate-600 dark:text-[#6b7a8d] dark:hover:text-[#9dabb9]'>
-                    Edit raw JSON
-                  </summary>
-                  <div className='mt-1.5'>
-                    <div className='mb-1 flex items-center justify-end'>
-                      <button
-                        type='button'
-                        onClick={formatTagsJson}
-                        className='rounded px-2 py-0.5 text-xs font-medium text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:text-[#9dabb9] dark:hover:bg-[#2d3540] dark:hover:text-white'
-                      >
-                        Format
-                      </button>
-                    </div>
-                    <textarea
-                      rows={3}
-                      {...register('tagsJson')}
-                      onBlur={handleTagsBlur}
-                      className={
-                        inputClassName +
-                        ' resize-none bg-slate-50 font-mono text-sm dark:bg-[#1e252e]' +
-                        (errors.tagsJson
-                          ? ' border-red-500 focus:border-red-500 focus:ring-red-500/20'
-                          : '')
-                      }
-                      placeholder={'{\n  "key": "value"\n}'}
-                    />
-                    {errors.tagsJson && (
-                      <p className='mt-1 text-sm text-red-600 dark:text-red-400'>
-                        {errors.tagsJson.message}
-                      </p>
-                    )}
-                  </div>
-                </details>
-              </div>
+                </span>
+              ))}
             </div>
-          </div>
+          )}
 
-          {/* Footer */}
-          <div className='flex shrink-0 items-center justify-end gap-3 border-t border-slate-100 px-6 py-4 dark:border-[#2d3540]'>
+          {/* Add tag inline input */}
+          <div className='flex items-center gap-2'>
+            <input
+              type='text'
+              placeholder='Key'
+              value={tagKey}
+              onChange={(e) => setTagKey(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  addTag();
+                }
+              }}
+              className={inputClassName + ' flex-1'}
+            />
+            <input
+              type='text'
+              placeholder='Value'
+              value={tagValue}
+              onChange={(e) => setTagValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  addTag();
+                }
+              }}
+              className={inputClassName + ' flex-1'}
+            />
             <button
               type='button'
-              onClick={handleClose}
-              className='rounded-lg px-4 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 dark:text-[#9dabb9] dark:hover:bg-[#1e252e]'
+              onClick={addTag}
+              disabled={!tagKey.trim()}
+              className='flex h-10.5 w-10.5 shrink-0 items-center justify-center rounded-lg border border-slate-200 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 disabled:cursor-not-allowed disabled:opacity-40 dark:border-[#2d3540] dark:hover:bg-[#1e252e] dark:hover:text-white'
             >
-              Cancel
-            </button>
-            <button
-              type='submit'
-              disabled={!isValid || isSubmitting}
-              className='inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-blue-500 dark:hover:bg-blue-600'
-            >
-              <Plus className='h-3.5 w-3.5' />
-              {isEditing ? 'Save Changes' : 'Create Map'}
+              <Plus className='h-4 w-4' />
             </button>
           </div>
-        </form>
-      </div>
-    </div>
+
+          {/* Raw JSON toggle */}
+          <details className='mt-2'>
+            <summary className='cursor-pointer text-xs text-slate-400 hover:text-slate-600 dark:text-[#6b7a8d] dark:hover:text-[#9dabb9]'>
+              Edit raw JSON
+            </summary>
+            <div className='mt-1.5'>
+              <div className='mb-1 flex items-center justify-end'>
+                <button
+                  type='button'
+                  onClick={formatTagsJson}
+                  className='rounded px-2 py-0.5 text-xs font-medium text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:text-[#9dabb9] dark:hover:bg-[#2d3540] dark:hover:text-white'
+                >
+                  Format
+                </button>
+              </div>
+              <textarea
+                rows={3}
+                {...register('tagsJson')}
+                onBlur={handleTagsBlur}
+                className={
+                  inputClassName +
+                  ' resize-none bg-slate-50 font-mono text-sm dark:bg-[#1e252e]' +
+                  (errors.tagsJson
+                    ? ' border-red-500 focus:border-red-500 focus:ring-red-500/20'
+                    : '')
+                }
+                placeholder={'{\n  "key": "value"\n}'}
+              />
+              {errors.tagsJson && (
+                <p className='mt-1 text-sm text-red-600 dark:text-red-400'>
+                  {errors.tagsJson.message}
+                </p>
+              )}
+            </div>
+          </details>
+        </div>
+      </form>
+    </DialogFrame>
   );
 }

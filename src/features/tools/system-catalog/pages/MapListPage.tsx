@@ -1,6 +1,5 @@
-import { useState, useMemo, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router';
-import { useQueryClient } from '@tanstack/react-query';
+import { useState, useMemo } from 'react';
+import { Link } from 'react-router';
 import {
   Search,
   LayoutGrid,
@@ -10,19 +9,12 @@ import {
   NotebookText,
   User,
 } from 'lucide-react';
-import { toast } from 'sonner';
 import { useAppShellHeader } from '@/context/app-shell-context';
 import { useAuthContext } from '@/context/auth-context';
 import type { MapSummary, MapStatus } from '../data/dynamodb-schema';
-import {
-  systemCatalogMapsQuery,
-  useCreateSystemCatalogMap,
-  useSystemCatalogMaps,
-} from '../api/system-catalog.api';
-import { mapToSummary } from '../utils/mapModel';
+import { useSystemCatalogMaps } from '../api/system-catalog.api';
 import { getRelativeTime } from '@/utils/timeFormat';
-import { MapEditModal, SystemCatalogInfoDrawer } from '../components';
-import type { MapFormData } from '../components/MapEditModal';
+import { SystemCatalogInfoDrawer } from '../components';
 import { useToolsPageQueryParams } from '../../hooks/useToolsPageQueryParams';
 
 const STATUS_CONFIG: Record<MapStatus, { label: string; className: string }> = {
@@ -50,13 +42,6 @@ const STATUS_OPTIONS: { value: MapStatus | 'all'; label: string }[] = [
   { value: 'archived', label: 'Archived' },
 ];
 
-const EMPTY_MAP_FORM: MapFormData = {
-  name: '',
-  description: '',
-  status: 'draft',
-  tagsJson: '{}',
-};
-
 function getInitials(name: string): string {
   return name
     .split(' ')
@@ -64,15 +49,6 @@ function getInitials(name: string): string {
     .join('')
     .toUpperCase()
     .slice(0, 2);
-}
-
-function parseTagsJson(value: string): Record<string, string> {
-  try {
-    const parsed = JSON.parse(value) as Record<string, string>;
-    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
-  } catch {
-    return {};
-  }
 }
 
 function MapCard({ map }: { map: MapSummary }) {
@@ -158,8 +134,6 @@ function FilterSelect({
 export function MapListPage() {
   const title = 'System Catalog';
   const description = 'Explore and plan system architecture through interactive maps.';
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const { isInfoDrawerOpen, openInfoDrawer, closeInfoDrawer } = useToolsPageQueryParams();
 
   const { user } = useAuthContext();
@@ -169,13 +143,10 @@ export function MapListPage() {
   const [statusFilter, setStatusFilter] = useState<MapStatus | 'all'>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showOnlyMine, setShowOnlyMine] = useState(false);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const { data, isPending, isError, refetch } = useSystemCatalogMaps(
     showOnlyMine && userEmail ? { params: { query: { userEmail } } } : undefined
   );
-  const createMapMutation = useCreateSystemCatalogMap();
-
   const headerConfig = useMemo(
     () => ({
       mode: 'main' as const,
@@ -211,65 +182,12 @@ export function MapListPage() {
     });
   }, [maps, searchQuery, statusFilter]);
 
-  const handleOpenCreateModal = useCallback(() => setIsCreateModalOpen(true), []);
-  const handleCloseCreateModal = useCallback(() => setIsCreateModalOpen(false), []);
-
-  const handleCreateMap = useCallback(
-    async (data: MapFormData) => {
-      try {
-        const createdMap = await createMapMutation.mutateAsync({
-          body: {
-            name: data.name,
-            description: data.description,
-            status: data.status,
-            tags: parseTagsJson(data.tagsJson),
-          },
-        });
-
-        const listQueryKey = systemCatalogMapsQuery.queryOptions().queryKey;
-        queryClient.setQueryData(
-          listQueryKey,
-          (previous: { maps?: MapSummary[]; nextCursor?: string | null } | undefined) => {
-            if (!previous?.maps) {
-              return previous;
-            }
-
-            return {
-              ...previous,
-              maps: [mapToSummary(createdMap), ...previous.maps],
-            };
-          }
-        );
-
-        setIsCreateModalOpen(false);
-        toast.success('Map created.');
-        void navigate(`/tools/system-catalog/${createdMap.mapId}`);
-      } catch {
-        toast.error('Unable to create map.');
-      }
-    },
-    [createMapMutation, navigate, queryClient]
-  );
-
   const infoDrawer = (
     <SystemCatalogInfoDrawer
       isOpen={isInfoDrawerOpen}
       onClose={closeInfoDrawer}
       title={title}
       description={description}
-      onCreateMap={handleOpenCreateModal}
-    />
-  );
-
-  const createMapModal = (
-    <MapEditModal
-      isOpen={isCreateModalOpen}
-      initialData={EMPTY_MAP_FORM}
-      isEditing={false}
-      onSubmit={(data) => {
-        void handleCreateMap(data);
-      }}
-      onClose={handleCloseCreateModal}
     />
   );
 
@@ -283,7 +201,6 @@ export function MapListPage() {
         </div>
 
         {infoDrawer}
-        {createMapModal}
       </>
     );
   }
@@ -308,7 +225,6 @@ export function MapListPage() {
         </div>
 
         {infoDrawer}
-        {createMapModal}
       </>
     );
   }
@@ -422,8 +338,6 @@ export function MapListPage() {
             </div>
           )}
         </div>
-
-        {createMapModal}
       </div>
 
       {infoDrawer}
