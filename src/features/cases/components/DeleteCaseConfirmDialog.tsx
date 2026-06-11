@@ -1,8 +1,8 @@
 import { Trash2 } from 'lucide-react';
-import type { Case } from '../types/case.types';
+import type { CaseModel } from '../api/cases.api';
 
 interface DeleteCaseConfirmDialogProps {
-  case_: Case;
+  case_: CaseModel;
   onConfirm: () => void;
   onCancel: () => void;
 }
@@ -25,7 +25,7 @@ export function DeleteCaseConfirmDialog({
 
         <div className='p-6'>
           <p className='mb-3 text-sm text-neutral-600 dark:text-[#9dabb9]'>
-            <strong className='text-neutral-900 dark:text-slate-100'>{case_.title}</strong>
+            <strong className='text-neutral-900 dark:text-slate-100'>{case_.requestFormId}</strong>
           </p>
           <p className='text-sm text-red-600 dark:text-red-400'>
             This will remove the case and its links. This action can&apos;t be undone.

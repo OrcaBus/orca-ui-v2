@@ -2,8 +2,7 @@ import { useMemo, useCallback } from 'react';
 import { useQueryParams } from '@/hooks/useQueryParams';
 import { DEFAULT_PAGE_SIZE, PARAM_ORDER_BY, PARAM_SEARCH } from '@/utils/constants';
 import type { FilterBadge } from '@/components/tables/FilterBar';
-import type { AnalysisType } from '@/data/mockData';
-import type { ListAnalysisModel } from '../../api/workflows.api';
+import { ListAnalysisModel, AnalysisStatusEnum } from '../../api/workflows.api';
 
 export type AnalysisTypeStatus = 'ACTIVE' | 'INACTIVE';
 
@@ -32,7 +31,7 @@ export type AnalysisTypesFilterPatch = Partial<{
 }>;
 
 export interface UseAnalysisTypesListQueryParamsOptions {
-  analysisTypes?: AnalysisType[];
+  analysisTypes?: AnalysisStatusEnum[];
 }
 
 function toFirstString(value: string | string[] | undefined): string {
@@ -44,9 +43,7 @@ function toFirstString(value: string | string[] | undefined): string {
  * Analysis types list state driven by URL query params.
  * Filter params: atStatus, atAnalysisName, atAnalysisVersion. Shared: search, orderBy, pagination.
  */
-export function useAnalysisTypesListQueryParams(
-  options: UseAnalysisTypesListQueryParamsOptions = {}
-) {
+export function useAnalysisTypesListQueryParams() {
   const {
     params,
     setParams,
@@ -102,7 +99,7 @@ export function useAnalysisTypesListQueryParams(
   const analysisTypesQueryParams = useMemo((): ListAnalysisModel & Record<string, unknown> => {
     const statusRaw = filterValues[PARAM_STATUS];
     const statusForApi =
-      !statusRaw || statusRaw === 'all' ? undefined : (statusRaw as AnalysisTypeStatus);
+      !statusRaw || statusRaw === 'all' ? undefined : (statusRaw as AnalysisStatusEnum);
 
     return {
       page: pagination.page || 1,
@@ -194,24 +191,24 @@ export function useAnalysisTypesListQueryParams(
     setAnalysisVersionFilter,
   ]);
 
-  const filteredAnalysisTypes = useMemo(() => {
-    const source = options.analysisTypes ?? [];
-    const nameFilter = filterValues[PARAM_ANALYSIS_NAME].toLowerCase();
-    const versionFilter = filterValues[PARAM_ANALYSIS_VERSION].toLowerCase();
+  // const filteredAnalysisTypes = useMemo(() => {
+  //   const source = options.analysisTypes ?? [];
+  //   const nameFilter = filterValues[PARAM_ANALYSIS_NAME].toLowerCase();
+  //   const versionFilter = filterValues[PARAM_ANALYSIS_VERSION].toLowerCase();
 
-    return source.filter((at) => {
-      const matchesSearch =
-        at.name.toLowerCase().includes(search.toLowerCase()) ||
-        at.id.toLowerCase().includes(search.toLowerCase()) ||
-        at.version.toLowerCase().includes(search.toLowerCase()) ||
-        at.description.toLowerCase().includes(search.toLowerCase());
-      const matchesStatus = status === 'all' || at.status === status;
-      const matchesNameFilter = !nameFilter || at.name.toLowerCase().includes(nameFilter);
-      const matchesVersionFilter =
-        !versionFilter || at.version.toLowerCase().includes(versionFilter);
-      return matchesSearch && matchesStatus && matchesNameFilter && matchesVersionFilter;
-    });
-  }, [options.analysisTypes, search, status, filterValues]);
+  //   return source.filter((at) => {
+  //     const matchesSearch =
+  //       at.name.toLowerCase().includes(search.toLowerCase()) ||
+  //       at.id.toLowerCase().includes(search.toLowerCase()) ||
+  //       at.version.toLowerCase().includes(search.toLowerCase()) ||
+  //       at.description.toLowerCase().includes(search.toLowerCase());
+  //     const matchesStatus = status === 'all' || at.status === status;
+  //     const matchesNameFilter = !nameFilter || at.name.toLowerCase().includes(nameFilter);
+  //     const matchesVersionFilter =
+  //       !versionFilter || at.version.toLowerCase().includes(versionFilter);
+  //     return matchesSearch && matchesStatus && matchesNameFilter && matchesVersionFilter;
+  //   });
+  // }, [options.analysisTypes, search, status, filterValues]);
 
   return {
     search,
@@ -237,6 +234,6 @@ export function useAnalysisTypesListQueryParams(
     analysisVersionFilter: filterValues[PARAM_ANALYSIS_VERSION],
     setAnalysisVersionFilter,
     activeFilterBadges,
-    filteredAnalysisTypes,
+    // filteredAnalysisTypes,
   };
 }

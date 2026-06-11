@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Link } from 'react-router';
 import { useAppShellHeader } from '@/context/app-shell-context';
-import { Settings, FileText, Workflow, ArrowRight } from 'lucide-react';
+import { Settings, FileCheck, NotebookText, ArrowRight } from 'lucide-react';
 import { ToolsInfoDrawer } from '../components/ToolsInfoDrawer';
 import { useToolsPageQueryParams } from '../hooks/useToolsPageQueryParams';
 
@@ -27,7 +27,7 @@ export function ToolsPage() {
       id: 'sscheck',
       name: 'SSChecker',
       description: 'Validate sample sheet format and contents with configurable logging output.',
-      icon: FileText,
+      icon: FileCheck,
       iconColor: 'text-blue-600',
       iconBg: 'bg-blue-100',
       hoverBorder: 'hover:border-blue-300',
@@ -40,7 +40,7 @@ export function ToolsPage() {
       name: 'System Catalog',
       description:
         'Document, explore, and plan system architecture through interactive diagrams with searchable service and event metadata.',
-      icon: Workflow,
+      icon: NotebookText,
       iconColor: 'text-green-600',
       iconBg: 'bg-green-100',
       hoverBorder: 'hover:border-green-300',

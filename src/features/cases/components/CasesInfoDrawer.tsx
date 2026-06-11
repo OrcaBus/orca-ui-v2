@@ -2,6 +2,7 @@ import { useState } from 'react';
 import dayjs from 'dayjs';
 import { Briefcase, FolderSync, Plus } from 'lucide-react';
 import { DrawerFrame } from '@/components/modals/DrawerFrame';
+import { InfoDrawerActionCard } from '@/components/modals/InfoDrawerActionCard';
 import { useCaseSyncFromRedcapAutoHistoryModel } from '../api/cases.api';
 import { AddCaseModal } from './AddCaseModal';
 import { AutoImportFromRedcapModal } from './AutoImportFromRedcapModal';
@@ -62,23 +63,24 @@ export function CasesInfoDrawer({ isOpen, onClose }: CasesInfoDrawerProps) {
 
         <section>
           <h3 className='text-sm font-semibold text-slate-900 dark:text-white'>Actions</h3>
-          <div className='mt-3 space-y-2'>
-            <button
-              type='button'
+          <div className='mt-3 space-y-3'>
+            <InfoDrawerActionCard
+              title='Import from REDCap'
+              description='Pull case records from REDCap and review the import flow before adding them to the portal.'
+              buttonLabel='Auto Import from REDCap'
               onClick={() => setShowAutoImportModal(true)}
-              className='flex w-full items-center justify-center gap-2 rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-200 dark:hover:bg-[#2d3540]'
-            >
-              <FolderSync className='h-4 w-4' />
-              Auto Import from REDCap
-            </button>
-            <button
-              type='button'
+              icon={<FolderSync className='h-4 w-4' />}
+              buttonIcon={<FolderSync className='h-4 w-4' />}
+              variant='secondary'
+            />
+            <InfoDrawerActionCard
+              title='Create a case'
+              description='Create a single case record manually when it is not available through the REDCap import flow.'
+              buttonLabel='Add New Case'
               onClick={() => setShowAddCaseModal(true)}
-              className='flex w-full items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 dark:bg-[#137fec] dark:hover:bg-blue-600'
-            >
-              <Plus className='h-4 w-4' />
-              Add New Case
-            </button>
+              icon={<Briefcase className='h-4 w-4' />}
+              buttonIcon={<Plus className='h-4 w-4' />}
+            />
           </div>
         </section>
       </div>

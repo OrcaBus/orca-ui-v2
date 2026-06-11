@@ -13,10 +13,18 @@
  * └─────────────┴──────────────────────────────────────────────────────────┘
  *
  * ┌────────────────────────────────────────────────────────────────────────┐
- * │ GSI-1: StatusIndex (for list/filter)                                  │
+ * │ GSI-1: MapsByUpdatedAt (default list)                                 │
  * ├─────────────────┬──────────────────────────────────────────────────────┤
- * │ GSI1PK (String)  │ "STATUS#active"  or "STATUS#draft"                │
- * │ GSI1SK (String)  │ "UPDATED#2026-04-14T00:00:00Z#umccr-production"   │
+ * │ GSI1PK (String) │ "MAPS"                                              │
+ * │ GSI1SK (String) │ "UPDATED#2026-04-14T00:00:00Z#umccr-production"     │
+ * └─────────────────┴──────────────────────────────────────────────────────┘
+ *   → Enables: "List all maps, sorted by last updated"
+ *
+ * ┌────────────────────────────────────────────────────────────────────────┐
+ * │ GSI-2: StatusIndex (status-filtered list)                             │
+ * ├─────────────────┬──────────────────────────────────────────────────────┤
+ * │ GSI2PK (String) │ "STATUS#active"  or "STATUS#draft"                  │
+ * │ GSI2SK (String) │ "UPDATED#2026-04-14T00:00:00Z#umccr-production"     │
  * └─────────────────┴──────────────────────────────────────────────────────┘
  *   → Enables: "List all active maps, sorted by last updated"
  *   → Enables: "List all draft maps"
@@ -27,16 +35,24 @@
  * ════════════════════════════════════════════════════════════════════════════
  *
  * SINGLE-DOCUMENT model: Each map is ONE DynamoDB item containing
- * its nodes, groups, edges, and layout embedded as arrays/maps.
+ * its nodes, groups, edges, and engineColors embedded as arrays/maps.
  *
  * Why single-document (not normalized)?
  *  1. A map is always loaded as a whole (the ReactFlow canvas needs
- *     all nodes + edges + layout at once). No partial loading use case.
+ *     all nodes, groups, edges, and positions at once). No partial loading use case.
  *  2. Max item size: 400KB. A map with 50 nodes × ~2KB each = ~100KB.
  *     Even with rich event payloads we stay well under the limit.
  *  3. Writes are map-level (save button saves the entire canvas state).
- *     No need for fine-grained item-level mutations.
- *  4. Simpler transactions: Create/update/delete a map = 1 PutItem.
+ *     No need for node/group/edge subresource writes in v1.
+ *  4. Simpler concurrency: create/update/delete a map can stay within a
+ *     single conditional write plus an optional history item write.
+ *
+ * Explicit v1 non-goals:
+ *  - contains search over name/description/tags
+ *  - filtering by author or nodeType
+ *  - multiple sort modes
+ *
+ * Those patterns need additional indexing or a different database/search tier.
  *
  * When would you split?
  *  - If maps exceed ~300 nodes (approaching 400KB).
@@ -49,21 +65,28 @@
  *
  *  #  │ Access Pattern                          │ Key Condition
  *  ───┼─────────────────────────────────────────┼──────────────────────────
- *  1  │ List all maps (summaries)           │ PK = "CATALOG_V1",
- *     │                                         │ SK begins_with "MAP#"
+ *  1  │ List all maps (summaries)           │ GSI1PK = "MAPS"
+ *     │ (sorted by updatedAt)                   │ GSI1SK begins_with "UPDATED#"
  *     │                                         │ ProjectionExpression on
  *     │                                         │ summary fields only
  *  ───┼─────────────────────────────────────────┼──────────────────────────
- *  2  │ Get full map                        │ PK = "CATALOG_V1",
- *     │                                         │ SK = "MAP#<mapId>"
+ *  2  │ Filter maps by status               │ GSI2PK = "STATUS#active",
+ *     │ (sorted by updatedAt)                   │ GSI2SK begins_with "UPDATED#"
  *  ───┼─────────────────────────────────────────┼──────────────────────────
- *  3  │ Filter maps by status               │ GSI1PK = "STATUS#active",
- *     │ (sorted by updatedAt)                   │ GSI1SK begins_with "UPDATED#"
+ *  3  │ Get full map                        │ PK = "CATALOG_V1",
+ *     │                                         │ SK = "MAP#<mapId>"
  *  ───┼─────────────────────────────────────────┼──────────────────────────
  *  4  │ Create map                          │ PutItem (condition: SK
  *     │                                         │ attribute_not_exists)
  *  ───┼─────────────────────────────────────────┼──────────────────────────
- *  5  │ Update map (full replace)           │ PutItem
+ *  5  │ Save full map content               │ UpdateExpression SET
+ *     │ (nodes, groups, edges, colors)          │ nodes = :nodes, groups = :groups,
+ *     │                                         │ edges = :edges, engineColors = :colors,
+ *     │                                         │ nodeCount = :nodeCount,
+ *     │                                         │ edgeCount = :edgeCount,
+ *     │                                         │ version = :nextVersion
+ *     │                                         │ ConditionExpression:
+ *     │                                         │ version = :expectedVersion
  *  ───┼─────────────────────────────────────────┼──────────────────────────
  *  6  │ Update map metadata only            │ UpdateExpression SET
  *     │ (name, description, status, tags)       │ name = :n, status = :s ...
@@ -121,7 +144,6 @@ export type HistoryChangeType =
   | 'created'
   | 'metadata_updated'
   | 'content_saved'
-  | 'content_patched'
   | 'node_added'
   | 'node_updated'
   | 'node_deleted'
@@ -144,7 +166,7 @@ export interface MapNode {
   version: string;
   engine: string;
   description: string;
-  /** Group IDs this node belongs to (many-to-many). */
+  /** Derived membership view for clients. Canonical membership lives on MapGroup.nodeIds. */
   groupIds: string[];
   inputEvents: EventDef[];
   outputEvents: EventDef[];
@@ -167,11 +189,12 @@ export interface MapGroup {
   description?: string;
   type: GroupType;
   color: string;
-  /** Node IDs belonging to this group. */
+  /** Canonical node membership list for this group. */
   nodeIds: string[];
 }
 
 export interface MapEdge {
+  /** UUIDs are preferred; deterministic edgeType-aware IDs are acceptable. */
   edgeId: string;
   source: string;
   target: string;
@@ -187,10 +210,14 @@ export interface DynamoDBMapItem {
   /** Sort key: "MAP#<mapId>" */
   SK: string;
 
-  /** GSI-1 partition key: "STATUS#<status>" */
+  /** GSI-1 partition key: "MAPS" */
   GSI1PK: string;
   /** GSI-1 sort key: "UPDATED#<ISO8601>#<mapId>" */
   GSI1SK: string;
+  /** GSI-2 partition key: "STATUS#<status>" */
+  GSI2PK: string;
+  /** GSI-2 sort key: "UPDATED#<ISO8601>#<mapId>" */
+  GSI2SK: string;
 
   entityType: 'MAP';
 
@@ -288,7 +315,10 @@ export interface DynamoDBHistoryItem {
   changedAt: string;
   summary: string;
   /** Optional: full map snapshot at this point for restore capability. */
-  snapshot?: Omit<DynamoDBMapItem, 'PK' | 'SK' | 'GSI1PK' | 'GSI1SK' | 'entityType'>;
+  snapshot?: Omit<
+    DynamoDBMapItem,
+    'PK' | 'SK' | 'GSI1PK' | 'GSI1SK' | 'GSI2PK' | 'GSI2SK' | 'entityType'
+  >;
 }
 
 // ─── CDK Table Definition (reference) ─────────────────────────────────────
@@ -307,9 +337,22 @@ export interface DynamoDBHistoryItem {
  * });
  *
  * table.addGlobalSecondaryIndex({
- *   indexName: 'StatusIndex',
+ *   indexName: 'MapsByUpdatedAt',
  *   partitionKey: { name: 'GSI1PK', type: dynamodb.AttributeType.STRING },
  *   sortKey: { name: 'GSI1SK', type: dynamodb.AttributeType.STRING },
+ *   projectionType: dynamodb.ProjectionType.INCLUDE,
+ *   nonKeyAttributes: [
+ *     'mapId', 'name', 'description', 'status',
+ *     'version', 'isDeleted',
+ *     'createdBy', 'createdAt', 'updatedBy', 'updatedAt',
+ *     'tags', 'nodeCount', 'edgeCount',
+ *   ],
+ * });
+ *
+ * table.addGlobalSecondaryIndex({
+ *   indexName: 'StatusIndex',
+ *   partitionKey: { name: 'GSI2PK', type: dynamodb.AttributeType.STRING },
+ *   sortKey: { name: 'GSI2SK', type: dynamodb.AttributeType.STRING },
  *   projectionType: dynamodb.ProjectionType.INCLUDE,
  *   nonKeyAttributes: [
  *     'mapId', 'name', 'description', 'status',

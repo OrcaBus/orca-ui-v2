@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { X, Zap, Info } from 'lucide-react';
 import { tryPrettyJson } from '@/utils/json';
-import type { EventDef, EventFormData } from '../types/system-catalog.types';
+import type { EventDef } from '../data/dynamodb-schema';
+import type { EventFormData } from '../types/system-catalog.types';
 import { defaultEventFormData, eventDefToForm, formToEventDef } from '../utils/eventForm';
 
 interface EventModalProps {

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Zap, ChevronRight, Pencil, Trash2 } from 'lucide-react';
-import type { EventDef } from '../types/system-catalog.types';
+import type { EventDef } from '../data/dynamodb-schema';
 
 interface EventCardProps {
   event: EventDef;

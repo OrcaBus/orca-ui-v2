@@ -1,13 +1,15 @@
-// ─── Domain Types (used by both frontend and API) ─────────────────────────
+import type {
+  EventDef as MapEventDef,
+  GroupType,
+  MapEdgeType,
+  MapGroup,
+  MapNode,
+  MapNodeType,
+  ResourceType,
+  WorkflowEngine,
+} from '../data/dynamodb-schema';
 
-export interface EventDef {
-  name: string;
-  topic?: string;
-  condition?: string;
-  payload: Record<string, unknown>;
-}
-
-/** Form shape for add/edit event modal in system catalog. */
+export type EventDef = MapEventDef;
 export interface EventFormData {
   name: string;
   topic: string;
@@ -19,17 +21,34 @@ export type NodeConfig = Record<string, string>;
 
 export interface NodeParentLink {
   nodeId: string;
-  edgeType: EdgeType;
+  edgeType: MapEdgeType;
 }
 
 export interface NodeFormData {
   name: string;
   version: string;
-  engine: string;
-  groupId: string;
+  nodeType: MapNodeType;
+  resourceType: ResourceType;
+  workflowEngine: WorkflowEngine;
+  groupIds: string[];
   parentLinks: NodeParentLink[];
   description: string;
   configJson: string;
+}
+
+export type EdgeType = MapEdgeType;
+
+export interface EdgeDef {
+  id: string;
+  source: string;
+  target: string;
+  edgeType: EdgeType;
+  label?: string;
+}
+
+export interface NodePosition {
+  x: number;
+  y: number;
 }
 
 export interface CatalogNodeData {
@@ -46,6 +65,29 @@ export interface CatalogNodeData {
   [key: string]: unknown;
 }
 
+export interface CatalogNodeLookupItem {
+  label: string;
+  nodeType: MapNodeType;
+  resourceType?: ResourceType;
+  workflowEngine?: WorkflowEngine;
+}
+
+export type CatalogNodeViewData = MapNode & {
+  dimmed?: boolean;
+  highlighted?: boolean;
+  accentColor?: string;
+};
+
+export interface GroupFilterItem {
+  id: string;
+  name: string;
+  type: GroupType | 'all';
+  count: number;
+  color: string;
+  nodeIds: string[];
+  description?: string;
+}
+
 export interface GroupItem {
   id: string;
   name: string;
@@ -53,37 +95,7 @@ export interface GroupItem {
   count: number;
   color: string;
   nodeIds: string[];
+  description?: string;
 }
 
-export type EdgeType =
-  | 'trigger'
-  | 'trigger_input'
-  | 'input_dependency'
-  | 'event_publish'
-  | 'event_subscribe'
-  | 'state_change'
-  | 'execution_request'
-  | 'rest_call';
-
-export interface EdgeDef {
-  id: string;
-  source: string;
-  target: string;
-  edgeType: EdgeType;
-  label?: string;
-}
-
-export interface NodePosition {
-  x: number;
-  y: number;
-}
-
-// ─── API Response Types ───────────────────────────────────────────────────
-
-export interface CatalogApiResponse {
-  nodes: Record<string, CatalogNodeData>;
-  groups: GroupItem[];
-  edges: EdgeDef[];
-  layout: Record<string, NodePosition>;
-  engineColors: Record<string, string>;
-}
+export type CatalogGroup = MapGroup;

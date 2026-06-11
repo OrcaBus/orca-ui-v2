@@ -32,6 +32,7 @@ export type Readset = components['schemas']['Readset'];
 export type CommentSeverityEnum = components['schemas']['SeverityEnum'];
 
 export type WorkflowModel = components['schemas']['Workflow'];
+export type WorkflowStatusEnum = components['schemas']['StatusEnum'];
 export type WorkflowListModel = components['schemas']['WorkflowList'];
 export type WorkflowHistoryModel = components['schemas']['WorkflowHistory'];
 export type ValidationStateEnum = components['schemas']['ValidationStateEnum'];
@@ -58,7 +59,7 @@ export type AnalysisListModel = components['schemas']['AnalysisMin'];
 export type AnalysisContextModel = components['schemas']['AnalysisContext'];
 export type ComputeContextModel = components['schemas']['AnalysisContext'];
 export type StorageContextModel = components['schemas']['AnalysisContext'];
-export type WorkflowStatusEnum = components['schemas']['StatusEnum'];
+export type AnalysisStatusEnum = components['schemas']['StatusEnum'];
 export type UsecaseEnum = components['schemas']['UsecaseEnum'];
 
 export type ListWorkflowModel = operations['workflowList']['parameters']['query'];

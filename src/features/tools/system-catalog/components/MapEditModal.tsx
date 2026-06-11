@@ -137,11 +137,6 @@ export function MapEditModal({
 
   const parsedTags = parseTagsJson(tagsJson) ?? {};
 
-  const onFormSubmit = (data: MapFormData) => {
-    onSubmit(data);
-    onClose();
-  };
-
   const handleClose = () => {
     reset();
     setTagKey('');
@@ -153,7 +148,7 @@ export function MapEditModal({
     <div className='fixed inset-0 z-50 flex items-center justify-center'>
       <div className='absolute inset-0 bg-black/40 backdrop-blur-sm' onClick={handleClose} />
       <div className='relative flex max-h-[calc(100vh-4rem)] w-full max-w-lg flex-col rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-[#2d3540] dark:bg-[#111418]'>
-        <form onSubmit={(e) => void handleSubmit(onFormSubmit)(e)} className='contents'>
+        <form onSubmit={(e) => void handleSubmit(onSubmit)(e)} className='contents'>
           {/* Header */}
           <div className='flex shrink-0 items-start justify-between px-6 pt-6 pb-2'>
             <div>

@@ -53,7 +53,7 @@ export function SyncHistoryDialog({ isOpen, onClose }: SyncHistoryDialogProps) {
       title='REDCap Sync History'
       description='Past automatic imports from REDCap.'
       icon={<History className='h-5 w-5' />}
-      size='md'
+      size='xl'
       bodyClassName='p-0'
     >
       <div className='p-4'>

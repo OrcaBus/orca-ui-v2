@@ -20,4 +20,3 @@ export { CaseDetailsUsersTable } from './CaseDetailsUsersTable';
 
 // deprecated exports - to be removed in a future release
 export { AutoGenerateCasesModal } from './AutoGenerateCasesModal';
-export { CaseSummaryDrawer } from './CaseSummaryDrawer';

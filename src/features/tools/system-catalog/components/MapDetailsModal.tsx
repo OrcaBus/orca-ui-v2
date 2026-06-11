@@ -1,4 +1,4 @@
-import { Pencil, Calendar, User, Tag, GitBranch, Box } from 'lucide-react';
+import { Pencil, Calendar, User, Tag, NotebookText, Box, Trash2 } from 'lucide-react';
 import { DialogFrame } from '@/components/modals/DialogFrame';
 import { Badge } from '@/components/ui/Badge';
 import type { MapSummary } from '../data/dynamodb-schema';
@@ -25,9 +25,18 @@ interface MapDetailsModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onEdit: () => void;
+  onDelete: () => void;
+  isDeleting?: boolean;
 }
 
-export function MapDetailsModal({ map, open, onOpenChange, onEdit }: MapDetailsModalProps) {
+export function MapDetailsModal({
+  map,
+  open,
+  onOpenChange,
+  onEdit,
+  onDelete,
+  isDeleting = false,
+}: MapDetailsModalProps) {
   const badge = STATUS_BADGE[map.status] ?? STATUS_BADGE.draft;
 
   return (
@@ -39,17 +48,28 @@ export function MapDetailsModal({ map, open, onOpenChange, onEdit }: MapDetailsM
       titleAdornment={<Badge variant={badge.variant}>{badge.label}</Badge>}
       size='md'
       footer={
-        <button
-          type='button'
-          onClick={() => {
-            onOpenChange(false);
-            onEdit();
-          }}
-          className='flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600'
-        >
-          <Pencil className='h-3.5 w-3.5' />
-          Edit Map
-        </button>
+        <>
+          <button
+            type='button'
+            onClick={onDelete}
+            disabled={isDeleting}
+            className='flex items-center gap-2 rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-red-500/30 dark:text-red-400 dark:hover:bg-red-500/10'
+          >
+            <Trash2 className='h-3.5 w-3.5' />
+            {isDeleting ? 'Archiving…' : 'Archive Map'}
+          </button>
+          <button
+            type='button'
+            onClick={() => {
+              onOpenChange(false);
+              onEdit();
+            }}
+            className='flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600'
+          >
+            <Pencil className='h-3.5 w-3.5' />
+            Edit Map
+          </button>
+        </>
       }
     >
       <div className='grid gap-4 text-sm'>
@@ -109,7 +129,7 @@ export function MapDetailsModal({ map, open, onOpenChange, onEdit }: MapDetailsM
             <span className='text-slate-500 dark:text-[#6b7a8d]'>nodes</span>
           </div>
           <div className='flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2 dark:bg-[#1a2029]'>
-            <GitBranch className='h-4 w-4 text-slate-400 dark:text-[#6b7a8d]' />
+            <NotebookText className='h-4 w-4 text-slate-400 dark:text-[#6b7a8d]' />
             <span className='font-semibold text-slate-900 dark:text-white'>{map.edgeCount}</span>
             <span className='text-slate-500 dark:text-[#6b7a8d]'>edges</span>
           </div>
