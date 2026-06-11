@@ -1,4 +1,4 @@
-import { useMemo, useCallback, useEffect } from 'react';
+import { useMemo, useCallback, useEffect, useRef } from 'react';
 import {
   ReactFlow,
   type Edge,
@@ -17,9 +17,10 @@ import {
 import { Cpu } from 'lucide-react';
 import { useTheme } from '@/context/theme-context';
 import type { MapEdge, MapEdgeType, MapGroup, MapNode } from '../data/dynamodb-schema';
-import type { CatalogNodeViewData } from '../types/system-catalog.types';
+import type { CatalogNodeViewData, NodePosition } from '../types/system-catalog.types';
 import { ALL_GROUP_ID } from '../utils/mapModel';
 import { getNodeAccentColor, getNodeDetailLabel, getNodeKindLabel } from '../utils/nodeDisplay';
+import { useAutoLayout } from '../hooks/useAutoLayout';
 import {
   IcaPipelineNode,
   EventBridgeNode,
@@ -135,6 +136,10 @@ export interface MapInnerProps {
   edges: MapEdge[];
   groups: MapGroup[];
   engineColors: Record<string, string>;
+  /** Incremented by the toolbar's "Auto Layout" button to request a fresh dagre layout. */
+  autoLayoutSignal: number;
+  /** Reports dagre-computed positions back so they can be persisted on save. */
+  onAutoLayout: (positions: Record<string, NodePosition>) => void;
 }
 
 export function MapInner({
@@ -146,8 +151,11 @@ export function MapInner({
   edges: mapEdges,
   groups,
   engineColors,
+  autoLayoutSignal,
+  onAutoLayout,
 }: MapInnerProps) {
   const { fitView } = useReactFlow();
+  const { runLayout, nodesInitialized } = useAutoLayout();
   const { resolvedTheme } = useTheme();
 
   const edgeMeta = useMemo(
@@ -206,7 +214,7 @@ export function MapInner({
       .map((node) => ({
         id: node.nodeId,
         type: resolveReactFlowNodeType(node),
-        position: node.position,
+        position: node.position ?? { x: 0, y: 0 },
         data: {
           ...node,
           accentColor: getNodeAccentColor(node, engineColors),
@@ -271,10 +279,53 @@ export function MapInner({
   const [nodes, setNodes, onNodesChange] = useNodesState(computedNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(computedEdges);
 
+  // Re-sync data/styling from props while preserving each node's live position
+  // (from drag or auto-layout), so switching groups, searching, or toggling theme
+  // never resets the computed layout back to the origin.
   useEffect(() => {
-    setNodes(computedNodes);
+    setNodes((current) => {
+      const positionById = new Map(current.map((node) => [node.id, node.position]));
+      return computedNodes.map((node) => {
+        const livePosition = positionById.get(node.id);
+        return livePosition ? { ...node, position: livePosition } : node;
+      });
+    });
     setEdges(computedEdges);
   }, [computedNodes, computedEdges, setNodes, setEdges]);
+
+  // A map whose nodes have no stored positions needs a one-off dagre layout once
+  // React Flow has measured the nodes, so it renders readable instead of stacked.
+  const needsAutoLayout = useMemo(
+    () => mapNodes.length > 0 && mapNodes.some((node) => !node.position),
+    [mapNodes]
+  );
+
+  const hasAutoLaidOut = useRef(false);
+  useEffect(() => {
+    if (hasAutoLaidOut.current || !nodesInitialized) {
+      return;
+    }
+    hasAutoLaidOut.current = true;
+    if (needsAutoLayout) {
+      runLayout(setNodes, { direction: 'LR' });
+    }
+  }, [nodesInitialized, needsAutoLayout, runLayout, setNodes]);
+
+  // Toolbar "Auto Layout" button: re-run dagre and report positions back for persistence.
+  const processedLayoutSignal = useRef(autoLayoutSignal);
+  useEffect(() => {
+    if (processedLayoutSignal.current === autoLayoutSignal) {
+      return;
+    }
+    processedLayoutSignal.current = autoLayoutSignal;
+
+    const laidOutNodes = runLayout(setNodes, { direction: 'LR' });
+    const positions: Record<string, NodePosition> = {};
+    for (const node of laidOutNodes) {
+      positions[node.id] = node.position;
+    }
+    onAutoLayout(positions);
+  }, [autoLayoutSignal, runLayout, setNodes, onAutoLayout]);
 
   useEffect(() => {
     const timer = setTimeout(() => {

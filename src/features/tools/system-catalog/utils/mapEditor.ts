@@ -24,6 +24,7 @@ export type MapEditorAction =
   | { type: 'upsertGroup'; group: MapGroup }
   | { type: 'deleteGroup'; groupId: string }
   | { type: 'updateNodePosition'; nodeId: string; position: MapNode['position'] }
+  | { type: 'setNodePositions'; positions: Record<string, MapNode['position']> }
   | { type: 'updateMetadata'; patch: MetadataPatch };
 
 export function mapEditorReducer(state: MapFull | null, action: MapEditorAction): MapFull | null {
@@ -118,6 +119,20 @@ export function mapEditorReducer(state: MapFull | null, action: MapEditorAction)
             ? {
                 ...node,
                 position: action.position,
+              }
+            : node
+        ),
+      };
+    }
+
+    case 'setNodePositions': {
+      return {
+        ...state,
+        nodes: state.nodes.map((node) =>
+          action.positions[node.nodeId]
+            ? {
+                ...node,
+                position: action.positions[node.nodeId],
               }
             : node
         ),

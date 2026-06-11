@@ -113,11 +113,16 @@ function buildNodeFromForm({
   };
 }
 
+type PlacedPosition = NonNullable<MapNode['position']>;
+
+const hasPosition = (position: MapNode['position']): position is PlacedPosition =>
+  Boolean(position);
+
 function getNextNodePosition(map: MapFull, parentNodeIds: string[]): MapNode['position'] {
   const nodesById = toRecord(map.nodes);
   const parentPositions = parentNodeIds
     .map((nodeId) => nodesById[nodeId]?.position)
-    .filter(Boolean);
+    .filter(hasPosition);
 
   if (parentPositions.length > 0) {
     return {
@@ -126,10 +131,12 @@ function getNextNodePosition(map: MapFull, parentNodeIds: string[]): MapNode['po
     };
   }
 
-  if (map.nodes.length > 0) {
+  const placedPositions = map.nodes.map((node) => node.position).filter(hasPosition);
+
+  if (placedPositions.length > 0) {
     return {
-      x: Math.max(...map.nodes.map((node) => node.position.x)) + 320,
-      y: map.nodes.reduce((sum: number, node) => sum + node.position.y, 0) / map.nodes.length,
+      x: Math.max(...placedPositions.map((position) => position.x)) + 320,
+      y: placedPositions.reduce((sum, position) => sum + position.y, 0) / placedPositions.length,
     };
   }
 
@@ -178,6 +185,7 @@ function SystemCatalogContent({ mapId }: { mapId: string }) {
   const [deleteGroupConfirm, setDeleteGroupConfirm] = useState<MapGroup | null>(null);
   const [isMapDeleteConfirmOpen, setIsMapDeleteConfirmOpen] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
+  const [autoLayoutSignal, setAutoLayoutSignal] = useState(0);
 
   const {
     data: fetchedMap,
@@ -310,12 +318,14 @@ function SystemCatalogContent({ mapId }: { mapId: string }) {
       const nodeId = editingId ?? slugify(formData.name);
       const existingNode = editingId ? nodesById[editingId] : undefined;
       const resolvedNodeId = !editingId && nodesById[nodeId] ? `${nodeId}-${Date.now()}` : nodeId;
-      const position =
-        existingNode?.position ??
-        getNextNodePosition(
-          editorMap,
-          formData.parentLinks.map((parentLink) => parentLink.nodeId)
-        );
+      // Editing keeps the node where it is (even if it has no stored position yet — its
+      // live auto-laid-out spot is preserved). New nodes get an initial placement.
+      const position = existingNode
+        ? existingNode.position
+        : getNextNodePosition(
+            editorMap,
+            formData.parentLinks.map((parentLink) => parentLink.nodeId)
+          );
 
       applyEditorAction({
         type: 'upsertNode',
@@ -420,6 +430,17 @@ function SystemCatalogContent({ mapId }: { mapId: string }) {
   const handleUpdateNodePosition = useCallback(
     (nodeId: string, position: MapNode['position']) => {
       applyEditorAction({ type: 'updateNodePosition', nodeId, position });
+    },
+    [applyEditorAction]
+  );
+
+  const handleTriggerAutoLayout = useCallback(() => {
+    setAutoLayoutSignal((signal) => signal + 1);
+  }, []);
+
+  const handleApplyAutoLayoutPositions = useCallback(
+    (positions: Record<string, NonNullable<MapNode['position']>>) => {
+      applyEditorAction({ type: 'setNodePositions', positions });
     },
     [applyEditorAction]
   );
@@ -623,6 +644,7 @@ function SystemCatalogContent({ mapId }: { mapId: string }) {
         onSelectGroup={setSelectedGroup}
         onSearchChange={setSearchQuery}
         onAddNode={handleOpenAddModal}
+        onAutoLayout={handleTriggerAutoLayout}
         onSave={() => {
           void handleSaveContent();
         }}
@@ -649,6 +671,8 @@ function SystemCatalogContent({ mapId }: { mapId: string }) {
             edges={editorMap.edges}
             groups={editorMap.groups}
             engineColors={editorMap.engineColors}
+            autoLayoutSignal={autoLayoutSignal}
+            onAutoLayout={handleApplyAutoLayoutPositions}
           />
         </div>
 

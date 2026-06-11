@@ -88,6 +88,7 @@ paths:
         - $ref: '#/components/parameters/Limit'
         - $ref: '#/components/parameters/Cursor'
         - $ref: '#/components/parameters/IncludeDeleted'
+        - $ref: '#/components/parameters/UserEmail'
       responses:
         '200':
           description: Paginated list of map summaries
@@ -401,6 +402,15 @@ components:
         default: false
       description: Include soft-deleted maps in results
 
+    UserEmail:
+      name: userEmail
+      in: query
+      required: false
+      schema:
+        type: string
+        format: email
+      description: Filter maps by user email (matches createdBy or updatedBy)
+
     IfMatch:
       name: If-Match
       in: header
@@ -573,7 +583,6 @@ components:
         - inputEvents
         - outputEvents
         - tags
-        - position
       properties:
         nodeId:
           type: string
@@ -614,7 +623,12 @@ components:
             maxRetries: '2'
             timeout: '8h'
         position:
-          $ref: '#/components/schemas/Position'
+          allOf:
+            - $ref: '#/components/schemas/Position'
+          description: |
+            Optional, client-curated canvas position. When omitted, the client computes
+            a layout automatically (dagre) from the graph edges. A stored position acts as
+            a manual override (e.g. after dragging a node).
 
     ResourceMapNode:
       allOf:

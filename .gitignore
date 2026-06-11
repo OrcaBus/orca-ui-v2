@@ -71,6 +71,7 @@ stats.html
 src/api/types/*
 
 # Ignore AI agents files and skills
-.cursor/ 
 .github/skills/*
 .agents/*
+.claude/*
+.cursor/*

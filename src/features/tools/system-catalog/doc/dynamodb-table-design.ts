@@ -172,8 +172,12 @@ export interface MapNode {
   outputEvents: EventDef[];
   /** Arbitrary key-value pairs. */
   tags: Record<string, string>;
-  /** Canvas position in pixels. */
-  position: { x: number; y: number };
+  /**
+   * Optional, client-curated canvas position in pixels. When absent, the client
+   * auto-computes a layout (dagre) from the edges; a stored value is a manual
+   * override (e.g. after dragging). Persisted only when the user lays out or drags.
+   */
+  position?: { x: number; y: number };
 }
 
 export interface EventDef {

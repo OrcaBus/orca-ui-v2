@@ -10,6 +10,7 @@ import {
   Pencil,
   Trash2,
   Save,
+  Network,
 } from 'lucide-react';
 import type { GroupFilterItem } from '../types/system-catalog.types';
 
@@ -25,6 +26,7 @@ interface FloatingToolbarProps {
   onSelectGroup: (groupId: string) => void;
   onSearchChange: (query: string) => void;
   onAddNode: () => void;
+  onAutoLayout: () => void;
   onSave: () => void;
   onAddGroup: () => void;
   onEditGroup: (group: GroupFilterItem) => void;
@@ -45,6 +47,7 @@ export function FloatingToolbar({
   onSelectGroup,
   onSearchChange,
   onAddNode,
+  onAutoLayout,
   onSave,
   onAddGroup,
   onEditGroup,
@@ -284,6 +287,18 @@ export function FloatingToolbar({
         >
           <Plus className='h-3.5 w-3.5' />
           <span className='hidden sm:inline'>Add Node</span>
+        </button>
+
+        <div className='mx-0.5 h-5 w-px bg-slate-200 dark:bg-[#2d3540]' />
+
+        {/* Auto layout */}
+        <button
+          type='button'
+          onClick={onAutoLayout}
+          title='Auto layout'
+          className='flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:text-[#6b7a8d] dark:hover:bg-[#1e252e] dark:hover:text-white'
+        >
+          <Network className='h-4 w-4' />
         </button>
 
         <div className='mx-0.5 h-5 w-px bg-slate-200 dark:bg-[#2d3540]' />
