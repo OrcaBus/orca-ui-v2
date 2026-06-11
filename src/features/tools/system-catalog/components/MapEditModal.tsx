@@ -69,6 +69,12 @@ interface MapEditModalProps {
   isEditing: boolean;
   onSubmit: (data: MapFormData) => void | Promise<void>;
   onClose: () => void;
+  /** Override the dialog title (defaults to Edit/Create based on `isEditing`). */
+  title?: string;
+  /** Override the dialog subtitle. */
+  description?: string;
+  /** Override the submit button label. */
+  submitLabel?: string;
 }
 
 // ─── Component ──────────────────────────────────────────────────────────────
@@ -79,6 +85,9 @@ export function MapEditModal({
   isEditing,
   onSubmit,
   onClose,
+  title,
+  description,
+  submitLabel,
 }: MapEditModalProps) {
   const {
     register,
@@ -148,8 +157,10 @@ export function MapEditModal({
     <DialogFrame
       isOpen={isOpen}
       onClose={handleClose}
-      title={isEditing ? 'Edit Map' : 'Create New Map'}
-      description={isEditing ? 'Update map properties.' : 'Set up a new map from scratch.'}
+      title={title ?? (isEditing ? 'Edit Map' : 'Create New Map')}
+      description={
+        description ?? (isEditing ? 'Update map properties.' : 'Set up a new map from scratch.')
+      }
       icon={<NotebookText className='h-5 w-5' />}
       size='md'
       closeDisabled={isSubmitting}
@@ -169,7 +180,7 @@ export function MapEditModal({
             className='inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-blue-500 dark:hover:bg-blue-600'
           >
             <Plus className='h-3.5 w-3.5' />
-            {isEditing ? 'Save Changes' : 'Create Map'}
+            {submitLabel ?? (isEditing ? 'Save Changes' : 'Create Map')}
           </button>
         </div>
       }

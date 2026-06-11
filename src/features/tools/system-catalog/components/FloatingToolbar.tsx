@@ -11,6 +11,7 @@ import {
   Trash2,
   Save,
   Network,
+  Copy,
 } from 'lucide-react';
 import type { GroupFilterItem } from '../types/system-catalog.types';
 
@@ -27,6 +28,7 @@ interface FloatingToolbarProps {
   onSearchChange: (query: string) => void;
   onAddNode: () => void;
   onAutoLayout: () => void;
+  onDuplicate: () => void;
   onSave: () => void;
   onAddGroup: () => void;
   onEditGroup: (group: GroupFilterItem) => void;
@@ -48,6 +50,7 @@ export function FloatingToolbar({
   onSearchChange,
   onAddNode,
   onAutoLayout,
+  onDuplicate,
   onSave,
   onAddGroup,
   onEditGroup,
@@ -299,6 +302,18 @@ export function FloatingToolbar({
           className='flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:text-[#6b7a8d] dark:hover:bg-[#1e252e] dark:hover:text-white'
         >
           <Network className='h-4 w-4' />
+        </button>
+
+        <div className='mx-0.5 h-5 w-px bg-slate-200 dark:bg-[#2d3540]' />
+
+        {/* Make a copy */}
+        <button
+          type='button'
+          onClick={onDuplicate}
+          title='Make a copy'
+          className='flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:text-[#6b7a8d] dark:hover:bg-[#1e252e] dark:hover:text-white'
+        >
+          <Copy className='h-4 w-4' />
         </button>
 
         <div className='mx-0.5 h-5 w-px bg-slate-200 dark:bg-[#2d3540]' />

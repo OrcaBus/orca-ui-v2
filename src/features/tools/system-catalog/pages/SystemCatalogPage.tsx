@@ -9,6 +9,7 @@ import type { MapFull, MapGroup, MapNode } from '../data/dynamodb-schema';
 import {
   systemCatalogMapQuery,
   systemCatalogMapsQuery,
+  useCreateSystemCatalogMap,
   useDeleteSystemCatalogMap,
   useSaveSystemCatalogMapContent,
   useSystemCatalogMap,
@@ -71,6 +72,26 @@ function isPreconditionFailure(error: unknown): boolean {
     candidate.response?.status === 412 ||
     candidate.code === 'PRECONDITION_FAILED' ||
     candidate.error?.code === 'PRECONDITION_FAILED'
+  );
+}
+
+function isConflict(error: unknown): boolean {
+  if (!error || typeof error !== 'object') {
+    return false;
+  }
+
+  const candidate = error as {
+    status?: number;
+    response?: { status?: number };
+    code?: string;
+    error?: { code?: string };
+  };
+
+  return (
+    candidate.status === 409 ||
+    candidate.response?.status === 409 ||
+    candidate.code === 'CONFLICT' ||
+    candidate.error?.code === 'CONFLICT'
   );
 }
 
@@ -186,6 +207,7 @@ function SystemCatalogContent({ mapId }: { mapId: string }) {
   const [isMapDeleteConfirmOpen, setIsMapDeleteConfirmOpen] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
   const [autoLayoutSignal, setAutoLayoutSignal] = useState(0);
+  const [isDuplicateOpen, setIsDuplicateOpen] = useState(false);
 
   const {
     data: fetchedMap,
@@ -207,6 +229,7 @@ function SystemCatalogContent({ mapId }: { mapId: string }) {
   const updateMapMutation = useUpdateSystemCatalogMap();
   const saveContentMutation = useSaveSystemCatalogMapContent();
   const deleteMapMutation = useDeleteSystemCatalogMap();
+  const createMapMutation = useCreateSystemCatalogMap();
 
   useEffect(() => {
     if (fetchedMap) {
@@ -226,6 +249,15 @@ function SystemCatalogContent({ mapId }: { mapId: string }) {
     [editorMap]
   );
   const mapSummary = useMemo(() => (editorMap ? mapToSummary(editorMap) : null), [editorMap]);
+  const duplicateInitialData = useMemo<MapFormData>(
+    () => ({
+      name: editorMap ? `Copy of ${editorMap.name}` : '',
+      description: editorMap?.description ?? '',
+      status: 'draft',
+      tagsJson: JSON.stringify(editorMap?.tags ?? {}, null, 2),
+    }),
+    [editorMap]
+  );
   const headerMapName =
     mapSummary?.name ?? fetchedMap?.name ?? (isError ? 'Unavailable' : 'Loading...');
   const headerConfig = useMemo(
@@ -542,6 +574,56 @@ function SystemCatalogContent({ mapId }: { mapId: string }) {
     [editorMap, mapId, updateMapMutation, updateCaches]
   );
 
+  const handleDuplicateMap = useCallback(
+    async (data: MapFormData) => {
+      if (!editorMap) {
+        return;
+      }
+
+      try {
+        // 1. Create the new map (metadata only). The backend stamps createdBy from the
+        //    current actor, so the copy is owned by the user making it.
+        const createdMap = await createMapMutation.mutateAsync({
+          body: {
+            name: data.name,
+            description: data.description,
+            status: data.status,
+            tags: parseTagsJson(data.tagsJson),
+            engineColors: editorMap.engineColors,
+          },
+        });
+
+        // 2. Copy the current diagram content into the new map (version starts at 1).
+        const savedMap = await saveContentMutation.mutateAsync({
+          params: {
+            path: { mapId: createdMap.mapId },
+            header: {
+              'If-Match': `"${createdMap.version}"`,
+            },
+          },
+          body: {
+            nodes: editorMap.nodes,
+            groups: editorMap.groups,
+            edges: editorMap.edges,
+            engineColors: editorMap.engineColors,
+          },
+        });
+
+        updateCaches(savedMap);
+        setIsDuplicateOpen(false);
+        toast.success('Map copied.');
+        void navigate(`/tools/system-catalog/${savedMap.mapId}`);
+      } catch (error) {
+        toast.error(
+          isConflict(error)
+            ? 'A map with this name already exists. Pick a different name.'
+            : 'Unable to copy map.'
+        );
+      }
+    },
+    [editorMap, createMapMutation, saveContentMutation, updateCaches, navigate]
+  );
+
   const handleArchiveMap = useCallback(async () => {
     if (!editorMap || !mapId) {
       return;
@@ -645,6 +727,7 @@ function SystemCatalogContent({ mapId }: { mapId: string }) {
         onSearchChange={setSearchQuery}
         onAddNode={handleOpenAddModal}
         onAutoLayout={handleTriggerAutoLayout}
+        onDuplicate={() => setIsDuplicateOpen(true)}
         onSave={() => {
           void handleSaveContent();
         }}
@@ -731,6 +814,19 @@ function SystemCatalogContent({ mapId }: { mapId: string }) {
           void handleUpdateMap(data);
         }}
         onClose={() => setIsMapEditOpen(false)}
+      />
+
+      <MapEditModal
+        isOpen={isDuplicateOpen}
+        isEditing={false}
+        title='Copy Map'
+        description='Create a copy under your name. Nodes, groups, and edges are preserved.'
+        submitLabel='Create Copy'
+        initialData={duplicateInitialData}
+        onSubmit={(data) => {
+          void handleDuplicateMap(data);
+        }}
+        onClose={() => setIsDuplicateOpen(false)}
       />
 
       <GroupEditModal
