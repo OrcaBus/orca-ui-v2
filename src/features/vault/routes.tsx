@@ -2,7 +2,9 @@ import { lazy } from 'react';
 import type { RouteObject } from 'react-router';
 import { useEnvironment } from '@/context/environment-context';
 
-const VaultPage = lazy(() => import('./pages/VaultPage').then((m) => ({ default: m.VaultPage })));
+const VaultPage = lazy(() =>
+  import('./root/pages/VaultPage').then((m) => ({ default: m.VaultPage }))
+);
 const UnderDevelopmentPage = lazy(() =>
   import('../errors/pages/UnderDevelopmentPage').then((m) => ({ default: m.UnderDevelopmentPage }))
 );

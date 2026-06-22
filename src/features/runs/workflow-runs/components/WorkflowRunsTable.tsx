@@ -8,7 +8,7 @@ import {
   useWorkflowRunListQueryParams,
   WorkflowRunStatus,
 } from '../hooks/useWorkflowRunListQueryParams';
-import { useWorkflowRunListModel, type WorkflowRunListModel } from '../../api/workflows.api';
+import { useWorkflowRunListModel, type WorkflowRunListModel } from '../../shared/api/workflows.api';
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { PillTag } from '@/components/ui/PillTag';

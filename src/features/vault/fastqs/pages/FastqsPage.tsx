@@ -170,10 +170,6 @@ export function FastqsPage() {
         onClearAll={activeFilterBadges.length > 0 ? clearAllFilters : undefined}
       />
 
-      <div className='mb-4 text-sm text-neutral-600 dark:text-neutral-400'>
-        Showing {filteredFastqs.length} of {FASTQ_FILES.length} FASTQ files
-      </div>
-
       {filteredFastqs.length > 0 ? (
         <DataTable
           data={filteredFastqs}

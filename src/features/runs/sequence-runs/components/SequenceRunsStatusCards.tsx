@@ -5,7 +5,7 @@ import type { InstrumentRunStatus } from '../utils/groupByInstrumentRun';
 import {
   useInstrumentRunStatsStatusCountsModel,
   type SequenceRunStatusType,
-} from '../../api/sequence.api';
+} from '../../shared/api/sequence.api';
 import { useSequenceListQueryParams } from '../hooks/useSequenceListQueryParams';
 import { keepPreviousData } from '@tanstack/react-query';
 import { toLocalStartOfDay } from '@/utils/timeFormat';

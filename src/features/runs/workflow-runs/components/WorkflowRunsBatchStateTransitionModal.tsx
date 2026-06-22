@@ -13,7 +13,7 @@ import {
   type WorkflowRunListModel,
   WORKFLOWRUNS_LIST_PATH,
   WORKFLOWRUNS_STATUS_COUNT_PATH,
-} from '../../api/workflows.api';
+} from '../../shared/api/workflows.api';
 import { useQueryClient } from '@tanstack/react-query';
 
 type ValidationRule =

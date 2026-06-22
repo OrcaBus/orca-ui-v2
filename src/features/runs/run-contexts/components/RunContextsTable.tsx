@@ -4,7 +4,7 @@ import { ApiErrorState } from '@/components/ui/ApiErrorState';
 import { PillTag, type PillTagVariant } from '@/components/ui/PillTag';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { DEFAULT_PAGE_SIZE } from '@/utils/constants';
-import { useRunContextListModel, type RunContext } from '../../api/workflows.api';
+import { useRunContextListModel, type RunContext } from '../../shared/api/workflows.api';
 import { useRunContextsListQueryParams } from '../hooks/useRunContextsListQueryParams';
 
 function getUsecasePillVariant(usecase: RunContext['usecase']): PillTagVariant {

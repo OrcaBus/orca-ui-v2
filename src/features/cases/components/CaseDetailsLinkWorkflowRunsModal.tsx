@@ -3,7 +3,7 @@ import { useParams } from 'react-router';
 import { Link as LinkIcon, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { StatusBadge } from '@/components/ui/StatusBadge';
-import { useWorkflowRunListModel } from '@/features/runs/api/workflows.api';
+import { useWorkflowRunListModel } from '@/features/runs/shared/api/workflows.api';
 import { useCaseExternalEntityCreateModel } from '../api/cases.api';
 
 export interface CaseDetailsLinkWorkflowRunsModalProps {

@@ -1,6 +1,6 @@
 import { Column, DataTable } from '@/components/tables/DataTable';
 import { useAnalysisRunsListQueryParams } from '../hooks/useAnalysisRunsListQueryParams';
-import { useAnalysisRunListModel, type AnalysisRunListModel } from '../../api/workflows.api';
+import { useAnalysisRunListModel, type AnalysisRunListModel } from '../../shared/api/workflows.api';
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router';
 import { PillTag } from '@/components/ui/PillTag';

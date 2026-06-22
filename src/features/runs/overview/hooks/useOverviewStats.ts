@@ -3,8 +3,11 @@ import { keepPreviousData } from '@tanstack/react-query';
 import {
   useSequenceRunListModel,
   useSequenceRunStatsStatusCountsModel,
-} from '../../api/sequence.api';
-import { useWorkflowRunStatusCountModel, workflowRunListModel } from '../../api/workflows.api';
+} from '../../shared/api/sequence.api';
+import {
+  useWorkflowRunStatusCountModel,
+  workflowRunListModel,
+} from '../../shared/api/workflows.api';
 import {
   calculateOverviewStats,
   mapOverviewSequenceRuns,

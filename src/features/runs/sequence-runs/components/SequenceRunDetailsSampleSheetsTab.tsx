@@ -7,7 +7,7 @@ import { StatusBadge } from '@/components/ui/StatusBadge';
 import {
   useSequenceRunSampleSheetsByInstrumentRunIdModel,
   type SequenceRunSampleSheetDetailModel,
-} from '../../api/sequence.api';
+} from '../../shared/api/sequence.api';
 import { SimpleTable } from '@/components/tables/SimpleTable';
 import { Column } from '@/components/tables/DataTable';
 import { SampleSheetUploadModal } from './SampleSheetUploadModal';

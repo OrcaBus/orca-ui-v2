@@ -7,7 +7,7 @@ import {
   useAnalysisRunDetailsWorkflowRunsQueryParams,
   type AnalysisRunWorkflowRunStatus,
 } from '../hooks/useAnalysisRunDetailsWorkflowRunsQueryParams';
-import { useWorkflowRunListModel, type WorkflowRunListModel } from '../../api/workflows.api';
+import { useWorkflowRunListModel, type WorkflowRunListModel } from '../../shared/api/workflows.api';
 import { FilterBar } from '@/components/tables/FilterBar';
 import { ApiErrorState } from '@/components/ui/ApiErrorState';
 import { useMemo } from 'react';

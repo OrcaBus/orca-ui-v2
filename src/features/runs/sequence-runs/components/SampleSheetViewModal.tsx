@@ -14,7 +14,7 @@ import { Tabs } from '@/components/ui/Tabs';
 import { CodeViewer } from '@/components/ui/CodeViewer';
 import { DialogFrame } from '@/components/modals/DialogFrame';
 import { downloadCsvFile, jsonToCsv } from '@/utils/csv';
-import type { SequenceRunSampleSheetDetailModel } from '../../api/sequence.api';
+import type { SequenceRunSampleSheetDetailModel } from '../../shared/api/sequence.api';
 
 // ---------------------------------------------------------------------------
 // Formatted-view helpers

@@ -3,7 +3,7 @@ import { ChartNoAxesColumn } from 'lucide-react';
 import { FilterBar } from '@/components/tables/FilterBar';
 // import { MultiSelect } from '@/components/ui/MultiSelect';
 import { useAppShellHeader } from '@/context/app-shell-context';
-import { RunsInfoDrawer } from '../../components/RunsInfoDrawer';
+import { RunsInfoDrawer } from '../../shared/components/RunsInfoDrawer';
 import type { AnalysisRunStatus } from '../hooks/useAnalysisRunsListQueryParams';
 import { useAnalysisRunsPageQueryParams } from '../hooks/useAnalysisRunsPageQueryParams';
 import { buildAnalysisRunsFilterBadges } from '../utils/buildAnalysisRunsFilterBadges';

@@ -1,7 +1,7 @@
 import { keepPreviousData } from '@tanstack/react-query';
 import { ApiErrorState } from '@/components/ui/ApiErrorState';
 import { StatusCard } from '@/components/ui/StatusCard';
-import { useWorkflowRunStatusCountModel } from '../../api/workflows.api';
+import { useWorkflowRunStatusCountModel } from '../../shared/api/workflows.api';
 import { toLocalStartOfDay } from '@/utils/timeFormat';
 import { getRunsStatusIcon } from '../../shared/utils/statusIcons';
 import {

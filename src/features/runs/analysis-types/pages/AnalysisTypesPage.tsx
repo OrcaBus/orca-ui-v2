@@ -3,7 +3,7 @@ import { Combine } from 'lucide-react';
 import { FilterBar } from '@/components/tables/FilterBar';
 import { Select } from '@/components/ui/Select';
 import { useAppShellHeader } from '@/context/app-shell-context';
-import { RunsInfoDrawer } from '../../components/RunsInfoDrawer';
+import { RunsInfoDrawer } from '../../shared/components/RunsInfoDrawer';
 import type { AnalysisTypeStatus } from '../hooks/useAnalysisTypesListQueryParams';
 import { useAnalysisTypesPageQueryParams } from '../hooks/useAnalysisTypesPageQueryParams';
 import AnalysisTypesTable from '../components/AnalysisTypesTable';
