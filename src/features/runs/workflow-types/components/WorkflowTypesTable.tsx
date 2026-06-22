@@ -1,6 +1,6 @@
 import { Column, DataTable } from '@/components/tables/DataTable';
 import { useWorkflowTypesListQueryParams } from '../hooks/useWorkflowTypesListQueryParams';
-import { useWorkflowGroupedModel, type WorkflowListModel } from '../../api/workflows.api';
+import { useWorkflowGroupedModel, type WorkflowListModel } from '../../shared/api/workflows.api';
 import { useMemo } from 'react';
 import { PillTag } from '@/components/ui/PillTag';
 import { StatusBadge } from '@/components/ui/StatusBadge';

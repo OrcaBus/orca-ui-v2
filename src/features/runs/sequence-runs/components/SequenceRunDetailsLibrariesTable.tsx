@@ -17,7 +17,7 @@ import {
   useQueryMetadataLibraryModel,
   type LibraryDetailType,
   type QualityEnum,
-} from '@/features/lab/api/lab.api';
+} from '@/features/lab/shared/api/lab.api';
 import { useSequenceRunDetailsContext } from '../context/SequenceRunDetailsContext';
 import { useSequenceRunDetailsLibrariesQueryParams } from '../hooks/useSequenceRunDetailsLibrariesQueryParams';
 

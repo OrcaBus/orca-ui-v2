@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Dna } from 'lucide-react';
 import { FilterBar } from '@/components/tables/FilterBar';
 import { useAppShellHeader } from '@/context/app-shell-context';
-import { RunsInfoDrawer } from '../../components/RunsInfoDrawer';
+import { RunsInfoDrawer } from '../../shared/components/RunsInfoDrawer';
 import { useSequenceRunsPageQueryParams } from '../hooks/useSequenceRunsPageQueryParams';
 import type { InstrumentRunStatus } from '../utils/groupByInstrumentRun';
 import { buildSequenceRunsFilterBadges } from '../utils/buildSequenceRunsFilterBadges';

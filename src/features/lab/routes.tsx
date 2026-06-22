@@ -1,12 +1,12 @@
 import { lazy } from 'react';
 import { Outlet, type RouteObject } from 'react-router';
 
-const LabPage = lazy(() => import('./pages/LabPage').then((m) => ({ default: m.LabPage })));
+const LabPage = lazy(() => import('./root/pages/LabPage').then((m) => ({ default: m.LabPage })));
 const LibraryDetailsPage = lazy(() =>
-  import('./pages/LibraryDetailsPage').then((m) => ({ default: m.LibraryDetailsPage }))
+  import('./library/pages/LibraryDetailsPage').then((m) => ({ default: m.LibraryDetailsPage }))
 );
 const LibraryIdRedirect = lazy(() =>
-  import('./pages/LibraryIdRedirect').then((m) => ({ default: m.LibraryIdRedirect }))
+  import('./library/pages/LibraryIdRedirect').then((m) => ({ default: m.LibraryIdRedirect }))
 );
 
 const Routes: RouteObject = {

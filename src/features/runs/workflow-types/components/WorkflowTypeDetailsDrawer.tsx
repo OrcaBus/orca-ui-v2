@@ -1,4 +1,4 @@
-import { WorkflowListModel, WorkflowHistoryModel } from '../../api/workflows.api';
+import { WorkflowListModel, WorkflowHistoryModel } from '../../shared/api/workflows.api';
 import { DrawerFrame } from '@/components/modals/DrawerFrame';
 import { PillTag } from '@/components/ui/PillTag';
 import { getExecutionEnginePillVariant } from '../../shared/utils/executionEnginePill';

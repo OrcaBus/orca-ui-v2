@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 import { SampleSheetUploadModal } from '../SampleSheetUploadModal';
 import { SampleSheetViewModal } from '../SampleSheetViewModal';
-import type { SequenceRunSampleSheetDetailModel } from '../../../api/sequence.api';
+import type { SequenceRunSampleSheetDetailModel } from '../../../shared/api/sequence.api';
 
 vi.mock('@headlessui/react', () => ({
   Description: ({ children, className }: { children: ReactNode; className?: string }) => (

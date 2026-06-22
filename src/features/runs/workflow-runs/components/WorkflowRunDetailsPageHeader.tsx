@@ -8,7 +8,7 @@ import {
   useWorkflowRunRerunModel,
   useWorkflowRunStateCreateModel,
   type DatasetEnum,
-} from '../../api/workflows.api';
+} from '../../shared/api/workflows.api';
 import { WorkflowRunRerunModal, type RerunFormValues } from './WorkflowRunRerunModal';
 
 export function WorkflowRunDetailsPageHeader() {

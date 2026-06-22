@@ -1,15 +1,15 @@
 import { lazy } from 'react';
 import { Navigate, type RouteObject } from 'react-router';
 
-const RunsPage = lazy(() => import('./pages/RunsPage').then((m) => ({ default: m.RunsPage })));
+const RunsPage = lazy(() => import('./root/pages/RunsPage').then((m) => ({ default: m.RunsPage })));
 const RunsLayout = lazy(() =>
-  import('./pages/RunsLayout').then((m) => ({ default: m.RunsLayout }))
+  import('./root/pages/RunsLayout').then((m) => ({ default: m.RunsLayout }))
 );
 const OverviewPage = lazy(() =>
   import('./overview/pages/OverviewPage').then((m) => ({ default: m.OverviewPage }))
 );
 const WorkflowRunPortalRedirect = lazy(() =>
-  import('./pages/WorkflowRunPortalRedirect').then((m) => ({
+  import('./root/pages/WorkflowRunPortalRedirect').then((m) => ({
     default: m.WorkflowRunPortalRedirect,
   }))
 );

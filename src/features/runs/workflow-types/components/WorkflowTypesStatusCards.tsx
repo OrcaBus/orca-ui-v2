@@ -4,7 +4,7 @@ import { StatusCard } from '@/components/ui/StatusCard';
 import {
   useGroupedWorkflowStatusCountModel,
   type WorkflowStatusCountModel,
-} from '../../api/workflows.api';
+} from '../../shared/api/workflows.api';
 import { getValidationStateIcon } from '../../shared/utils/statusIcons';
 import {
   useWorkflowTypesListQueryParams,

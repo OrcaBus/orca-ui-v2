@@ -3,7 +3,7 @@ import { useQueryParams } from '@/hooks/useQueryParams';
 import { DEFAULT_PAGE_SIZE, PARAM_ORDER_BY, PARAM_SEARCH } from '@/utils/constants';
 import type { FilterBadge } from '@/components/tables/FilterBar';
 import type { WorkflowTypeDefinition } from '@/data/mockData';
-import type { ExecutionEngineEnum, ValidationStateEnum } from '../../api/workflows.api';
+import type { ExecutionEngineEnum, ValidationStateEnum } from '../../shared/api/workflows.api';
 
 export type ValidationState = ValidationStateEnum;
 export type ExecutionEngine = ExecutionEngineEnum;

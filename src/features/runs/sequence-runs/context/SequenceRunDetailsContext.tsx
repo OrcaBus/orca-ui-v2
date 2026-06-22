@@ -9,7 +9,7 @@ import {
   useSequenceRunCommentsByInstrumentRunIdModel,
   useSequenceRunStatesByInstrumentRunIdModel,
   useSequenceRunStateValidMapModel,
-} from '../../api/sequence.api';
+} from '../../shared/api/sequence.api';
 import { useParams } from 'react-router-dom';
 import { SpinnerWithText } from '@/components/ui/Spinner';
 import { ApiErrorState } from '@/components/ui/ApiErrorState';

@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Workflow } from 'lucide-react';
 import { FilterBar } from '@/components/tables/FilterBar';
 import { useAppShellHeader } from '@/context/app-shell-context';
-import { RunsInfoDrawer } from '../../components/RunsInfoDrawer';
+import { RunsInfoDrawer } from '../../shared/components/RunsInfoDrawer';
 import { useWorkflowTypesPageQueryParams } from '../hooks/useWorkflowTypesPageQueryParams';
 import WorkflowTypesTable from '../components/WorkflowTypesTable';
 import { WorkflowTypesStatusCards } from '../components/WorkflowTypesStatusCards';

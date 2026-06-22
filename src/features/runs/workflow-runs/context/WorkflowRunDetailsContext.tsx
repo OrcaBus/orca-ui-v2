@@ -9,7 +9,7 @@ import {
   useWorkflowRunStateListModel,
   useWorkflowRunStateCreationValidMapModel,
   useWorkflowRunRerunValidateModel,
-} from '../../api/workflows.api';
+} from '../../shared/api/workflows.api';
 import { useParams } from 'react-router-dom';
 import { SpinnerWithText } from '@/components/ui/Spinner';
 import { ApiErrorState } from '@/components/ui/ApiErrorState';

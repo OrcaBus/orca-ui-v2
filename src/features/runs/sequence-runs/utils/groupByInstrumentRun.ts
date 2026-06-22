@@ -1,5 +1,5 @@
 import type { SequenceRun } from '@/data/mockData';
-import type { SequenceRunStatusType } from '../../api/sequence.api';
+import type { SequenceRunStatusType } from '../../shared/api/sequence.api';
 
 export type InstrumentRunStatus = SequenceRunStatusType;
 

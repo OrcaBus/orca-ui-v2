@@ -1,6 +1,6 @@
 import { Column, DataTable } from '@/components/tables/DataTable';
 import { useAnalysisTypesListQueryParams } from '../hooks/useAnalysisTypesListQueryParams';
-import { useAnalysisListModel, type AnalysisModel } from '../../api/workflows.api';
+import { useAnalysisListModel, type AnalysisModel } from '../../shared/api/workflows.api';
 import { useMemo } from 'react';
 import { PillTag } from '@/components/ui/PillTag';
 import { StatusBadge } from '@/components/ui/StatusBadge';

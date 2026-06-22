@@ -32,7 +32,7 @@ import {
   useWorkflowRunStateUpdateModel,
   type WorkflowRunCommentModel,
   type WorkflowRunStateModel,
-} from '../../api/workflows.api';
+} from '../../shared/api/workflows.api';
 import { useWorkflowRunDetailsContext } from '../context/WorkflowRunDetailsContext';
 
 type ValidationRule =

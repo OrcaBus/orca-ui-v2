@@ -2,7 +2,7 @@ import { SimpleTable, SimpleTableColumn } from '@/components/tables/SimpleTable'
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { PillTag } from '@/components/ui/PillTag';
 import { useAnalysisRunDetailsContext } from '../context/AnalysisRunDetailsContext';
-import type { RunContext } from '@/features/runs/api/workflows.api';
+import type { RunContext } from '@/features/runs/shared/api/workflows.api';
 
 export function AnalysisRunDetailsRunContextTable() {
   const { analysisRunDetail, isLoadingAnalysisRunDetail } = useAnalysisRunDetailsContext();

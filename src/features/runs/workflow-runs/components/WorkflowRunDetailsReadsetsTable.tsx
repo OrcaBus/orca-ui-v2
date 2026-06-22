@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router';
 import { SimpleTable, SimpleTableColumn } from '@/components/tables/SimpleTable';
 import { useWorkflowRunDetailsContext } from '../context/WorkflowRunDetailsContext';
-import type { Readset as WorkflowReadset } from '@/features/runs/api/workflows.api';
+import type { Readset as WorkflowReadset } from '@/features/runs/shared/api/workflows.api';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { Copy, Check } from 'lucide-react';

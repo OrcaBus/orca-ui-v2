@@ -8,7 +8,7 @@ import { useParams } from 'react-router-dom';
 import { useAuthContext } from '@/context/auth-context';
 import { DialogFrame } from '@/components/modals/DialogFrame';
 import { cn } from '@/utils/cn';
-import { useSequenceRunAddSampleSheetModel } from '../../api/sequence.api';
+import { useSequenceRunAddSampleSheetModel } from '../../shared/api/sequence.api';
 
 // ---------------------------------------------------------------------------
 // Schema

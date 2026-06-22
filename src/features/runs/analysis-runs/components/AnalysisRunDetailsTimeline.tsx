@@ -20,7 +20,7 @@ import {
   useAnalysisRunCommentUpdateModel,
   useAnalysisRunCommentDeleteModel,
   type AnalysisRunCommentModel,
-} from '../../api/workflows.api';
+} from '../../shared/api/workflows.api';
 import { useAnalysisRunDetailsContext } from '../context/AnalysisRunDetailsContext';
 
 // ---------------------------------------------------------------------------

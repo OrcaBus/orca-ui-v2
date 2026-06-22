@@ -2,7 +2,7 @@ import { useCallback, useMemo } from 'react';
 import { CirclePlay } from 'lucide-react';
 import { FilterBar } from '@/components/tables/FilterBar';
 import { useAppShellHeader } from '@/context/app-shell-context';
-import { RunsInfoDrawer } from '../../components/RunsInfoDrawer';
+import { RunsInfoDrawer } from '../../shared/components/RunsInfoDrawer';
 import type { WorkflowRunStatus } from '../hooks/useWorkflowRunListQueryParams';
 import { useWorkflowRunsPageQueryParams } from '../hooks/useWorkflowRunsPageQueryParams';
 import WorkflowRunsTable from '../components/WorkflowRunsTable';

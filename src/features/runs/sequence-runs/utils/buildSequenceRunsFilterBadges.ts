@@ -1,5 +1,5 @@
 import type { FilterBadge } from '@/components/tables/FilterBar';
-import type { SequenceRunStatusType } from '../../api/sequence.api';
+import type { SequenceRunStatusType } from '../../shared/api/sequence.api';
 
 const STATUS_LABELS: Record<SequenceRunStatusType, string> = {
   STARTED: 'Started',

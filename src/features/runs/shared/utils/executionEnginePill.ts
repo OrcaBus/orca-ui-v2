@@ -1,5 +1,5 @@
 import type { PillTagVariant } from '@/components/ui/PillTag';
-import type { ExecutionEngineEnum } from '../../api/workflows.api';
+import type { ExecutionEngineEnum } from '../api/workflows.api';
 
 /**
  * Maps workflow execution engine to PillTag variant (single source of truth).

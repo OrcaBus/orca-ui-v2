@@ -2,7 +2,7 @@ import { useCallback, useMemo } from 'react';
 import type { FilterBadge } from '@/components/tables/FilterBar';
 import { useQueryParams } from '@/hooks/useQueryParams';
 import { DEFAULT_PAGE_SIZE, PARAM_ORDER_BY, PARAM_SEARCH } from '@/utils/constants';
-import type { ListAnalysisContextModel, WorkflowStatusEnum } from '../../api/workflows.api';
+import type { ListAnalysisContextModel, WorkflowStatusEnum } from '../../shared/api/workflows.api';
 
 export type AnalysisContextStatus = WorkflowStatusEnum;
 

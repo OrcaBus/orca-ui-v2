@@ -340,13 +340,19 @@ Only move it to a root shared folder such as `components/`, `hooks/`, `utils/`, 
 src/
   features/
     tools/
-      pages/
-        ToolsPage.tsx
+      root/
+        pages/
+          ToolsPage.tsx
+        components/
+          InfoDrawer.tsx
+        hooks/
+          useToolsPageQueryParams.ts
       shared/
+        api/
+          tools.api.ts
         components/
           ToolCard.tsx
           ToolGrid.tsx
-          ToolsIntro.tsx
         types/
           tool.types.ts
       ss-checker/
@@ -355,10 +361,14 @@ src/
           SSCheckerLauncher.tsx
         hooks/
           useSSChecker.ts
-      workflow-diagram/
+        pages/
+          SSCheckerPage.tsx
+      system-catalog/
         components/
           WorkflowDiagramCard.tsx
           WorkflowDiagramLauncher.tsx
         hooks/
-          useWorkflowDiagram.ts
+          usesystemCatalogDiagram.ts
+        pages/
+          SystemCatalogListPage.tsx
 ```

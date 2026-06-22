@@ -11,7 +11,7 @@ import {
   useQueryMetadataLibraryModel,
   type LibraryDetailType,
   type QualityEnum,
-} from '@/features/lab/api/lab.api';
+} from '@/features/lab/shared/api/lab.api';
 import { useAnalysisRunDetailsLibrariesQueryParams } from '../hooks/useAnalysisRunDetailsLibrariesQueryParams';
 import { orderByParam } from '@/utils/queryParams';
 import { FilterBar } from '@/components/tables/FilterBar';

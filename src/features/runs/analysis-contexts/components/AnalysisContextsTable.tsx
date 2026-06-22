@@ -4,7 +4,10 @@ import { ApiErrorState } from '@/components/ui/ApiErrorState';
 import { PillTag, type PillTagVariant } from '@/components/ui/PillTag';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { DEFAULT_PAGE_SIZE } from '@/utils/constants';
-import { useAnalysisContextListModel, type AnalysisContextModel } from '../../api/workflows.api';
+import {
+  useAnalysisContextListModel,
+  type AnalysisContextModel,
+} from '../../shared/api/workflows.api';
 import { useAnalysisContextsListQueryParams } from '../hooks/useAnalysisContextsListQueryParams';
 
 function getUsecasePillVariant(usecase: AnalysisContextModel['usecase']): PillTagVariant {
