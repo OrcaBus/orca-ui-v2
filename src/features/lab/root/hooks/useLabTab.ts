@@ -1,5 +1,5 @@
 import { useMemo, useCallback } from 'react';
-import { useQueryParams } from '@/hooks/useQueryParams';
+import { useNavigate, useLocation } from 'react-router';
 
 export const LAB_TAB_VALUES = ['library', 'subject', 'individual', 'sample', 'project'] as const;
 export type LabTabId = (typeof LAB_TAB_VALUES)[number];
@@ -12,23 +12,31 @@ function parseTabParam(value: string | undefined): LabTabId {
 }
 
 /**
- * Controls the lab page tab via URL query param `tab`.
- * - ?tab=library (or no param) → Library
- * - ?tab=subject → Subject
- * - ?tab=individual → Individual
- * - ?tab=sample → Sample
- * - ?tab=project → Project
+ * Controls the lab page tab via URL path segment.
+ * - /library (or no segment) → Library
+ * - /subject → Subject
+ * - /individual → Individual
+ * - /sample → Sample
+ * - /project → Project
  */
 export function useLabTab() {
-  const { getParam, setParams } = useQueryParams({ paginationKeys: [] });
-  const tabParam = getParam('tab');
-  const activeTab = useMemo(() => parseTabParam(tabParam), [tabParam]);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const activeTab = useMemo(() => {
+    // pathname is like /lab, /lab/subject, /lab/individual, etc.
+    const segments = location.pathname.split('/').filter(Boolean);
+    // segments[0] = 'lab', segments[1] = tab segment (if any)
+    return parseTabParam(segments[1]);
+  }, [location.pathname]);
+
   const setActiveTab = useCallback(
     (id: string) => {
       const tab = parseTabParam(id);
-      setParams({ tab: tab === 'library' ? undefined : tab });
+      void navigate(tab === 'library' ? '/lab' : `/lab/${tab}`);
     },
-    [setParams]
+    [navigate]
   );
+
   return { activeTab, setActiveTab };
 }
