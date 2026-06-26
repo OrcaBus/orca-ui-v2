@@ -205,6 +205,17 @@ export function LibrariesTable() {
         </span>
       ),
     },
+    {
+      key: 'requestFormId',
+      header: 'Request ID',
+      sortable: false,
+      csvValue: (lib) => lib.requestFormId ?? '',
+      render: (lib) => (
+        <span className='text-sm text-neutral-700 dark:text-[#9dabb9]'>
+          {lib.requestFormId ?? '-'}
+        </span>
+      ),
+    },
   ];
 
   const handleDownloadCsv = (ctx: DataTableActionContext<LibraryDetailType>) => {

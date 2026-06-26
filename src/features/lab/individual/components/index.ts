@@ -1,0 +1,1 @@
+export { IndividualsTable } from './IndividualsTable';

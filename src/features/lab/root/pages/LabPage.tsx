@@ -3,6 +3,10 @@ import { LibraryBig } from 'lucide-react';
 import { useAppShellHeader } from '@/context/app-shell-context';
 import { Tabs } from '@/components/ui/Tabs';
 import { LibraryPage } from '../../library/pages/LibraryPage';
+import { SubjectPage } from '../../subject/pages/SubjectPage';
+import { IndividualPage } from '../../individual/pages/IndividualPage';
+import { SamplePage } from '../../sample/pages/SamplePage';
+import { ProjectPage } from '../../project/pages/ProjectPage';
 import { useLabPageQueryParams } from '../hooks/useLabPageQueryParams';
 import { LabInfoDrawer } from '../components/LabInfoDrawer';
 
@@ -39,10 +43,10 @@ export function LabPage() {
         </div>
 
         {activeTab === 'library' && <LibraryPage />}
-        {activeTab === 'subject' && <div>Subject Content</div>}
-        {activeTab === 'individual' && <div>Individual Content</div>}
-        {activeTab === 'sample' && <div>Sample Content</div>}
-        {activeTab === 'project' && <div>Project Content</div>}
+        {activeTab === 'subject' && <SubjectPage />}
+        {activeTab === 'individual' && <IndividualPage />}
+        {activeTab === 'sample' && <SamplePage />}
+        {activeTab === 'project' && <ProjectPage />}
       </div>
 
       <LabInfoDrawer isOpen={isInfoDrawerOpen} onClose={closeInfoDrawer} />
