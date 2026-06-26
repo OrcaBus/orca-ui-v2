@@ -83,6 +83,7 @@ interface AdvancedFilterBarProps {
   activeFilterBadges: FilterBadge[];
   onClearAll?: () => void;
   actions?: ReactNode;
+  filterHelpText?: ReactNode;
   columns?: number;
 }
 
@@ -110,6 +111,7 @@ export function AdvancedFilterBar({
   activeFilterBadges,
   onClearAll,
   actions,
+  filterHelpText,
   columns = 6,
 }: AdvancedFilterBarProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -311,6 +313,12 @@ export function AdvancedFilterBar({
                 );
               })}
             </div>
+
+            {filterHelpText && (
+              <div className='mt-3 text-sm text-neutral-500 italic dark:text-[#9dabb9]'>
+                {filterHelpText}
+              </div>
+            )}
 
             <div className='mt-4 flex items-center justify-end gap-3 border-t border-dashed border-neutral-100 pt-3 dark:border-[#2d3540]'>
               <button
