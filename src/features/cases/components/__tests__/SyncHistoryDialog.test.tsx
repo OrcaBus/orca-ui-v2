@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
+import { useCaseSyncFromRedcapAutoHistoryModel } from '../../api/cases.api';
 import { SyncHistoryDialog } from '../SyncHistoryDialog';
 
 vi.mock('@headlessui/react', () => ({
@@ -50,6 +51,8 @@ vi.mock('../../api/cases.api', () => ({
   })),
 }));
 
+const useSyncHistoryMock = vi.mocked(useCaseSyncFromRedcapAutoHistoryModel);
+
 describe('SyncHistoryDialog', () => {
   it('renders above open drawers', () => {
     const html = renderToStaticMarkup(
@@ -57,5 +60,32 @@ describe('SyncHistoryDialog', () => {
     );
 
     expect(html).toContain('z-60');
+  });
+
+  it('formats imported timestamps in the display timezone', () => {
+    useSyncHistoryMock.mockReturnValueOnce({
+      data: {
+        results: [
+          {
+            id: 1,
+            externalService: 'REDCap',
+            importedAt: '2026-06-04T13:54:19Z',
+          },
+        ],
+        pagination: {
+          page: 1,
+          rowsPerPage: 10,
+          count: 1,
+        },
+      },
+      isLoading: false,
+      refetch: vi.fn(),
+    } as unknown as ReturnType<typeof useCaseSyncFromRedcapAutoHistoryModel>);
+
+    const html = renderToStaticMarkup(
+      <SyncHistoryDialog isOpen={true} onClose={() => undefined} />
+    );
+
+    expect(html).toContain('2026-06-04 23:54 +10:00');
   });
 });

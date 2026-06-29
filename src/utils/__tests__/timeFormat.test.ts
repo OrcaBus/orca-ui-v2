@@ -14,6 +14,10 @@ describe('formatTableDate', () => {
     expect(formatTableDate('2026-02-05T03:09:00Z')).toBe('2026-02-05 14:09 +11:00');
   });
 
+  it('uses Australia/Melbourne daylight saving rules', () => {
+    expect(formatTableDate('2026-06-04T13:54:19Z')).toBe('2026-06-04 23:54 +10:00');
+  });
+
   it('returns original string for invalid dates', () => {
     expect(formatTableDate('not-a-date')).toBe('not-a-date');
   });
@@ -60,6 +64,10 @@ describe('toUtcStartOfDay', () => {
 describe('toLocalStartOfDay', () => {
   it('returns UTC+11 start-of-day for date-only values', () => {
     expect(toLocalStartOfDay('2025-11-06')).toBe('2025-11-06T00:00:00+11:00');
+  });
+
+  it('returns UTC+10 start-of-day during standard time', () => {
+    expect(toLocalStartOfDay('2025-06-06')).toBe('2025-06-06T00:00:00+10:00');
   });
 
   it('returns undefined for empty input', () => {

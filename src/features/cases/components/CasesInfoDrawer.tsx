@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import dayjs from 'dayjs';
 import { Briefcase, FolderSync, Plus } from 'lucide-react';
 import { DrawerFrame } from '@/components/modals/DrawerFrame';
 import { InfoDrawerActionCard } from '@/components/modals/InfoDrawerActionCard';
+import { formatTableDate } from '@/utils/timeFormat';
 import { useCaseSyncFromRedcapAutoHistoryModel } from '../api/cases.api';
 import { AddCaseModal } from './AddCaseModal';
 import { AutoImportFromRedcapModal } from './AutoImportFromRedcapModal';
@@ -29,7 +29,7 @@ export function CasesInfoDrawer({ isOpen, onClose }: CasesInfoDrawerProps) {
   const lastSynced = syncHistoryData?.results?.[0]?.importedAt;
   const lastSyncedLabel =
     lastSynced && !isSyncHistoryLoading && !isSyncHistoryError
-      ? dayjs(lastSynced).format('YYYY-MM-DD HH:mm Z')
+      ? formatTableDate(lastSynced)
       : undefined;
 
   return (
