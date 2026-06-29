@@ -1,25 +1,24 @@
-import { useState, useCallback, useMemo } from 'react';
-import { useParams } from 'react-router';
-import { ReactFlowProvider } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-
-import type { CatalogNodeData, EventDef, EdgeDef, GroupItem } from '../types/system-catalog.types';
-import type { NodeFormData } from '../types/system-catalog.types';
+import { useState, useCallback, useMemo, useEffect, useReducer } from 'react';
+import { useNavigate, useParams } from 'react-router';
+import { useQueryClient } from '@tanstack/react-query';
+import { ReactFlowProvider } from '@xyflow/react';
+import { toast } from 'sonner';
+import { useAppShellHeader } from '@/context/app-shell-context';
+import type { MapFull, MapGroup, MapNode } from '../data/dynamodb-schema';
 import {
-  GROUP_LIST,
-  PIPELINE_NODES,
-  CATALOG_EDGES,
-  NODE_POSITIONS,
-  ENGINE_COLORS,
-  MAP_LIST,
-  EVENT_FLOW_NODES,
-  EVENT_FLOW_EDGES,
-  EVENT_FLOW_POSITIONS,
-  EVENT_FLOW_GROUPS,
-} from '../data';
+  systemCatalogMapQuery,
+  systemCatalogMapsQuery,
+  useCreateSystemCatalogMap,
+  useDeleteSystemCatalogMap,
+  useSaveSystemCatalogMapContent,
+  useSystemCatalogMap,
+  useUpdateSystemCatalogMap,
+} from '../api/system-catalog.api';
 import {
   NodeModal,
   DeleteConfirmDialog,
+  DeleteMapConfirmDialog,
   DeleteGroupConfirmDialog,
   MapInner,
   NodeDrawer,
@@ -30,10 +29,11 @@ import {
 import { MapEditModal } from '../components/MapEditModal';
 import type { MapFormData } from '../components/MapEditModal';
 import type { GroupFormData } from '../components/GroupEditModal';
-
-import { buildParentEdges, parseNodeConfigJson, nodeToFormData } from '../utils/nodeForm';
-
-// ─── Helpers ────────────────────────────────────────────────────────────────
+import type { EventDef, GroupFilterItem, NodeFormData } from '../types/system-catalog.types';
+import { mapEditorReducer } from '../utils/mapEditor';
+import { ALL_GROUP_ID, buildGroupFilters, buildNodeLookup, mapToSummary } from '../utils/mapModel';
+import { nodeToFormData, parseNodeConfigJson } from '../utils/nodeForm';
+import { WORKFLOW_ENGINE_OPTIONS, RESOURCE_TYPE_OPTIONS } from '../utils/nodeDisplay';
 
 function slugify(text: string): string {
   return text
@@ -42,60 +42,249 @@ function slugify(text: string): string {
     .replace(/(^-|-$)/g, '');
 }
 
-const ENGINE_OPTIONS = Object.keys(ENGINE_COLORS);
+function toRecord(nodes: MapNode[]): Record<string, MapNode> {
+  return Object.fromEntries(nodes.map((node) => [node.nodeId, node]));
+}
 
-// ─── Main Page Component ───────────────────────────────────────────────────
+function parseTagsJson(value: string): Record<string, string> {
+  try {
+    const parsed = JSON.parse(value) as Record<string, string>;
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+  } catch {
+    return {};
+  }
+}
 
-function SystemCatalogContent() {
-  const { mapId } = useParams<{ mapId: string }>();
-  const map = useMemo(() => MAP_LIST.find((d) => d.mapId === mapId), [mapId]);
+function isPreconditionFailure(error: unknown): boolean {
+  if (!error || typeof error !== 'object') {
+    return false;
+  }
 
-  const isEventFlow = mapId === 'orcabus-event-flow';
+  const candidate = error as {
+    status?: number;
+    response?: { status?: number };
+    code?: string;
+    error?: { code?: string };
+  };
 
-  const [selectedGroup, setSelectedGroup] = useState('ALL');
+  return (
+    candidate.status === 412 ||
+    candidate.response?.status === 412 ||
+    candidate.code === 'PRECONDITION_FAILED' ||
+    candidate.error?.code === 'PRECONDITION_FAILED'
+  );
+}
+
+function isConflict(error: unknown): boolean {
+  if (!error || typeof error !== 'object') {
+    return false;
+  }
+
+  const candidate = error as {
+    status?: number;
+    response?: { status?: number };
+    code?: string;
+    error?: { code?: string };
+  };
+
+  return (
+    candidate.status === 409 ||
+    candidate.response?.status === 409 ||
+    candidate.code === 'CONFLICT' ||
+    candidate.error?.code === 'CONFLICT'
+  );
+}
+
+function buildNodeFromForm({
+  nodeId,
+  formData,
+  position,
+  existingNode,
+}: {
+  nodeId: string;
+  formData: NodeFormData;
+  position: MapNode['position'];
+  existingNode?: MapNode;
+}): MapNode {
+  const tags = parseNodeConfigJson(formData.configJson) ?? {};
+  const baseNode = {
+    nodeId,
+    label: formData.name,
+    version: formData.version || existingNode?.version || 'v0.1.0',
+    description: formData.description,
+    groupIds: formData.groupIds,
+    inputEvents: existingNode?.inputEvents ?? [],
+    outputEvents: existingNode?.outputEvents ?? [],
+    tags,
+    position,
+  };
+
+  if (formData.nodeType === 'resource') {
+    return {
+      ...baseNode,
+      nodeType: 'resource',
+      resourceType: formData.resourceType,
+    };
+  }
+
+  return {
+    ...baseNode,
+    nodeType: 'workflow',
+    workflowEngine: formData.workflowEngine,
+  };
+}
+
+type PlacedPosition = NonNullable<MapNode['position']>;
+
+const hasPosition = (position: MapNode['position']): position is PlacedPosition =>
+  Boolean(position);
+
+function getNextNodePosition(map: MapFull, parentNodeIds: string[]): MapNode['position'] {
+  const nodesById = toRecord(map.nodes);
+  const parentPositions = parentNodeIds
+    .map((nodeId) => nodesById[nodeId]?.position)
+    .filter(hasPosition);
+
+  if (parentPositions.length > 0) {
+    return {
+      x: Math.max(...parentPositions.map((position) => position.x)) + 320,
+      y: parentPositions.reduce((sum, position) => sum + position.y, 0) / parentPositions.length,
+    };
+  }
+
+  const placedPositions = map.nodes.map((node) => node.position).filter(hasPosition);
+
+  if (placedPositions.length > 0) {
+    return {
+      x: Math.max(...placedPositions.map((position) => position.x)) + 320,
+      y: placedPositions.reduce((sum, position) => sum + position.y, 0) / placedPositions.length,
+    };
+  }
+
+  return { x: 100, y: 500 };
+}
+
+function buildListCacheUpdater(savedMap: MapFull) {
+  const summary = mapToSummary(savedMap);
+
+  return (
+    previous: { maps?: ReturnType<typeof mapToSummary>[]; nextCursor?: string | null } | undefined
+  ) => {
+    if (!previous?.maps) {
+      return previous;
+    }
+
+    const existingIndex = previous.maps.findIndex((map) => map.mapId === summary.mapId);
+    if (existingIndex === -1) {
+      return {
+        ...previous,
+        maps: [summary, ...previous.maps],
+      };
+    }
+
+    return {
+      ...previous,
+      maps: previous.maps.map((map) => (map.mapId === summary.mapId ? summary : map)),
+    };
+  };
+}
+
+function SystemCatalogContent({ mapId }: { mapId: string }) {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const [selectedGroup, setSelectedGroup] = useState(ALL_GROUP_ID);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isMapEditOpen, setIsMapEditOpen] = useState(false);
-
-  // Mutable catalog state — conditionally load event-flow or pipeline data
-  const [catalogNodes, setCatalogNodes] = useState<Record<string, CatalogNodeData>>(() => ({
-    ...(isEventFlow ? EVENT_FLOW_NODES : PIPELINE_NODES),
-  }));
-  const [positions, setPositions] = useState<Record<string, { x: number; y: number }>>(() => ({
-    ...(isEventFlow ? EVENT_FLOW_POSITIONS : NODE_POSITIONS),
-  }));
-  const [catalogEdges, setCatalogEdges] = useState<EdgeDef[]>(() => [
-    ...(isEventFlow ? EVENT_FLOW_EDGES : CATALOG_EDGES),
-  ]);
-
-  // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
-
-  // Group state
-  const [groups, setGroups] = useState<GroupItem[]>(() => [
-    ...(isEventFlow ? EVENT_FLOW_GROUPS : GROUP_LIST),
-  ]);
   const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
-  const [editingGroup, setEditingGroup] = useState<GroupItem | null>(null);
-  const [deleteGroupConfirm, setDeleteGroupConfirm] = useState<GroupItem | null>(null);
+  const [editingGroup, setEditingGroup] = useState<MapGroup | null>(null);
+  const [deleteGroupConfirm, setDeleteGroupConfirm] = useState<MapGroup | null>(null);
+  const [isMapDeleteConfirmOpen, setIsMapDeleteConfirmOpen] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
+  const [autoLayoutSignal, setAutoLayoutSignal] = useState(0);
+  const [isDuplicateOpen, setIsDuplicateOpen] = useState(false);
 
-  const allNodes = useMemo(
-    () =>
-      Object.fromEntries(
-        Object.entries(catalogNodes).map(([id, n]) => [id, { label: n.label, engine: n.engine }])
-      ),
-    [catalogNodes]
+  const {
+    data: fetchedMap,
+    isPending,
+    isError,
+  } = useSystemCatalogMap({
+    params: {
+      path: {
+        mapId: mapId ?? '',
+      },
+    },
+    reactQuery: {
+      enabled: !!mapId,
+    },
+  });
+
+  const [editorMap, dispatch] = useReducer(mapEditorReducer, null as MapFull | null);
+
+  const updateMapMutation = useUpdateSystemCatalogMap();
+  const saveContentMutation = useSaveSystemCatalogMapContent();
+  const deleteMapMutation = useDeleteSystemCatalogMap();
+  const createMapMutation = useCreateSystemCatalogMap();
+
+  useEffect(() => {
+    if (fetchedMap) {
+      dispatch({ type: 'hydrate', map: fetchedMap });
+    }
+  }, [fetchedMap]);
+
+  const applyEditorAction = useCallback((action: Parameters<typeof dispatch>[0]) => {
+    dispatch(action);
+    setIsDirty(true);
+  }, []);
+
+  const nodesById = useMemo(() => (editorMap ? toRecord(editorMap.nodes) : {}), [editorMap]);
+  const allNodes = useMemo(() => (editorMap ? buildNodeLookup(editorMap.nodes) : {}), [editorMap]);
+  const groupFilters = useMemo<GroupFilterItem[]>(
+    () => (editorMap ? buildGroupFilters(editorMap.groups, editorMap.nodes.length) : []),
+    [editorMap]
   );
+  const mapSummary = useMemo(() => (editorMap ? mapToSummary(editorMap) : null), [editorMap]);
+  const duplicateInitialData = useMemo<MapFormData>(
+    () => ({
+      name: editorMap ? `Copy of ${editorMap.name}` : '',
+      description: editorMap?.description ?? '',
+      status: 'draft',
+      tagsJson: JSON.stringify(editorMap?.tags ?? {}, null, 2),
+    }),
+    [editorMap]
+  );
+  const headerMapName =
+    mapSummary?.name ?? fetchedMap?.name ?? (isError ? 'Unavailable' : 'Loading...');
+  const headerConfig = useMemo(
+    () => ({
+      mode: 'detail' as const,
+      breadcrumbs: [
+        { label: 'Tools', href: '/tools' },
+        { label: 'System Catalog', href: '/tools/system-catalog' },
+        {
+          label: headerMapName,
+          isLoading: isPending,
+        },
+      ],
+    }),
+    [headerMapName, isPending]
+  );
+
+  useAppShellHeader(headerConfig);
 
   const emptyFormData: NodeFormData = useMemo(
     () => ({
       name: '',
       version: '',
-      engine: ENGINE_OPTIONS[0],
-      groupId: '',
+      nodeType: 'workflow',
+      resourceType: RESOURCE_TYPE_OPTIONS[0]?.value ?? 'aws_lambda',
+      workflowEngine: WORKFLOW_ENGINE_OPTIONS[0]?.value ?? 'ICA',
+      groupIds: [],
       parentLinks: [],
       description: '',
       configJson: '{}',
@@ -104,19 +293,46 @@ function SystemCatalogContent() {
   );
 
   const modalInitialData = useMemo<NodeFormData>(() => {
-    if (!editingId || !catalogNodes[editingId]) return emptyFormData;
-    return nodeToFormData(editingId, catalogNodes[editingId], catalogEdges);
-  }, [editingId, catalogNodes, catalogEdges, emptyFormData]);
+    if (!editingId || !editorMap) {
+      return emptyFormData;
+    }
 
-  // ── CRUD Handlers ──────────────────────────────────────────────────────
+    const node = nodesById[editingId];
+    return node ? nodeToFormData(editingId, node, editorMap.edges) : emptyFormData;
+  }, [editingId, editorMap, nodesById, emptyFormData]);
+
+  const emptyGroupFormData = useMemo<GroupFormData>(
+    () => ({
+      name: '',
+      description: '',
+      type: 'analysis',
+      color: '#6366f1',
+      nodeIds: [],
+    }),
+    []
+  );
+
+  const groupModalInitialData = useMemo<GroupFormData>(() => {
+    if (!editingGroup) {
+      return emptyGroupFormData;
+    }
+
+    return {
+      name: editingGroup.name,
+      description: editingGroup.description ?? '',
+      type: editingGroup.type,
+      color: editingGroup.color,
+      nodeIds: editingGroup.nodeIds,
+    };
+  }, [editingGroup, emptyGroupFormData]);
 
   const handleOpenAddModal = useCallback(() => {
     setEditingId(null);
     setIsModalOpen(true);
   }, []);
 
-  const handleOpenEditModal = useCallback((id: string) => {
-    setEditingId(id);
+  const handleOpenEditModal = useCallback((nodeId: string) => {
+    setEditingId(nodeId);
     setIsModalOpen(true);
   }, []);
 
@@ -125,162 +341,82 @@ function SystemCatalogContent() {
     setEditingId(null);
   }, []);
 
-  const handleCreateNode = useCallback(
-    (id: string, formData: NodeFormData) => {
-      const tags = parseNodeConfigJson(formData.configJson) ?? {};
-      const newNode: CatalogNodeData = {
-        label: formData.name,
-        version: formData.version || 'v0.1.0',
-        engine: formData.engine,
-        description: formData.description,
-        groupIds: formData.groupId ? [formData.groupId] : [],
-        inputEvents: [],
-        outputEvents: [],
-        tags,
-      };
-
-      // Calculate position: to the right of the rightmost parent, or a default
-      let newX = 100;
-      let newY = 500;
-      if (formData.parentLinks.length > 0) {
-        const parentPositions = formData.parentLinks
-          .map((parentLink) => positions[parentLink.nodeId])
-          .filter(Boolean);
-        if (parentPositions.length > 0) {
-          newX = Math.max(...parentPositions.map((p) => p.x)) + 320;
-          newY = parentPositions.reduce((sum, p) => sum + p.y, 0) / parentPositions.length;
-        }
-      } else {
-        const allPos = Object.values(positions);
-        if (allPos.length > 0) {
-          newX = Math.max(...allPos.map((p) => p.x)) + 320;
-          newY = allPos.reduce((sum, p) => sum + p.y, 0) / allPos.length;
-        }
-      }
-
-      const newEdges = buildParentEdges(id, formData.parentLinks);
-
-      setCatalogNodes((prev) => ({ ...prev, [id]: newNode }));
-      setPositions((prev) => ({ ...prev, [id]: { x: newX, y: newY } }));
-      setCatalogEdges((prev) => [...prev, ...newEdges]);
-      setSelectedNodeId(id);
-    },
-    [positions]
-  );
-
-  const handleUpdateNode = useCallback((id: string, formData: NodeFormData) => {
-    const tags = parseNodeConfigJson(formData.configJson) ?? {};
-
-    setCatalogNodes((prev) => ({
-      ...prev,
-      [id]: {
-        ...prev[id],
-        label: formData.name,
-        version: formData.version || prev[id].version,
-        engine: formData.engine,
-        description: formData.description,
-        groupIds: formData.groupId ? [formData.groupId] : prev[id].groupIds,
-        tags,
-      },
-    }));
-
-    setCatalogEdges((prev) => {
-      const kept = prev.filter((edge) => edge.target !== id);
-      const newEdges = buildParentEdges(id, formData.parentLinks, prev);
-      return [...kept, ...newEdges];
-    });
-  }, []);
-
   const handleSubmitNode = useCallback(
     (formData: NodeFormData) => {
-      const id = editingId ?? slugify(formData.name);
-
-      if (!editingId && catalogNodes[id]) {
-        const uniqueId = `${id}-${Date.now()}`;
-        handleCreateNode(uniqueId, formData);
-      } else if (editingId) {
-        handleUpdateNode(editingId, formData);
-      } else {
-        handleCreateNode(id, formData);
+      if (!editorMap) {
+        return;
       }
 
+      const nodeId = editingId ?? slugify(formData.name);
+      const existingNode = editingId ? nodesById[editingId] : undefined;
+      const resolvedNodeId = !editingId && nodesById[nodeId] ? `${nodeId}-${Date.now()}` : nodeId;
+      // Editing keeps the node where it is (even if it has no stored position yet — its
+      // live auto-laid-out spot is preserved). New nodes get an initial placement.
+      const position = existingNode
+        ? existingNode.position
+        : getNextNodePosition(
+            editorMap,
+            formData.parentLinks.map((parentLink) => parentLink.nodeId)
+          );
+
+      applyEditorAction({
+        type: 'upsertNode',
+        nodeId: resolvedNodeId,
+        node: buildNodeFromForm({
+          nodeId: resolvedNodeId,
+          formData,
+          position,
+          existingNode,
+        }),
+        groupIds: formData.groupIds,
+        parentLinks: formData.parentLinks,
+      });
+
+      setSelectedNodeId(resolvedNodeId);
       handleCloseModal();
     },
-    [editingId, catalogNodes, handleCloseModal, handleCreateNode, handleUpdateNode]
+    [editorMap, editingId, nodesById, applyEditorAction, handleCloseModal]
   );
 
   const handleDeleteNode = useCallback(
-    (id: string) => {
-      setCatalogNodes((prev) => {
-        const next = { ...prev };
-        delete next[id];
-        return next;
-      });
-      setPositions((prev) => {
-        const next = { ...prev };
-        delete next[id];
-        return next;
-      });
-      setCatalogEdges((prev) => prev.filter((e) => e.source !== id && e.target !== id));
-      if (selectedNodeId === id) setSelectedNodeId(null);
+    (nodeId: string) => {
+      applyEditorAction({ type: 'deleteNode', nodeId });
+      if (selectedNodeId === nodeId) {
+        setSelectedNodeId(null);
+      }
       setDeleteConfirmId(null);
     },
-    [selectedNodeId]
+    [applyEditorAction, selectedNodeId]
   );
-
-  const handleNodeClick = useCallback((id: string) => {
-    setSelectedNodeId((prev) => (prev === id ? null : id));
-  }, []);
 
   const handleUpdateNodeEvents = useCallback(
-    (id: string, patch: { inputEvents?: EventDef[]; outputEvents?: EventDef[] }) => {
-      setCatalogNodes((prev) => {
-        const w = prev[id];
-        if (!w) return prev;
-        return {
-          ...prev,
-          [id]: {
-            ...w,
-            ...(patch.inputEvents !== undefined && { inputEvents: patch.inputEvents }),
-            ...(patch.outputEvents !== undefined && { outputEvents: patch.outputEvents }),
-          },
-        };
-      });
+    (nodeId: string, patch: { inputEvents?: EventDef[]; outputEvents?: EventDef[] }) => {
+      applyEditorAction({ type: 'updateNodeEvents', nodeId, patch });
     },
-    []
+    [applyEditorAction]
   );
-
-  // ── Group CRUD Handlers ─────────────────────────────────────────────────
-
-  const emptyGroupFormData: GroupFormData = useMemo(
-    () => ({
-      name: '',
-      type: 'analysis' as const,
-      color: '#6366f1',
-      nodeIds: [],
-    }),
-    []
-  );
-
-  const groupModalInitialData = useMemo<GroupFormData>(() => {
-    if (!editingGroup) return emptyGroupFormData;
-    return {
-      name: editingGroup.name,
-      type: editingGroup.type as GroupFormData['type'],
-      color: editingGroup.color,
-      nodeIds: editingGroup.nodeIds,
-    };
-  }, [editingGroup, emptyGroupFormData]);
 
   const handleOpenAddGroup = useCallback(() => {
     setEditingGroup(null);
     setIsGroupModalOpen(true);
   }, []);
 
-  const handleOpenEditGroup = useCallback((group: GroupItem) => {
-    setEditingGroup(group);
-    setIsGroupModalOpen(true);
-  }, []);
+  const handleOpenEditGroup = useCallback(
+    (groupFilter: GroupFilterItem) => {
+      if (!editorMap || groupFilter.id === ALL_GROUP_ID) {
+        return;
+      }
+
+      const group = editorMap.groups.find((candidate) => candidate.groupId === groupFilter.id);
+      if (!group) {
+        return;
+      }
+
+      setEditingGroup(group);
+      setIsGroupModalOpen(true);
+    },
+    [editorMap]
+  );
 
   const handleCloseGroupModal = useCallback(() => {
     setIsGroupModalOpen(false);
@@ -289,81 +425,337 @@ function SystemCatalogContent() {
 
   const handleSubmitGroup = useCallback(
     (data: GroupFormData) => {
-      if (editingGroup) {
-        // Update existing group
-        setGroups((prev) =>
-          prev.map((g) =>
-            g.id === editingGroup.id
-              ? {
-                  ...g,
-                  name: data.name,
-                  type: data.type,
-                  color: data.color,
-                  nodeIds: data.nodeIds,
-                  count: data.nodeIds.length,
-                }
-              : g
-          )
-        );
-      } else {
-        // Create new group
-        const id = data.name.toUpperCase().replace(/[^A-Z0-9]+/g, '_');
-        const newGroup: GroupItem = {
-          id,
+      const groupId = editingGroup?.groupId ?? data.name.toUpperCase().replace(/[^A-Z0-9]+/g, '_');
+
+      applyEditorAction({
+        type: 'upsertGroup',
+        group: {
+          groupId,
           name: data.name,
+          description: data.description || undefined,
           type: data.type,
-          count: data.nodeIds.length,
           color: data.color,
           nodeIds: data.nodeIds,
-        };
-        setGroups((prev) => [...prev, newGroup]);
-      }
+        },
+      });
+
       handleCloseGroupModal();
     },
-    [editingGroup, handleCloseGroupModal]
+    [editingGroup, applyEditorAction, handleCloseGroupModal]
   );
 
   const handleDeleteGroup = useCallback(
-    (group: GroupItem) => {
-      setGroups((prev) => prev.filter((g) => g.id !== group.id));
-      if (selectedGroup === group.id) setSelectedGroup('ALL');
+    (groupFilter: GroupFilterItem) => {
+      if (groupFilter.id === ALL_GROUP_ID) {
+        return;
+      }
+
+      applyEditorAction({ type: 'deleteGroup', groupId: groupFilter.id });
+      if (selectedGroup === groupFilter.id) {
+        setSelectedGroup(ALL_GROUP_ID);
+      }
       setDeleteGroupConfirm(null);
     },
-    [selectedGroup]
+    [applyEditorAction, selectedGroup]
   );
+
+  const handleUpdateNodePosition = useCallback(
+    (nodeId: string, position: MapNode['position']) => {
+      applyEditorAction({ type: 'updateNodePosition', nodeId, position });
+    },
+    [applyEditorAction]
+  );
+
+  const handleTriggerAutoLayout = useCallback(() => {
+    setAutoLayoutSignal((signal) => signal + 1);
+  }, []);
+
+  const handleApplyAutoLayoutPositions = useCallback(
+    (positions: Record<string, NonNullable<MapNode['position']>>) => {
+      applyEditorAction({ type: 'setNodePositions', positions });
+    },
+    [applyEditorAction]
+  );
+
+  const updateCaches = useCallback(
+    (nextMap: MapFull) => {
+      const mapQueryKey = systemCatalogMapQuery.queryOptions({
+        params: {
+          path: { mapId: nextMap.mapId },
+        },
+      }).queryKey;
+      const listQueryKey = systemCatalogMapsQuery.queryOptions().queryKey;
+
+      queryClient.setQueryData(mapQueryKey, nextMap);
+      queryClient.setQueryData(listQueryKey, buildListCacheUpdater(nextMap));
+    },
+    [queryClient]
+  );
+
+  const handleSaveContent = useCallback(async () => {
+    if (!editorMap || !mapId || !isDirty) {
+      return;
+    }
+
+    try {
+      const savedMap = await saveContentMutation.mutateAsync({
+        params: {
+          path: { mapId },
+          header: {
+            'If-Match': `"${editorMap.version}"`,
+          },
+        },
+        body: {
+          nodes: editorMap.nodes,
+          groups: editorMap.groups,
+          edges: editorMap.edges,
+          engineColors: editorMap.engineColors,
+        },
+      });
+
+      dispatch({ type: 'hydrate', map: savedMap });
+      setIsDirty(false);
+      updateCaches(savedMap);
+      toast.success('System catalog changes saved.');
+    } catch (error) {
+      toast.error(
+        isPreconditionFailure(error)
+          ? 'This map changed on the server. Refresh before saving again.'
+          : 'Unable to save system catalog changes.'
+      );
+    }
+  }, [editorMap, mapId, isDirty, saveContentMutation, updateCaches]);
+
+  const handleUpdateMap = useCallback(
+    async (data: MapFormData) => {
+      if (!editorMap || !mapId) {
+        return;
+      }
+
+      try {
+        const updatedMap = await updateMapMutation.mutateAsync({
+          params: {
+            path: { mapId },
+            header: {
+              'If-Match': `"${editorMap.version}"`,
+            },
+          },
+          body: {
+            name: data.name,
+            description: data.description,
+            status: data.status,
+            tags: parseTagsJson(data.tagsJson),
+          },
+        });
+
+        const mergedMap: MapFull = {
+          ...editorMap,
+          name: updatedMap.name,
+          description: updatedMap.description,
+          status: updatedMap.status,
+          tags: updatedMap.tags,
+          version: updatedMap.version,
+          updatedAt: updatedMap.updatedAt,
+          updatedBy: updatedMap.updatedBy,
+        };
+
+        dispatch({ type: 'hydrate', map: mergedMap });
+        updateCaches(mergedMap);
+        setIsMapEditOpen(false);
+        toast.success('Map metadata updated.');
+      } catch (error) {
+        toast.error(
+          isPreconditionFailure(error)
+            ? 'This map changed on the server. Refresh before updating metadata again.'
+            : 'Unable to update map metadata.'
+        );
+      }
+    },
+    [editorMap, mapId, updateMapMutation, updateCaches]
+  );
+
+  const handleDuplicateMap = useCallback(
+    async (data: MapFormData) => {
+      if (!editorMap) {
+        return;
+      }
+
+      try {
+        // 1. Create the new map (metadata only). The backend stamps createdBy from the
+        //    current actor, so the copy is owned by the user making it.
+        const createdMap = await createMapMutation.mutateAsync({
+          body: {
+            name: data.name,
+            description: data.description,
+            status: data.status,
+            tags: parseTagsJson(data.tagsJson),
+            engineColors: editorMap.engineColors,
+          },
+        });
+
+        // 2. Copy the current diagram content into the new map (version starts at 1).
+        const savedMap = await saveContentMutation.mutateAsync({
+          params: {
+            path: { mapId: createdMap.mapId },
+            header: {
+              'If-Match': `"${createdMap.version}"`,
+            },
+          },
+          body: {
+            nodes: editorMap.nodes,
+            groups: editorMap.groups,
+            edges: editorMap.edges,
+            engineColors: editorMap.engineColors,
+          },
+        });
+
+        updateCaches(savedMap);
+        setIsDuplicateOpen(false);
+        toast.success('Map copied.');
+        void navigate(`/tools/system-catalog/${savedMap.mapId}`);
+      } catch (error) {
+        toast.error(
+          isConflict(error)
+            ? 'A map with this name already exists. Pick a different name.'
+            : 'Unable to copy map.'
+        );
+      }
+    },
+    [editorMap, createMapMutation, saveContentMutation, updateCaches, navigate]
+  );
+
+  const handleArchiveMap = useCallback(async () => {
+    if (!editorMap || !mapId) {
+      return;
+    }
+
+    try {
+      await deleteMapMutation.mutateAsync({
+        params: {
+          path: { mapId },
+          header: {
+            'If-Match': `"${editorMap.version}"`,
+          },
+        },
+      });
+
+      const listQueryKey = systemCatalogMapsQuery.queryOptions().queryKey;
+      const mapQueryKey = systemCatalogMapQuery.queryOptions({
+        params: {
+          path: { mapId },
+        },
+      }).queryKey;
+
+      queryClient.setQueryData(
+        listQueryKey,
+        (
+          previous:
+            | { maps?: ReturnType<typeof mapToSummary>[]; nextCursor?: string | null }
+            | undefined
+        ) => {
+          if (!previous?.maps) {
+            return previous;
+          }
+
+          return {
+            ...previous,
+            maps: previous.maps.filter((map) => map.mapId !== mapId),
+          };
+        }
+      );
+      queryClient.removeQueries({ queryKey: mapQueryKey });
+
+      toast.success('Map archived.');
+      void navigate('/tools/system-catalog');
+    } catch (error) {
+      toast.error(
+        isPreconditionFailure(error)
+          ? 'This map changed on the server. Refresh before archiving it.'
+          : 'Unable to archive map.'
+      );
+    } finally {
+      setIsMapDeleteConfirmOpen(false);
+    }
+  }, [deleteMapMutation, editorMap, mapId, navigate, queryClient]);
+
+  if (isError) {
+    return (
+      <div
+        className='flex items-center justify-center bg-slate-50 px-6 text-center text-sm text-slate-500 dark:bg-[#101922] dark:text-[#9dabb9]'
+        style={{ height: 'calc(100vh - 56px)' }}
+      >
+        <div>
+          <div className='font-medium text-slate-700 dark:text-slate-200'>
+            Unable to load system catalog map.
+          </div>
+          <button
+            type='button'
+            onClick={() => void navigate('/tools/system-catalog')}
+            className='mt-3 rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-white dark:border-[#2d3540] dark:text-slate-200 dark:hover:bg-[#1e252e]'
+          >
+            Back to maps
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (isPending || !editorMap || !mapSummary) {
+    return (
+      <div
+        className='flex items-center justify-center bg-slate-50 text-sm text-slate-500 dark:bg-[#101922] dark:text-[#9dabb9]'
+        style={{ height: 'calc(100vh - 56px)' }}
+      >
+        Loading system catalog…
+      </div>
+    );
+  }
 
   return (
     <div
       className='relative overflow-hidden bg-slate-50 dark:bg-[#101922]'
       style={{ height: 'calc(100vh - 56px)' }}
     >
-      {/* ── Floating Toolbar ──────────────────────────────────────── */}
       <FloatingToolbar
-        mapName={map?.name}
-        groups={groups}
+        mapName={editorMap.name}
+        groups={groupFilters}
         selectedGroup={selectedGroup}
         searchQuery={searchQuery}
-        nodeCount={Object.keys(catalogNodes).length}
+        nodeCount={editorMap.nodes.length}
         onMapNameClick={() => setIsDetailsOpen(true)}
         onSelectGroup={setSelectedGroup}
         onSearchChange={setSearchQuery}
         onAddNode={handleOpenAddModal}
+        onAutoLayout={handleTriggerAutoLayout}
+        onDuplicate={() => setIsDuplicateOpen(true)}
+        onSave={() => {
+          void handleSaveContent();
+        }}
         onAddGroup={handleOpenAddGroup}
         onEditGroup={handleOpenEditGroup}
-        onDeleteGroup={(group) => setDeleteGroupConfirm(group)}
+        onDeleteGroup={(group) =>
+          group.id !== ALL_GROUP_ID &&
+          setDeleteGroupConfirm(
+            editorMap.groups.find((candidate) => candidate.groupId === group.id) ?? null
+          )
+        }
+        isDirty={isDirty}
+        isSaving={saveContentMutation.isPending}
       />
 
-      {/* ── Map + Drawer ─────────────────────────────────────────── */}
       <div className='flex h-full overflow-hidden'>
         <div className='relative flex-1'>
           <MapInner
             selectedGroup={selectedGroup}
-            onNodeClick={handleNodeClick}
+            onNodeClick={setSelectedNodeId}
+            onNodePositionChange={handleUpdateNodePosition}
             searchQuery={searchQuery}
-            catalogNodes={catalogNodes}
-            positions={positions}
-            catalogEdges={catalogEdges}
-            groups={groups}
+            nodes={editorMap.nodes}
+            edges={editorMap.edges}
+            groups={editorMap.groups}
+            engineColors={editorMap.engineColors}
+            autoLayoutSignal={autoLayoutSignal}
+            onAutoLayout={handleApplyAutoLayoutPositions}
           />
         </div>
 
@@ -371,69 +763,78 @@ function SystemCatalogContent() {
           <div className='z-30 flex w-120 shrink-0 flex-col overflow-hidden border-l border-slate-200 dark:border-[#2d3540]'>
             <NodeDrawer
               nodeId={selectedNodeId}
-              nodes={catalogNodes}
+              nodes={nodesById}
+              groups={editorMap.groups}
               onClose={() => setSelectedNodeId(null)}
               onEdit={handleOpenEditModal}
-              onDelete={(id) => setDeleteConfirmId(id)}
+              onDelete={(nodeId) => setDeleteConfirmId(nodeId)}
               onUpdateEvents={handleUpdateNodeEvents}
             />
           </div>
         )}
       </div>
 
-      {/* ── Modals ────────────────────────────────────────────────── */}
       <NodeModal
         isOpen={isModalOpen}
         editingId={editingId}
         initialData={modalInitialData}
         allNodes={allNodes}
+        groups={editorMap.groups}
         onSubmit={handleSubmitNode}
         onClose={handleCloseModal}
       />
 
-      {deleteConfirmId && catalogNodes[deleteConfirmId] && (
+      {deleteConfirmId && nodesById[deleteConfirmId] && (
         <DeleteConfirmDialog
-          nodeLabel={catalogNodes[deleteConfirmId].label}
+          nodeLabel={nodesById[deleteConfirmId].label}
           onConfirm={() => handleDeleteNode(deleteConfirmId)}
           onCancel={() => setDeleteConfirmId(null)}
         />
       )}
 
-      {map && (
-        <MapDetailsModal
-          map={map}
-          open={isDetailsOpen}
-          onOpenChange={setIsDetailsOpen}
-          onEdit={() => {
-            setIsMapEditOpen(true);
-          }}
-        />
-      )}
+      <MapDetailsModal
+        map={mapSummary}
+        open={isDetailsOpen}
+        onOpenChange={setIsDetailsOpen}
+        onEdit={() => setIsMapEditOpen(true)}
+        onDelete={() => setIsMapDeleteConfirmOpen(true)}
+        isDeleting={deleteMapMutation.isPending}
+      />
 
-      {map && (
-        <MapEditModal
-          isOpen={isMapEditOpen}
-          isEditing={true}
-          initialData={{
-            name: map.name,
-            description: map.description,
-            status: map.status,
-            tagsJson: JSON.stringify(map.tags, null, 2),
-          }}
-          onSubmit={(data: MapFormData) => {
-            // TODO: Persist updated map to backend
-            console.log('Update map:', data);
-          }}
-          onClose={() => setIsMapEditOpen(false)}
-        />
-      )}
+      <MapEditModal
+        isOpen={isMapEditOpen}
+        isEditing={true}
+        initialData={{
+          name: editorMap.name,
+          description: editorMap.description,
+          status: editorMap.status,
+          tagsJson: JSON.stringify(editorMap.tags, null, 2),
+        }}
+        onSubmit={(data) => {
+          void handleUpdateMap(data);
+        }}
+        onClose={() => setIsMapEditOpen(false)}
+      />
+
+      <MapEditModal
+        isOpen={isDuplicateOpen}
+        isEditing={false}
+        title='Copy Map'
+        description='Create a copy under your name. Nodes, groups, and edges are preserved.'
+        submitLabel='Create Copy'
+        initialData={duplicateInitialData}
+        onSubmit={(data) => {
+          void handleDuplicateMap(data);
+        }}
+        onClose={() => setIsDuplicateOpen(false)}
+      />
 
       <GroupEditModal
         isOpen={isGroupModalOpen}
         isEditing={editingGroup !== null}
         initialData={groupModalInitialData}
         allNodes={allNodes}
-        engineColors={ENGINE_COLORS}
+        engineColors={editorMap.engineColors}
         onSubmit={handleSubmitGroup}
         onClose={handleCloseGroupModal}
       />
@@ -441,8 +842,29 @@ function SystemCatalogContent() {
       {deleteGroupConfirm && (
         <DeleteGroupConfirmDialog
           groupName={deleteGroupConfirm.name}
-          onConfirm={() => handleDeleteGroup(deleteGroupConfirm)}
+          onConfirm={() =>
+            handleDeleteGroup({
+              id: deleteGroupConfirm.groupId,
+              name: deleteGroupConfirm.name,
+              type: deleteGroupConfirm.type,
+              count: deleteGroupConfirm.nodeIds.length,
+              color: deleteGroupConfirm.color,
+              nodeIds: deleteGroupConfirm.nodeIds,
+              description: deleteGroupConfirm.description,
+            })
+          }
           onCancel={() => setDeleteGroupConfirm(null)}
+        />
+      )}
+
+      {isMapDeleteConfirmOpen && (
+        <DeleteMapConfirmDialog
+          mapName={editorMap.name}
+          isDeleting={deleteMapMutation.isPending}
+          onConfirm={() => {
+            void handleArchiveMap();
+          }}
+          onCancel={() => setIsMapDeleteConfirmOpen(false)}
         />
       )}
     </div>
@@ -450,9 +872,11 @@ function SystemCatalogContent() {
 }
 
 export function SystemCatalogPage() {
+  const { mapId } = useParams<{ mapId: string }>();
+
   return (
     <ReactFlowProvider>
-      <SystemCatalogContent />
+      <SystemCatalogContent key={mapId ?? 'system-catalog'} mapId={mapId ?? ''} />
     </ReactFlowProvider>
   );
 }

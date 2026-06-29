@@ -22,13 +22,14 @@ export type PathsRecord = {};
 
 type PathsWithMethod<
   Paths extends PathsRecord,
-  Method extends 'get' | 'post' | 'patch' | 'delete',
+  Method extends 'get' | 'put' | 'post' | 'patch' | 'delete',
 > = {
   [K in keyof Paths]: Paths[K] extends Record<Method, unknown> ? K : never;
 }[keyof Paths] &
   string;
 
 export type PathsWithGet<Paths extends PathsRecord> = PathsWithMethod<Paths, 'get'>;
+export type PathsWithPut<Paths extends PathsRecord> = PathsWithMethod<Paths, 'put'>;
 export type PathsWithPost<Paths extends PathsRecord> = PathsWithMethod<Paths, 'post'>;
 export type PathsWithPatch<Paths extends PathsRecord> = PathsWithMethod<Paths, 'patch'>;
 export type PathsWithDelete<Paths extends PathsRecord> = PathsWithMethod<Paths, 'delete'>;
@@ -292,7 +293,7 @@ export function createQueryModel<
  */
 export function createMutationHook<
   Paths extends PathsRecord,
-  Method extends 'post' | 'patch' | 'delete',
+  Method extends 'put' | 'post' | 'patch' | 'delete',
   Path extends PathsWithMethod<Paths, Method>,
 >(api: ApiClient<Paths>, method: Method, path: Path) {
   const resolved = api.resolvePath(path);
@@ -324,6 +325,14 @@ export function createMutationHook<
 /* ---------------------------------- */
 /* Convenience factories for common methods */
 /* ---------------------------------- */
+
+export const createPutMutationHook = <
+  Paths extends PathsRecord,
+  Path extends PathsWithMethod<Paths, 'put'>,
+>(
+  api: ApiClient<Paths>,
+  path: Path
+) => createMutationHook(api, 'put', path);
 
 export const createPostMutationHook = <
   Paths extends PathsRecord,

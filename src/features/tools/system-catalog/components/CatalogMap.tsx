@@ -1,23 +1,26 @@
-import { useMemo, useCallback, useEffect } from 'react';
+import { useMemo, useCallback, useEffect, useRef } from 'react';
 import {
   ReactFlow,
-  Node,
-  Edge,
+  type Edge,
+  type Node,
   Controls,
   Background,
   useNodesState,
   useEdgesState,
   MarkerType,
   BackgroundVariant,
-  NodeProps,
+  type NodeProps,
   useReactFlow,
   Handle,
   Position,
 } from '@xyflow/react';
 import { Cpu } from 'lucide-react';
 import { useTheme } from '@/context/theme-context';
-import type { CatalogNodeData, EdgeDef, EdgeType, GroupItem } from '../types/system-catalog.types';
-import { ENGINE_COLORS } from '../data';
+import type { MapEdge, MapEdgeType, MapGroup, MapNode } from '../data/dynamodb-schema';
+import type { CatalogNodeViewData, NodePosition } from '../types/system-catalog.types';
+import { ALL_GROUP_ID } from '../utils/mapModel';
+import { getNodeAccentColor, getNodeDetailLabel, getNodeKindLabel } from '../utils/nodeDisplay';
+import { useAutoLayout } from '../hooks/useAutoLayout';
 import {
   IcaPipelineNode,
   EventBridgeNode,
@@ -28,14 +31,12 @@ import {
 } from './EventFlowNodes';
 
 const EDGE_TYPE_STYLES: Record<
-  EdgeType,
+  MapEdgeType,
   { strokeDasharray?: string; strokeWidth: number; color?: string }
 > = {
-  // Original pipeline edge types
   trigger: { strokeWidth: 2 },
   trigger_input: { strokeDasharray: '8 4', strokeWidth: 1.5 },
   input_dependency: { strokeDasharray: '4 3', strokeWidth: 1 },
-  // Event flow edge types
   event_publish: { strokeWidth: 2, color: '#22c55e' },
   event_subscribe: { strokeWidth: 2, color: '#22c55e' },
   state_change: { strokeWidth: 2, color: '#d97706' },
@@ -44,42 +45,43 @@ const EDGE_TYPE_STYLES: Record<
 };
 
 function PipelineNode({ data, selected }: NodeProps) {
-  const d = data as CatalogNodeData;
-  const engineColor = ENGINE_COLORS[d.engine] ?? '#6b7280';
-  const isDimmed = d.dimmed === true;
-  const isHighlighted = d.highlighted === true;
+  const node = data as unknown as CatalogNodeViewData;
+  const nodeColor =
+    typeof node.accentColor === 'string' ? node.accentColor : getNodeAccentColor(node);
+  const isDimmed = node.dimmed === true;
+  const isHighlighted = node.highlighted === true;
 
   return (
     <div
-      className='relative max-w-[200px] min-w-[180px] cursor-pointer overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all duration-200 dark:border-[#2d3540] dark:bg-[#111418]'
+      className='relative max-w-50 min-w-45 cursor-pointer overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all duration-200 dark:border-[#2d3540] dark:bg-[#111418]'
       style={{
-        borderColor: isHighlighted ? engineColor : selected ? engineColor : undefined,
+        borderColor: isHighlighted ? nodeColor : selected ? nodeColor : undefined,
         borderWidth: isHighlighted || selected ? 2 : 1,
         opacity: isDimmed ? 0.3 : 1,
         boxShadow: isHighlighted
-          ? `0 0 0 3px ${engineColor}22, 0 4px 12px rgba(0,0,0,0.1)`
+          ? `0 0 0 3px ${nodeColor}22, 0 4px 12px rgba(0,0,0,0.1)`
           : selected
-            ? `0 0 0 2px ${engineColor}44, 0 4px 12px rgba(0,0,0,0.1)`
+            ? `0 0 0 2px ${nodeColor}44, 0 4px 12px rgba(0,0,0,0.1)`
             : '0 1px 4px rgba(0,0,0,0.06)',
       }}
     >
       <div
-        className='absolute top-0 bottom-0 left-0 w-[3px] rounded-l-xl'
-        style={{ background: engineColor }}
+        className='absolute top-0 bottom-0 left-0 w-0.75 rounded-l-xl'
+        style={{ background: nodeColor }}
       />
 
       <div className='pt-3 pr-3 pb-3 pl-4'>
         <div
           className='mb-2 inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold'
-          style={{ background: `${engineColor}18`, color: engineColor }}
+          style={{ background: `${nodeColor}18`, color: nodeColor }}
         >
           <Cpu className='h-2.5 w-2.5' />
-          {d.engine}
+          {getNodeKindLabel(node)} · {getNodeDetailLabel(node)}
         </div>
         <div className='text-[13px] leading-tight font-semibold text-slate-900 dark:text-white'>
-          {d.label}
+          {node.label}
         </div>
-        <div className='mt-0.5 text-[11px] text-slate-400 dark:text-[#9dabb9]'>{d.version}</div>
+        <div className='mt-0.5 text-[11px] text-slate-400 dark:text-[#9dabb9]'>{node.version}</div>
       </div>
 
       <Handle type='target' position={Position.Left} style={{ opacity: 0 }} />
@@ -100,57 +102,83 @@ const nodeTypes = {
   execution_service: ExecutionServiceNode,
 };
 
-/** Map node IDs to their ReactFlow node type based on tags or explicit nodeType. */
-function resolveNodeType(id: string, data: CatalogNodeData): string {
-  const tagType = data.tags?.type;
-  if (tagType === 'external_platform') return 'ica_pipeline';
-  if (tagType === 'event_bus') return 'aws_event_bridge';
-  if (tagType === 'queue') return 'aws_sqs';
-  if (tagType === 'storage') return 'aws_s3';
-  if (tagType === 'rest_api_service') return 'rest_api_service';
-  if (tagType === 'execution_service') return 'execution_service';
-  return 'pipeline';
+function resolveReactFlowNodeType(node: MapNode) {
+  if (node.nodeType === 'workflow') {
+    if (node.workflowEngine === 'ICA') {
+      return 'ica_pipeline';
+    }
+
+    return 'pipeline';
+  }
+
+  switch (node.resourceType) {
+    case 'aws_event_bridge':
+      return 'aws_event_bridge';
+    case 'aws_sqs':
+      return 'aws_sqs';
+    case 'aws_s3':
+      return 'aws_s3';
+    case 'rest_api_service':
+      return 'rest_api_service';
+    case 'execution_service':
+      return 'execution_service';
+    default:
+      return 'pipeline';
+  }
 }
 
 export interface MapInnerProps {
   selectedGroup: string;
   onNodeClick: (id: string) => void;
+  onNodePositionChange: (id: string, position: MapNode['position']) => void;
   searchQuery: string;
-  catalogNodes: Record<string, CatalogNodeData>;
-  positions: Record<string, { x: number; y: number }>;
-  catalogEdges: EdgeDef[];
-  groups: GroupItem[];
+  nodes: MapNode[];
+  edges: MapEdge[];
+  groups: MapGroup[];
+  engineColors: Record<string, string>;
+  /** Incremented by the toolbar's "Auto Layout" button to request a fresh dagre layout. */
+  autoLayoutSignal: number;
+  /** Reports dagre-computed positions back so they can be persisted on save. */
+  onAutoLayout: (positions: Record<string, NodePosition>) => void;
 }
 
 export function MapInner({
   selectedGroup,
   onNodeClick,
+  onNodePositionChange,
   searchQuery,
-  catalogNodes,
-  positions,
-  catalogEdges,
+  nodes: mapNodes,
+  edges: mapEdges,
   groups,
+  engineColors,
+  autoLayoutSignal,
+  onAutoLayout,
 }: MapInnerProps) {
   const { fitView } = useReactFlow();
+  const { runLayout, nodesInitialized } = useAutoLayout();
   const { resolvedTheme } = useTheme();
 
   const edgeMeta = useMemo(
-    () => new Map(catalogEdges.map((e) => [e.id, { edgeType: e.edgeType, label: e.label }])),
-    [catalogEdges]
+    () =>
+      new Map(
+        mapEdges.map((edge) => [edge.edgeId, { edgeType: edge.edgeType, label: edge.label }])
+      ),
+    [mapEdges]
   );
 
-  const initialEdges: Edge[] = useMemo(
+  const initialEdges = useMemo<Edge[]>(
     () =>
-      catalogEdges.map((e) => {
-        const typeStyle = EDGE_TYPE_STYLES[e.edgeType];
+      mapEdges.map((edge) => {
+        const typeStyle = EDGE_TYPE_STYLES[edge.edgeType];
         const baseColor =
-          typeStyle.color ?? (e.edgeType === 'input_dependency' ? '#cbd5e1' : '#94a3b8');
+          typeStyle.color ?? (edge.edgeType === 'input_dependency' ? '#cbd5e1' : '#94a3b8');
+
         return {
-          id: e.id,
-          source: e.source,
-          target: e.target,
+          id: edge.edgeId,
+          source: edge.source,
+          target: edge.target,
           type: 'smoothstep',
-          label: e.label,
+          label: edge.label,
           labelStyle: { fontSize: 9, fill: baseColor, fontStyle: 'italic' as const },
           labelBgStyle: { fill: 'transparent' },
           markerEnd: { type: MarkerType.ArrowClosed, color: baseColor },
@@ -161,40 +189,51 @@ export function MapInner({
           },
         };
       }),
-    [catalogEdges]
+    [mapEdges]
   );
 
   const buildNodes = useCallback((): Node[] => {
-    const activeGroup = selectedGroup !== 'ALL' ? groups.find((a) => a.id === selectedGroup) : null;
+    const activeGroup =
+      selectedGroup !== ALL_GROUP_ID
+        ? (groups.find((group) => group.groupId === selectedGroup) ?? null)
+        : null;
     const focusedIds = activeGroup ? new Set(activeGroup.nodeIds) : null;
 
-    return Object.entries(catalogNodes)
-      .filter(([, data]) => {
-        if (!searchQuery) return true;
+    return mapNodes
+      .filter((node) => {
+        if (!searchQuery) {
+          return true;
+        }
+
+        const loweredQuery = searchQuery.toLowerCase();
         return (
-          data.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          data.description.toLowerCase().includes(searchQuery.toLowerCase())
+          node.label.toLowerCase().includes(loweredQuery) ||
+          node.description.toLowerCase().includes(loweredQuery)
         );
       })
-      .map(([id, data]) => {
-        const highlighted = focusedIds ? focusedIds.has(id) : false;
-        const dimmed = focusedIds ? !focusedIds.has(id) : false;
-        return {
-          id,
-          type: resolveNodeType(id, data),
-          position: positions[id] ?? { x: 0, y: 0 },
-          data: { ...data, highlighted, dimmed },
-        };
-      });
-  }, [selectedGroup, searchQuery, catalogNodes, positions, groups]);
+      .map((node) => ({
+        id: node.nodeId,
+        type: resolveReactFlowNodeType(node),
+        position: node.position ?? { x: 0, y: 0 },
+        data: {
+          ...node,
+          accentColor: getNodeAccentColor(node, engineColors),
+          highlighted: focusedIds ? focusedIds.has(node.nodeId) : false,
+          dimmed: focusedIds ? !focusedIds.has(node.nodeId) : false,
+        },
+      }));
+  }, [selectedGroup, searchQuery, mapNodes, groups, engineColors]);
 
   const dimmedColor = resolvedTheme === 'dark' ? '#2d3540' : '#e2e8f0';
   const defaultEdgeColor = resolvedTheme === 'dark' ? '#64748b' : '#94a3b8';
 
   const buildEdges = useCallback((): Edge[] => {
-    const activeGroup = selectedGroup !== 'ALL' ? groups.find((a) => a.id === selectedGroup) : null;
+    const activeGroup =
+      selectedGroup !== ALL_GROUP_ID
+        ? (groups.find((group) => group.groupId === selectedGroup) ?? null)
+        : null;
     const focusedIds = activeGroup ? new Set(activeGroup.nodeIds) : null;
-    const groupColor = groups.find((a) => a.id === selectedGroup)?.color;
+    const groupColor = activeGroup?.color;
 
     return initialEdges.map((edge) => {
       const meta = edgeMeta.get(edge.id);
@@ -203,7 +242,6 @@ export function MapInner({
         ? focusedIds.has(edge.source) && focusedIds.has(edge.target)
         : true;
 
-      // Use the edge type's intrinsic color (event flow edges) or fall back to group/default
       const intrinsicColor = typeStyle.color;
       const strokeColor = isActive
         ? focusedIds
@@ -215,6 +253,7 @@ export function MapInner({
                 : '#cbd5e1'
               : defaultEdgeColor))
         : dimmedColor;
+
       return {
         ...edge,
         style: {
@@ -240,25 +279,73 @@ export function MapInner({
   const [nodes, setNodes, onNodesChange] = useNodesState(computedNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(computedEdges);
 
+  // Re-sync data/styling from props while preserving each node's live position
+  // (from drag or auto-layout), so switching groups, searching, or toggling theme
+  // never resets the computed layout back to the origin.
   useEffect(() => {
-    setNodes(computedNodes);
+    setNodes((current) => {
+      const positionById = new Map(current.map((node) => [node.id, node.position]));
+      return computedNodes.map((node) => {
+        const livePosition = positionById.get(node.id);
+        return livePosition ? { ...node, position: livePosition } : node;
+      });
+    });
     setEdges(computedEdges);
   }, [computedNodes, computedEdges, setNodes, setEdges]);
+
+  // A map whose nodes have no stored positions needs a one-off dagre layout once
+  // React Flow has measured the nodes, so it renders readable instead of stacked.
+  const needsAutoLayout = useMemo(
+    () => mapNodes.length > 0 && mapNodes.some((node) => !node.position),
+    [mapNodes]
+  );
+
+  const hasAutoLaidOut = useRef(false);
+  useEffect(() => {
+    if (hasAutoLaidOut.current || !nodesInitialized) {
+      return;
+    }
+    hasAutoLaidOut.current = true;
+    if (needsAutoLayout) {
+      runLayout(setNodes, { direction: 'LR' });
+    }
+  }, [nodesInitialized, needsAutoLayout, runLayout, setNodes]);
+
+  // Toolbar "Auto Layout" button: re-run dagre and report positions back for persistence.
+  const processedLayoutSignal = useRef(autoLayoutSignal);
+  useEffect(() => {
+    if (processedLayoutSignal.current === autoLayoutSignal) {
+      return;
+    }
+    processedLayoutSignal.current = autoLayoutSignal;
+
+    const laidOutNodes = runLayout(setNodes, { direction: 'LR' });
+    const positions: Record<string, NodePosition> = {};
+    for (const node of laidOutNodes) {
+      positions[node.id] = node.position;
+    }
+    onAutoLayout(positions);
+  }, [autoLayoutSignal, runLayout, setNodes, onAutoLayout]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       const activeGroup =
-        selectedGroup !== 'ALL' ? groups.find((a) => a.id === selectedGroup) : null;
+        selectedGroup !== ALL_GROUP_ID
+          ? (groups.find((group) => group.groupId === selectedGroup) ?? null)
+          : null;
+
       if (activeGroup) {
         void fitView({
-          nodes: activeGroup.nodeIds.map((id) => ({ id })),
+          nodes: activeGroup.nodeIds.map((nodeId) => ({ id: nodeId })),
           duration: 600,
           padding: 0.3,
         });
-      } else {
-        void fitView({ duration: 600, padding: 0.15 });
+        return;
       }
+
+      void fitView({ duration: 600, padding: 0.15 });
     }, 50);
+
     return () => clearTimeout(timer);
   }, [selectedGroup, fitView, groups]);
 
@@ -270,6 +357,7 @@ export function MapInner({
       onEdgesChange={onEdgesChange}
       nodeTypes={nodeTypes}
       onNodeClick={(_, node) => onNodeClick(node.id)}
+      onNodeDragStop={(_, node) => onNodePositionChange(node.id, node.position)}
       fitView
       fitViewOptions={{ padding: 0.15 }}
       attributionPosition='bottom-left'

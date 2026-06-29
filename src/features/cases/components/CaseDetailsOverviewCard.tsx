@@ -1,7 +1,7 @@
 import { PillTag } from '../../../components/ui/PillTag';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { formatDetailDate } from '../../../utils/timeFormat';
-import { getCaseTypeVariant } from '../utils/getCaseTypeVariant';
+import { getCaseStudyTypeVariant } from '../utils/getCaseVariants';
 import { getCaseStatusVisual } from '../utils/caseStatus.visuals';
 import { useCaseDetailsContext } from '../context/CaseDetailsContext';
 
@@ -103,7 +103,12 @@ export function CaseDetailsOverviewCard() {
           {isLoadingCaseDetail ? (
             <Skeleton className='h-5 w-24' />
           ) : (
-            <PillTag variant={getCaseTypeVariant(caseDetail?.studyType ?? '')} size='sm'>
+            <PillTag
+              variant={
+                caseDetail?.studyType ? getCaseStudyTypeVariant(caseDetail.studyType) : 'neutral'
+              }
+              size='sm'
+            >
               {caseDetail?.studyType ?? '—'}
             </PillTag>
           )}

@@ -1,11 +1,7 @@
 import { tryPrettyJson } from '@/utils/json';
-import type {
-  EdgeDef,
-  NodeConfig,
-  NodeFormData,
-  CatalogNodeData,
-  NodeParentLink,
-} from '../types/system-catalog.types';
+import type { MapEdge, MapNode } from '../data/dynamodb-schema';
+import type { NodeConfig, NodeFormData, NodeParentLink } from '../types/system-catalog.types';
+import { RESOURCE_TYPE_OPTIONS, WORKFLOW_ENGINE_OPTIONS } from './nodeDisplay';
 
 export function parseNodeConfigJson(raw: string): NodeConfig | null {
   const trimmed = raw.trim();
@@ -34,8 +30,8 @@ export function configToJson(config: NodeConfig): string {
   return tryPrettyJson(JSON.stringify(config));
 }
 
-export function getParentLinksForNode(nodeId: string, catalogEdges: EdgeDef[]): NodeParentLink[] {
-  return catalogEdges
+export function getParentLinksForNode(nodeId: string, mapEdges: MapEdge[]): NodeParentLink[] {
+  return mapEdges
     .filter((edge) => edge.target === nodeId)
     .map((edge) => ({ nodeId: edge.source, edgeType: edge.edgeType }));
 }
@@ -43,8 +39,8 @@ export function getParentLinksForNode(nodeId: string, catalogEdges: EdgeDef[]): 
 export function buildParentEdges(
   targetId: string,
   parentLinks: NodeParentLink[],
-  existingEdges: EdgeDef[] = []
-): EdgeDef[] {
+  existingEdges: MapEdge[] = []
+): MapEdge[] {
   return parentLinks.map((parentLink) => {
     const existingEdge = existingEdges.find(
       (edge) =>
@@ -54,7 +50,7 @@ export function buildParentEdges(
     );
 
     return {
-      id: `e-${parentLink.nodeId}-${targetId}`,
+      edgeId: `e-${parentLink.nodeId}-${targetId}-${parentLink.edgeType}`,
       source: parentLink.nodeId,
       target: targetId,
       edgeType: parentLink.edgeType,
@@ -63,17 +59,21 @@ export function buildParentEdges(
   });
 }
 
-export function nodeToFormData(
-  nodeId: string,
-  node: CatalogNodeData,
-  catalogEdges: EdgeDef[]
-): NodeFormData {
+export function nodeToFormData(nodeId: string, node: MapNode, mapEdges: MapEdge[]): NodeFormData {
   return {
     name: node.label,
     version: node.version,
-    engine: node.engine,
-    groupId: node.groupIds[0] ?? '',
-    parentLinks: getParentLinksForNode(nodeId, catalogEdges),
+    nodeType: node.nodeType,
+    resourceType:
+      node.nodeType === 'resource'
+        ? node.resourceType
+        : (RESOURCE_TYPE_OPTIONS[0]?.value ?? 'aws_lambda'),
+    workflowEngine:
+      node.nodeType === 'workflow'
+        ? node.workflowEngine
+        : (WORKFLOW_ENGINE_OPTIONS[0]?.value ?? 'ICA'),
+    groupIds: node.groupIds,
+    parentLinks: getParentLinksForNode(nodeId, mapEdges),
     description: node.description,
     configJson: configToJson(node.tags),
   };

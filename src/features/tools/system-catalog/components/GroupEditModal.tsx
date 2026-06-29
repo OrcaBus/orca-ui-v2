@@ -3,15 +3,15 @@ import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { X, Plus, ChevronDown } from 'lucide-react';
-import type { CatalogNodeData } from '../types/system-catalog.types';
-
-// ─── Schema ─────────────────────────────────────────────────────────────────
+import type { CatalogNodeLookupItem } from '../types/system-catalog.types';
+import { getNodeAccentColor, getNodeDetailLabel } from '../utils/nodeDisplay';
 
 const GROUP_TYPES = ['infrastructure', 'ingestion', 'analysis', 'flows', 'service'] as const;
 export type GroupType = (typeof GROUP_TYPES)[number];
 
 const groupFormSchema = z.object({
   name: z.string().min(1, 'Group name is required'),
+  description: z.string(),
   type: z.enum(GROUP_TYPES),
   color: z.string().min(1, 'Color is required'),
   nodeIds: z.array(z.string()),
@@ -19,21 +19,19 @@ const groupFormSchema = z.object({
 
 export type GroupFormData = z.infer<typeof groupFormSchema>;
 
-// ─── Constants ──────────────────────────────────────────────────────────────
-
 const COLOR_PRESETS = [
-  '#6366f1', // indigo
-  '#06b6d4', // cyan
-  '#a855f7', // purple
-  '#f59e0b', // amber
-  '#3b82f6', // blue
-  '#10b981', // emerald
-  '#ec4899', // pink
-  '#ef4444', // red
-  '#f97316', // orange
-  '#14b8a6', // teal
-  '#8b5cf6', // violet
-  '#84cc16', // lime
+  '#6366f1',
+  '#06b6d4',
+  '#a855f7',
+  '#f59e0b',
+  '#3b82f6',
+  '#10b981',
+  '#ec4899',
+  '#ef4444',
+  '#f97316',
+  '#14b8a6',
+  '#8b5cf6',
+  '#84cc16',
 ];
 
 const TYPE_LABELS: Record<GroupType, string> = {
@@ -47,19 +45,15 @@ const TYPE_LABELS: Record<GroupType, string> = {
 const inputClassName =
   'w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 transition-all placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-white dark:placeholder:text-[#9dabb9] dark:focus:border-blue-400';
 
-// ─── Props ──────────────────────────────────────────────────────────────────
-
 interface GroupEditModalProps {
   isOpen: boolean;
   isEditing: boolean;
   initialData: GroupFormData;
-  allNodes: Record<string, Pick<CatalogNodeData, 'label' | 'engine'>>;
+  allNodes: Record<string, CatalogNodeLookupItem>;
   engineColors: Record<string, string>;
   onSubmit: (data: GroupFormData) => void;
   onClose: () => void;
 }
-
-// ─── Component ──────────────────────────────────────────────────────────────
 
 export function GroupEditModal({
   isOpen,
@@ -95,14 +89,13 @@ export function GroupEditModal({
     }
   }, [isOpen, initialData, isSubmitting, reset]);
 
-  if (!isOpen) return null;
+  if (!isOpen) {
+    return null;
+  }
 
-  const availableNodes = Object.entries(allNodes).filter(([id]) => !selectedNodeIds.includes(id));
-
-  const onFormSubmit = (data: GroupFormData) => {
-    onSubmit(data);
-    onClose();
-  };
+  const availableNodes = Object.entries(allNodes).filter(
+    ([nodeId]) => !selectedNodeIds.includes(nodeId)
+  );
 
   const handleClose = () => {
     reset();
@@ -113,8 +106,7 @@ export function GroupEditModal({
     <div className='fixed inset-0 z-50 flex items-center justify-center'>
       <div className='absolute inset-0 bg-black/40 backdrop-blur-sm' onClick={handleClose} />
       <div className='relative flex max-h-[calc(100vh-4rem)] w-full max-w-lg flex-col rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-[#2d3540] dark:bg-[#111418]'>
-        <form onSubmit={(e) => void handleSubmit(onFormSubmit)(e)} className='contents'>
-          {/* Header */}
+        <form onSubmit={(event) => void handleSubmit(onSubmit)(event)} className='contents'>
           <div className='flex shrink-0 items-start justify-between px-6 pt-6 pb-2'>
             <div>
               <h2 className='text-lg font-bold text-slate-900 dark:text-white'>
@@ -135,10 +127,8 @@ export function GroupEditModal({
             </button>
           </div>
 
-          {/* Form fields — scrollable area */}
           <div className='overflow-y-auto px-6 py-4'>
             <div className='space-y-4'>
-              {/* Group Name */}
               <div>
                 <label
                   htmlFor='group-name'
@@ -160,7 +150,22 @@ export function GroupEditModal({
                 )}
               </div>
 
-              {/* Type */}
+              <div>
+                <label
+                  htmlFor='group-description'
+                  className='mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300'
+                >
+                  Description
+                </label>
+                <textarea
+                  id='group-description'
+                  rows={3}
+                  placeholder='Describe what this group represents...'
+                  {...register('description')}
+                  className={inputClassName + ' resize-none'}
+                />
+              </div>
+
               <div>
                 <label
                   htmlFor='group-type'
@@ -174,9 +179,9 @@ export function GroupEditModal({
                     {...register('type')}
                     className={inputClassName + ' appearance-none pr-8'}
                   >
-                    {GROUP_TYPES.map((t) => (
-                      <option key={t} value={t}>
-                        {TYPE_LABELS[t]}
+                    {GROUP_TYPES.map((type) => (
+                      <option key={type} value={type}>
+                        {TYPE_LABELS[type]}
                       </option>
                     ))}
                   </select>
@@ -184,7 +189,6 @@ export function GroupEditModal({
                 </div>
               </div>
 
-              {/* Color */}
               <div>
                 <label className='mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300'>
                   Color
@@ -224,7 +228,6 @@ export function GroupEditModal({
                 )}
               </div>
 
-              {/* Nodes Included */}
               <div>
                 <label className='mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300'>
                   Nodes Included
@@ -241,8 +244,8 @@ export function GroupEditModal({
                     </span>
                     <button
                       type='button'
-                      onClick={(e) => {
-                        e.stopPropagation();
+                      onClick={(event) => {
+                        event.stopPropagation();
                         setIsNodeDropdownOpen((open) => !open);
                       }}
                       className='ml-auto shrink-0 rounded-md p-0.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-[#2d3540] dark:hover:text-white'
@@ -253,27 +256,28 @@ export function GroupEditModal({
 
                   {selectedNodeIds.length > 0 && (
                     <div className='mt-2 flex flex-wrap gap-2'>
-                      {selectedNodeIds.map((wfId) => {
-                        const wf = allNodes[wfId];
-                        const engineColor = wf ? (engineColors[wf.engine] ?? '#6b7280') : '#6b7280';
+                      {selectedNodeIds.map((nodeId) => {
+                        const node = allNodes[nodeId];
+                        const nodeColor = node ? getNodeAccentColor(node, engineColors) : '#6b7280';
+
                         return (
                           <div
-                            key={wfId}
+                            key={nodeId}
                             className='flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 dark:border-[#2d3540] dark:bg-[#1e252e]'
                           >
                             <div
                               className='h-2 w-2 shrink-0 rounded-full'
-                              style={{ background: engineColor }}
+                              style={{ background: nodeColor }}
                             />
                             <span className='text-sm font-medium text-slate-700 dark:text-slate-300'>
-                              {wf?.label ?? wfId}
+                              {node?.label ?? nodeId}
                             </span>
                             <button
                               type='button'
                               onClick={() =>
                                 setValue(
                                   'nodeIds',
-                                  selectedNodeIds.filter((id) => id !== wfId),
+                                  selectedNodeIds.filter((selectedId) => selectedId !== nodeId),
                                   { shouldValidate: true }
                                 )
                               }
@@ -289,12 +293,12 @@ export function GroupEditModal({
 
                   {isNodeDropdownOpen && availableNodes.length > 0 && (
                     <div className='absolute top-full right-0 left-0 z-10 mt-1 max-h-48 overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg dark:border-[#2d3540] dark:bg-[#1e252e]'>
-                      {availableNodes.map(([id, catalogNode]) => (
+                      {availableNodes.map(([nodeId, node]) => (
                         <button
-                          key={id}
+                          key={nodeId}
                           type='button'
                           onClick={() => {
-                            setValue('nodeIds', [...selectedNodeIds, id], {
+                            setValue('nodeIds', [...selectedNodeIds, nodeId], {
                               shouldValidate: true,
                             });
                             setIsNodeDropdownOpen(false);
@@ -303,11 +307,12 @@ export function GroupEditModal({
                         >
                           <div
                             className='h-2 w-2 rounded-full'
-                            style={{
-                              background: engineColors[catalogNode.engine] ?? '#6b7280',
-                            }}
+                            style={{ background: getNodeAccentColor(node, engineColors) }}
                           />
-                          {catalogNode.label}
+                          <span className='min-w-0 flex-1 truncate'>{node.label}</span>
+                          <span className='shrink-0 text-xs text-slate-400 dark:text-[#6b7a8d]'>
+                            {getNodeDetailLabel(node)}
+                          </span>
                         </button>
                       ))}
                     </div>
@@ -317,7 +322,6 @@ export function GroupEditModal({
             </div>
           </div>
 
-          {/* Footer */}
           <div className='flex shrink-0 items-center justify-end gap-3 border-t border-slate-100 px-6 py-4 dark:border-[#2d3540]'>
             <button
               type='button'

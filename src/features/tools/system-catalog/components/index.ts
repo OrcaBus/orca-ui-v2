@@ -2,6 +2,7 @@ export { NodeModal } from './NodeModal';
 export { DeleteConfirmDialog } from './DeleteConfirmDialog';
 export { DeleteEventConfirmDialog } from './DeleteEventConfirmDialog';
 export { DeleteGroupConfirmDialog } from './DeleteGroupConfirmDialog';
+export { DeleteMapConfirmDialog } from './DeleteMapConfirmDialog';
 export { EventModal } from './EventModal';
 export { MapInner } from './CatalogMap';
 export { NodeDrawer } from './NodeDrawer';
@@ -10,6 +11,7 @@ export { FloatingToolbar } from './FloatingToolbar';
 export { MapDetailsModal } from './MapDetailsModal';
 export { MapEditModal } from './MapEditModal';
 export { GroupEditModal } from './GroupEditModal';
+export { SystemCatalogInfoDrawer } from './SystemCatalogInfoDrawer';
 export {
   IcaPipelineNode,
   EventBridgeNode,

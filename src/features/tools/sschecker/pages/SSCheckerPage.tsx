@@ -1,11 +1,16 @@
-import { FileText } from 'lucide-react';
-import { PageHeader } from '@/components/layout/PageHeader';
-import { SSCheckerBreadcrumb } from '../components/SSCheckerBreadcrumb';
+import { useMemo } from 'react';
+import { FileCheck } from 'lucide-react';
+import { useAppShellHeader } from '@/context/app-shell-context';
+import { useToolsPageQueryParams } from '../../hooks/useToolsPageQueryParams';
+import { SSCheckerInfoDrawer } from '../components/SSCheckerInfoDrawer';
 import { SSCheckerInputsPanel } from '../components/SSCheckerInputsPanel';
 import { SSCheckerResultsLogPanel } from '../components/SSCheckerResultsLogPanel';
 import { useSSChecker } from '../hooks/useSSChecker';
 
 export function SSCheckerPage() {
+  const title = 'SSChecker';
+  const description = 'Upload a sample sheet to validate formatting and metadata.';
+  const { isInfoDrawerOpen, openInfoDrawer, closeInfoDrawer } = useToolsPageQueryParams();
   const {
     selectedFile,
     loggingLevel,
@@ -22,40 +27,55 @@ export function SSCheckerPage() {
     handleDownloadV2SampleSheet,
   } = useSSChecker();
 
+  const headerConfig = useMemo(
+    () => ({
+      mode: 'main' as const,
+      title,
+      icon: <FileCheck className='h-6 w-6' />,
+      info: {
+        onOpen: openInfoDrawer,
+      },
+    }),
+    [openInfoDrawer, title]
+  );
+
+  useAppShellHeader(headerConfig);
+
   return (
-    <div className='p-6'>
-      <SSCheckerBreadcrumb />
+    <>
+      <div className='p-6'>
+        <div className='flex items-start gap-4'>
+          <SSCheckerInputsPanel
+            selectedFile={selectedFile}
+            loggingLevel={loggingLevel}
+            isChecking={isChecking}
+            onFileSelect={handleFileSelect}
+            onFileClear={handleFileClear}
+            onLoggingLevelChange={setLoggingLevel}
+            onCheck={() => void handleCheck()}
+          />
 
-      <PageHeader
-        title='SSChecker'
-        description='Upload a sample sheet to validate formatting and metadata.'
-        icon={<FileText className='h-6 w-6' />}
-      />
-
-      <div className='flex items-start gap-4'>
-        <SSCheckerInputsPanel
-          selectedFile={selectedFile}
-          loggingLevel={loggingLevel}
-          isChecking={isChecking}
-          onFileSelect={handleFileSelect}
-          onFileClear={handleFileClear}
-          onLoggingLevelChange={setLoggingLevel}
-          onCheck={() => void handleCheck()}
-        />
-
-        <SSCheckerResultsLogPanel
-          isChecking={isChecking}
-          selectedFileName={selectedFile?.name}
-          validationResponse={validationResponse}
-          error={error}
-          loggingLevel={loggingLevel}
-          copied={copied}
-          onCopyLog={handleCopyLog}
-          onDownloadLog={handleDownloadLog}
-          onDownloadV2SampleSheet={handleDownloadV2SampleSheet}
-          onRetry={() => void handleCheck()}
-        />
+          <SSCheckerResultsLogPanel
+            isChecking={isChecking}
+            selectedFileName={selectedFile?.name}
+            validationResponse={validationResponse}
+            error={error}
+            loggingLevel={loggingLevel}
+            copied={copied}
+            onCopyLog={handleCopyLog}
+            onDownloadLog={handleDownloadLog}
+            onDownloadV2SampleSheet={handleDownloadV2SampleSheet}
+            onRetry={() => void handleCheck()}
+          />
+        </div>
       </div>
-    </div>
+
+      <SSCheckerInfoDrawer
+        isOpen={isInfoDrawerOpen}
+        onClose={closeInfoDrawer}
+        title={title}
+        description={description}
+      />
+    </>
   );
 }

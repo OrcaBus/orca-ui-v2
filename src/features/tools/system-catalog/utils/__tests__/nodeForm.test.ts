@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { EdgeDef, CatalogNodeData } from '../../types/system-catalog.types';
+import type { MapEdge, MapNode } from '../../data/dynamodb-schema';
 import { buildParentEdges, parseNodeConfigJson, nodeToFormData } from '../nodeForm';
 
 describe('parseNodeConfigJson', () => {
@@ -21,10 +21,12 @@ describe('parseNodeConfigJson', () => {
 
 describe('nodeToFormData', () => {
   it('hydrates tag JSON and parent edge types for editing', () => {
-    const catalogNode: CatalogNodeData = {
+    const catalogNode: MapNode = {
+      nodeId: 'bcl-convert',
+      nodeType: 'workflow',
+      workflowEngine: 'ICA',
       label: 'BCL Convert',
       version: 'v4.2.7',
-      engine: 'ICA',
       description: 'Converts BCL to FASTQ.',
       groupIds: ['SEQUENCING', 'WGS'],
       inputEvents: [],
@@ -33,17 +35,18 @@ describe('nodeToFormData', () => {
         computeQueue: 'ica-prod-bcl-convert',
         timeout: '8h',
       },
+      position: { x: 280, y: 330 },
     };
 
-    const edges: EdgeDef[] = [
+    const edges: MapEdge[] = [
       {
-        id: 'e-bssh-bcl',
+        edgeId: 'e-bssh-bcl-trigger',
         source: 'bssh',
         target: 'bcl-convert',
         edgeType: 'trigger',
       },
       {
-        id: 'e-sequencer-bcl',
+        edgeId: 'e-sequencer-bcl-input_dependency',
         source: 'sequencer',
         target: 'bcl-convert',
         edgeType: 'input_dependency',
@@ -53,8 +56,9 @@ describe('nodeToFormData', () => {
     expect(nodeToFormData('bcl-convert', catalogNode, edges)).toMatchObject({
       name: 'BCL Convert',
       version: 'v4.2.7',
-      engine: 'ICA',
-      groupId: 'SEQUENCING',
+      nodeType: 'workflow',
+      workflowEngine: 'ICA',
+      groupIds: ['SEQUENCING', 'WGS'],
       parentLinks: [
         { nodeId: 'bssh', edgeType: 'trigger' },
         { nodeId: 'sequencer', edgeType: 'input_dependency' },
@@ -77,13 +81,13 @@ describe('buildParentEdges', () => {
       ])
     ).toEqual([
       {
-        id: 'e-wgs-alignment-qc-wgs-tumor-normal',
+        edgeId: 'e-wgs-alignment-qc-wgs-tumor-normal-trigger_input',
         source: 'wgs-alignment-qc',
         target: 'wgs-tumor-normal',
         edgeType: 'trigger_input',
       },
       {
-        id: 'e-bcl-convert-wgs-tumor-normal',
+        edgeId: 'e-bcl-convert-wgs-tumor-normal-input_dependency',
         source: 'bcl-convert',
         target: 'wgs-tumor-normal',
         edgeType: 'input_dependency',
@@ -98,7 +102,7 @@ describe('buildParentEdges', () => {
         [{ nodeId: 'bcl-convert', edgeType: 'input_dependency' }],
         [
           {
-            id: 'e-bcl-convert-wgs-tumor-normal',
+            edgeId: 'e-bcl-convert-wgs-tumor-normal-input_dependency',
             source: 'bcl-convert',
             target: 'wgs-tumor-normal',
             edgeType: 'input_dependency',
@@ -108,7 +112,7 @@ describe('buildParentEdges', () => {
       )
     ).toEqual([
       {
-        id: 'e-bcl-convert-wgs-tumor-normal',
+        edgeId: 'e-bcl-convert-wgs-tumor-normal-input_dependency',
         source: 'bcl-convert',
         target: 'wgs-tumor-normal',
         edgeType: 'input_dependency',

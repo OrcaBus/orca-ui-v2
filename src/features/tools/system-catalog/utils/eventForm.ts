@@ -1,4 +1,5 @@
-import type { EventDef, EventFormData } from '../types/system-catalog.types';
+import type { EventDef } from '../data/dynamodb-schema';
+import type { EventFormData } from '../types/system-catalog.types';
 
 export const defaultEventFormData: EventFormData = {
   name: '',

@@ -6,7 +6,7 @@
  */
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { Cloud, Radio, Inbox, HardDrive, Database, Zap, Play, Workflow } from 'lucide-react';
-import type { CatalogNodeData } from '../types/system-catalog.types';
+import type { CatalogNodeViewData } from '../types/system-catalog.types';
 
 // ── Shared Helpers ────────────────────────────────────────────────────────
 
@@ -47,7 +47,7 @@ function dimStyle(isDimmed: boolean, isHighlighted: boolean, accentColor: string
 // ── ICA Pipeline Node (Cloud Shape) ──────────────────────────────────────
 
 export function IcaPipelineNode({ data }: NodeProps) {
-  const d = data as CatalogNodeData;
+  const d = data as unknown as CatalogNodeViewData;
   const isDimmed = d.dimmed === true;
   const isHighlighted = d.highlighted === true;
   const color = SERVICE_COLORS.ICA;
@@ -93,14 +93,14 @@ export function IcaPipelineNode({ data }: NodeProps) {
 // ── EventBridge Node (Hexagonal/Tunnel Shape) ────────────────────────────
 
 export function EventBridgeNode({ data }: NodeProps) {
-  const d = data as CatalogNodeData;
+  const d = data as unknown as CatalogNodeViewData;
   const isDimmed = d.dimmed === true;
   const isHighlighted = d.highlighted === true;
   const color = SERVICE_COLORS.EVENTBRIDGE;
 
   return (
     <div
-      className='relative min-w-[220px] cursor-pointer'
+      className='relative min-w-55 cursor-pointer'
       style={{ ...dimStyle(isDimmed, isHighlighted, color) }}
     >
       {/* Hexagonal shape via clip-path */}
@@ -138,7 +138,7 @@ export function EventBridgeNode({ data }: NodeProps) {
 // ── SQS Queue Node ───────────────────────────────────────────────────────
 
 export function SqsNode({ data }: NodeProps) {
-  const d = data as CatalogNodeData;
+  const d = data as unknown as CatalogNodeViewData;
   const isDimmed = d.dimmed === true;
   const isHighlighted = d.highlighted === true;
   const color = SERVICE_COLORS.SQS;
@@ -173,7 +173,7 @@ export function SqsNode({ data }: NodeProps) {
 // ── S3 Bucket Node ───────────────────────────────────────────────────────
 
 export function S3Node({ data }: NodeProps) {
-  const d = data as CatalogNodeData;
+  const d = data as unknown as CatalogNodeViewData;
   const isDimmed = d.dimmed === true;
   const isHighlighted = d.highlighted === true;
   const color = SERVICE_COLORS.S3;
@@ -209,7 +209,7 @@ export function S3Node({ data }: NodeProps) {
 // ── REST API Service Node (Lambda + RDS) ─────────────────────────────────
 
 export function RestApiServiceNode({ data }: NodeProps) {
-  const d = data as CatalogNodeData;
+  const d = data as unknown as CatalogNodeViewData;
   const isDimmed = d.dimmed === true;
   const isHighlighted = d.highlighted === true;
   const lambdaColor = SERVICE_COLORS.LAMBDA;
@@ -266,7 +266,7 @@ export function RestApiServiceNode({ data }: NodeProps) {
 // ── Execution Service Node (StepFunction + DynamoDB) ─────────────────────
 
 export function ExecutionServiceNode({ data }: NodeProps) {
-  const d = data as CatalogNodeData;
+  const d = data as unknown as CatalogNodeViewData;
   const isDimmed = d.dimmed === true;
   const isHighlighted = d.highlighted === true;
   const sfColor = SERVICE_COLORS.STEPFUNCTION;

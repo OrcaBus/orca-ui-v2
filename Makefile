@@ -11,6 +11,7 @@ VITE_FILE_URL ?= https://file.dev.umccr.org
 VITE_SSCHECK_URL ?= https://sscheck-orcabus.dev.umccr.org
 VITE_HTSGET_URL ?= https://htsget-file.dev.umccr.org
 VITE_CASE_URL ?= https://case.dev.umccr.org
+VITE_SYSTEM_CATALOG_URL ?= https://system-catalog.dev.umccr.org
 
 # Dev server port (Vite). Override when 3000 is in use, e.g. `make start PORT=3001` or `make start-3001`.
 PORT ?= 3000
@@ -24,6 +25,7 @@ export VITE_SSCHECK_URL
 export VITE_SEQUENCE_RUN_URL
 export VITE_HTSGET_URL
 export VITE_CASE_URL
+export VITE_SYSTEM_CATALOG_URL
 
 generate-openapi-types:
 	@echo "Generating Metadata OpenAPI types from ${VITE_METADATA_URL}..."
@@ -36,6 +38,8 @@ generate-openapi-types:
 	@pnpm exec openapi-typescript ${VITE_FILE_URL}/schema/openapi.json -o ./src/api/types/file.openapi.d.ts
 	@echo "Generating Case OpenAPI types from ${VITE_CASE_URL}..."
 	@pnpm exec openapi-typescript ${VITE_CASE_URL}/schema/openapi.json -o ./src/api/types/case.openapi.d.ts
+	@echo "Generating System Catalog OpenAPI types from ${VITE_SYSTEM_CATALOG_URL}..."
+	@pnpm exec openapi-typescript --default-non-nullable false ${VITE_SYSTEM_CATALOG_URL}/schema/openapi.json -o ./src/api/types/system-catalog.openapi.d.ts
 
 start: generate-openapi-types
 	@pnpm run start
@@ -69,4 +73,3 @@ format:
 
 format-check:
 	@pnpm format:check
-

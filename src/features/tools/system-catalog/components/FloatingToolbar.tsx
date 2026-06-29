@@ -1,13 +1,25 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router';
-import { ArrowLeft, Search, X, Plus, ChevronDown, Layers, Pencil, Trash2 } from 'lucide-react';
-import type { GroupItem } from '../types/system-catalog.types';
+import {
+  ArrowLeft,
+  Search,
+  X,
+  Plus,
+  ChevronDown,
+  Layers,
+  Pencil,
+  Trash2,
+  Save,
+  Network,
+  Copy,
+} from 'lucide-react';
+import type { GroupFilterItem } from '../types/system-catalog.types';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
 interface FloatingToolbarProps {
   mapName?: string;
-  groups: GroupItem[];
+  groups: GroupFilterItem[];
   selectedGroup: string;
   searchQuery: string;
   nodeCount: number;
@@ -15,9 +27,14 @@ interface FloatingToolbarProps {
   onSelectGroup: (groupId: string) => void;
   onSearchChange: (query: string) => void;
   onAddNode: () => void;
+  onAutoLayout: () => void;
+  onDuplicate: () => void;
+  onSave: () => void;
   onAddGroup: () => void;
-  onEditGroup: (group: GroupItem) => void;
-  onDeleteGroup: (group: GroupItem) => void;
+  onEditGroup: (group: GroupFilterItem) => void;
+  onDeleteGroup: (group: GroupFilterItem) => void;
+  isDirty: boolean;
+  isSaving: boolean;
 }
 
 // ─── Component ──────────────────────────────────────────────────────────────
@@ -32,9 +49,14 @@ export function FloatingToolbar({
   onSelectGroup,
   onSearchChange,
   onAddNode,
+  onAutoLayout,
+  onDuplicate,
+  onSave,
   onAddGroup,
   onEditGroup,
   onDeleteGroup,
+  isDirty,
+  isSaving,
 }: FloatingToolbarProps) {
   const [isGroupDropdownOpen, setIsGroupDropdownOpen] = useState(false);
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
@@ -268,6 +290,44 @@ export function FloatingToolbar({
         >
           <Plus className='h-3.5 w-3.5' />
           <span className='hidden sm:inline'>Add Node</span>
+        </button>
+
+        <div className='mx-0.5 h-5 w-px bg-slate-200 dark:bg-[#2d3540]' />
+
+        {/* Auto layout */}
+        <button
+          type='button'
+          onClick={onAutoLayout}
+          title='Auto layout'
+          className='flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:text-[#6b7a8d] dark:hover:bg-[#1e252e] dark:hover:text-white'
+        >
+          <Network className='h-4 w-4' />
+        </button>
+
+        <div className='mx-0.5 h-5 w-px bg-slate-200 dark:bg-[#2d3540]' />
+
+        {/* Make a copy */}
+        <button
+          type='button'
+          onClick={onDuplicate}
+          title='Make a copy'
+          className='flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:text-[#6b7a8d] dark:hover:bg-[#1e252e] dark:hover:text-white'
+        >
+          <Copy className='h-4 w-4' />
+        </button>
+
+        <div className='mx-0.5 h-5 w-px bg-slate-200 dark:bg-[#2d3540]' />
+
+        <button
+          type='button'
+          onClick={onSave}
+          disabled={!isDirty || isSaving}
+          className='flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 px-3 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-[#2d3540] dark:text-slate-200 dark:hover:bg-[#1e252e]'
+        >
+          <Save className='h-3.5 w-3.5' />
+          <span className='hidden sm:inline'>
+            {isSaving ? 'Saving…' : isDirty ? 'Save' : 'Saved'}
+          </span>
         </button>
 
         <div className='mx-0.5 h-5 w-px bg-slate-200 dark:bg-[#2d3540]' />
