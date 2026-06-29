@@ -15,7 +15,7 @@ import type { MapSummary, MapStatus } from '../data/dynamodb-schema';
 import { useSystemCatalogMaps } from '../api/system-catalog.api';
 import { getRelativeTime } from '@/utils/timeFormat';
 import { SystemCatalogInfoDrawer } from '../components';
-import { useToolsPageQueryParams } from '../../hooks/useToolsPageQueryParams';
+import { useToolsPageQueryParams } from '../../root/hooks/useToolsPageQueryParams';
 
 const STATUS_CONFIG: Record<MapStatus, { label: string; className: string }> = {
   active: {
