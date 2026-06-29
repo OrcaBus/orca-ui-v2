@@ -1,14 +1,9 @@
 import { useNavigate } from 'react-router';
 import { FileText, Info } from 'lucide-react';
-import { PillTag } from '@/components/ui/PillTag';
-import type { PillTagVariant } from '@/components/ui/PillTag';
 import { DataTable, type Column } from '@/components/tables/DataTable';
 import { useLibraryDetails } from '../context/LibraryDetailsContext';
-import {
-  useQueryMetadataLibraryModel,
-  type LibraryDetailType,
-  type QualityEnum,
-} from '../../shared/api/lab.api';
+import { useQueryMetadataLibraryModel, type LibraryDetailType } from '../../shared/api/lab.api';
+import { renderClickableId, renderQualityPill, renderTextValue } from '../../shared/utils';
 import { ApiErrorState } from '@/components/ui/ApiErrorState';
 import { orderByParam } from '@/utils/queryParams';
 import { useLibraryDetailsRelatedLibrariesQueryParams } from '../hooks/useLibraryDetailsRelatedLibrariesQueryParams';
@@ -52,17 +47,8 @@ export function LibraryDetailsRelatedLibrariesTable() {
       sortDirection: getOrderDirection('library_id'),
       defaultSortDirection: 'desc',
       onSort: (nextDirection) => setOrderBy(orderByParam(nextDirection, 'library_id')),
-      render: (lib) => (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            void navigate(`/lab/libraries/${lib.orcabusId}`);
-          }}
-          className='text-left font-mono font-medium text-blue-600 hover:text-blue-800 hover:underline dark:text-[#137fec] dark:hover:text-blue-400'
-        >
-          {lib.libraryId}
-        </button>
-      ),
+      render: (lib) =>
+        renderClickableId(lib.libraryId, navigate, () => `/lab/libraries/${lib.orcabusId}`),
     },
     {
       key: 'phenotype',
@@ -71,9 +57,7 @@ export function LibraryDetailsRelatedLibrariesTable() {
       sortDirection: getOrderDirection('phenotype'),
       defaultSortDirection: 'desc',
       onSort: (nextDirection) => setOrderBy(orderByParam(nextDirection, 'phenotype')),
-      render: (lib) => (
-        <span className='text-neutral-700 dark:text-[#9dabb9]'>{lib.phenotype || '-'}</span>
-      ),
+      render: (lib) => renderTextValue(lib.phenotype),
     },
     {
       key: 'workflow',
@@ -82,9 +66,7 @@ export function LibraryDetailsRelatedLibrariesTable() {
       sortDirection: getOrderDirection('workflow'),
       defaultSortDirection: 'desc',
       onSort: (nextDirection) => setOrderBy(orderByParam(nextDirection, 'workflow')),
-      render: (lib) => (
-        <span className='text-sm text-neutral-600 dark:text-[#9dabb9]'>{lib.workflow || '-'}</span>
-      ),
+      render: (lib) => renderTextValue(lib.workflow, 'text-neutral-600'),
     },
     {
       key: 'quality',
@@ -93,21 +75,7 @@ export function LibraryDetailsRelatedLibrariesTable() {
       sortDirection: getOrderDirection('quality'),
       defaultSortDirection: 'desc',
       onSort: (nextDirection) => setOrderBy(orderByParam(nextDirection, 'quality')),
-      render: (lib) => {
-        const mapQualityToVariant: Record<QualityEnum, PillTagVariant> = {
-          'very-poor': 'red',
-          poor: 'red',
-          good: 'green',
-          borderline: 'amber',
-        };
-        if (!lib.quality) return '-';
-        const variant = mapQualityToVariant[lib.quality];
-        return (
-          <PillTag variant={variant} size='sm'>
-            {lib.quality?.toString()}
-          </PillTag>
-        );
-      },
+      render: (lib) => renderQualityPill(lib.quality),
     },
     {
       key: 'type',
@@ -116,11 +84,7 @@ export function LibraryDetailsRelatedLibrariesTable() {
       sortDirection: getOrderDirection('type'),
       defaultSortDirection: 'desc',
       onSort: (nextDirection) => setOrderBy(orderByParam(nextDirection, 'type')),
-      render: (lib) => (
-        <span className='truncate text-sm text-neutral-700 dark:text-[#9dabb9]'>
-          {lib.type || '-'}
-        </span>
-      ),
+      render: (lib) => renderTextValue(lib.type, 'truncate'),
     },
     {
       key: 'assay',
@@ -129,11 +93,7 @@ export function LibraryDetailsRelatedLibrariesTable() {
       sortDirection: getOrderDirection('assay'),
       defaultSortDirection: 'desc',
       onSort: (nextDirection) => setOrderBy(orderByParam(nextDirection, 'assay')),
-      render: (lib) => (
-        <span className='truncate text-sm text-neutral-700 dark:text-[#9dabb9]'>
-          {lib.assay || '-'}
-        </span>
-      ),
+      render: (lib) => renderTextValue(lib.assay, 'truncate'),
     },
     {
       key: 'coverage',
@@ -142,9 +102,7 @@ export function LibraryDetailsRelatedLibrariesTable() {
       sortDirection: getOrderDirection('coverage'),
       defaultSortDirection: 'desc',
       onSort: (nextDirection) => setOrderBy(orderByParam(nextDirection, 'coverage')),
-      render: (lib) => (
-        <span className='text-sm text-neutral-900 dark:text-slate-100'>{lib.coverage ?? '-'}</span>
-      ),
+      render: (lib) => renderTextValue(lib.coverage, 'text-neutral-900 dark:text-slate-100'),
     },
     {
       key: 'overrideCycles',
@@ -153,60 +111,43 @@ export function LibraryDetailsRelatedLibrariesTable() {
       sortDirection: getOrderDirection('override_cycles'),
       defaultSortDirection: 'desc',
       onSort: (nextDirection) => setOrderBy(orderByParam(nextDirection, 'override_cycles')),
-      render: (lib) => (
-        <span className='font-mono text-xs text-neutral-600 dark:text-[#9dabb9]'>
-          {lib.overrideCycles ?? '-'}
-        </span>
-      ),
+      render: (lib) => renderTextValue(lib.overrideCycles, 'font-mono text-xs text-neutral-600'),
     },
     {
       key: 'subject',
       header: 'Subject ID',
       csvValue: (lib) => lib.subject?.subjectId ?? '',
-      render: (lib) => (
-        <span className='text-sm text-neutral-700 dark:text-[#9dabb9]'>
-          {lib.subject?.subjectId}
-        </span>
-      ),
+      render: (lib) => renderTextValue(lib.subject?.subjectId),
     },
     {
       key: 'sample',
       header: 'Sample ID',
       csvValue: (lib) => lib.sample.sampleId ?? '',
-      render: (lib) => (
-        <span className='text-sm text-neutral-700 dark:text-[#9dabb9]'>{lib.sample.sampleId}</span>
-      ),
+      render: (lib) => renderTextValue(lib.sample.sampleId),
     },
     {
       key: 'externalSampleId',
       header: 'External Sample ID',
       csvValue: (lib) => lib.sample.externalSampleId ?? '',
-      render: (lib) => (
-        <span className='text-sm text-neutral-700 dark:text-[#9dabb9]'>
-          {lib.sample.externalSampleId ?? '-'}
-        </span>
-      ),
+      render: (lib) => renderTextValue(lib.sample.externalSampleId),
     },
     {
       key: 'projectSet',
       header: 'Project ID',
       csvValue: (lib) => lib.projectSet.map((p) => p.projectId).join(', '),
-      render: (lib) => (
-        <span className='text-sm text-neutral-700 dark:text-[#9dabb9]'>
-          {(lib.projectSet.map((project) => project.projectId).join(', ') ?? '-') || '-'}
-        </span>
-      ),
+      render: (lib) =>
+        renderTextValue(lib.projectSet.map((project) => project.projectId).join(', ')),
     },
     {
       key: 'projectName',
       header: 'Project Name',
       sortable: false,
       csvValue: (lib) => lib.projectSet.map((p) => p.name).join(', '),
-      render: (lib) => (
-        <span className='block max-w-37.5 truncate text-xs text-neutral-700 dark:text-[#9dabb9]'>
-          {(lib.projectSet.map((project) => project.name).join(', ') ?? '-') || '-'}
-        </span>
-      ),
+      render: (lib) =>
+        renderTextValue(
+          lib.projectSet.map((project) => project.name).join(', '),
+          'block max-w-37.5 truncate text-xs'
+        ),
     },
   ];
 

@@ -5,8 +5,12 @@ import {
   useQueryMetadataDetailLibraryHistoryModel,
   type LibraryHistoryType,
 } from '../../shared/api/lab.api';
+import { renderQualityPill, renderTextValue } from '../../shared/utils';
 import { ApiErrorState } from '@/components/ui/ApiErrorState';
 import { useLibraryDetailsHistoryQueryParams } from '../hooks/useLibraryDetailsHistoryQueryParams';
+
+/** History rows use a higher-contrast text colour than the muted lab list tables. */
+const HISTORY_TEXT_CLASS = 'text-neutral-900 dark:text-white';
 
 export function LibraryDetailsHistoryTable() {
   const { libraryDetail, isLoadingLibraryDetail } = useLibraryDetails();
@@ -39,57 +43,43 @@ export function LibraryDetailsHistoryTable() {
       key: 'historyId',
       header: 'History ID',
       sortable: true,
-      render: (h) => (
-        <span className='font-mono text-sm text-neutral-900 dark:text-white'>{h.historyId}</span>
-      ),
+      render: (h) => renderTextValue(h.historyId, `font-mono ${HISTORY_TEXT_CLASS}`),
     },
     {
       key: 'projectSet',
       header: 'Project Set',
       sortable: true,
-      render: (h) => (
-        <span className='text-sm text-neutral-900 dark:text-white'>{h.projectSet}</span>
-      ),
+      render: (h) => renderTextValue(h.projectSet.join(', '), HISTORY_TEXT_CLASS),
     },
     {
       key: 'orcabusId',
       header: 'Orcabus ID',
       sortable: true,
-      render: (h) => (
-        <span className='font-mono text-xs text-neutral-700 dark:text-[#9dabb9]'>
-          {h.orcabusId}
-        </span>
-      ),
+      render: (h) => renderTextValue(h.orcabusId, 'font-mono text-xs'),
     },
     {
       key: 'libraryId',
       header: 'Library ID',
       sortable: true,
-      render: (h) => (
-        <span className='font-mono text-sm text-neutral-900 dark:text-white'>{h.libraryId}</span>
-      ),
+      render: (h) => renderTextValue(h.libraryId, `font-mono ${HISTORY_TEXT_CLASS}`),
     },
     {
       key: 'phenotype',
       header: 'Phenotype',
       sortable: true,
-      render: (h) => (
-        <span className='text-sm text-neutral-900 capitalize dark:text-white'>{h.phenotype}</span>
-      ),
+      render: (h) => renderTextValue(h.phenotype, `capitalize ${HISTORY_TEXT_CLASS}`),
     },
     {
       key: 'workflow',
       header: 'Workflow',
       sortable: true,
-      render: (h) => <span className='text-sm text-neutral-900 dark:text-white'>{h.workflow}</span>,
+      render: (h) => renderTextValue(h.workflow, HISTORY_TEXT_CLASS),
     },
     {
       key: 'quality',
       header: 'Quality',
       sortable: true,
-      render: (h) => (
-        <span className='text-sm text-neutral-900 dark:text-white'>{h.quality ?? '-'}</span>
-      ),
+      render: (h) => renderQualityPill(h.quality),
     },
     {
       key: 'type',
@@ -105,51 +95,41 @@ export function LibraryDetailsHistoryTable() {
       key: 'assay',
       header: 'Assay',
       sortable: true,
-      render: (h) => <span className='text-sm text-neutral-900 dark:text-white'>{h.assay}</span>,
+      render: (h) => renderTextValue(h.assay, HISTORY_TEXT_CLASS),
     },
     {
       key: 'coverage',
       header: 'Coverage',
       sortable: true,
-      render: (h) => (
-        <span className='text-sm text-neutral-900 dark:text-white'>{h.coverage}x</span>
-      ),
+      render: (h) =>
+        renderTextValue(
+          typeof h.coverage === 'number' ? `${h.coverage}x` : null,
+          HISTORY_TEXT_CLASS
+        ),
     },
     {
       key: 'overrideCycles',
       header: 'OverrideCycles',
       sortable: true,
-      render: (h) => (
-        <span className='font-mono text-xs text-neutral-900 dark:text-white'>
-          {h.overrideCycles}
-        </span>
-      ),
+      render: (h) => renderTextValue(h.overrideCycles, `font-mono text-xs ${HISTORY_TEXT_CLASS}`),
     },
     {
       key: 'historyUserId',
       header: 'HistoryUserId',
       sortable: true,
-      render: (h) => (
-        <span className='text-sm text-neutral-900 dark:text-white'>{h.historyUserId}</span>
-      ),
+      render: (h) => renderTextValue(h.historyUserId, HISTORY_TEXT_CLASS),
     },
     {
       key: 'historyDate',
       header: 'HistoryDate',
       sortable: true,
-      render: (h) => (
-        <span className='text-sm text-neutral-900 dark:text-white'>
-          {new Date(h.historyDate).toLocaleString()}
-        </span>
-      ),
+      render: (h) => renderTextValue(new Date(h.historyDate).toLocaleString(), HISTORY_TEXT_CLASS),
     },
     {
       key: 'historyChangeReason',
       header: 'HistoryChangeReason',
       sortable: true,
-      render: (h) => (
-        <span className='text-sm text-neutral-900 dark:text-white'>{h.historyChangeReason}</span>
-      ),
+      render: (h) => renderTextValue(h.historyChangeReason, HISTORY_TEXT_CLASS),
     },
     {
       key: 'historyType',
@@ -168,17 +148,13 @@ export function LibraryDetailsHistoryTable() {
       key: 'sample',
       header: 'Sample',
       sortable: true,
-      render: (h) => (
-        <span className='font-mono text-sm text-neutral-900 dark:text-white'>{h.sample}</span>
-      ),
+      render: (h) => renderTextValue(h.sample, `font-mono ${HISTORY_TEXT_CLASS}`),
     },
     {
       key: 'subject',
       header: 'Subject',
       sortable: true,
-      render: (h) => (
-        <span className='font-mono text-sm text-neutral-900 dark:text-white'>{h.subject}</span>
-      ),
+      render: (h) => renderTextValue(h.subject, `font-mono ${HISTORY_TEXT_CLASS}`),
     },
   ];
 
