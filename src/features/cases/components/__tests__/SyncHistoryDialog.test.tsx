@@ -1,6 +1,39 @@
+import type { ReactNode } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 import { SyncHistoryDialog } from '../SyncHistoryDialog';
+
+vi.mock('@headlessui/react', () => ({
+  Description: ({ children, className }: { children: ReactNode; className?: string }) => (
+    <p className={className}>{children}</p>
+  ),
+  Dialog: ({
+    children,
+    className,
+    open,
+  }: {
+    children: ReactNode;
+    className?: string;
+    open: boolean;
+  }) => (open ? <div className={className}>{children}</div> : null),
+  DialogBackdrop: ({ className }: { className?: string }) => <div className={className} />,
+  DialogPanel: ({
+    children,
+    className,
+    style,
+  }: {
+    children: ReactNode;
+    className?: string;
+    style?: React.CSSProperties;
+  }) => (
+    <section className={className} style={style}>
+      {children}
+    </section>
+  ),
+  DialogTitle: ({ children, className }: { children: ReactNode; className?: string }) => (
+    <h2 className={className}>{children}</h2>
+  ),
+}));
 
 vi.mock('../../api/cases.api', () => ({
   useCaseSyncFromRedcapAutoHistoryModel: vi.fn(() => ({
@@ -23,6 +56,6 @@ describe('SyncHistoryDialog', () => {
       <SyncHistoryDialog isOpen={true} onClose={() => undefined} />
     );
 
-    expect(html).toContain('z-[60]');
+    expect(html).toContain('z-60');
   });
 });

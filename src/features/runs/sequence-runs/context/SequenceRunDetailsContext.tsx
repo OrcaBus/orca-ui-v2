@@ -35,8 +35,7 @@ interface SequenceRunDetailsContextValue {
    * placeholder/edit-only records and should be excluded).
    */
   latestSequenceRun: ReturnType<typeof useSequenceRunByInstrumentRunIdModel>['data'] extends
-    | (infer T)[]
-    | undefined
+    (infer T)[] | undefined
     ? T | null
     : null;
   /**

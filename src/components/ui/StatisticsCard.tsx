@@ -1,13 +1,7 @@
 import { CheckCircle2, XCircle, AlertCircle, MinusCircle, Clock, Archive } from 'lucide-react';
 
 type StatusType =
-  | 'succeeded'
-  | 'failed'
-  | 'started'
-  | 'aborted'
-  | 'resolved'
-  | 'deprecated'
-  | 'ongoing';
+  'succeeded' | 'failed' | 'started' | 'aborted' | 'resolved' | 'deprecated' | 'ongoing';
 
 interface StatisticsCardProps {
   status: StatusType;

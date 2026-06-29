@@ -4,12 +4,7 @@ import { DEFAULT_PAGE_SIZE, PARAM_ORDER_BY, PARAM_SEARCH } from '@/utils/constan
 import { toLocalStartOfDay } from '@/utils/timeFormat';
 
 export type AnalysisRunStatus =
-  | 'succeeded'
-  | 'failed'
-  | 'aborted'
-  | 'resolved'
-  | 'deprecated'
-  | 'ongoing';
+  'succeeded' | 'failed' | 'aborted' | 'resolved' | 'deprecated' | 'ongoing';
 
 const PARAM_STATUS = 'arStatus';
 const PARAM_TYPE = 'arType';

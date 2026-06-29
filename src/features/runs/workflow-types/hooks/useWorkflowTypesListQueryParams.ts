@@ -109,8 +109,7 @@ export function useWorkflowTypesListQueryParams(
       search: search || undefined,
       name: filterValues[PARAM_TYPE_NAME] || undefined,
       executionEngine: (filterValues[PARAM_EXECUTION_ENGINE] || undefined) as
-        | ExecutionEngineEnum
-        | undefined,
+        ExecutionEngineEnum | undefined,
       validationState: validationState
         ? (validationState.toUpperCase() as Uppercase<ValidationState>)
         : undefined,
