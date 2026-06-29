@@ -1,90 +1,21 @@
 import { useNavigate } from 'react-router';
-import {
-  DataTable,
-  type Column,
-  type DataTableActionContext,
-  type DataTableToolbarAction,
-} from '@/components/tables/DataTable';
+import { DataTable, type Column, type DataTableToolbarAction } from '@/components/tables/DataTable';
 import { ApiErrorState } from '@/components/ui/ApiErrorState';
-import { downloadTableAsCsv } from '@/utils/csv';
 import { orderByParam } from '@/utils/queryParams';
-import { Download } from 'lucide-react';
-import { toast } from 'sonner';
 import {
   useQueryMetadataIndividualModel,
   type IndividualDetailType,
 } from '../../shared/api/lab.api';
-import { useIndividualQueryParams } from '../hooks/useIndividualQueryParams';
 import {
-  createIndividualSubjectRows,
-  joinIndividualTableValues,
-  type IndividualSubjectRow,
-} from '../utils/individualTableRows';
-
-const STACKED_VALUE_CLASS =
-  'flex min-h-7 items-center text-sm text-neutral-700 dark:text-[#9dabb9]';
-
-function renderTextValue(value: string | null | undefined, className = '') {
-  return <span className={className}>{value || '-'}</span>;
-}
-
-function renderIndividualId(
-  individual: IndividualDetailType,
-  navigate: ReturnType<typeof useNavigate>
-) {
-  const individualId = individual.individualId?.trim();
-
-  if (!individualId) {
-    return <span className='text-sm text-neutral-500 dark:text-[#9dabb9]'>-</span>;
-  }
-
-  return (
-    <button
-      type='button'
-      onClick={(event) => {
-        event.stopPropagation();
-        void navigate(`/lab?individualId=${encodeURIComponent(individualId)}`);
-      }}
-      className='font-mono text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline dark:text-[#137fec] dark:hover:text-blue-400'
-    >
-      {individualId}
-    </button>
-  );
-}
-
-function renderSubjectIds(rows: IndividualSubjectRow[], navigate: ReturnType<typeof useNavigate>) {
-  if (rows.length === 0) {
-    return <span className='text-sm text-neutral-500 dark:text-[#9dabb9]'>-</span>;
-  }
-
-  return (
-    <div className='flex flex-col gap-1'>
-      {rows.map((row, index) => {
-        if (row.subjectId === '-') {
-          return (
-            <span key={`${row.subjectId}-${index}`} className={STACKED_VALUE_CLASS}>
-              {row.subjectId}
-            </span>
-          );
-        }
-
-        return (
-          <button
-            key={`${row.subjectId}-${index}`}
-            type='button'
-            onClick={(event) => {
-              event.stopPropagation();
-              void navigate(`/lab/subject?subjectId=${encodeURIComponent(row.subjectId)}`);
-            }}
-            className={`flex min-h-7 items-center font-mono text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline dark:text-[#137fec] dark:hover:text-blue-400`}
-          >
-            {row.subjectId}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
+  createCsvDownloadAction,
+  EMPTY_TABLE_VALUE,
+  joinTableValues,
+  renderClickableId,
+  renderStackedLinks,
+  renderTextValue,
+} from '../../shared/utils';
+import { useIndividualQueryParams } from '../hooks/useIndividualQueryParams';
+import { createIndividualSubjectRows } from '../utils/individualTableRows';
 
 export function IndividualsTable() {
   const navigate = useNavigate();
@@ -119,7 +50,12 @@ export function IndividualsTable() {
       defaultSortDirection: 'desc',
       onSort: (nextDirection) => setOrderBy(orderByParam(nextDirection, 'individual_id')),
       csvValue: (individual) => individual.individualId ?? '',
-      render: (individual) => renderIndividualId(individual, navigate),
+      render: (individual) =>
+        renderClickableId(
+          individual.individualId,
+          navigate,
+          (id) => `/lab?individualId=${encodeURIComponent(id)}`
+        ),
     },
     {
       key: 'source',
@@ -129,45 +65,29 @@ export function IndividualsTable() {
       defaultSortDirection: 'desc',
       onSort: (nextDirection) => setOrderBy(orderByParam(nextDirection, 'source')),
       csvValue: (individual) => individual.source ?? '',
-      render: (individual) =>
-        renderTextValue(individual.source, 'text-sm text-neutral-700 dark:text-[#9dabb9]'),
+      render: (individual) => renderTextValue(individual.source),
     },
     {
       key: 'subjectIds',
       header: 'Subject ID',
       csvValue: (individual) =>
-        joinIndividualTableValues(
-          createIndividualSubjectRows(individual).map((row) => row.subjectId)
+        joinTableValues(createIndividualSubjectRows(individual).map((row) => row.subjectId)),
+      render: (individual) =>
+        renderStackedLinks(
+          createIndividualSubjectRows(individual).map((row) => ({
+            label: row.subjectId,
+            href:
+              row.subjectId !== EMPTY_TABLE_VALUE
+                ? `/lab/subject?subjectId=${encodeURIComponent(row.subjectId)}`
+                : null,
+          })),
+          navigate
         ),
-      render: (individual) => renderSubjectIds(createIndividualSubjectRows(individual), navigate),
     },
   ];
 
-  const handleDownloadCsv = (ctx: DataTableActionContext<IndividualDetailType>) => {
-    const hasPartialSelection =
-      ctx.selectedRows.length > 0 && ctx.selectedRows.length < ctx.data.length;
-    const rows = hasPartialSelection ? ctx.selectedRows : ctx.data;
-
-    if (rows.length === 0) {
-      toast.warning('No data to export');
-      return;
-    }
-
-    downloadTableAsCsv(rows, ctx.visibleColumns, 'individuals');
-    toast.success(
-      hasPartialSelection
-        ? `Exported ${rows.length} selected row(s) to CSV`
-        : `Exported all ${rows.length} row(s) to CSV`
-    );
-  };
-
   const toolbarActions: DataTableToolbarAction<IndividualDetailType>[] = [
-    {
-      id: 'download-csv',
-      label: 'Download to CSV',
-      icon: <Download className='h-4 w-4' />,
-      onClick: handleDownloadCsv,
-    },
+    createCsvDownloadAction<IndividualDetailType>('individuals'),
   ];
 
   if (isError) {
