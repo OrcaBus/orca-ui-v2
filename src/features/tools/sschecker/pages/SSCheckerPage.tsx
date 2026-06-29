@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { FileCheck } from 'lucide-react';
 import { useAppShellHeader } from '@/context/app-shell-context';
-import { useToolsPageQueryParams } from '../../hooks/useToolsPageQueryParams';
+import { useToolsPageQueryParams } from '../../root/hooks/useToolsPageQueryParams';
 import { SSCheckerInfoDrawer } from '../components/SSCheckerInfoDrawer';
 import { SSCheckerInputsPanel } from '../components/SSCheckerInputsPanel';
 import { SSCheckerResultsLogPanel } from '../components/SSCheckerResultsLogPanel';

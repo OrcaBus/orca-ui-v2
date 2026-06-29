@@ -350,11 +350,10 @@ src/
       shared/
         api/
           tools.api.ts
-        components/
-          ToolCard.tsx
-          ToolGrid.tsx
         types/
           tool.types.ts
+        utils/
+          statusIcons.tsx
       ss-checker/
         components/
           SSCheckerCard.tsx
