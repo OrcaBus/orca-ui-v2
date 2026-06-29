@@ -62,7 +62,7 @@ install:
 	@pnpm install
 	@pre-commit install
 
-lint:
+lint: generate-openapi-types
 	@pnpm lint
 
 lint-fix:

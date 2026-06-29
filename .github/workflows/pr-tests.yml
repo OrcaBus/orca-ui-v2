@@ -74,8 +74,7 @@ jobs:
         run: make install
 
       - name: Lint and code formatting
-        run: |
-          make check
+        run: make check
 
   test-app:
     runs-on: ubuntu-22.04-arm
