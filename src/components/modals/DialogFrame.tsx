@@ -66,7 +66,7 @@ export function DialogFrame({
     <HeadlessDialog
       open={isOpen}
       onClose={closeDisabled ? () => undefined : onClose}
-      className='relative z-50'
+      className='relative z-60'
     >
       <DialogBackdrop
         transition

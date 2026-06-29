@@ -650,8 +650,7 @@ function SystemCatalogContent({ mapId }: { mapId: string }) {
         listQueryKey,
         (
           previous:
-            | { maps?: ReturnType<typeof mapToSummary>[]; nextCursor?: string | null }
-            | undefined
+            { maps?: ReturnType<typeof mapToSummary>[]; nextCursor?: string | null } | undefined
         ) => {
           if (!previous?.maps) {
             return previous;

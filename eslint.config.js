@@ -15,6 +15,8 @@ export default defineConfig([
     'src/api/types',
     'docs',
     '.agents',
+    '.claude',
+    '.cursor',
     '.github/skills',
   ]),
 

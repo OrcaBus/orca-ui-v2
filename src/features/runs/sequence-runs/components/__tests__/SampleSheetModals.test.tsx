@@ -52,7 +52,7 @@ vi.mock('@/context/auth-context', () => ({
   }),
 }));
 
-vi.mock('../../../api/sequence.api', () => ({
+vi.mock('../../../shared/api/sequence.api', () => ({
   useSequenceRunAddSampleSheetModel: () => ({ mutateAsync: vi.fn() }),
 }));
 

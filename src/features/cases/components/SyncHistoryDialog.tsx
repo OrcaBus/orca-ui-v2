@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import dayjs from 'dayjs';
 import { History } from 'lucide-react';
 import { DataTable, type Column } from '../../../components/tables/DataTable';
 import { DialogFrame } from '@/components/modals/DialogFrame';
 import { DEFAULT_PAGE_SIZE } from '@/utils/constants';
+import { formatTableDate } from '@/utils/timeFormat';
 import { useCaseSyncFromRedcapAutoHistoryModel, type ExternalSyncLogModel } from '../api/cases.api';
 
 interface SyncHistoryDialogProps {
@@ -31,7 +31,7 @@ const COLUMNS: Column<ExternalSyncLogModel>[] = [
     header: 'Imported At',
     render: (entry) => (
       <span className='font-mono text-sm text-neutral-700 dark:text-slate-300'>
-        {dayjs(entry.importedAt).format('YYYY-MM-DD HH:mm Z')}
+        {formatTableDate(entry.importedAt)}
       </span>
     ),
   },

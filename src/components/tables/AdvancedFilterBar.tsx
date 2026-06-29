@@ -60,11 +60,7 @@ function formatBadgeDisplay(badge: FilterBadge): string {
 }
 
 export type FilterFieldConfig =
-  | TextFilterField
-  | RangeFilterField
-  | SelectFilterField
-  | MultiSelectFilterField
-  | DateFilterField;
+  TextFilterField | RangeFilterField | SelectFilterField | MultiSelectFilterField | DateFilterField;
 
 /**
  * Controlled filter bar: parent owns source of truth (e.g. URL params).

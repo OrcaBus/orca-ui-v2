@@ -5,25 +5,28 @@
  *
  * Standard formats:
  * - Backend/API/storage: 2026-02-05T03:09:00Z (UTC ISO 8601)
+ * - UI display timezone: Australia/Melbourne
  * - UI table cells (sortable): 2026-02-05 14:09 +11:00
  * - UI detail display (human-friendly): 05 Feb 2026, 14:09 (UTC+11:00)
  * - Native datetime-local inputs: 2026-02-05T14:09
  */
 
 import dayjs from 'dayjs';
+import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 
 dayjs.extend(utc);
+dayjs.extend(timezone);
 
-/** Display timezone offset (e.g. Australia/Melbourne). Configurable from user preferences. */
-const DISPLAY_UTC_OFFSET = 11; // UTC+11:00
+/** Display timezone. Configurable from user preferences later. */
+const DISPLAY_TIME_ZONE = 'Australia/Melbourne';
 
 /**
- * Parse an ISO string and return a dayjs instance in the display timezone (UTC+11).
+ * Parse an ISO string and return a dayjs instance in the display timezone.
  * Ensures consistent parsing and avoids invalid-date edge cases.
  */
 function parseInDisplayZone(isoString: string): dayjs.Dayjs {
-  return dayjs.utc(isoString).utcOffset(DISPLAY_UTC_OFFSET);
+  return dayjs.utc(isoString).tz(DISPLAY_TIME_ZONE);
 }
 
 /**
@@ -83,12 +86,12 @@ export function toUtcStartOfDay(dateString: string | null | undefined): string |
 
 /**
  * Convert a date-only string (YYYY-MM-DD) to display-timezone start-of-day for API query params.
- * The resulting timestamp is anchored to UTC+11 to match table/detail local-time presentation.
+ * The resulting timestamp is anchored to the display timezone to match table/detail local-time presentation.
  * @returns e.g. "2025-11-06T00:00:00+11:00", or undefined when input is empty/invalid.
  */
 export function toLocalStartOfDay(dateString: string | null | undefined): string | undefined {
   if (!dateString) return undefined;
-  const d = dayjs.utc(dateString).utcOffset(DISPLAY_UTC_OFFSET, true);
+  const d = dayjs.tz(dateString, DISPLAY_TIME_ZONE);
   if (!d.isValid()) return undefined;
   return d.startOf('day').format('YYYY-MM-DDTHH:mm:ssZ');
 }

@@ -1,0 +1,97 @@
+name: Pull Request Tests
+
+on:
+  pull_request:
+    paths-ignore:
+      # The ignore only works only if changes to the main branch only include the following files.
+      # So if the commit only contain .md changes but the PR change contain more, the ignore fails
+      # https://github.com/actions/runner/issues/2324#issuecomment-1703345084
+      - '**.md'
+      - '**.svg'
+      - '**.drawio'
+      - '**.png'
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+    branches:
+      - main
+
+# Least privilege: these jobs only read the repo (checkout, install, test, secret scan).
+permissions:
+  contents: read
+
+# Cancel superseded in-progress runs for the same PR to save CI minutes.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Single source of truth for the Node version used across all jobs.
+env:
+  NODE_VERSION: '24.x'
+
+# Actions Used (please keep this documented here as added)
+#  https://github.com/marketplace/actions/checkout
+#  https://github.com/marketplace/actions/setup-pnpm
+#  https://github.com/marketplace/actions/setup-node-js-environment
+#  https://github.com/marketplace/actions/trufflehog-oss
+
+jobs:
+  pre-commit-lint-security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: ${{ !github.event.pull_request.draft }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - run: corepack enable
+
+      - name: Print toolchain versions
+        run: |
+          node -v
+          python3 -V
+          pip3 -V
+          make --version
+
+      # TODO see whether we can leverage https://github.com/pre-commit/action
+      - name: Install system-wide tools dependencies
+        run: |
+          pip3 install pre-commit
+
+      - name: Install dependencies
+        # Root frozen install covers the whole pnpm workspace.
+        run: make install
+
+      - name: Lint and code formatting
+        run: make check
+
+  test-app:
+    runs-on: ubuntu-22.04-arm
+    timeout-minutes: 15
+    if: ${{ !github.event.pull_request.draft }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - run: corepack enable
+
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - run: pnpm test

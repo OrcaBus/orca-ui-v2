@@ -1,5 +1,5 @@
 export const SYNC_START_YEAR = 2017;
-export const DEFAULT_GSHEET_PREVIEW_RANGE = '1:10';
+export const DEFAULT_GSHEET_PREVIEW_RANGE = '0:10';
 
 const GSHEET_RANGE_INPUT_REGEX = /^(\d+(?::\d+)?)(,\s*\d+(?::\d+)?)*$/;
 

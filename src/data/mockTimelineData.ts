@@ -22,9 +22,7 @@ type LegacyTimelineEventType =
   | 'custom_state';
 
 type LegacyTimelineEventSource =
-  | { type: 'system' }
-  | { type: 'user'; userName: string }
-  | { type: 'custom' };
+  { type: 'system' } | { type: 'user'; userName: string } | { type: 'custom' };
 
 interface LegacyTimelineEvent {
   id: string;

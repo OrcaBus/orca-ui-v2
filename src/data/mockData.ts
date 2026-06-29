@@ -274,11 +274,7 @@ export interface AnalysisType {
   version: string;
   description: string;
   category:
-    | 'variant-calling'
-    | 'rna-analysis'
-    | 'quality-control'
-    | 'structural-variant'
-    | 'methylation';
+    'variant-calling' | 'rna-analysis' | 'quality-control' | 'structural-variant' | 'methylation';
   status: 'ACTIVE' | 'INACTIVE';
   validationState: 'validated' | 'unvalidated' | 'deprecated' | 'failed';
   lastUsed?: string;
