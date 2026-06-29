@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { IndividualDetailType } from '../../../shared/api/lab.api';
-import { createIndividualSubjectRows, joinIndividualTableValues } from '../individualTableRows';
+import { createIndividualSubjectRows } from '../individualTableRows';
 
 describe('createIndividualSubjectRows', () => {
   it('keeps every subjectSet record as an ordered vertical row', () => {
@@ -29,13 +29,5 @@ describe('createIndividualSubjectRows', () => {
       { subjectId: '-' },
       { subjectId: '-' },
     ]);
-  });
-});
-
-describe('joinIndividualTableValues', () => {
-  it('omits table dashes from CSV values', () => {
-    expect(joinIndividualTableValues(['CUPID-FMC-072', '-', '10484837'])).toBe(
-      'CUPID-FMC-072, 10484837'
-    );
   });
 });
