@@ -8,10 +8,15 @@ import {
   createPutMutationHook,
   createQueryHook,
   createQueryModel,
+  getVersionedPath,
 } from '@/api/client';
+import { env } from '@/utils/env';
+
+const apiVersion = env.VITE_SYSTEM_CATALOG_API_VERSION as string;
 
 const systemCatalogApi = new ApiClient<paths>({
-  baseUrl: config.apiEndpoint.systemCatalog || '',
+  baseUrl: config.apiEndpoint.systemCatalog,
+  getPath: (path) => getVersionedPath(path, apiVersion),
 });
 
 export type SystemCatalogMapStatus = components['schemas']['MapStatus'];
