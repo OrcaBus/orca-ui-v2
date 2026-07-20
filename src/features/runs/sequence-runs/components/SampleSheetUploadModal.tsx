@@ -131,8 +131,6 @@ export function SampleSheetUploadModal({
     if (files.length > 0) handleFileChange(files[0]);
   };
 
-  if (!isOpen) return null;
-
   return (
     <DialogFrame
       isOpen={isOpen}

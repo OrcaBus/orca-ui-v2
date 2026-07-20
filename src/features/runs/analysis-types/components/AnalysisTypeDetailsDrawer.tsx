@@ -5,13 +5,15 @@ import type {
   WorkflowModel,
 } from '../../shared/api/workflows.api';
 import { DrawerFrame } from '@/components/modals/DrawerFrame';
+import { useLastPresent } from '@/hooks/useLastPresent';
 import { PillTag } from '@/components/ui/PillTag';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { SimpleTable, type SimpleTableColumn } from '@/components/tables/SimpleTable';
 import { getExecutionEnginePillVariant } from '../../shared/utils/executionEnginePill';
 
 interface AnalysisTypeDetailsDrawerProps {
-  analysisType: AnalysisModel;
+  analysisType: AnalysisModel | null;
+  isOpen: boolean;
   onClose: () => void;
 }
 
@@ -29,8 +31,37 @@ function formatUsecase(usecase: string): string {
 
 export function AnalysisTypeDetailsDrawer({
   analysisType,
+  isOpen,
   onClose,
 }: AnalysisTypeDetailsDrawerProps) {
+  const shown = useLastPresent(analysisType);
+
+  return (
+    <DrawerFrame
+      isOpen={isOpen}
+      onClose={onClose}
+      title={
+        shown ? (
+          <>
+            {shown.analysisName}{' '}
+            <span className='font-normal text-neutral-500 dark:text-neutral-400'>
+              {formatDisplayVersion(shown.analysisVersion)}
+            </span>
+          </>
+        ) : (
+          ''
+        )
+      }
+      subtitle={shown ? <span className='font-mono text-xs'>{shown.orcabusId}</span> : undefined}
+      size='lg'
+      closeLabel='Close analysis type details'
+    >
+      {shown && <AnalysisTypeDetailsBody analysisType={shown} />}
+    </DrawerFrame>
+  );
+}
+
+function AnalysisTypeDetailsBody({ analysisType }: { analysisType: AnalysisModel }) {
   const contexts = analysisType.contexts ?? [];
   const workflows = analysisType.workflows ?? [];
 
@@ -139,21 +170,7 @@ export function AnalysisTypeDetailsDrawer({
   );
 
   return (
-    <DrawerFrame
-      isOpen={true}
-      onClose={onClose}
-      title={
-        <>
-          {analysisType.analysisName}{' '}
-          <span className='font-normal text-neutral-500 dark:text-neutral-400'>
-            {formatDisplayVersion(analysisType.analysisVersion)}
-          </span>
-        </>
-      }
-      subtitle={<span className='font-mono text-xs'>{analysisType.orcabusId}</span>}
-      size='lg'
-      closeLabel='Close analysis type details'
-    >
+    <>
       {/* Summary — compact grid aligned with design */}
       <div className='mb-8 border-b border-neutral-200 pb-6 dark:border-[#2d3540]'>
         <div className='grid grid-cols-2 gap-x-8 gap-y-4'>
@@ -209,6 +226,6 @@ export function AnalysisTypeDetailsDrawer({
         rowKey={(wf) => wf.orcabusId}
         emptyMessage='No workflows linked to this analysis type.'
       />
-    </DrawerFrame>
+    </>
   );
 }

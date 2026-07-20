@@ -4,15 +4,16 @@ import { useTheme } from '@/context/theme-context';
 import { DialogFrame } from '@/components/modals/DialogFrame';
 
 interface ThemeSettingsModalProps {
+  isOpen: boolean;
   onClose: () => void;
 }
 
-export function ThemeSettingsModal({ onClose }: ThemeSettingsModalProps) {
+export function ThemeSettingsModal({ isOpen, onClose }: ThemeSettingsModalProps) {
   const { theme, setTheme } = useTheme();
 
   return (
     <DialogFrame
-      isOpen
+      isOpen={isOpen}
       onClose={onClose}
       title='Theme Preferences'
       description='Choose how your application looks'

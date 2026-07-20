@@ -22,8 +22,16 @@ export function FilesTable() {
     useFilesListQueryParams();
 
   const [selectedFile, setSelectedFile] = useState<S3Record | null>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
 
-  const closeDetail = useCallback(() => setSelectedFile(null), []);
+  const openDetail = useCallback((file: S3Record) => {
+    setSelectedFile(file);
+    setIsDetailOpen(true);
+  }, []);
+  const closeDetail = useCallback(() => {
+    setIsDetailOpen(false);
+    setSelectedFile(null);
+  }, []);
 
   const {
     data: filesData,
@@ -63,7 +71,7 @@ export function FilesTable() {
               <div>
                 <button
                   type='button'
-                  onClick={() => setSelectedFile(file)}
+                  onClick={() => openDetail(file)}
                   className='text-left text-sm font-medium text-neutral-900 hover:underline dark:text-white'
                 >
                   {name}
@@ -107,10 +115,7 @@ export function FilesTable() {
               )}
               <FilePreviewButton s3Record={file} />
               {!isIgvFile && isDownloadable && <FileDownloadButton s3Record={file} />}
-              <FileMoreActionsDropdown
-                s3Record={file}
-                onViewDetails={() => setSelectedFile(file)}
-              />
+              <FileMoreActionsDropdown s3Record={file} onViewDetails={() => openDetail(file)} />
             </div>
           );
         },
@@ -156,7 +161,7 @@ export function FilesTable() {
           ),
       },
     ],
-    [setSelectedFile]
+    [openDetail]
   );
 
   if (isErrorFilesData) {
@@ -191,7 +196,7 @@ export function FilesTable() {
           totalItems: filesData?.pagination.count || 0,
         }}
       />
-      {selectedFile && <FileRecordDetailsDrawer file={selectedFile} onClose={closeDetail} />}
+      <FileRecordDetailsDrawer file={selectedFile} isOpen={isDetailOpen} onClose={closeDetail} />
     </>
   );
 }

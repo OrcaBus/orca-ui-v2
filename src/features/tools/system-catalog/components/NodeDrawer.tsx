@@ -316,22 +316,20 @@ export function NodeDrawer({
       </div>
 
       <EventModal
-        key={`event-modal-${eventModal?.id ?? 'closed'}`}
         isOpen={eventModal !== null}
-        mode={eventModal?.mode ?? 'add'}
-        variant={eventModal?.variant ?? 'input'}
+        mode={eventModal?.mode ?? null}
+        variant={eventModal?.variant ?? null}
         initialEvent={eventModal?.mode === 'edit' ? eventModal.initial : undefined}
         onSave={handleSaveEvent}
         onClose={() => setEventModal(null)}
       />
 
-      {eventDeleteConfirm && (
-        <DeleteEventConfirmDialog
-          eventName={eventDeleteConfirm.eventName}
-          onConfirm={handleConfirmDeleteEvent}
-          onCancel={() => setEventDeleteConfirm(null)}
-        />
-      )}
+      <DeleteEventConfirmDialog
+        isOpen={eventDeleteConfirm !== null}
+        eventName={eventDeleteConfirm?.eventName ?? null}
+        onConfirm={handleConfirmDeleteEvent}
+        onCancel={() => setEventDeleteConfirm(null)}
+      />
     </div>
   );
 }

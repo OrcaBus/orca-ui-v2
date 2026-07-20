@@ -25,6 +25,7 @@ import { useLibraryDetailsWorkflowRunsQueryParams } from '../hooks/useLibraryDet
 
 export function LibraryDetailsWorkflowRunFilesTable() {
   const [selectedFile, setSelectedFile] = useState<S3Record | null>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
   const {
     portalRunId,
     workflowRunFilePagination,
@@ -71,7 +72,10 @@ export function LibraryDetailsWorkflowRunFilesTable() {
               <div>
                 <button
                   type='button'
-                  onClick={() => setSelectedFile(file)}
+                  onClick={() => {
+                    setSelectedFile(file);
+                    setIsDetailOpen(true);
+                  }}
                   className='text-left text-sm font-medium text-neutral-900 hover:underline dark:text-white'
                 >
                   {name}
@@ -116,7 +120,10 @@ export function LibraryDetailsWorkflowRunFilesTable() {
               {!isIgvFile && isDownloadable && <FileDownloadButton s3Record={file} />}
               <FileMoreActionsDropdown
                 s3Record={file}
-                onViewDetails={() => setSelectedFile(file)}
+                onViewDetails={() => {
+                  setSelectedFile(file);
+                  setIsDetailOpen(true);
+                }}
               />
             </div>
           );
@@ -199,9 +206,14 @@ export function LibraryDetailsWorkflowRunFilesTable() {
           totalItems: filesData?.pagination.count ?? 0,
         }}
       />
-      {selectedFile && (
-        <FileRecordDetailsDrawer file={selectedFile} onClose={() => setSelectedFile(null)} />
-      )}
+      <FileRecordDetailsDrawer
+        file={selectedFile}
+        isOpen={isDetailOpen}
+        onClose={() => {
+          setIsDetailOpen(false);
+          setSelectedFile(null);
+        }}
+      />
     </>
   );
 }

@@ -41,19 +41,17 @@ export function CaseDetailsUsersTab() {
         onSuccess={refresh}
       />
 
-      {caseOrcabusId && removeTarget && (
-        <CaseDetailsRemoveUserModal
-          isOpen
-          caseOrcabusId={caseOrcabusId}
-          userOrcabusId={removeTarget.userOrcabusId}
-          userEmail={removeTarget.userEmail}
-          onClose={() => setRemoveTarget(null)}
-          onSuccess={() => {
-            setRemoveTarget(null);
-            refresh();
-          }}
-        />
-      )}
+      <CaseDetailsRemoveUserModal
+        isOpen={!!caseOrcabusId && removeTarget !== null}
+        caseOrcabusId={caseOrcabusId ?? ''}
+        userOrcabusId={removeTarget?.userOrcabusId ?? ''}
+        userEmail={removeTarget?.userEmail ?? null}
+        onClose={() => setRemoveTarget(null)}
+        onSuccess={() => {
+          setRemoveTarget(null);
+          refresh();
+        }}
+      />
     </>
   );
 }

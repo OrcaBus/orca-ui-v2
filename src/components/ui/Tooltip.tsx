@@ -141,6 +141,11 @@ function TooltipTrigger({
 }: { asChild?: boolean; children: ReactNode } & ComponentProps<'button'>) {
   const { setOpen, triggerRef, delayDuration } = useTooltipContext();
   const openTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  // Set when a pointer press dismisses the tooltip. It suppresses the focus that
+  // the same click puts on the trigger — and any later focus restored to it (e.g.
+  // when a dialog opened from the trigger closes) — from re-opening the tooltip.
+  // Cleared on a fresh pointer-enter so hovering still works afterwards.
+  const dismissedByPointerRef = useRef(false);
 
   const handleOpen = useCallback(() => {
     clearTimeout(openTimerRef.current);
@@ -155,12 +160,31 @@ function TooltipTrigger({
     setOpen(false);
   }, [setOpen]);
 
+  const handlePointerEnter = useCallback(() => {
+    dismissedByPointerRef.current = false;
+    handleOpen();
+  }, [handleOpen]);
+
+  const handlePointerDown = useCallback(() => {
+    dismissedByPointerRef.current = true;
+    handleClose();
+  }, [handleClose]);
+
+  const handleFocus = useCallback(() => {
+    // Ignore focus that follows a pointer dismissal (click, or focus restored
+    // after a dialog opened from this trigger closes). Keyboard focus is not
+    // preceded by a pointer press, so it still opens the tooltip.
+    if (dismissedByPointerRef.current) return;
+    handleOpen();
+  }, [handleOpen]);
+
   useEffect(() => () => clearTimeout(openTimerRef.current), []);
 
   const interactionProps = {
-    onMouseEnter: handleOpen,
+    onPointerEnter: handlePointerEnter,
     onMouseLeave: handleClose,
-    onFocus: handleOpen,
+    onPointerDown: handlePointerDown,
+    onFocus: handleFocus,
     onBlur: handleClose,
   };
 

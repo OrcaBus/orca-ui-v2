@@ -37,15 +37,7 @@ export const TextViewer = ({ s3ObjectId, s3Key }: Props) => {
   };
 
   return (
-    <div
-      className={cn(
-        'h-full w-full',
-        'overflow-hidden rounded-lg',
-        'border border-gray-200 dark:border-gray-700',
-        'bg-white dark:bg-gray-900',
-        'shadow-sm'
-      )}
-    >
+    <div className={cn('h-full w-full', 'overflow-hidden', 'bg-white dark:bg-gray-900')}>
       {/* Header */}
       <div
         className={cn(

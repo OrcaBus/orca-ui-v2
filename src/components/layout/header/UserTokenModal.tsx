@@ -7,14 +7,16 @@ import { Button } from '@/components/ui/Button';
 import { formatDetailDate } from '@/utils/timeFormat';
 import { toast } from 'sonner';
 
-type UserTokenModalProps = { onClose: () => void };
+type UserTokenModalProps = { isOpen: boolean; onClose: () => void };
 
-export function UserTokenModal({ onClose }: UserTokenModalProps) {
+export function UserTokenModal({ isOpen, onClose }: UserTokenModalProps) {
   const [jwtData, setJWTData] = useState({ token: '', expires: '' });
   const [isLoading, setIsLoading] = useState(false);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
+    // Only fetch the JWT while the modal is open (it stays mounted when closed).
+    if (!isOpen) return;
     let cancel = false;
     const fetchToken = async () => {
       setIsLoading(true);
@@ -41,7 +43,7 @@ export function UserTokenModal({ onClose }: UserTokenModalProps) {
     return () => {
       cancel = true;
     };
-  }, []);
+  }, [isOpen]);
 
   const handleCopy = async () => {
     try {
@@ -56,7 +58,7 @@ export function UserTokenModal({ onClose }: UserTokenModalProps) {
 
   return (
     <DialogFrame
-      isOpen
+      isOpen={isOpen}
       onClose={onClose}
       title='JSON Web Token (JWT)'
       icon={<Key className='h-4 w-4' />}

@@ -18,18 +18,12 @@ export const ImageViewer = ({ s3ObjectId, s3Key }: Props) => {
 
   return (
     <div
-      className={cn(
-        'h-full w-full',
-        'overflow-hidden rounded-lg',
-        'border border-gray-200 dark:border-gray-700',
-        'bg-white dark:bg-gray-900',
-        'shadow-sm'
-      )}
+      className={cn('flex h-full w-full flex-col', 'overflow-hidden', 'bg-white dark:bg-gray-900')}
     >
       {/* Header */}
       <div
         className={cn(
-          'border-b px-4 py-2',
+          'shrink-0 border-b px-4 py-2',
           'border-gray-200 dark:border-gray-700',
           'bg-gray-50 dark:bg-gray-800'
         )}
@@ -54,14 +48,18 @@ export const ImageViewer = ({ s3ObjectId, s3Key }: Props) => {
       {/* Content */}
       <div
         className={cn(
-          'relative h-[calc(100%-2.5rem)]',
-          'flex items-center justify-center',
+          'flex min-h-0 flex-1 items-center justify-center',
           'p-4',
           'bg-gray-50 dark:bg-gray-800/50',
-          'overflow-auto'
+          'overflow-hidden'
         )}
       >
-        <a href={url} target='_blank' rel='noopener noreferrer'>
+        <a
+          href={url}
+          target='_blank'
+          rel='noopener noreferrer'
+          className='flex h-full w-full items-center justify-center'
+        >
           <ImageWithFallback
             className={cn(
               'max-h-full max-w-full',

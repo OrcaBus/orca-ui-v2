@@ -132,9 +132,11 @@ const WorkflowTypesTable = () => {
           totalItems: workflowData?.pagination.count || 0,
         }}
       />
-      {selectedWorkflowTypeId && selectedWorkflowType && (
-        <WorkflowTypeDetailsDrawer workflowType={selectedWorkflowType} onClose={closeDetail} />
-      )}
+      <WorkflowTypeDetailsDrawer
+        workflowType={selectedWorkflowType}
+        isOpen={selectedWorkflowType != null}
+        onClose={closeDetail}
+      />
     </>
   );
 };

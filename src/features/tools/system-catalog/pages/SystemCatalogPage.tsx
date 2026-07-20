@@ -783,13 +783,14 @@ function SystemCatalogContent({ mapId }: { mapId: string }) {
         onClose={handleCloseModal}
       />
 
-      {deleteConfirmId && nodesById[deleteConfirmId] && (
-        <DeleteConfirmDialog
-          nodeLabel={nodesById[deleteConfirmId].label}
-          onConfirm={() => handleDeleteNode(deleteConfirmId)}
-          onCancel={() => setDeleteConfirmId(null)}
-        />
-      )}
+      <DeleteConfirmDialog
+        isOpen={!!(deleteConfirmId && nodesById[deleteConfirmId])}
+        nodeLabel={deleteConfirmId ? (nodesById[deleteConfirmId]?.label ?? null) : null}
+        onConfirm={() => {
+          if (deleteConfirmId) handleDeleteNode(deleteConfirmId);
+        }}
+        onCancel={() => setDeleteConfirmId(null)}
+      />
 
       <MapDetailsModal
         map={mapSummary}
@@ -838,10 +839,11 @@ function SystemCatalogContent({ mapId }: { mapId: string }) {
         onClose={handleCloseGroupModal}
       />
 
-      {deleteGroupConfirm && (
-        <DeleteGroupConfirmDialog
-          groupName={deleteGroupConfirm.name}
-          onConfirm={() =>
+      <DeleteGroupConfirmDialog
+        isOpen={deleteGroupConfirm !== null}
+        groupName={deleteGroupConfirm?.name ?? null}
+        onConfirm={() => {
+          if (deleteGroupConfirm)
             handleDeleteGroup({
               id: deleteGroupConfirm.groupId,
               name: deleteGroupConfirm.name,
@@ -850,22 +852,20 @@ function SystemCatalogContent({ mapId }: { mapId: string }) {
               color: deleteGroupConfirm.color,
               nodeIds: deleteGroupConfirm.nodeIds,
               description: deleteGroupConfirm.description,
-            })
-          }
-          onCancel={() => setDeleteGroupConfirm(null)}
-        />
-      )}
+            });
+        }}
+        onCancel={() => setDeleteGroupConfirm(null)}
+      />
 
-      {isMapDeleteConfirmOpen && (
-        <DeleteMapConfirmDialog
-          mapName={editorMap.name}
-          isDeleting={deleteMapMutation.isPending}
-          onConfirm={() => {
-            void handleArchiveMap();
-          }}
-          onCancel={() => setIsMapDeleteConfirmOpen(false)}
-        />
-      )}
+      <DeleteMapConfirmDialog
+        isOpen={isMapDeleteConfirmOpen}
+        mapName={editorMap.name}
+        isDeleting={deleteMapMutation.isPending}
+        onConfirm={() => {
+          void handleArchiveMap();
+        }}
+        onCancel={() => setIsMapDeleteConfirmOpen(false)}
+      />
     </div>
   );
 }

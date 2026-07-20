@@ -1,22 +1,33 @@
+import { useState } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { PillTag, type PillTagVariant } from '@/components/ui/PillTag';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/Tooltip';
+import { formatBytes, getFileExtension, getFileTypeBadgeStyle } from '@/utils/files';
+import { FilePathSegments } from '@/features/files/components/FilePathSegments';
+import { FilePreviewDrawer } from '@/features/files/components/FilePreviewDrawer';
 import { useLibraryDetails } from '../context/LibraryDetailsContext';
 import { useLibraryLinkageFiles } from '../hooks/useLibraryLinkageFiles';
-import type { LibraryLinkageFileGroup, LibraryLinkageFileGroupKey } from '../utils/libraryLinkage';
+import type {
+  LibraryLinkageFileGroup,
+  LibraryLinkageFileGroupKey,
+  LibraryLinkageFileSummary,
+} from '../utils/libraryLinkage';
 
 const FALLBACK_VALUE = '-';
 
+// Category colours mapped to the shared PillTag variant tokens so the linkage
+// badges read as the same pill component used across Library Details.
 const fileGroupStyles: Record<LibraryLinkageFileGroupKey, string> = {
   sequence:
-    'border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-300',
+    'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20',
   analysis:
-    'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300',
+    'bg-green-100 text-green-700 border-green-200 dark:bg-green-500/10 dark:text-green-400 dark:border-green-500/20',
   metrics:
-    'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-300',
+    'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20',
   reports:
-    'border-purple-200 bg-purple-50 text-purple-700 dark:border-purple-500/20 dark:bg-purple-500/10 dark:text-purple-300',
+    'bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/20',
   other:
-    'border-neutral-200 bg-neutral-100 text-neutral-700 dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-[#c1cbd8]',
+    'bg-neutral-100 text-neutral-700 border-neutral-200 dark:bg-[#1e252e] dark:text-[#9dabb9] dark:border-[#2d3540]',
 };
 
 interface DetailRowProps {
@@ -84,19 +95,71 @@ function LinkageErrorState({ onRetry }: { onRetry: () => void }) {
 }
 
 function FileNameBadge({
-  filename,
+  file,
   groupKey,
 }: {
-  filename: string;
+  file: LibraryLinkageFileSummary;
   groupKey: LibraryLinkageFileGroupKey;
 }) {
+  const { filename, record } = file;
+  const ext = getFileExtension(record.key);
+  const dir = record.key.includes('/')
+    ? record.key.substring(0, record.key.lastIndexOf('/') + 1)
+    : '';
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
   return (
-    <span
-      title={filename}
-      className={`inline-flex max-w-full min-w-0 items-center rounded-full border px-2.5 py-1 text-xs font-medium ${fileGroupStyles[groupKey]}`}
-    >
-      <span className='truncate'>{filename}</span>
-    </span>
+    <>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            type='button'
+            onClick={() => setIsPreviewOpen(true)}
+            className={`inline-flex max-w-full min-w-0 cursor-pointer items-center rounded-full border px-2 py-0.5 text-xs! font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${fileGroupStyles[groupKey]}`}
+          >
+            <span className='truncate'>{filename}</span>
+          </button>
+        </TooltipTrigger>
+        <TooltipContent side='top' align='start' variant='light' size='md'>
+          <div className='space-y-2.5'>
+            <div className='font-mono text-xs font-medium break-all text-neutral-900 dark:text-neutral-100'>
+              {filename}
+            </div>
+            <div className='grid grid-cols-[auto_minmax(0,1fr)] items-start gap-x-3 gap-y-1.5'>
+              <span className='text-[11px] text-neutral-500 dark:text-neutral-400'>Type</span>
+              <span
+                className={`inline-flex w-fit items-center rounded px-1.5 py-0.5 text-[10px] font-bold uppercase ${getFileTypeBadgeStyle(ext)}`}
+              >
+                {ext}
+              </span>
+              <span className='text-[11px] text-neutral-500 dark:text-neutral-400'>Size</span>
+              <span className='text-[11px] text-neutral-700 dark:text-neutral-200'>
+                {record.size != null ? formatBytes(record.size) : FALLBACK_VALUE}
+              </span>
+              <span className='text-[11px] text-neutral-500 dark:text-neutral-400'>Location</span>
+              <span className='min-w-0'>
+                {dir ? (
+                  <FilePathSegments path={dir} />
+                ) : (
+                  <span className='text-[11px] text-neutral-400 dark:text-neutral-500'>
+                    {FALLBACK_VALUE}
+                  </span>
+                )}
+              </span>
+            </div>
+            <div className='border-t border-neutral-100 pt-1.5 text-[11px] text-neutral-400 dark:border-neutral-700 dark:text-neutral-500'>
+              Click to preview
+            </div>
+          </div>
+        </TooltipContent>
+      </Tooltip>
+
+      <FilePreviewDrawer
+        isOpen={isPreviewOpen}
+        onClose={() => setIsPreviewOpen(false)}
+        s3Record={record}
+      />
+    </>
   );
 }
 
@@ -106,7 +169,7 @@ function LinkageFileGroupList({ groups }: { groups: LibraryLinkageFileGroup[] })
       {groups.map((group) => (
         <section key={group.key} className='min-w-0'>
           <div className='mb-2 flex items-center gap-2'>
-            <h4 className='text-xs font-medium tracking-wide text-neutral-500 uppercase dark:text-[#9dabb9]'>
+            <h4 className='text-xs font-medium text-neutral-600 dark:text-[#9dabb9]'>
               {group.label}
             </h4>
             <span className='rounded-full bg-neutral-100 px-1.5 py-0.5 text-[10px] font-medium text-neutral-500 dark:bg-[#2d3540] dark:text-[#9dabb9]'>
@@ -115,7 +178,7 @@ function LinkageFileGroupList({ groups }: { groups: LibraryLinkageFileGroup[] })
           </div>
           <div className='flex min-w-0 flex-wrap gap-2'>
             {group.files.map((file) => (
-              <FileNameBadge key={file.id} filename={file.filename} groupKey={group.key} />
+              <FileNameBadge key={file.id} file={file} groupKey={group.key} />
             ))}
           </div>
         </section>

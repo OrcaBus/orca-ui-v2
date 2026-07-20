@@ -28,6 +28,7 @@ export function CaseDetailsLinkedWorkflowRunFilesTable({
   portalRunId,
 }: CaseDetailsLinkedWorkflowRunFilesTableProps) {
   const [selectedFile, setSelectedFile] = useState<S3Record | null>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 
@@ -72,7 +73,10 @@ export function CaseDetailsLinkedWorkflowRunFilesTable({
               <div>
                 <button
                   type='button'
-                  onClick={() => setSelectedFile(file)}
+                  onClick={() => {
+                    setSelectedFile(file);
+                    setIsDetailOpen(true);
+                  }}
                   className='text-left text-sm font-medium text-neutral-900 hover:underline dark:text-white'
                 >
                   {name}
@@ -117,7 +121,10 @@ export function CaseDetailsLinkedWorkflowRunFilesTable({
               {!isIgvFile && isDownloadable && <FileDownloadButton s3Record={file} />}
               <FileMoreActionsDropdown
                 s3Record={file}
-                onViewDetails={() => setSelectedFile(file)}
+                onViewDetails={() => {
+                  setSelectedFile(file);
+                  setIsDetailOpen(true);
+                }}
               />
             </div>
           );
@@ -186,9 +193,14 @@ export function CaseDetailsLinkedWorkflowRunFilesTable({
           totalItems: filesData?.pagination.count ?? 0,
         }}
       />
-      {selectedFile && (
-        <FileRecordDetailsDrawer file={selectedFile} onClose={() => setSelectedFile(null)} />
-      )}
+      <FileRecordDetailsDrawer
+        file={selectedFile}
+        isOpen={isDetailOpen}
+        onClose={() => {
+          setIsDetailOpen(false);
+          setSelectedFile(null);
+        }}
+      />
     </>
   );
 }
