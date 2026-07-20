@@ -4,7 +4,6 @@ import { DEFAULT_NON_PAGINATE_PAGE_SIZE } from '@/utils/constants';
 import { getFilename } from '@/utils/files';
 
 type LibraryLinkageInput = Pick<LibraryDetailType, 'type' | 'assay'>;
-type LinkageFileInput = Pick<S3Record, 'bucket' | 'key'>;
 
 export type LibraryLinkageWorkflowGroupKey = 'sash' | 'tumor-normal' | 'wts' | 'rnasum' | 'cttsov2';
 
@@ -20,6 +19,8 @@ export type LibraryLinkageWorkflowConfig = {
 export type LibraryLinkageFileSummary = {
   id: string;
   filename: string;
+  /** Full S3 record, used to drive the file hover card and details drawer. */
+  record: S3Record;
 };
 
 export type LibraryLinkageFileGroup = {
@@ -143,7 +144,7 @@ export function buildLinkageFileQueryParams({
   };
 }
 
-export function groupLibraryLinkageFiles(files: LinkageFileInput[]): LibraryLinkageFileGroup[] {
+export function groupLibraryLinkageFiles(files: S3Record[]): LibraryLinkageFileGroup[] {
   const seenFileIds = new Set<string>();
   const grouped = new Map<LibraryLinkageFileGroupKey, LibraryLinkageFileSummary[]>(
     LIBRARY_LINKAGE_FILE_GROUPS.map(({ key }) => [key, []])
@@ -156,7 +157,7 @@ export function groupLibraryLinkageFiles(files: LinkageFileInput[]): LibraryLink
 
     const filename = getFilename(file.key);
     const groupKey = getLibraryLinkageFileGroupKey(filename);
-    grouped.get(groupKey)?.push({ id, filename });
+    grouped.get(groupKey)?.push({ id, filename, record: file });
   }
 
   return LIBRARY_LINKAGE_FILE_GROUPS.map(({ key, label }) => ({

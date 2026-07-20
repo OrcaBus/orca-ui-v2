@@ -126,11 +126,13 @@ export function UserMenu() {
         </MenuItems>
       </Menu>
 
-      {settingsOpen && <ThemeSettingsModal onClose={() => setSettingsOpen(false)} />}
-      {profileOpen && (
-        <UserProfileModal user={userInformation} onClose={() => setProfileOpen(false)} />
-      )}
-      {tokenOpen && <UserTokenModal onClose={() => setTokenOpen(false)} />}
+      <ThemeSettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      <UserProfileModal
+        user={userInformation}
+        isOpen={profileOpen}
+        onClose={() => setProfileOpen(false)}
+      />
+      <UserTokenModal isOpen={tokenOpen} onClose={() => setTokenOpen(false)} />
     </>
   );
 }

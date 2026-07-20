@@ -131,9 +131,11 @@ const AnalysisTypesTable = () => {
           totalItems: analysisData?.pagination.count || 0,
         }}
       />
-      {selectedAnalysisTypeId && selectedAnalysisType && (
-        <AnalysisTypeDetailsDrawer analysisType={selectedAnalysisType} onClose={closeDetail} />
-      )}
+      <AnalysisTypeDetailsDrawer
+        analysisType={selectedAnalysisType}
+        isOpen={selectedAnalysisType != null}
+        onClose={closeDetail}
+      />
     </>
   );
 };

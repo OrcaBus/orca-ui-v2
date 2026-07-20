@@ -11,6 +11,12 @@ import {
 import { EnvironmentContext } from '@/context/environment-context';
 import { Header } from '../Header';
 
+// UserMenu now keeps its modals mounted, so ThemeSettingsModal's useTheme() runs
+// even while closed. These layout tests don't exercise theming.
+vi.mock('@/context/theme-context', () => ({
+  useTheme: () => ({ theme: 'system', setTheme: vi.fn() }),
+}));
+
 const authValue: AuthContextValue = {
   isAuthenticated: true,
   user: { name: 'Ray Liu', email: 'ray@example.com' },

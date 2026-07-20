@@ -13,6 +13,7 @@ import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Tabs } from '@/components/ui/Tabs';
 import { CodeViewer } from '@/components/ui/CodeViewer';
 import { DialogFrame } from '@/components/modals/DialogFrame';
+import { useLastPresent } from '@/hooks/useLastPresent';
 import { downloadCsvFile, jsonToCsv } from '@/utils/csv';
 import type { SequenceRunSampleSheetDetailModel } from '../../shared/api/sequence.api';
 
@@ -248,41 +249,48 @@ interface SampleSheetViewModalProps {
 // ---------------------------------------------------------------------------
 
 export function SampleSheetViewModal({ isOpen, onClose, sampleSheet }: SampleSheetViewModalProps) {
-  if (!isOpen || !sampleSheet) return null;
+  // Keep the last sheet so the dialog keeps its content while it animates closed.
+  const shown = useLastPresent(sampleSheet);
 
-  return (
-    <SampleSheetViewModalContent
-      key={sampleSheet.orcabusId}
-      onClose={onClose}
-      sampleSheet={sampleSheet}
-    />
-  );
+  return <SampleSheetViewModalContent isOpen={isOpen} onClose={onClose} sampleSheet={shown} />;
 }
 
 function SampleSheetViewModalContent({
+  isOpen,
   onClose,
   sampleSheet,
 }: {
+  isOpen: boolean;
   onClose: () => void;
-  sampleSheet: SequenceRunSampleSheetDetailModel;
+  sampleSheet: SequenceRunSampleSheetDetailModel | null;
 }) {
   const [activeTab, setActiveTab] = useState<'formatted' | 'csv' | 'json'>('formatted');
+  const [shownSheetId, setShownSheetId] = useState(sampleSheet?.orcabusId);
+
+  // Reset to the default tab whenever a different sheet is shown (adjust state
+  // while rendering — no effect required).
+  if (sampleSheet != null && sampleSheet.orcabusId !== shownSheetId) {
+    setShownSheetId(sampleSheet.orcabusId);
+    setActiveTab('formatted');
+  }
 
   // CSV: use original if present, otherwise derive from the parsed JSON
-  const csvContent =
-    sampleSheet.sampleSheetContentOriginal ?? jsonToCsv(sampleSheet.sampleSheetContent);
+  const csvContent = sampleSheet
+    ? (sampleSheet.sampleSheetContentOriginal ?? jsonToCsv(sampleSheet.sampleSheetContent))
+    : '';
 
   // JSON: stringify the structured content directly (sampleSheetContent is unknown)
   const jsonText =
-    sampleSheet.sampleSheetContent != null
+    sampleSheet?.sampleSheetContent != null
       ? JSON.stringify(sampleSheet.sampleSheetContent, null, 2)
       : null;
 
-  const baseName = sampleSheet.sampleSheetName.replace(/\.[^.]+$/, '');
+  const baseName = sampleSheet ? sampleSheet.sampleSheetName.replace(/\.[^.]+$/, '') : '';
   const downloadFormat = activeTab === 'json' ? 'JSON' : 'CSV';
   const canDownload = activeTab === 'json' ? jsonText != null : csvContent.length > 0;
 
   const handleDownload = () => {
+    if (!sampleSheet) return;
     if (activeTab === 'csv' || activeTab === 'formatted') {
       if (!csvContent) return;
       downloadCsvFile(
@@ -308,9 +316,9 @@ function SampleSheetViewModalContent({
 
   return (
     <DialogFrame
-      isOpen={true}
+      isOpen={isOpen}
       onClose={onClose}
-      title={sampleSheet.sampleSheetName}
+      title={sampleSheet?.sampleSheetName ?? ''}
       description='Sample Sheet Viewer'
       icon={<FileText className='h-5 w-5' />}
       size='full'
@@ -341,69 +349,75 @@ function SampleSheetViewModalContent({
         </button>
       }
     >
-      {/* Metadata row */}
-      <div className='shrink-0 border-b border-neutral-200 bg-neutral-50 px-6 py-3 dark:border-neutral-700 dark:bg-neutral-800/50'>
-        <div className='flex flex-wrap gap-x-6 gap-y-2 text-xs text-neutral-600 dark:text-neutral-400'>
-          <span className='flex items-center gap-1.5'>
-            <Clock className='h-3.5 w-3.5' />
-            {formatTableDate(sampleSheet.associationTimestamp)}
-          </span>
-          <span className='flex items-center gap-1.5'>
-            <User className='h-3.5 w-3.5' />
-            {sampleSheet.comment?.createdBy ?? '—'}
-          </span>
-          {sampleSheet.associationStatus && <StatusBadge status={sampleSheet.associationStatus} />}
-        </div>
-        {sampleSheet.comment?.comment && (
-          <div className='mt-2 flex items-start gap-2 rounded-md border border-neutral-200 bg-white p-2.5 dark:border-neutral-700 dark:bg-neutral-800'>
-            <MessageSquare className='mt-0.5 h-3.5 w-3.5 shrink-0 text-neutral-400' />
-            <p className='text-xs text-neutral-700 dark:text-neutral-300'>
-              {sampleSheet.comment.comment}
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* Tabs */}
-      <div className='shrink-0 px-6 pt-3'>
-        <Tabs
-          tabs={[
-            { id: 'formatted', label: 'Formatted' },
-            { id: 'csv', label: 'CSV' },
-            { id: 'json', label: 'JSON' },
-          ]}
-          activeTab={activeTab}
-          onTabChange={(id) => setActiveTab(id as 'formatted' | 'csv' | 'json')}
-        />
-      </div>
-
-      {/* Scrollable content */}
-      <div className='min-h-0 flex-1 overflow-y-auto px-6 py-4'>
-        {activeTab === 'formatted' ? (
-          <FormattedView sampleSheet={sampleSheet} />
-        ) : activeTab === 'csv' ? (
-          csvContent ? (
-            <pre className='rounded-md bg-neutral-50 p-4 font-mono text-xs whitespace-pre text-neutral-800 dark:bg-neutral-800 dark:text-neutral-200'>
-              {csvContent}
-            </pre>
-          ) : (
-            <div className='flex items-center justify-center py-12 text-sm text-neutral-500 dark:text-neutral-400'>
-              No CSV content available.
+      {sampleSheet && (
+        <>
+          {/* Metadata row */}
+          <div className='shrink-0 border-b border-neutral-200 bg-neutral-50 px-6 py-3 dark:border-neutral-700 dark:bg-neutral-800/50'>
+            <div className='flex flex-wrap gap-x-6 gap-y-2 text-xs text-neutral-600 dark:text-neutral-400'>
+              <span className='flex items-center gap-1.5'>
+                <Clock className='h-3.5 w-3.5' />
+                {formatTableDate(sampleSheet.associationTimestamp)}
+              </span>
+              <span className='flex items-center gap-1.5'>
+                <User className='h-3.5 w-3.5' />
+                {sampleSheet.comment?.createdBy ?? '—'}
+              </span>
+              {sampleSheet.associationStatus && (
+                <StatusBadge status={sampleSheet.associationStatus} />
+              )}
             </div>
-          )
-        ) : jsonText ? (
-          <CodeViewer
-            code={jsonText}
-            language='json'
-            title={`${baseName}.json`}
-            showHeader={false}
-          />
-        ) : (
-          <div className='flex items-center justify-center py-12 text-sm text-neutral-500 dark:text-neutral-400'>
-            No JSON content available.
+            {sampleSheet.comment?.comment && (
+              <div className='mt-2 flex items-start gap-2 rounded-md border border-neutral-200 bg-white p-2.5 dark:border-neutral-700 dark:bg-neutral-800'>
+                <MessageSquare className='mt-0.5 h-3.5 w-3.5 shrink-0 text-neutral-400' />
+                <p className='text-xs text-neutral-700 dark:text-neutral-300'>
+                  {sampleSheet.comment.comment}
+                </p>
+              </div>
+            )}
           </div>
-        )}
-      </div>
+
+          {/* Tabs */}
+          <div className='shrink-0 px-6 pt-3'>
+            <Tabs
+              tabs={[
+                { id: 'formatted', label: 'Formatted' },
+                { id: 'csv', label: 'CSV' },
+                { id: 'json', label: 'JSON' },
+              ]}
+              activeTab={activeTab}
+              onTabChange={(id) => setActiveTab(id as 'formatted' | 'csv' | 'json')}
+            />
+          </div>
+
+          {/* Scrollable content */}
+          <div className='min-h-0 flex-1 overflow-y-auto px-6 py-4'>
+            {activeTab === 'formatted' ? (
+              <FormattedView sampleSheet={sampleSheet} />
+            ) : activeTab === 'csv' ? (
+              csvContent ? (
+                <pre className='rounded-md bg-neutral-50 p-4 font-mono text-xs whitespace-pre text-neutral-800 dark:bg-neutral-800 dark:text-neutral-200'>
+                  {csvContent}
+                </pre>
+              ) : (
+                <div className='flex items-center justify-center py-12 text-sm text-neutral-500 dark:text-neutral-400'>
+                  No CSV content available.
+                </div>
+              )
+            ) : jsonText ? (
+              <CodeViewer
+                code={jsonText}
+                language='json'
+                title={`${baseName}.json`}
+                showHeader={false}
+              />
+            ) : (
+              <div className='flex items-center justify-center py-12 text-sm text-neutral-500 dark:text-neutral-400'>
+                No JSON content available.
+              </div>
+            )}
+          </div>
+        </>
+      )}
     </DialogFrame>
   );
 }

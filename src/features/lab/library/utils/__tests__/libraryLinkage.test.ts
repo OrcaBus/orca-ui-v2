@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import type { S3Record } from '@/features/files/api/files.api';
 import {
   buildLatestWorkflowRunQueryParams,
   buildLinkageFileQueryParams,
@@ -73,7 +74,7 @@ describe('buildLinkageFileQueryParams', () => {
 });
 
 describe('groupLibraryLinkageFiles', () => {
-  it('groups files by filename-derived category and only exposes filenames', () => {
+  it('groups files by filename-derived category and preserves the source record', () => {
     const grouped = groupLibraryLinkageFiles([
       record('bucket-a', 'analysis/run-a/sequence/sample.bam'),
       record('bucket-a', 'analysis/run-a/variants/sample.pass.vcf.gz'),
@@ -86,7 +87,13 @@ describe('groupLibraryLinkageFiles', () => {
       {
         key: 'sequence',
         label: 'Sequence Files',
-        files: [{ id: 'bucket-a:analysis/run-a/sequence/sample.bam', filename: 'sample.bam' }],
+        files: [
+          {
+            id: 'bucket-a:analysis/run-a/sequence/sample.bam',
+            filename: 'sample.bam',
+            record: record('bucket-a', 'analysis/run-a/sequence/sample.bam'),
+          },
+        ],
       },
       {
         key: 'analysis',
@@ -95,6 +102,7 @@ describe('groupLibraryLinkageFiles', () => {
           {
             id: 'bucket-a:analysis/run-a/variants/sample.pass.vcf.gz',
             filename: 'sample.pass.vcf.gz',
+            record: record('bucket-a', 'analysis/run-a/variants/sample.pass.vcf.gz'),
           },
         ],
       },
@@ -105,6 +113,7 @@ describe('groupLibraryLinkageFiles', () => {
           {
             id: 'bucket-a:analysis/run-a/metrics/sample_metrics.csv',
             filename: 'sample_metrics.csv',
+            record: record('bucket-a', 'analysis/run-a/metrics/sample_metrics.csv'),
           },
         ],
       },
@@ -115,6 +124,7 @@ describe('groupLibraryLinkageFiles', () => {
           {
             id: 'bucket-a:analysis/run-a/reports/sample_report.html',
             filename: 'sample_report.html',
+            record: record('bucket-a', 'analysis/run-a/reports/sample_report.html'),
           },
         ],
       },
@@ -125,6 +135,7 @@ describe('groupLibraryLinkageFiles', () => {
           {
             id: 'bucket-a:analysis/run-a/notes/readme.without-known-type',
             filename: 'readme.without-known-type',
+            record: record('bucket-a', 'analysis/run-a/notes/readme.without-known-type'),
           },
         ],
       },
@@ -140,12 +151,20 @@ describe('groupLibraryLinkageFiles', () => {
 
     expect(grouped).toHaveLength(1);
     expect(grouped[0]?.files).toEqual([
-      { id: 'bucket-a:analysis/run-a/sample.bam', filename: 'sample.bam' },
-      { id: 'bucket-b:analysis/run-a/sample.bam', filename: 'sample.bam' },
+      {
+        id: 'bucket-a:analysis/run-a/sample.bam',
+        filename: 'sample.bam',
+        record: record('bucket-a', 'analysis/run-a/sample.bam'),
+      },
+      {
+        id: 'bucket-b:analysis/run-a/sample.bam',
+        filename: 'sample.bam',
+        record: record('bucket-b', 'analysis/run-a/sample.bam'),
+      },
     ]);
   });
 });
 
-function record(bucket: string, key: string) {
-  return { bucket, key };
+function record(bucket: string, key: string): S3Record {
+  return { bucket, key } as unknown as S3Record;
 }

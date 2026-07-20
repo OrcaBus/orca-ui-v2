@@ -2,8 +2,9 @@ import { useEffect } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { X, Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { DialogFrame } from '@/components/modals/DialogFrame';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { useCaseDetailsContext } from '../context/CaseDetailsContext';
@@ -126,219 +127,24 @@ export function EditCaseModal({ isOpen, onClose }: EditCaseModalProps) {
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className='fixed inset-0 z-50 flex items-center justify-center'>
-      <div className='absolute inset-0 bg-black/50' onClick={onClose} />
-
-      <div className='relative flex max-h-[90vh] w-full max-w-2xl flex-col rounded-xl border border-transparent bg-white shadow-2xl dark:border-[#2d3540] dark:bg-[#111418]'>
-        {/* Header */}
-        <div className='border-b border-neutral-200 px-6 pt-6 pb-4 dark:border-[#2d3540]'>
-          <div className='flex items-start justify-between'>
-            <div>
-              <h2 className='text-lg font-semibold text-neutral-900 dark:text-slate-100'>
-                Edit Case
-              </h2>
-              <p className='mt-0.5 text-sm text-neutral-500 dark:text-[#9dabb9]'>
-                Update case details for{' '}
-                <span className='rounded bg-blue-100 px-1.5 py-0.5 font-mono text-xs text-blue-700 dark:bg-blue-900/40 dark:text-blue-400'>
-                  {caseDetail?.orcabusId}
-                </span>
-              </p>
-            </div>
-            <button
-              type='button'
-              onClick={onClose}
-              className='rounded-lg p-1.5 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-600 dark:text-[#9dabb9] dark:hover:bg-[#1e252e] dark:hover:text-slate-100'
-            >
-              <X className='h-5 w-5' />
-            </button>
-          </div>
-        </div>
-
-        {/* Scrollable body */}
-        <div className='overflow-y-auto px-6 py-5'>
-          <form id='edit-case-form' onSubmit={(e) => void form.handleSubmit(handleFormSubmit)(e)}>
-            {/* Request Form ID */}
-            <div className='mb-5 space-y-2'>
-              <label
-                htmlFor='edit-requestFormId'
-                className='text-sm font-medium text-neutral-700 dark:text-neutral-300'
-              >
-                Request Form ID <span className='text-red-500 dark:text-red-400'>*</span>
-              </label>
-              <Input
-                id='edit-requestFormId'
-                {...form.register('requestFormId')}
-                placeholder='e.g. 1000060'
-                className='rounded-lg border-neutral-300 shadow-sm dark:border-[#2d3540] dark:bg-[#1e252e]'
-              />
-              {errors.requestFormId && (
-                <p className='text-sm text-red-500 dark:text-red-400'>
-                  {errors.requestFormId.message}
-                </p>
-              )}
-            </div>
-
-            {/* Type + Study Type */}
-            <div className='mb-5 grid grid-cols-2 gap-4'>
-              <div className='space-y-2'>
-                <label
-                  htmlFor='edit-type'
-                  className='text-sm font-medium text-neutral-700 dark:text-neutral-300'
-                >
-                  Type <span className='text-red-500 dark:text-red-400'>*</span>
-                </label>
-                <select
-                  id='edit-type'
-                  {...form.register('type')}
-                  className='w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-200 dark:focus:border-[#137fec] dark:focus:ring-[#137fec]'
-                >
-                  {CASE_TYPES.map((o) => (
-                    <option key={o.value} value={o.value}>
-                      {o.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className='space-y-2'>
-                <label
-                  htmlFor='edit-studyType'
-                  className='text-sm font-medium text-neutral-700 dark:text-neutral-300'
-                >
-                  Study Type <span className='text-red-500 dark:text-red-400'>*</span>
-                </label>
-                <select
-                  id='edit-studyType'
-                  {...form.register('studyType')}
-                  className='w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-200 dark:focus:border-[#137fec] dark:focus:ring-[#137fec]'
-                >
-                  {STUDY_TYPES.map((o) => (
-                    <option key={o.value} value={o.value}>
-                      {o.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {/* Links */}
-            <div className='mb-5 space-y-2'>
-              <div className='flex items-center justify-between'>
-                <label className='text-sm font-medium text-neutral-700 dark:text-neutral-300'>
-                  Links
-                </label>
-                <button
-                  type='button'
-                  onClick={() => appendLink({ key: '', value: '' })}
-                  className='flex items-center gap-1 rounded-md border border-neutral-300 px-2 py-1 text-xs font-medium text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-[#2d3540] dark:text-neutral-300 dark:hover:bg-[#1e252e]'
-                >
-                  <Plus className='h-3 w-3' />
-                  Add Link
-                </button>
-              </div>
-              <div className='space-y-2'>
-                {linkFields.map((field, idx) => (
-                  <div key={field.id} className='flex items-center gap-2'>
-                    <Input
-                      {...form.register(`links.${idx}.key`)}
-                      placeholder='Name (e.g. trello)'
-                      className='w-36 shrink-0 rounded-lg border-neutral-300 text-sm dark:border-[#2d3540] dark:bg-[#1e252e]'
-                    />
-                    <Input
-                      {...form.register(`links.${idx}.value`)}
-                      placeholder='URL'
-                      className='flex-1 rounded-lg border-neutral-300 text-sm dark:border-[#2d3540] dark:bg-[#1e252e]'
-                    />
-                    <button
-                      type='button'
-                      onClick={() => removeLink(idx)}
-                      className='rounded p-1 text-neutral-400 transition-colors hover:text-red-500 dark:hover:text-red-400'
-                    >
-                      <Trash2 className='h-4 w-4' />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Checkboxes */}
-            <div className='mb-5 space-y-3'>
-              <label className='flex cursor-pointer items-center gap-2 text-sm text-neutral-700 dark:text-neutral-300'>
-                <input
-                  type='checkbox'
-                  {...form.register('isReportRequired')}
-                  className='h-4 w-4 rounded border-neutral-300 text-blue-600 focus:ring-blue-500 dark:border-[#2d3540] dark:bg-[#1e252e]'
-                />
-                Report Required
-              </label>
-              <label className='flex cursor-pointer items-center gap-2 text-sm text-neutral-700 dark:text-neutral-300'>
-                <input
-                  type='checkbox'
-                  {...form.register('isNataAccredited')}
-                  className='h-4 w-4 rounded border-neutral-300 text-blue-600 focus:ring-blue-500 dark:border-[#2d3540] dark:bg-[#1e252e]'
-                />
-                NATA Accredited
-              </label>
-            </div>
-
-            {/* Alias */}
-            <div className='mb-5 space-y-2'>
-              <div className='flex items-center justify-between'>
-                <label className='text-sm font-medium text-neutral-700 dark:text-neutral-300'>
-                  Alias
-                </label>
-                <button
-                  type='button'
-                  onClick={() => appendAlias({ value: '' })}
-                  className='flex items-center gap-1 rounded-md border border-neutral-300 px-2 py-1 text-xs font-medium text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-[#2d3540] dark:text-neutral-300 dark:hover:bg-[#1e252e]'
-                >
-                  <Plus className='h-3 w-3' />
-                  Add Alias
-                </button>
-              </div>
-              <div className='space-y-2'>
-                {aliasFields.map((field, idx) => (
-                  <div key={field.id} className='flex items-center gap-2'>
-                    <Input
-                      {...form.register(`alias.${idx}.value`)}
-                      placeholder='Alias value'
-                      className='flex-1 rounded-lg border-neutral-300 text-sm dark:border-[#2d3540] dark:bg-[#1e252e]'
-                    />
-                    <button
-                      type='button'
-                      onClick={() => removeAlias(idx)}
-                      className='rounded p-1 text-neutral-400 transition-colors hover:text-red-500 dark:hover:text-red-400'
-                    >
-                      <Trash2 className='h-4 w-4' />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Description */}
-            <div className='mb-4 space-y-2'>
-              <label
-                htmlFor='edit-description'
-                className='text-sm font-medium text-neutral-700 dark:text-neutral-300'
-              >
-                Description
-              </label>
-              <Textarea
-                id='edit-description'
-                {...form.register('description')}
-                placeholder='Enter case description'
-                rows={4}
-                className='min-h-0 resize-none rounded-lg border-neutral-300 shadow-sm dark:border-[#2d3540] dark:bg-[#1e252e]'
-              />
-            </div>
-          </form>
-        </div>
-
-        {/* Footer */}
-        <div className='flex items-center justify-end gap-3 border-t border-neutral-200 px-6 py-4 dark:border-[#2d3540]'>
+    <DialogFrame
+      isOpen={isOpen}
+      onClose={onClose}
+      title='Edit Case'
+      description={
+        <>
+          Update case details for{' '}
+          <span className='rounded bg-blue-100 px-1.5 py-0.5 font-mono text-xs text-blue-700 dark:bg-blue-900/40 dark:text-blue-400'>
+            {caseDetail?.orcabusId}
+          </span>
+        </>
+      }
+      size='xl'
+      panelClassName='flex max-h-[90vh] flex-col'
+      bodyClassName='min-h-0 flex-1 overflow-y-auto px-6 py-5'
+      footer={
+        <>
           <button
             type='button'
             onClick={onClose}
@@ -354,8 +160,183 @@ export function EditCaseModal({ isOpen, onClose }: EditCaseModalProps) {
           >
             {isSubmitting ? 'Saving...' : 'Save Changes'}
           </button>
+        </>
+      }
+    >
+      <form id='edit-case-form' onSubmit={(e) => void form.handleSubmit(handleFormSubmit)(e)}>
+        {/* Request Form ID */}
+        <div className='mb-5 space-y-2'>
+          <label
+            htmlFor='edit-requestFormId'
+            className='text-sm font-medium text-neutral-700 dark:text-neutral-300'
+          >
+            Request Form ID <span className='text-red-500 dark:text-red-400'>*</span>
+          </label>
+          <Input
+            id='edit-requestFormId'
+            {...form.register('requestFormId')}
+            placeholder='e.g. 1000060'
+            className='rounded-lg border-neutral-300 shadow-sm dark:border-[#2d3540] dark:bg-[#1e252e]'
+          />
+          {errors.requestFormId && (
+            <p className='text-sm text-red-500 dark:text-red-400'>{errors.requestFormId.message}</p>
+          )}
         </div>
-      </div>
-    </div>
+
+        {/* Type + Study Type */}
+        <div className='mb-5 grid grid-cols-2 gap-4'>
+          <div className='space-y-2'>
+            <label
+              htmlFor='edit-type'
+              className='text-sm font-medium text-neutral-700 dark:text-neutral-300'
+            >
+              Type <span className='text-red-500 dark:text-red-400'>*</span>
+            </label>
+            <select
+              id='edit-type'
+              {...form.register('type')}
+              className='w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-200 dark:focus:border-[#137fec] dark:focus:ring-[#137fec]'
+            >
+              {CASE_TYPES.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className='space-y-2'>
+            <label
+              htmlFor='edit-studyType'
+              className='text-sm font-medium text-neutral-700 dark:text-neutral-300'
+            >
+              Study Type <span className='text-red-500 dark:text-red-400'>*</span>
+            </label>
+            <select
+              id='edit-studyType'
+              {...form.register('studyType')}
+              className='w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-200 dark:focus:border-[#137fec] dark:focus:ring-[#137fec]'
+            >
+              {STUDY_TYPES.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Links */}
+        <div className='mb-5 space-y-2'>
+          <div className='flex items-center justify-between'>
+            <label className='text-sm font-medium text-neutral-700 dark:text-neutral-300'>
+              Links
+            </label>
+            <button
+              type='button'
+              onClick={() => appendLink({ key: '', value: '' })}
+              className='flex items-center gap-1 rounded-md border border-neutral-300 px-2 py-1 text-xs font-medium text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-[#2d3540] dark:text-neutral-300 dark:hover:bg-[#1e252e]'
+            >
+              <Plus className='h-3 w-3' />
+              Add Link
+            </button>
+          </div>
+          <div className='space-y-2'>
+            {linkFields.map((field, idx) => (
+              <div key={field.id} className='flex items-center gap-2'>
+                <Input
+                  {...form.register(`links.${idx}.key`)}
+                  placeholder='Name (e.g. trello)'
+                  className='w-36 shrink-0 rounded-lg border-neutral-300 text-sm dark:border-[#2d3540] dark:bg-[#1e252e]'
+                />
+                <Input
+                  {...form.register(`links.${idx}.value`)}
+                  placeholder='URL'
+                  className='flex-1 rounded-lg border-neutral-300 text-sm dark:border-[#2d3540] dark:bg-[#1e252e]'
+                />
+                <button
+                  type='button'
+                  onClick={() => removeLink(idx)}
+                  className='rounded p-1 text-neutral-400 transition-colors hover:text-red-500 dark:hover:text-red-400'
+                >
+                  <Trash2 className='h-4 w-4' />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Checkboxes */}
+        <div className='mb-5 space-y-3'>
+          <label className='flex cursor-pointer items-center gap-2 text-sm text-neutral-700 dark:text-neutral-300'>
+            <input
+              type='checkbox'
+              {...form.register('isReportRequired')}
+              className='h-4 w-4 rounded border-neutral-300 text-blue-600 focus:ring-blue-500 dark:border-[#2d3540] dark:bg-[#1e252e]'
+            />
+            Report Required
+          </label>
+          <label className='flex cursor-pointer items-center gap-2 text-sm text-neutral-700 dark:text-neutral-300'>
+            <input
+              type='checkbox'
+              {...form.register('isNataAccredited')}
+              className='h-4 w-4 rounded border-neutral-300 text-blue-600 focus:ring-blue-500 dark:border-[#2d3540] dark:bg-[#1e252e]'
+            />
+            NATA Accredited
+          </label>
+        </div>
+
+        {/* Alias */}
+        <div className='mb-5 space-y-2'>
+          <div className='flex items-center justify-between'>
+            <label className='text-sm font-medium text-neutral-700 dark:text-neutral-300'>
+              Alias
+            </label>
+            <button
+              type='button'
+              onClick={() => appendAlias({ value: '' })}
+              className='flex items-center gap-1 rounded-md border border-neutral-300 px-2 py-1 text-xs font-medium text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-[#2d3540] dark:text-neutral-300 dark:hover:bg-[#1e252e]'
+            >
+              <Plus className='h-3 w-3' />
+              Add Alias
+            </button>
+          </div>
+          <div className='space-y-2'>
+            {aliasFields.map((field, idx) => (
+              <div key={field.id} className='flex items-center gap-2'>
+                <Input
+                  {...form.register(`alias.${idx}.value`)}
+                  placeholder='Alias value'
+                  className='flex-1 rounded-lg border-neutral-300 text-sm dark:border-[#2d3540] dark:bg-[#1e252e]'
+                />
+                <button
+                  type='button'
+                  onClick={() => removeAlias(idx)}
+                  className='rounded p-1 text-neutral-400 transition-colors hover:text-red-500 dark:hover:text-red-400'
+                >
+                  <Trash2 className='h-4 w-4' />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Description */}
+        <div className='mb-4 space-y-2'>
+          <label
+            htmlFor='edit-description'
+            className='text-sm font-medium text-neutral-700 dark:text-neutral-300'
+          >
+            Description
+          </label>
+          <Textarea
+            id='edit-description'
+            {...form.register('description')}
+            placeholder='Enter case description'
+            rows={4}
+            className='min-h-0 resize-none rounded-lg border-neutral-300 shadow-sm dark:border-[#2d3540] dark:bg-[#1e252e]'
+          />
+        </div>
+      </form>
+    </DialogFrame>
   );
 }

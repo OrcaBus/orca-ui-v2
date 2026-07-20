@@ -1,41 +1,52 @@
+import { DialogFrame } from '@/components/modals/DialogFrame';
+import { useLastPresent } from '@/hooks/useLastPresent';
+
 interface DeleteGroupConfirmDialogProps {
-  groupName: string;
+  groupName: string | null;
+  isOpen: boolean;
   onConfirm: () => void;
   onCancel: () => void;
 }
 
 export function DeleteGroupConfirmDialog({
   groupName,
+  isOpen,
   onConfirm,
   onCancel,
 }: DeleteGroupConfirmDialogProps) {
+  // Keep the name so the message stays intact while the dialog animates closed.
+  const shown = useLastPresent(groupName);
+
   return (
-    <div className='fixed inset-0 z-50 flex items-center justify-center'>
-      <div className='absolute inset-0 bg-black/40 backdrop-blur-sm' onClick={onCancel} />
-      <div className='relative w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-[#2d3540] dark:bg-[#111418]'>
-        <h3 className='text-base font-bold text-slate-900 dark:text-white'>Remove Group</h3>
-        <p className='mt-2 text-sm text-slate-500 dark:text-[#9dabb9]'>
-          Are you sure you want to remove{' '}
-          <strong className='text-slate-700 dark:text-white'>{groupName}</strong>? Nodes in this
-          group will not be deleted.
-        </p>
-        <div className='mt-5 flex items-center justify-end gap-3'>
+    <DialogFrame
+      isOpen={isOpen}
+      onClose={onCancel}
+      title='Remove Group'
+      size='sm'
+      footer={
+        <>
           <button
             type='button'
             onClick={onCancel}
-            className='rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 dark:text-[#9dabb9] dark:hover:bg-[#1e252e]'
+            className='rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-[#2d3540] dark:bg-transparent dark:text-neutral-300 dark:hover:bg-[#2d3540]'
           >
             Cancel
           </button>
           <button
             type='button'
             onClick={onConfirm}
-            className='rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700'
+            className='rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700'
           >
             Remove
           </button>
-        </div>
-      </div>
-    </div>
+        </>
+      }
+    >
+      <p className='text-sm text-neutral-600 dark:text-[#9dabb9]'>
+        Are you sure you want to remove{' '}
+        <strong className='font-medium text-neutral-900 dark:text-white'>{shown}</strong>? Nodes in
+        this group will not be deleted.
+      </p>
+    </DialogFrame>
   );
 }

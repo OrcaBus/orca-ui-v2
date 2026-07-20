@@ -14,6 +14,7 @@ interface Identity {
 
 interface UserProfileModalProps {
   user: FetchUserAttributesOutput;
+  isOpen: boolean;
   onClose: () => void;
 }
 
@@ -50,7 +51,7 @@ function IdentityRow({ label, value, mono }: { label: string; value: string; mon
   );
 }
 
-export function UserProfileModal({ user, onClose }: UserProfileModalProps) {
+export function UserProfileModal({ user, isOpen, onClose }: UserProfileModalProps) {
   const userName = user.name || getUsername(user.email as string);
   const userEmail = user.email ?? '';
   const isEmailVerified = user.email_verified === 'true';
@@ -67,7 +68,7 @@ export function UserProfileModal({ user, onClose }: UserProfileModalProps) {
 
   return (
     <DialogFrame
-      isOpen
+      isOpen={isOpen}
       onClose={onClose}
       title={userName}
       description={userEmail}
