@@ -1,6 +1,7 @@
 import { useMemo, type ReactNode } from 'react';
 import { mockWorkflowRuns } from '@/data/mockData';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { NOTIFICATIONS_LAST_VIEWED_AT_STORAGE_KEY } from '@/utils/storage-keys';
 import {
   NotificationContext,
   type NotificationContextValue,
@@ -8,7 +9,6 @@ import {
   type NotificationWorkflowStatus,
 } from './notification-context';
 
-const LAST_VIEWED_AT_STORAGE_KEY = 'workflow-notifications:last-viewed-at';
 const LOOKBACK_WINDOW_MS = 48 * 60 * 60 * 1000;
 
 function buildRecentFailureNotifications(now: Date): Omit<NotificationItem, 'isUnread'>[] {
@@ -65,8 +65,9 @@ function buildRecentFailureNotifications(now: Date): Omit<NotificationItem, 'isU
 
 export function NotificationProvider({ children }: { children: ReactNode }) {
   const [latestViewedAt, setLatestViewedAt] = useLocalStorage<string | null>(
-    LAST_VIEWED_AT_STORAGE_KEY,
-    null
+    NOTIFICATIONS_LAST_VIEWED_AT_STORAGE_KEY,
+    null,
+    { legacyKey: 'workflow-notifications:last-viewed-at' }
   );
 
   const value = useMemo<NotificationContextValue>(() => {

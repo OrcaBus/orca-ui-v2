@@ -19,6 +19,7 @@ import { Pagination } from './Pagination';
 import { usePaginationDefaults, type OptionalPaginationProps } from './useTablePagination';
 import { toast } from 'sonner';
 import { compareStringArrays } from '@/utils/array';
+import { STORAGE_PREFIX } from '@/utils/storage-keys';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 
 export interface Column<T> {
@@ -49,7 +50,7 @@ export interface DataTablePersistSettings {
 }
 
 export function getDataTableSettingsStorageKey(tableKey: string): string {
-  return `orcabus:data-table:${tableKey}:settings`;
+  return `${STORAGE_PREFIX}:data-table:${tableKey}:settings`;
 }
 
 export function createDataTablePersistedSettings<T extends { key: string }>(

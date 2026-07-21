@@ -1,5 +1,6 @@
 import { useEffect, useMemo } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import { THEME_STORAGE_KEY } from '@/utils/storage-keys';
 import {
   ThemeContext,
   type ResolvedTheme,
@@ -20,7 +21,9 @@ function applyThemeToDOM(resolved: ResolvedTheme) {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useLocalStorage<ThemePreference>('theme', 'system');
+  const [theme, setTheme] = useLocalStorage<ThemePreference>(THEME_STORAGE_KEY, 'system', {
+    legacyKey: 'theme',
+  });
 
   const resolvedTheme: ResolvedTheme = useMemo(
     () => (theme === 'system' ? getSystemTheme() : theme),

@@ -1,6 +1,8 @@
 import { Navigate } from 'react-router';
 import { Database, Loader2, UserIcon } from 'lucide-react';
 import { useAuthContext } from '@/context/auth-context';
+import { useLastVisitedPage } from '@/hooks/useLastVisitedPage';
+import { isRestorablePath } from '@/utils/last-visited-page';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
 
@@ -23,9 +25,10 @@ function Copyright() {
 
 export function SignInPage() {
   const { isAuthenticated, isLoading, signInWithGoogle } = useAuthContext();
+  const [lastVisitedPage] = useLastVisitedPage();
 
   if (isAuthenticated) {
-    return <Navigate replace to='/' />;
+    return <Navigate replace to={isRestorablePath(lastVisitedPage) ? lastVisitedPage : '/'} />;
   }
 
   return (

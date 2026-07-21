@@ -9,6 +9,7 @@ import { Hub } from 'aws-amplify/utils';
 import { Amplify } from 'aws-amplify';
 import { toast } from 'sonner';
 import config from '@/app/config';
+import { clearAuthStorage } from '@/hooks/useLocalStorage';
 import { AuthContext } from './auth-context';
 
 // ---------- Amplify initialisation (runs once at module load) ----------
@@ -168,7 +169,8 @@ function ResolvedAuthProvider({ children }: { children: ReactNode }) {
       console.error('Sign-out error:', error);
       toast.error('Failed to sign out');
     } finally {
-      localStorage.clear();
+      // Clear only auth tokens; preserve app state (last page, theme, table settings).
+      clearAuthStorage();
       cacheInitialAuthState(initialState);
       dispatch({ type: 'UNAUTHENTICATED' });
     }

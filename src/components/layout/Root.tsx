@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Outlet, useLocation } from 'react-router';
+import { useTrackLastVisitedPage } from '@/hooks/useLastVisitedPage';
 import { Header } from './Header';
 import { SecondarySidebar } from './SecondarySidebar';
 import { Sidebar } from './Sidebar';
@@ -7,6 +8,9 @@ import { Sidebar } from './Sidebar';
 export function Root() {
   const location = useLocation();
   const mainRef = useRef<HTMLElement>(null);
+
+  // Remember the current authenticated route so login can restore it later.
+  useTrackLastVisitedPage();
 
   // Scroll the content area back to the top whenever the route pathname changes.
   // React Router does not reset scroll on a custom overflow container automatically.
