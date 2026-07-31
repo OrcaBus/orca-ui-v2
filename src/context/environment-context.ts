@@ -1,10 +1,13 @@
 import { createContext, useContext } from 'react';
 
-export type AppEnvironment = 'dev' | 'stg' | 'prod';
+export type AppEnvironment = 'local' | 'dev' | 'stg' | 'prod';
+
+/** Environments with a deployed portal domain — i.e. everything except `local`. */
+export type DeployedEnvironment = Exclude<AppEnvironment, 'local'>;
 
 export interface EnvironmentContextValue {
   environment: AppEnvironment;
-  label: 'Dev' | 'Staging' | 'Prod';
+  label: 'Local' | 'Dev' | 'Staging' | 'Prod';
 }
 
 export const EnvironmentContext = createContext<EnvironmentContextValue | null>(null);

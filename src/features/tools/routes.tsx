@@ -1,6 +1,7 @@
 import { lazy } from 'react';
 import { Outlet, type RouteObject } from 'react-router';
 import { useEnvironment } from '@/context/environment-context';
+import { isDevEnvironment } from '@/context/environment-resolver';
 
 const ToolsPage = lazy(() =>
   import('./root/pages/ToolsPage').then((m) => ({ default: m.ToolsPage }))
@@ -26,7 +27,7 @@ const UnderDevelopmentPage = lazy(() =>
 export function SystemCatalogMapListRoute() {
   const { environment } = useEnvironment();
 
-  if (environment !== 'dev') {
+  if (!isDevEnvironment(environment)) {
     return (
       <UnderDevelopmentPage
         featureName='System Catalog'

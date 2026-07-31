@@ -3,12 +3,18 @@ import {
   ENVIRONMENT_HOSTNAMES,
   buildEnvironmentUrl,
   getEnvironmentLabel,
+  isDevEnvironment,
   resolveEnvironmentFromHostname,
 } from '../environment-resolver';
 
 describe('resolveEnvironmentFromHostname', () => {
+  it('resolves local hostnames', () => {
+    expect(resolveEnvironmentFromHostname('localhost')).toBe('local');
+    expect(resolveEnvironmentFromHostname('127.0.0.1')).toBe('local');
+    expect(resolveEnvironmentFromHostname('[::1]')).toBe('local');
+  });
+
   it('resolves dev hostnames', () => {
-    expect(resolveEnvironmentFromHostname('localhost')).toBe('dev');
     expect(resolveEnvironmentFromHostname('orcaui.dev.umccr.org')).toBe('dev');
     expect(resolveEnvironmentFromHostname('portal.dev.umccr.org')).toBe('dev');
   });
@@ -56,10 +62,32 @@ describe('buildEnvironmentUrl', () => {
       'https://portal.dev.umccr.org/v2/runs#overview'
     );
   });
+
+  it('upgrades the local dev server to https on the default port', () => {
+    expect(buildEnvironmentUrl('stg', 'http://localhost:3000/v2/files?bucket=test-data')).toBe(
+      'https://portal.stg.umccr.org/v2/files?bucket=test-data'
+    );
+  });
+
+  it('falls back to the environment app root without a current page', () => {
+    expect(buildEnvironmentUrl('dev')).toBe(
+      `https://portal.dev.umccr.org${import.meta.env.BASE_URL}`
+    );
+  });
+});
+
+describe('isDevEnvironment', () => {
+  it('treats local as dev so dev-only features stay available on localhost', () => {
+    expect(isDevEnvironment('local')).toBe(true);
+    expect(isDevEnvironment('dev')).toBe(true);
+    expect(isDevEnvironment('stg')).toBe(false);
+    expect(isDevEnvironment('prod')).toBe(false);
+  });
 });
 
 describe('getEnvironmentLabel', () => {
   it('returns the friendly label for each environment', () => {
+    expect(getEnvironmentLabel('local')).toBe('Local');
     expect(getEnvironmentLabel('dev')).toBe('Dev');
     expect(getEnvironmentLabel('stg')).toBe('Staging');
     expect(getEnvironmentLabel('prod')).toBe('Prod');
