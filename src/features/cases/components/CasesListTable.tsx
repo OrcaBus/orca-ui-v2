@@ -83,9 +83,6 @@ export function CasesListTable() {
             <div className='text-sm font-medium text-neutral-900 dark:text-neutral-100'>
               {formatCaseText(case_.studyName)}
             </div>
-            <div className='font-mono text-xs text-neutral-500 dark:text-neutral-400'>
-              {formatCaseText(case_.studyId)}
-            </div>
           </div>
         ),
       },

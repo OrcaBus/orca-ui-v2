@@ -99,12 +99,12 @@ describe('CasesListTable', () => {
     renderedColumns = [];
   });
 
-  it('renders compact study, UR number, and due date columns', () => {
+  it('renders study name, UR number, and due date without study ID', () => {
     const html = renderToStaticMarkup(<CasesListTable />);
 
     expect(html).toContain('Study');
     expect(html).toContain('ASPi2L');
-    expect(html).toContain('STUDY-42');
+    expect(html).not.toContain('STUDY-42');
     expect(html).toContain('UR Number');
     expect(html).toContain('UR123456');
     expect(html).toContain('Due Date');
@@ -137,7 +137,7 @@ describe('CasesListTable', () => {
     const studySection = html.match(/<h2>Study<\/h2>.*?<\/section>/)?.[0];
     const urNumberSection = html.match(/<h2>UR Number<\/h2>.*?<\/section>/)?.[0];
 
-    expect(studySection?.match(/>—</g)).toHaveLength(2);
+    expect(studySection?.match(/>—</g)).toHaveLength(1);
     expect(urNumberSection?.match(/>—</g)).toHaveLength(1);
   });
 });
