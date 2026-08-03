@@ -51,5 +51,8 @@ describe('CasesInfoDrawer', () => {
     });
     expect(html).toContain('Last synced at');
     expect(html).toContain('2026-06-04 23:54 +10:00');
+    expect(html).toContain('Import from REDCap');
+    expect(html).not.toContain('Create a case');
+    expect(html).not.toContain('Add New Case');
   });
 });
