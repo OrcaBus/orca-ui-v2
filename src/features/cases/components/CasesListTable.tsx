@@ -7,6 +7,7 @@ import { DEFAULT_PAGE_SIZE } from '@/utils/constants';
 import { useCasesListQueryParams } from '../hooks/useCasesListQueryParams';
 import { useCaseListModel, type CaseDetailModel } from '../api/cases.api';
 import { getCaseStatusVisual } from '../utils/caseStatus.visuals';
+import { formatCalendarDate } from '@/utils/timeFormat';
 
 export function CasesListTable() {
   const navigate = useNavigate();
@@ -65,6 +66,33 @@ export function CasesListTable() {
         ),
       },
       {
+        key: 'studyName',
+        header: 'Study',
+        sortable: true,
+        render: (case_) => (
+          <div className='min-w-36'>
+            <div className='text-sm font-medium text-neutral-900 dark:text-neutral-100'>
+              {case_.studyName ?? '—'}
+            </div>
+            {case_.studyId ? (
+              <div className='font-mono text-xs text-neutral-500 dark:text-neutral-400'>
+                {case_.studyId}
+              </div>
+            ) : null}
+          </div>
+        ),
+      },
+      {
+        key: 'urNumber',
+        header: 'UR Number',
+        sortable: true,
+        render: (case_) => (
+          <span className='font-mono text-sm text-neutral-700 dark:text-neutral-300'>
+            {case_.urNumber ?? '—'}
+          </span>
+        ),
+      },
+      {
         key: 'type',
         header: 'Type',
         sortable: true,
@@ -99,6 +127,16 @@ export function CasesListTable() {
             </PillTag>
           );
         },
+      },
+      {
+        key: 'dueDate',
+        header: 'Due Date',
+        sortable: true,
+        render: (case_) => (
+          <span className='text-sm font-medium whitespace-nowrap text-neutral-700 dark:text-neutral-300'>
+            {case_.dueDate ? formatCalendarDate(case_.dueDate) : '—'}
+          </span>
+        ),
       },
       {
         key: 'isNataAccredited',

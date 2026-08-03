@@ -299,7 +299,7 @@ Run: `CI=1 pnpm vitest run src/features/cases/utils/__tests__/caseStatus.visuals
 
 Expected: PASS.
 
-- [ ] **Step 5: Commit status and timeline mapping**
+- [x] **Step 5: Commit status and timeline mapping**
 
 ```bash
 git add src/features/cases/utils/caseStatus.visuals.ts src/features/cases/utils/__tests__/caseStatus.visuals.test.ts src/features/cases/components/CaseDetailsTimeline.tsx
@@ -317,7 +317,7 @@ git commit -m "feat(cases): add sample receipt statuses"
 - Modify: `src/features/cases/components/CasesListTable.tsx`
 - Modify: `src/features/cases/pages/CasesPage.tsx`
 
-- [ ] **Step 1: Write failing presentation tests**
+- [x] **Step 1: Write failing presentation tests**
 
 Mock `useCaseDetailsContext` and render the overview to static markup. Assert:
 
@@ -340,17 +340,17 @@ Mock `FilterBar`, the cases query-parameter hook, the app-shell hook, and child 
 expect(html).toContain('Search request ID, alias, study, study ID, or UR number...');
 ```
 
-- [ ] **Step 2: Run the component tests and verify RED**
+- [x] **Step 2: Run the component tests and verify RED**
 
 Run: `CI=1 pnpm vitest run src/features/cases/components/__tests__/CaseDetailsOverviewCard.test.tsx src/features/cases/components/__tests__/CasesListTable.test.tsx src/features/cases/pages/__tests__/CasesPage.test.tsx`
 
 Expected: FAIL because the fields/columns are absent.
 
-- [ ] **Step 3: Add responsive detail fields**
+- [x] **Step 3: Add responsive detail fields**
 
 Change the overview grid to `grid-cols-1 sm:grid-cols-2 xl:grid-cols-3`. Add Study Name, Study ID, UR Number, and Due Date cells using `formatCalendarDate(caseDetail.dueDate)` and the existing skeleton/em-dash patterns. Change the description span to `sm:col-span-2 xl:col-span-3` so it remains readable.
 
-- [ ] **Step 4: Add compact list columns and search guidance**
+- [x] **Step 4: Add compact list columns and search guidance**
 
 Add these column shapes to `CasesListTable.tsx`:
 
@@ -386,7 +386,7 @@ Add these column shapes to `CasesListTable.tsx`:
 
 Set the page search placeholder to `Search request ID, alias, study, study ID, or UR number...`.
 
-- [ ] **Step 5: Run the presentation tests and verify GREEN**
+- [x] **Step 5: Run the presentation tests and verify GREEN**
 
 Run: `CI=1 pnpm vitest run src/features/cases/components/__tests__/CaseDetailsOverviewCard.test.tsx src/features/cases/components/__tests__/CasesListTable.test.tsx src/features/cases/pages/__tests__/CasesPage.test.tsx`
 
