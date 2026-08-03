@@ -8,7 +8,10 @@ export type CaseStatusVisual = {
 
 export const CASE_STATUS_VISUALS: Record<CaseStatusEnum, CaseStatusVisual> = {
   request_received: { variant: 'blue', label: 'Request Received' },
-  sample_received: { variant: 'blue', label: 'Sample Received' },
+  wgts_tumour_sample_received: { variant: 'blue', label: 'WGTS Tumour Sample Received' },
+  wgts_germline_sample_received: { variant: 'blue', label: 'WGTS Germline Sample Received' },
+  cttso_sample_received: { variant: 'blue', label: 'CTTSO Sample Received' },
+  all_sample_received: { variant: 'purple', label: 'All Sample Received' },
   library_partially_failed: { variant: 'amber', label: 'Library Partially Failed' },
   sequencing_started: { variant: 'blue', label: 'Sequencing Started' },
   sequencing_completed: { variant: 'purple', label: 'Sequencing Completed' },

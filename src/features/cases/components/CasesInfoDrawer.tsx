@@ -1,10 +1,13 @@
 import { useState } from 'react';
-import { Briefcase, FolderSync, Plus } from 'lucide-react';
+import { Briefcase, FolderSync } from 'lucide-react';
 import { DrawerFrame } from '@/components/modals/DrawerFrame';
 import { InfoDrawerActionCard } from '@/components/modals/InfoDrawerActionCard';
 import { formatTableDate } from '@/utils/timeFormat';
 import { useCaseSyncFromRedcapAutoHistoryModel } from '../api/cases.api';
-import { AddCaseModal } from './AddCaseModal';
+// Manual case creation is temporarily unavailable because the Case Manager API
+// no longer exposes POST /case/. Restore this import with the preserved UI
+// wiring below when collection create support returns.
+// import { AddCaseModal } from './AddCaseModal';
 import { AutoImportFromRedcapModal } from './AutoImportFromRedcapModal';
 import { SyncHistoryDialog } from './SyncHistoryDialog';
 
@@ -14,7 +17,9 @@ interface CasesInfoDrawerProps {
 }
 
 export function CasesInfoDrawer({ isOpen, onClose }: CasesInfoDrawerProps) {
-  const [showAddCaseModal, setShowAddCaseModal] = useState(false);
+  // Manual case creation is temporarily unavailable. Preserve this state for
+  // restoration alongside AddCaseModal when POST /case/ returns.
+  // const [showAddCaseModal, setShowAddCaseModal] = useState(false);
   const [showAutoImportModal, setShowAutoImportModal] = useState(false);
   const [showSyncHistoryModal, setShowSyncHistoryModal] = useState(false);
 
@@ -73,6 +78,9 @@ export function CasesInfoDrawer({ isOpen, onClose }: CasesInfoDrawerProps) {
               buttonIcon={<FolderSync className='h-4 w-4' />}
               variant='secondary'
             />
+            {/* Manual case creation is temporarily unavailable because the Case Manager API
+                no longer exposes POST /case/. Restore this card with AddCaseModal when
+                collection create support returns.
             <InfoDrawerActionCard
               title='Create a case'
               description='Create a single case record manually when it is not available through the REDCap import flow.'
@@ -80,12 +88,13 @@ export function CasesInfoDrawer({ isOpen, onClose }: CasesInfoDrawerProps) {
               onClick={() => setShowAddCaseModal(true)}
               icon={<Briefcase className='h-4 w-4' />}
               buttonIcon={<Plus className='h-4 w-4' />}
-            />
+            /> */}
           </div>
         </section>
       </div>
 
-      <AddCaseModal isOpen={showAddCaseModal} onClose={() => setShowAddCaseModal(false)} />
+      {/* Manual case creation is temporarily unavailable. Restore with the action card above.
+      <AddCaseModal isOpen={showAddCaseModal} onClose={() => setShowAddCaseModal(false)} /> */}
 
       <SyncHistoryDialog
         isOpen={showSyncHistoryModal}

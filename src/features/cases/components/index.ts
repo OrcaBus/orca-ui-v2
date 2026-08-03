@@ -1,6 +1,8 @@
 export { CasesListTable } from './CasesListTable';
 export { CasesInfoDrawer } from './CasesInfoDrawer';
-export { AddCaseModal } from './AddCaseModal';
+// Manual case creation is temporarily unavailable because POST /case/ was
+// removed. Keep AddCaseModal.tsx for restoration when backend support returns.
+// export { AddCaseModal } from './AddCaseModal';
 export { AutoImportFromRedcapModal } from './AutoImportFromRedcapModal';
 export { SyncHistoryDialog } from './SyncHistoryDialog';
 

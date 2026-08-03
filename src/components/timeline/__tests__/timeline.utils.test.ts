@@ -131,6 +131,7 @@ describe('timeline utils', () => {
 
   it('formats timestamps with the shared detail display format', () => {
     expect(formatTimelineTimestamp('2026-02-05T03:09:00Z')).toBe('05 Feb 2026, 14:09 (UTC+11:00)');
+    expect(formatTimelineTimestamp('2026-08-03', 'date')).toBe('03 Aug 2026');
     expect(formatTimelineTimestamp('not-a-date')).toBe('not-a-date');
     expect(formatOptionalTimelineTimestamp('')).toBeNull();
     expect(formatOptionalTimelineTimestamp(null)).toBeNull();
@@ -162,6 +163,32 @@ describe('timeline utils', () => {
     expect(
       sortTimelineEvents([newerEvent, olderEvent], 'oldest').map((event) => event.eventId)
     ).toEqual(['older', 'newer']);
+  });
+
+  it('sorts date-only events after timed events on the same calendar date', () => {
+    const dateOnlyEvent = {
+      eventId: 'date-only',
+      eventType: TimelineEventTypes.STATE,
+      timestamp: '2026-08-03',
+      timestampPrecision: 'date',
+      sourceType: TimelineEventSourceTypes.SYSTEM,
+      state: 'all_sample_received',
+    } satisfies TimelineEvent;
+
+    const timedEvent = {
+      eventId: 'timed',
+      eventType: TimelineEventTypes.STATE,
+      timestamp: '2026-08-03T10:00:00Z',
+      sourceType: TimelineEventSourceTypes.SYSTEM,
+      state: 'cttso_sample_received',
+    } satisfies TimelineEvent;
+
+    expect(
+      sortTimelineEvents([timedEvent, dateOnlyEvent], 'latest').map((event) => event.eventId)
+    ).toEqual(['date-only', 'timed']);
+    expect(
+      sortTimelineEvents([dateOnlyEvent, timedEvent], 'oldest').map((event) => event.eventId)
+    ).toEqual(['timed', 'date-only']);
   });
 
   it('identifies records and primitive payload values', () => {

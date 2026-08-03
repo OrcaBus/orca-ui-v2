@@ -86,10 +86,13 @@ export interface TimelineEventAction {
   icon?: ReactNode;
 }
 
+export type TimelineTimestampPrecision = 'date' | 'date-time';
+
 interface TimelineBaseEvent {
   eventId: string;
   title?: string;
   timestamp: string;
+  timestampPrecision?: TimelineTimestampPrecision;
   createdBy?: string;
   isArchived?: boolean;
   archivedAt?: string | null;

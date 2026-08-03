@@ -7,10 +7,14 @@ import { DEFAULT_PAGE_SIZE } from '@/utils/constants';
 import { useCasesListQueryParams } from '../hooks/useCasesListQueryParams';
 import { useCaseListModel, type CaseDetailModel } from '../api/cases.api';
 import { getCaseStatusVisual } from '../utils/caseStatus.visuals';
+import { formatCaseText } from '../utils/caseDisplay';
+import { formatCalendarDate } from '@/utils/timeFormat';
+import { orderByParam } from '@/utils/queryParams';
 
 export function CasesListTable() {
   const navigate = useNavigate();
-  const { caseListQueryParams, setPage, setRowsPerPage } = useCasesListQueryParams();
+  const { caseListQueryParams, setPage, setRowsPerPage, setOrderBy, getOrderDirection } =
+    useCasesListQueryParams();
 
   const {
     data: caseList,
@@ -32,6 +36,9 @@ export function CasesListTable() {
         key: 'requestFormId',
         header: 'Request Form ID',
         sortable: true,
+        sortDirection: getOrderDirection('request_form_id'),
+        defaultSortDirection: 'desc',
+        onSort: (direction) => setOrderBy(orderByParam(direction, 'request_form_id')),
         render: (case_) => (
           <button
             onClick={() => void navigate(`/cases/${case_.orcabusId}`)}
@@ -65,9 +72,40 @@ export function CasesListTable() {
         ),
       },
       {
+        key: 'studyName',
+        header: 'Study',
+        sortable: true,
+        sortDirection: getOrderDirection('study_name'),
+        defaultSortDirection: 'desc',
+        onSort: (direction) => setOrderBy(orderByParam(direction, 'study_name')),
+        render: (case_) => (
+          <div className='min-w-36'>
+            <div className='text-sm font-medium text-neutral-900 dark:text-neutral-100'>
+              {formatCaseText(case_.studyName)}
+            </div>
+          </div>
+        ),
+      },
+      {
+        key: 'urNumber',
+        header: 'UR Number',
+        sortable: true,
+        sortDirection: getOrderDirection('ur_number'),
+        defaultSortDirection: 'desc',
+        onSort: (direction) => setOrderBy(orderByParam(direction, 'ur_number')),
+        render: (case_) => (
+          <span className='font-mono text-sm text-neutral-700 dark:text-neutral-300'>
+            {formatCaseText(case_.urNumber)}
+          </span>
+        ),
+      },
+      {
         key: 'type',
         header: 'Type',
         sortable: true,
+        sortDirection: getOrderDirection('type'),
+        defaultSortDirection: 'desc',
+        onSort: (direction) => setOrderBy(orderByParam(direction, 'type')),
         render: (case_) => (
           <PillTag variant='blue' size='sm'>
             {case_.type}
@@ -78,6 +116,9 @@ export function CasesListTable() {
         key: 'studyType',
         header: 'Study Type',
         sortable: true,
+        sortDirection: getOrderDirection('study_type'),
+        defaultSortDirection: 'desc',
+        onSort: (direction) => setOrderBy(orderByParam(direction, 'study_type')),
         render: (case_) => (
           <PillTag variant='neutral' size='sm'>
             {case_.studyType}
@@ -99,6 +140,19 @@ export function CasesListTable() {
             </PillTag>
           );
         },
+      },
+      {
+        key: 'dueDate',
+        header: 'Due Date',
+        sortable: true,
+        sortDirection: getOrderDirection('due_date'),
+        defaultSortDirection: 'desc',
+        onSort: (direction) => setOrderBy(orderByParam(direction, 'due_date')),
+        render: (case_) => (
+          <span className='text-sm font-medium whitespace-nowrap text-neutral-700 dark:text-neutral-300'>
+            {case_.dueDate ? formatCalendarDate(case_.dueDate) : '—'}
+          </span>
+        ),
       },
       {
         key: 'isNataAccredited',
@@ -129,7 +183,7 @@ export function CasesListTable() {
           ),
       },
     ],
-    [navigate]
+    [getOrderDirection, navigate, setOrderBy]
   );
 
   if (isError) {

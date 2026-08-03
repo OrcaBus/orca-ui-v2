@@ -1,8 +1,9 @@
 import { PillTag } from '../../../components/ui/PillTag';
 import { Skeleton } from '@/components/ui/Skeleton';
-import { formatDetailDate } from '../../../utils/timeFormat';
+import { formatCalendarDate, formatDetailDate } from '../../../utils/timeFormat';
 import { getCaseStudyTypeVariant } from '../utils/getCaseVariants';
 import { getCaseStatusVisual } from '../utils/caseStatus.visuals';
+import { formatCaseText } from '../utils/caseDisplay';
 import { useCaseDetailsContext } from '../context/CaseDetailsContext';
 
 const TYPE_DISPLAY_LABELS: Record<string, string> = {
@@ -16,7 +17,7 @@ export function CaseDetailsOverviewCard() {
 
   return (
     <div className='rounded-lg border border-neutral-200 bg-white p-6 dark:border-neutral-700 dark:bg-[#111418]'>
-      <div className='grid grid-cols-3 gap-x-8 gap-y-4'>
+      <div className='grid grid-cols-1 gap-x-8 gap-y-5 sm:grid-cols-2 xl:grid-cols-3'>
         <div>
           <div className='mb-1 text-sm text-neutral-500 dark:text-[#9dabb9]'>Request Form ID</div>
           {isLoadingCaseDetail ? (
@@ -115,6 +116,50 @@ export function CaseDetailsOverviewCard() {
         </div>
 
         <div>
+          <div className='mb-1 text-sm text-neutral-500 dark:text-[#9dabb9]'>Study Name</div>
+          {isLoadingCaseDetail ? (
+            <Skeleton className='h-4 w-32' />
+          ) : (
+            <div className='text-sm font-medium text-neutral-900 dark:text-neutral-100'>
+              {formatCaseText(caseDetail?.studyName)}
+            </div>
+          )}
+        </div>
+
+        <div>
+          <div className='mb-1 text-sm text-neutral-500 dark:text-[#9dabb9]'>Study ID</div>
+          {isLoadingCaseDetail ? (
+            <Skeleton className='h-4 w-28' />
+          ) : (
+            <div className='font-mono text-sm text-neutral-900 dark:text-neutral-100'>
+              {formatCaseText(caseDetail?.studyId)}
+            </div>
+          )}
+        </div>
+
+        <div>
+          <div className='mb-1 text-sm text-neutral-500 dark:text-[#9dabb9]'>UR Number</div>
+          {isLoadingCaseDetail ? (
+            <Skeleton className='h-4 w-28' />
+          ) : (
+            <div className='font-mono text-sm text-neutral-900 dark:text-neutral-100'>
+              {formatCaseText(caseDetail?.urNumber)}
+            </div>
+          )}
+        </div>
+
+        <div>
+          <div className='mb-1 text-sm text-neutral-500 dark:text-[#9dabb9]'>Due Date</div>
+          {isLoadingCaseDetail ? (
+            <Skeleton className='h-4 w-28' />
+          ) : (
+            <div className='text-sm font-medium text-neutral-900 dark:text-neutral-100'>
+              {caseDetail?.dueDate ? formatCalendarDate(caseDetail.dueDate) : '—'}
+            </div>
+          )}
+        </div>
+
+        <div>
           <div className='mb-1 text-sm text-neutral-500 dark:text-[#9dabb9]'>Last Updated</div>
           {isLoadingCaseDetail ? (
             <Skeleton className='h-4 w-36' />
@@ -151,7 +196,7 @@ export function CaseDetailsOverviewCard() {
           )}
         </div>
 
-        <div className='col-span-2'>
+        <div className='sm:col-span-2 xl:col-span-3'>
           <div className='mb-1 text-sm text-neutral-500 dark:text-[#9dabb9]'>Description</div>
           {isLoadingCaseDetail ? (
             <Skeleton className='h-4 w-full' />
