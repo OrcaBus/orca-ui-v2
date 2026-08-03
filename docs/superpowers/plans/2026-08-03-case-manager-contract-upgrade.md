@@ -100,7 +100,7 @@ Run: `CI=1 pnpm type-check`
 
 Expected: no missing `CaseDetailRequest`, removed path `post`, or `useCaseCreateModel` errors.
 
-- [ ] **Step 5: Commit the create-flow removal**
+- [x] **Step 5: Commit the create-flow removal**
 
 ```bash
 git add src/features/cases/api/cases.api.ts src/features/cases/components/AddCaseModal.tsx src/features/cases/components/CasesInfoDrawer.tsx src/features/cases/components/index.ts src/features/cases/components/__tests__/CasesInfoDrawer.test.tsx
@@ -119,7 +119,7 @@ git commit -m "fix(cases): disable unsupported manual creation"
 - Modify: `src/components/timeline/Timeline.tsx`
 - Modify: `src/components/timeline/__tests__/timeline.utils.test.ts`
 
-- [ ] **Step 1: Write failing calendar-date and adapter tests**
+- [x] **Step 1: Write failing calendar-date and adapter tests**
 
 Add a timeline assertion:
 
@@ -152,13 +152,13 @@ describe('getCaseStateTimelineTimestamp', () => {
 });
 ```
 
-- [ ] **Step 2: Run focused tests and verify RED**
+- [x] **Step 2: Run focused tests and verify RED**
 
 Run: `CI=1 pnpm vitest run src/components/timeline/__tests__/timeline.utils.test.ts src/features/cases/utils/__tests__/caseStateDate.test.ts`
 
 Expected: FAIL because precision formatting and the case adapter do not exist.
 
-- [ ] **Step 3: Implement date formatting and precision**
+- [x] **Step 3: Implement date formatting and precision**
 
 Add to `timeFormat.ts`:
 
@@ -193,7 +193,7 @@ export function formatTimelineTimestamp(
 const timestamp = formatTimelineTimestamp(event.timestamp, event.timestampPrecision);
 ```
 
-- [ ] **Step 4: Implement the focused case adapter**
+- [x] **Step 4: Implement the focused case adapter**
 
 Create `caseStateDate.ts`:
 
@@ -220,7 +220,7 @@ export function getCaseStateTimelineTimestamp(
 }
 ```
 
-- [ ] **Step 5: Run focused tests and verify GREEN**
+- [x] **Step 5: Run focused tests and verify GREEN**
 
 Run: `CI=1 pnpm vitest run src/components/timeline/__tests__/timeline.utils.test.ts src/features/cases/utils/__tests__/caseStateDate.test.ts`
 

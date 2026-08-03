@@ -20,6 +20,8 @@ dayjs.extend(timezone);
 
 /** Display timezone. Configurable from user preferences later. */
 const DISPLAY_TIME_ZONE = 'Australia/Melbourne';
+const API_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+const API_TIME_PATTERN = /^\d{2}:\d{2}(?::\d{2}(?:\.\d{1,6})?)?$/;
 
 /**
  * Parse an ISO string and return a dayjs instance in the display timezone.
@@ -27,6 +29,27 @@ const DISPLAY_TIME_ZONE = 'Australia/Melbourne';
  */
 function parseInDisplayZone(isoString: string): dayjs.Dayjs {
   return dayjs.utc(isoString).tz(DISPLAY_TIME_ZONE);
+}
+
+/** Format a backend calendar date without applying a timezone conversion. */
+export function formatCalendarDate(dateString: string): string {
+  if (!API_DATE_PATTERN.test(dateString)) return dateString;
+
+  const d = dayjs.utc(dateString);
+  if (!d.isValid() || d.format('YYYY-MM-DD') !== dateString) return dateString;
+  return d.format('DD MMM YYYY');
+}
+
+/** Compose split backend date/time fields as an instant in the display timezone. */
+export function composeDisplayZoneDateTime(
+  dateString: string,
+  timeString: string
+): string | undefined {
+  if (!API_DATE_PATTERN.test(dateString) || !API_TIME_PATTERN.test(timeString)) return undefined;
+
+  const d = dayjs.tz(`${dateString}T${timeString}`, DISPLAY_TIME_ZONE);
+  if (!d.isValid() || d.format('YYYY-MM-DD') !== dateString) return undefined;
+  return d.toISOString();
 }
 
 /**

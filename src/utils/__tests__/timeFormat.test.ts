@@ -1,6 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
+  composeDisplayZoneDateTime,
   formatBackendDate,
+  formatCalendarDate,
   formatDateTimeLocalInputValue,
   formatDetailDate,
   formatTableDate,
@@ -8,6 +10,26 @@ import {
   toLocalStartOfDay,
   toUtcStartOfDay,
 } from '../timeFormat';
+
+describe('formatCalendarDate', () => {
+  it('formats a backend date without applying a timezone shift', () => {
+    expect(formatCalendarDate('2026-08-03')).toBe('03 Aug 2026');
+  });
+
+  it('returns the original value for an invalid backend date', () => {
+    expect(formatCalendarDate('not-a-date')).toBe('not-a-date');
+  });
+});
+
+describe('composeDisplayZoneDateTime', () => {
+  it('anchors split date and time fields to Australia/Melbourne', () => {
+    expect(composeDisplayZoneDateTime('2026-08-03', '09:30:00')).toBe('2026-08-02T23:30:00.000Z');
+  });
+
+  it('returns undefined for invalid split values', () => {
+    expect(composeDisplayZoneDateTime('not-a-date', '09:30:00')).toBeUndefined();
+  });
+});
 
 describe('formatTableDate', () => {
   it('formats valid ISO dates in UI table format', () => {

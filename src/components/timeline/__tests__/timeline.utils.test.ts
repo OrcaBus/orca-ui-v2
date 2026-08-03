@@ -131,6 +131,7 @@ describe('timeline utils', () => {
 
   it('formats timestamps with the shared detail display format', () => {
     expect(formatTimelineTimestamp('2026-02-05T03:09:00Z')).toBe('05 Feb 2026, 14:09 (UTC+11:00)');
+    expect(formatTimelineTimestamp('2026-08-03', 'date')).toBe('03 Aug 2026');
     expect(formatTimelineTimestamp('not-a-date')).toBe('not-a-date');
     expect(formatOptionalTimelineTimestamp('')).toBeNull();
     expect(formatOptionalTimelineTimestamp(null)).toBeNull();

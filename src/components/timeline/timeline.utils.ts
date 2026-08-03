@@ -1,5 +1,10 @@
-import { formatDetailDate } from '@/utils/timeFormat';
-import type { TimelineCommentEvent, TimelineEvent, TimelineStateEvent } from './timeline.type';
+import { formatCalendarDate, formatDetailDate } from '@/utils/timeFormat';
+import type {
+  TimelineCommentEvent,
+  TimelineEvent,
+  TimelineStateEvent,
+  TimelineTimestampPrecision,
+} from './timeline.type';
 import {
   TimelineCommentTypes,
   TimelineEventSourceTypes,
@@ -88,9 +93,12 @@ export function getSourceMeta(event: TimelineEvent): TimelineSourceMeta {
   };
 }
 
-/** Formats an ISO-like timestamp with the system detail-display format. */
-export function formatTimelineTimestamp(timestamp: string): string {
-  return formatDetailDate(timestamp);
+/** Formats a timeline timestamp according to its backend precision. */
+export function formatTimelineTimestamp(
+  timestamp: string,
+  precision: TimelineTimestampPrecision = 'date-time'
+): string {
+  return precision === 'date' ? formatCalendarDate(timestamp) : formatDetailDate(timestamp);
 }
 
 /** Safely formats optional timestamps from API data after runtime validation. */
