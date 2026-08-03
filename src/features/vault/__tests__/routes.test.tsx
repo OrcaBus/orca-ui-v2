@@ -16,13 +16,19 @@ function renderVaultRoute() {
 }
 
 describe('VaultRoute', () => {
-  it('renders VaultPage in dev', () => {
-    useEnvironmentMock.mockReturnValue({ environment: 'dev', label: 'Dev' });
+  it.each([
+    { environment: 'dev', label: 'Dev' },
+    { environment: 'local', label: 'Local' },
+  ] satisfies EnvironmentContextValue[])(
+    'renders VaultPage in $environment',
+    (environmentContext) => {
+      useEnvironmentMock.mockReturnValue(environmentContext);
 
-    const element = renderVaultRoute();
+      const element = renderVaultRoute();
 
-    expect(element.props.featureName).toBeUndefined();
-  });
+      expect(element.props.featureName).toBeUndefined();
+    }
+  );
 
   it.each([
     { environment: 'stg', label: 'Staging' },

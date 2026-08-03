@@ -1,16 +1,6 @@
 import { useEffect, useMemo, type ReactNode } from 'react';
-import {
-  EnvironmentContext,
-  type AppEnvironment,
-  type EnvironmentContextValue,
-} from './environment-context';
-import { resolveEnvironmentFromHostname } from './environment-resolver';
-
-function getEnvironmentLabel(environment: AppEnvironment): EnvironmentContextValue['label'] {
-  if (environment === 'prod') return 'Prod';
-  if (environment === 'stg') return 'Staging';
-  return 'Dev';
-}
+import { EnvironmentContext, type EnvironmentContextValue } from './environment-context';
+import { getEnvironmentLabel, resolveEnvironmentFromHostname } from './environment-resolver';
 
 export function EnvironmentProvider({ children }: { children: ReactNode }) {
   const currentHostname =
