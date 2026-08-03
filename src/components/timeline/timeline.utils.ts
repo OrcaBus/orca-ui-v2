@@ -1,5 +1,14 @@
-import { formatDetailDate } from '@/utils/timeFormat';
-import type { TimelineCommentEvent, TimelineEvent, TimelineStateEvent } from './timeline.type';
+import {
+  composeDisplayZoneDateTime,
+  formatCalendarDate,
+  formatDetailDate,
+} from '@/utils/timeFormat';
+import type {
+  TimelineCommentEvent,
+  TimelineEvent,
+  TimelineStateEvent,
+  TimelineTimestampPrecision,
+} from './timeline.type';
 import {
   TimelineCommentTypes,
   TimelineEventSourceTypes,
@@ -88,9 +97,12 @@ export function getSourceMeta(event: TimelineEvent): TimelineSourceMeta {
   };
 }
 
-/** Formats an ISO-like timestamp with the system detail-display format. */
-export function formatTimelineTimestamp(timestamp: string): string {
-  return formatDetailDate(timestamp);
+/** Formats a timeline timestamp according to its backend precision. */
+export function formatTimelineTimestamp(
+  timestamp: string,
+  precision: TimelineTimestampPrecision = 'date-time'
+): string {
+  return precision === 'date' ? formatCalendarDate(timestamp) : formatDetailDate(timestamp);
 }
 
 /** Safely formats optional timestamps from API data after runtime validation. */
@@ -108,8 +120,8 @@ export function sortTimelineEvents(
   sortOrder: TimelineSortOrder
 ): TimelineEvent[] {
   return [...events].sort((a, b) => {
-    const dateA = Date.parse(a.timestamp);
-    const dateB = Date.parse(b.timestamp);
+    const dateA = getTimelineSortTimestamp(a);
+    const dateB = getTimelineSortTimestamp(b);
 
     if (Number.isNaN(dateA) || Number.isNaN(dateB) || dateA === dateB) {
       return 0;
@@ -117,6 +129,16 @@ export function sortTimelineEvents(
 
     return sortOrder === 'latest' ? dateB - dateA : dateA - dateB;
   });
+}
+
+/** Places a date-only event after all timed events on that date, matching API null-time ordering. */
+function getTimelineSortTimestamp(event: TimelineEvent): number {
+  if (event.timestampPrecision === 'date') {
+    const endOfDay = composeDisplayZoneDateTime(event.timestamp, '23:59:59.999');
+    if (endOfDay) return Date.parse(endOfDay);
+  }
+
+  return Date.parse(event.timestamp);
 }
 
 /** Identifies plain object payload values that can be rendered as key-value rows. */

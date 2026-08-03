@@ -30,6 +30,7 @@ import {
 } from '../api/cases.api';
 import { useCaseDetailsContext } from '../context/CaseDetailsContext';
 import { CASE_STATUS_VISUALS } from '../utils/caseStatus.visuals';
+import { getCaseStateTimelineTimestamp } from '../utils/caseStateDate';
 
 type ArchiveTimelineRecordDialogProps = {
   isOpen: boolean;
@@ -182,12 +183,17 @@ export function CaseDetailsTimeline() {
       visibleCaseStates.map((state) => {
         const createdBy = state.createdBy ?? undefined;
         const archivedBy = state.archivedBy ?? undefined;
+        const eventTimestamp = getCaseStateTimelineTimestamp(
+          state.eventDate,
+          state.eventTime,
+          state.createdAt
+        );
 
         return {
           eventId: state.orcabusId,
           title: 'Case State Update',
           eventType: TimelineEventTypes.STATE,
-          timestamp: state.eventAt ?? state.createdAt,
+          ...eventTimestamp,
           createdBy,
           isArchived: state.isArchived,
           archivedAt: state.archivedAt,
@@ -279,7 +285,6 @@ export function CaseDetailsTimeline() {
 
     await archiveCaseState.mutateAsync({
       params: { path: { orcabusId: archivingState.orcabusId } },
-      body: { isArchived: true },
     });
 
     refresh();

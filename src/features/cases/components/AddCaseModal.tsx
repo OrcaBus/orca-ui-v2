@@ -4,11 +4,16 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Briefcase, Plus } from 'lucide-react';
 import { toast } from 'sonner';
-import { useQueryClient } from '@tanstack/react-query';
 import { cn } from '@/utils/cn';
 import { DialogFrame } from '@/components/modals/DialogFrame';
-import { useCaseCreateModel, CASE_LIST_PATH } from '../api/cases.api';
-import type { CaseRequestModel, CaseTypeEnum, CaseStudyTypeEnum } from '../api/cases.api';
+import type { CaseTypeEnum, CaseStudyTypeEnum } from '../api/cases.api';
+
+// Manual case creation is temporarily unavailable because POST /case/ was
+// removed from the Case Manager API. The component is retained for future use;
+// restore the query-client and mutation imports together with the commented
+// submission calls below when the endpoint returns.
+// import { useQueryClient } from '@tanstack/react-query';
+// import { useCaseCreateModel, CASE_LIST_PATH } from '../api/cases.api';
 
 // ─── constants ────────────────────────────────────────────────────────────────
 
@@ -53,8 +58,17 @@ const DEFAULT_VALUES: FormValues = {
 
 // ─── public types ─────────────────────────────────────────────────────────────
 
-// Callers receive the API-shaped value on submit
-export type AddCaseFormValues = CaseRequestModel;
+// Preserved shape of the former create request for future endpoint restoration.
+export type AddCaseFormValues = {
+  requestFormId: string;
+  type: CaseTypeEnum;
+  studyType: CaseStudyTypeEnum;
+  isReportRequired: boolean;
+  isNataAccredited: boolean;
+  alias: string[];
+  description: string | null;
+  links?: Record<string, string>;
+};
 
 export interface AddCaseModalProps {
   isOpen: boolean;
@@ -93,8 +107,8 @@ const errorCls = 'text-sm font-medium text-red-500 dark:text-red-400';
 // ─── component ────────────────────────────────────────────────────────────────
 
 export function AddCaseModal({ isOpen, onClose, onSuccess }: AddCaseModalProps) {
-  const queryClient = useQueryClient();
-  const { mutateAsync: createCase } = useCaseCreateModel();
+  // const queryClient = useQueryClient();
+  // const { mutateAsync: createCase } = useCaseCreateModel();
 
   const {
     register,
@@ -126,13 +140,17 @@ export function AddCaseModal({ isOpen, onClose, onSuccess }: AddCaseModalProps) 
     }
   }, [isOpen, isSubmitting, reset]);
 
-  const handleFormSubmit = async (values: FormValues) => {
+  const handleFormSubmit = (values: FormValues) => {
     try {
-      await createCase({ body: toRequestModel(values) });
-      await queryClient.invalidateQueries({ queryKey: ['get', CASE_LIST_PATH] });
-      toast.success('Case created successfully');
-      onSuccess?.();
-      onClose();
+      // Restore these calls when POST /case/ returns to the backend contract.
+      // await createCase({ body: toRequestModel(values) });
+      // await queryClient.invalidateQueries({ queryKey: ['get', CASE_LIST_PATH] });
+      // toast.success('Case created successfully');
+      // onSuccess?.();
+      // onClose();
+      void toRequestModel(values);
+      void onSuccess;
+      toast.error('Manual case creation is temporarily unavailable');
     } catch (error) {
       toast.error('Failed to create case');
       console.error('Error creating case:', error);

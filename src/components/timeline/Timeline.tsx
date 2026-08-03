@@ -99,7 +99,7 @@ export function Timeline({ events, customActions, selectedEventId, onEventSelect
               const isLast = index === sortedEvents.length - 1;
               const visual = getTimelineEventVisual(event);
               const Icon = visual.icon;
-              const timestamp = formatTimelineTimestamp(event.timestamp);
+              const timestamp = formatTimelineTimestamp(event.timestamp, event.timestampPrecision);
               const isFocused = focusedEventId === event.eventId;
               const eventActions = event.actions ?? [];
               const hasEventMenuActions = eventActions.length > 0;

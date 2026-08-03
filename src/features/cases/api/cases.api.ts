@@ -65,7 +65,9 @@ export type CaseCommentModel = components['schemas']['Comment'];
 export type CaseModel = components['schemas']['Case'];
 export type CaseDetailModel = components['schemas']['CaseDetail'];
 
-export type CaseRequestModel = components['schemas']['CaseDetailRequest'];
+// Manual case creation is temporarily unsupported by the backend. Restore this
+// request type when POST /case/ returns to the generated OpenAPI schema.
+// export type CaseRequestModel = components['schemas']['CaseDetailRequest'];
 export type PatchedCaseDetailRequestModel = components['schemas']['PatchedCaseDetailRequest'];
 export type CaseExternalEntityLinkCreateRequestModel =
   components['schemas']['CaseExternalEntityLinkCreateRequest'];
@@ -77,7 +79,9 @@ export type ExternalSyncLogModel = components['schemas']['ExternalSyncLog'];
 export const CASE_LIST_PATH = caseApi.resolvePath('/api/v1/case/');
 export const useCaseListModel = createQueryHook(caseApi, '/api/v1/case/');
 export const useCaseDetailModel = createQueryHook(caseApi, '/api/v1/case/{orcabusId}/');
-export const useCaseCreateModel = createPostMutationHook(caseApi, '/api/v1/case/');
+// Manual case creation is temporarily unsupported by the backend. Restore this
+// mutation hook when POST /case/ returns to the generated OpenAPI schema.
+// export const useCaseCreateModel = createPostMutationHook(caseApi, '/api/v1/case/');
 export const useCaseUpdateModel = createPatchMutationHook(caseApi, '/api/v1/case/{orcabusId}/');
 
 // case sync
