@@ -20,6 +20,7 @@
 - Create `src/features/cases/pages/__tests__/CasesPage.test.tsx` for updated search guidance.
 - Create `src/features/cases/components/__tests__/EditCaseModal.test.tsx` for the writable payload and due-date control.
 - Create `src/features/cases/utils/editCase.ts` for edit validation and PATCH payload construction.
+- Create `src/features/cases/utils/caseDisplay.ts` for consistent empty managed-field fallbacks.
 - Modify `src/utils/timeFormat.ts` to format calendar dates and compose backend date/time values in the display timezone.
 - Modify `src/components/timeline/timeline.type.ts`, `timeline.utils.ts`, `Timeline.tsx`, and timeline tests to support date-only precision.
 - Modify `src/features/cases/api/cases.api.ts` to remove stale create types/hooks from the active API surface.
@@ -521,7 +522,7 @@ Run: `CI=1 pnpm vitest run src/features/cases/components/__tests__/EditCaseModal
 
 Expected: PASS.
 
-- [ ] **Step 6: Commit the edit contract update**
+- [x] **Step 6: Commit the edit contract update**
 
 ```bash
 git add src/features/cases/components/EditCaseModal.tsx src/features/cases/components/__tests__/EditCaseModal.test.tsx src/features/cases/utils/editCase.ts
@@ -534,19 +535,19 @@ git commit -m "fix(cases): restrict updates to writable fields"
 
 - Modify only files already listed if verification reveals a scoped issue.
 
-- [ ] **Step 1: Confirm no retired contract usage remains**
+- [x] **Step 1: Confirm no retired contract usage remains**
 
 Run: `rg -n 'eventAt|sample_received|CaseDetailRequest|useCaseCreateModel' src/features/cases src/api/types/case.openapi.d.ts`
 
 Expected: no active `eventAt` or retired status usage; create references appear only in explanatory comments/inactive preserved code.
 
-- [ ] **Step 2: Run all cases and shared timeline tests**
+- [x] **Step 2: Run all cases and shared timeline tests**
 
 Run: `CI=1 pnpm vitest run src/features/cases src/components/timeline`
 
 Expected: all tests pass with zero failures.
 
-- [ ] **Step 3: Run static verification**
+- [x] **Step 3: Run static verification**
 
 Run: `CI=1 pnpm type-check`
 
@@ -560,19 +561,19 @@ Run: `CI=1 pnpm format:check`
 
 Expected: exit 0.
 
-- [ ] **Step 4: Run the production build**
+- [x] **Step 4: Run the production build**
 
 Run: `CI=1 pnpm build`
 
 Expected: TypeScript and Vite build succeed and produce `build/`.
 
-- [ ] **Step 5: Review the final diff against the approved design**
+- [x] **Step 5: Review the final diff against the approved design**
 
 Run: `git diff --check && git status --short && git diff 3e12407 -- src/features/cases src/components/timeline src/utils/timeFormat.ts`
 
 Expected: no whitespace errors, no unintended files, and every approved contract item represented.
 
-- [ ] **Step 6: Commit any verification-only cleanup**
+- [x] **Step 6: Commit any verification-only cleanup**
 
 If verification required code or formatting changes:
 

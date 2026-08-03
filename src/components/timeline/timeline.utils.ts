@@ -1,4 +1,8 @@
-import { formatCalendarDate, formatDetailDate } from '@/utils/timeFormat';
+import {
+  composeDisplayZoneDateTime,
+  formatCalendarDate,
+  formatDetailDate,
+} from '@/utils/timeFormat';
 import type {
   TimelineCommentEvent,
   TimelineEvent,
@@ -116,8 +120,8 @@ export function sortTimelineEvents(
   sortOrder: TimelineSortOrder
 ): TimelineEvent[] {
   return [...events].sort((a, b) => {
-    const dateA = Date.parse(a.timestamp);
-    const dateB = Date.parse(b.timestamp);
+    const dateA = getTimelineSortTimestamp(a);
+    const dateB = getTimelineSortTimestamp(b);
 
     if (Number.isNaN(dateA) || Number.isNaN(dateB) || dateA === dateB) {
       return 0;
@@ -125,6 +129,16 @@ export function sortTimelineEvents(
 
     return sortOrder === 'latest' ? dateB - dateA : dateA - dateB;
   });
+}
+
+/** Places a date-only event after all timed events on that date, matching API null-time ordering. */
+function getTimelineSortTimestamp(event: TimelineEvent): number {
+  if (event.timestampPrecision === 'date') {
+    const endOfDay = composeDisplayZoneDateTime(event.timestamp, '23:59:59.999');
+    if (endOfDay) return Date.parse(endOfDay);
+  }
+
+  return Date.parse(event.timestamp);
 }
 
 /** Identifies plain object payload values that can be rendered as key-value rows. */

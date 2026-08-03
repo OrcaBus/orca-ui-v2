@@ -3,6 +3,7 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { formatCalendarDate, formatDetailDate } from '../../../utils/timeFormat';
 import { getCaseStudyTypeVariant } from '../utils/getCaseVariants';
 import { getCaseStatusVisual } from '../utils/caseStatus.visuals';
+import { formatCaseText } from '../utils/caseDisplay';
 import { useCaseDetailsContext } from '../context/CaseDetailsContext';
 
 const TYPE_DISPLAY_LABELS: Record<string, string> = {
@@ -120,7 +121,7 @@ export function CaseDetailsOverviewCard() {
             <Skeleton className='h-4 w-32' />
           ) : (
             <div className='text-sm font-medium text-neutral-900 dark:text-neutral-100'>
-              {caseDetail?.studyName ?? '—'}
+              {formatCaseText(caseDetail?.studyName)}
             </div>
           )}
         </div>
@@ -131,7 +132,7 @@ export function CaseDetailsOverviewCard() {
             <Skeleton className='h-4 w-28' />
           ) : (
             <div className='font-mono text-sm text-neutral-900 dark:text-neutral-100'>
-              {caseDetail?.studyId ?? '—'}
+              {formatCaseText(caseDetail?.studyId)}
             </div>
           )}
         </div>
@@ -142,7 +143,7 @@ export function CaseDetailsOverviewCard() {
             <Skeleton className='h-4 w-28' />
           ) : (
             <div className='font-mono text-sm text-neutral-900 dark:text-neutral-100'>
-              {caseDetail?.urNumber ?? '—'}
+              {formatCaseText(caseDetail?.urNumber)}
             </div>
           )}
         </div>

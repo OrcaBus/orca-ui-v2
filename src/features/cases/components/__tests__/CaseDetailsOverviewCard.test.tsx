@@ -53,4 +53,24 @@ describe('CaseDetailsOverviewCard', () => {
     expect(html).toContain('Due Date');
     expect(html).toContain('31 Aug 2026');
   });
+
+  it('renders empty backend-managed identifiers as em dashes', () => {
+    useCaseDetailsContextMock.mockReturnValue({
+      caseDetail: {
+        ...caseDetail,
+        studyName: '',
+        studyId: '   ',
+        urNumber: '',
+      },
+      isLoadingCaseDetail: false,
+      caseStatesData: undefined,
+      isLoadingCaseStates: false,
+      refresh: vi.fn(),
+    });
+
+    const html = renderToStaticMarkup(<CaseDetailsOverviewCard />);
+    const identifierSection = html.slice(html.indexOf('Study Name'), html.indexOf('Due Date'));
+
+    expect(identifierSection.match(/>—</g)).toHaveLength(3);
+  });
 });

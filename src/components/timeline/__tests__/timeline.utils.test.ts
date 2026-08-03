@@ -165,6 +165,32 @@ describe('timeline utils', () => {
     ).toEqual(['older', 'newer']);
   });
 
+  it('sorts date-only events after timed events on the same calendar date', () => {
+    const dateOnlyEvent = {
+      eventId: 'date-only',
+      eventType: TimelineEventTypes.STATE,
+      timestamp: '2026-08-03',
+      timestampPrecision: 'date',
+      sourceType: TimelineEventSourceTypes.SYSTEM,
+      state: 'all_sample_received',
+    } satisfies TimelineEvent;
+
+    const timedEvent = {
+      eventId: 'timed',
+      eventType: TimelineEventTypes.STATE,
+      timestamp: '2026-08-03T10:00:00Z',
+      sourceType: TimelineEventSourceTypes.SYSTEM,
+      state: 'cttso_sample_received',
+    } satisfies TimelineEvent;
+
+    expect(
+      sortTimelineEvents([timedEvent, dateOnlyEvent], 'latest').map((event) => event.eventId)
+    ).toEqual(['date-only', 'timed']);
+    expect(
+      sortTimelineEvents([dateOnlyEvent, timedEvent], 'oldest').map((event) => event.eventId)
+    ).toEqual(['timed', 'date-only']);
+  });
+
   it('identifies records and primitive payload values', () => {
     expect(isRecord({ data: {} })).toBe(true);
     expect(isRecord([])).toBe(false);
