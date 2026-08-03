@@ -226,7 +226,7 @@ Run: `CI=1 pnpm vitest run src/components/timeline/__tests__/timeline.utils.test
 
 Expected: PASS.
 
-- [ ] **Step 6: Commit timeline date support**
+- [x] **Step 6: Commit timeline date support**
 
 ```bash
 git add src/utils/timeFormat.ts src/components/timeline/timeline.type.ts src/components/timeline/timeline.utils.ts src/components/timeline/Timeline.tsx src/components/timeline/__tests__/timeline.utils.test.ts src/features/cases/utils/caseStateDate.ts src/features/cases/utils/__tests__/caseStateDate.test.ts
@@ -241,7 +241,7 @@ git commit -m "feat(cases): support split state event dates"
 - Modify: `src/features/cases/utils/caseStatus.visuals.ts`
 - Modify: `src/features/cases/components/CaseDetailsTimeline.tsx`
 
-- [ ] **Step 1: Write a failing exhaustive status test**
+- [x] **Step 1: Write a failing exhaustive status test**
 
 ```ts
 it('maps every generated case status to a visual', () => {
@@ -261,13 +261,13 @@ it('maps every generated case status to a visual', () => {
 });
 ```
 
-- [ ] **Step 2: Run the status test and verify RED**
+- [x] **Step 2: Run the status test and verify RED**
 
 Run: `CI=1 pnpm vitest run src/features/cases/utils/__tests__/caseStatus.visuals.test.ts`
 
 Expected: FAIL because the four new mappings are absent and `sample_received` remains.
 
-- [ ] **Step 3: Replace the retired mapping and use split state fields**
+- [x] **Step 3: Replace the retired mapping and use split state fields**
 
 Use blue for individual intake receipts and purple for the all-samples milestone:
 
@@ -293,7 +293,7 @@ return {
 } satisfies TimelineEvent;
 ```
 
-- [ ] **Step 4: Run status and adapter tests**
+- [x] **Step 4: Run status and adapter tests**
 
 Run: `CI=1 pnpm vitest run src/features/cases/utils/__tests__/caseStatus.visuals.test.ts src/features/cases/utils/__tests__/caseStateDate.test.ts`
 
