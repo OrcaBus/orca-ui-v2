@@ -1,38 +1,19 @@
 import { useEffect } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { DialogFrame } from '@/components/modals/DialogFrame';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { useCaseDetailsContext } from '../context/CaseDetailsContext';
-import { useCaseUpdateModel, type CaseTypeEnum, type CaseStudyTypeEnum } from '../api/cases.api';
-
-const CASE_TYPES: { value: CaseTypeEnum; label: string }[] = [
-  { value: 'wgts', label: 'WGTS T-N' },
-  { value: 'cttso', label: 'ctTSO500' },
-  { value: 'wgs_n', label: 'WGS_N' },
-];
+import { useCaseUpdateModel, type CaseStudyTypeEnum } from '../api/cases.api';
+import { buildCaseUpdateRequest, editCaseSchema, type EditCaseFormValues } from '../utils/editCase';
 
 const STUDY_TYPES: { value: CaseStudyTypeEnum; label: string }[] = [
   { value: 'clinical', label: 'Clinical' },
   { value: 'research', label: 'Research' },
 ];
-
-const editCaseSchema = z.object({
-  requestFormId: z.string().min(1, 'Request Form ID is required'),
-  type: z.enum(['wgts', 'cttso', 'wgs_n']),
-  studyType: z.enum(['clinical', 'research']),
-  isReportRequired: z.boolean(),
-  isNataAccredited: z.boolean(),
-  alias: z.array(z.object({ value: z.string() })),
-  links: z.array(z.object({ key: z.string(), value: z.string() })),
-  description: z.string(),
-});
-
-type EditCaseFormValues = z.infer<typeof editCaseSchema>;
 
 interface EditCaseModalProps {
   isOpen: boolean;
@@ -51,11 +32,10 @@ export function EditCaseModal({ isOpen, onClose }: EditCaseModalProps) {
   const form = useForm<EditCaseFormValues>({
     resolver: zodResolver(editCaseSchema),
     defaultValues: {
-      requestFormId: caseDetail?.requestFormId ?? '',
-      type: caseDetail?.type ?? 'wgts',
       studyType: caseDetail?.studyType ?? 'clinical',
       isReportRequired: caseDetail?.isReportRequired ?? false,
       isNataAccredited: caseDetail?.isNataAccredited ?? false,
+      dueDate: caseDetail?.dueDate ?? '',
       alias: (caseDetail?.alias ?? []).map((v) => ({ value: v })),
       links: parseLinks(caseDetail?.links),
       description: caseDetail?.description ?? '',
@@ -90,11 +70,10 @@ export function EditCaseModal({ isOpen, onClose }: EditCaseModalProps) {
 
     if (isOpen || !isSubmitting) {
       form.reset({
-        requestFormId: caseDetail.requestFormId,
-        type: caseDetail.type,
         studyType: caseDetail.studyType,
         isReportRequired: caseDetail.isReportRequired ?? false,
         isNataAccredited: caseDetail.isNataAccredited ?? false,
+        dueDate: caseDetail.dueDate ?? '',
         alias: (caseDetail.alias ?? []).map((v) => ({ value: v })),
         links: parseLinks(caseDetail.links),
         description: caseDetail.description ?? '',
@@ -107,16 +86,7 @@ export function EditCaseModal({ isOpen, onClose }: EditCaseModalProps) {
     try {
       await mutateAsyncUpdate({
         params: { path: { orcabusId: caseDetail.orcabusId } },
-        body: {
-          requestFormId: values.requestFormId,
-          type: values.type,
-          studyType: values.studyType,
-          isReportRequired: values.isReportRequired,
-          isNataAccredited: values.isNataAccredited,
-          alias: values.alias.map((a) => a.value).filter(Boolean),
-          links: Object.fromEntries(values.links.map(({ key, value }) => [key, value])),
-          description: values.description || null,
-        },
+        body: buildCaseUpdateRequest(values),
       });
       toast.success('Case updated successfully');
       resetUpdateMutation();
@@ -138,6 +108,7 @@ export function EditCaseModal({ isOpen, onClose }: EditCaseModalProps) {
           <span className='rounded bg-blue-100 px-1.5 py-0.5 font-mono text-xs text-blue-700 dark:bg-blue-900/40 dark:text-blue-400'>
             {caseDetail?.orcabusId}
           </span>
+          . REDCap-managed identifiers are read-only.
         </>
       }
       size='xl'
@@ -164,46 +135,8 @@ export function EditCaseModal({ isOpen, onClose }: EditCaseModalProps) {
       }
     >
       <form id='edit-case-form' onSubmit={(e) => void form.handleSubmit(handleFormSubmit)(e)}>
-        {/* Request Form ID */}
-        <div className='mb-5 space-y-2'>
-          <label
-            htmlFor='edit-requestFormId'
-            className='text-sm font-medium text-neutral-700 dark:text-neutral-300'
-          >
-            Request Form ID <span className='text-red-500 dark:text-red-400'>*</span>
-          </label>
-          <Input
-            id='edit-requestFormId'
-            {...form.register('requestFormId')}
-            placeholder='e.g. 1000060'
-            className='rounded-lg border-neutral-300 shadow-sm dark:border-[#2d3540] dark:bg-[#1e252e]'
-          />
-          {errors.requestFormId && (
-            <p className='text-sm text-red-500 dark:text-red-400'>{errors.requestFormId.message}</p>
-          )}
-        </div>
-
-        {/* Type + Study Type */}
-        <div className='mb-5 grid grid-cols-2 gap-4'>
-          <div className='space-y-2'>
-            <label
-              htmlFor='edit-type'
-              className='text-sm font-medium text-neutral-700 dark:text-neutral-300'
-            >
-              Type <span className='text-red-500 dark:text-red-400'>*</span>
-            </label>
-            <select
-              id='edit-type'
-              {...form.register('type')}
-              className='w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-200 dark:focus:border-[#137fec] dark:focus:ring-[#137fec]'
-            >
-              {CASE_TYPES.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-          </div>
+        {/* User-editable scheduling fields */}
+        <div className='mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2'>
           <div className='space-y-2'>
             <label
               htmlFor='edit-studyType'
@@ -222,6 +155,20 @@ export function EditCaseModal({ isOpen, onClose }: EditCaseModalProps) {
                 </option>
               ))}
             </select>
+          </div>
+          <div className='space-y-2'>
+            <label
+              htmlFor='edit-dueDate'
+              className='text-sm font-medium text-neutral-700 dark:text-neutral-300'
+            >
+              Due Date
+            </label>
+            <Input
+              id='edit-dueDate'
+              type='date'
+              {...form.register('dueDate')}
+              className='rounded-lg border-neutral-300 shadow-sm dark:border-[#2d3540] dark:bg-[#1e252e]'
+            />
           </div>
         </div>
 
@@ -242,24 +189,35 @@ export function EditCaseModal({ isOpen, onClose }: EditCaseModalProps) {
           </div>
           <div className='space-y-2'>
             {linkFields.map((field, idx) => (
-              <div key={field.id} className='flex items-center gap-2'>
-                <Input
-                  {...form.register(`links.${idx}.key`)}
-                  placeholder='Name (e.g. trello)'
-                  className='w-36 shrink-0 rounded-lg border-neutral-300 text-sm dark:border-[#2d3540] dark:bg-[#1e252e]'
-                />
-                <Input
-                  {...form.register(`links.${idx}.value`)}
-                  placeholder='URL'
-                  className='flex-1 rounded-lg border-neutral-300 text-sm dark:border-[#2d3540] dark:bg-[#1e252e]'
-                />
-                <button
-                  type='button'
-                  onClick={() => removeLink(idx)}
-                  className='rounded p-1 text-neutral-400 transition-colors hover:text-red-500 dark:hover:text-red-400'
-                >
-                  <Trash2 className='h-4 w-4' />
-                </button>
+              <div key={field.id} className='space-y-1'>
+                <div className='flex items-center gap-2'>
+                  <Input
+                    {...form.register(`links.${idx}.key`)}
+                    placeholder='Name (e.g. trello)'
+                    aria-invalid={!!errors.links?.[idx]?.key}
+                    className='w-36 shrink-0 rounded-lg border-neutral-300 text-sm dark:border-[#2d3540] dark:bg-[#1e252e]'
+                  />
+                  <Input
+                    type='url'
+                    {...form.register(`links.${idx}.value`)}
+                    placeholder='https://...'
+                    aria-invalid={!!errors.links?.[idx]?.value}
+                    className='flex-1 rounded-lg border-neutral-300 text-sm dark:border-[#2d3540] dark:bg-[#1e252e]'
+                  />
+                  <button
+                    type='button'
+                    onClick={() => removeLink(idx)}
+                    aria-label={`Remove link ${idx + 1}`}
+                    className='rounded p-1 text-neutral-400 transition-colors hover:text-red-500 dark:hover:text-red-400'
+                  >
+                    <Trash2 className='h-4 w-4' />
+                  </button>
+                </div>
+                {(errors.links?.[idx]?.key || errors.links?.[idx]?.value) && (
+                  <p className='text-sm text-red-500 dark:text-red-400'>
+                    {errors.links[idx]?.key?.message ?? errors.links[idx]?.value?.message}
+                  </p>
+                )}
               </div>
             ))}
           </div>

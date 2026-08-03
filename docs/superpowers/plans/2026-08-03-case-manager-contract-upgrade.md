@@ -19,6 +19,7 @@
 - Create `src/features/cases/components/__tests__/CasesListTable.test.tsx` for new list columns.
 - Create `src/features/cases/pages/__tests__/CasesPage.test.tsx` for updated search guidance.
 - Create `src/features/cases/components/__tests__/EditCaseModal.test.tsx` for the writable payload and due-date control.
+- Create `src/features/cases/utils/editCase.ts` for edit validation and PATCH payload construction.
 - Modify `src/utils/timeFormat.ts` to format calendar dates and compose backend date/time values in the display timezone.
 - Modify `src/components/timeline/timeline.type.ts`, `timeline.utils.ts`, `Timeline.tsx`, and timeline tests to support date-only precision.
 - Modify `src/features/cases/api/cases.api.ts` to remove stale create types/hooks from the active API surface.
@@ -392,7 +393,7 @@ Run: `CI=1 pnpm vitest run src/features/cases/components/__tests__/CaseDetailsOv
 
 Expected: PASS.
 
-- [ ] **Step 6: Commit case presentation changes**
+- [x] **Step 6: Commit case presentation changes**
 
 ```bash
 git add src/features/cases/components/CaseDetailsOverviewCard.tsx src/features/cases/components/CasesListTable.tsx src/features/cases/pages/CasesPage.tsx src/features/cases/components/__tests__/CaseDetailsOverviewCard.test.tsx src/features/cases/components/__tests__/CasesListTable.test.tsx src/features/cases/pages/__tests__/CasesPage.test.tsx
@@ -404,11 +405,12 @@ git commit -m "feat(cases): show study and due date fields"
 **Files:**
 
 - Create: `src/features/cases/components/__tests__/EditCaseModal.test.tsx`
+- Create: `src/features/cases/utils/editCase.ts`
 - Modify: `src/features/cases/components/EditCaseModal.tsx`
 
-- [ ] **Step 1: Write failing edit-payload tests**
+- [x] **Step 1: Write failing edit-payload tests**
 
-Export `buildCaseUpdateRequest` for direct behavior testing and add:
+Define `buildCaseUpdateRequest` in `utils/editCase.ts` for direct behavior testing and add:
 
 ```ts
 it('builds a request containing only backend-writable fields', () => {
@@ -440,7 +442,7 @@ it('sends null when the due date is cleared', () => {
 
 Render the modal with mocked context/API and assert the HTML contains `type="date"` and does not contain labels for Request Form ID or Type.
 
-Export `editCaseSchema` and verify an appended link must contain both a name and a valid URL:
+Export `editCaseSchema` from `utils/editCase.ts` and verify an appended link must contain both a name and a valid URL:
 
 ```ts
 expect(() =>
@@ -448,13 +450,13 @@ expect(() =>
 ).toThrow();
 ```
 
-- [ ] **Step 2: Run the edit test and verify RED**
+- [x] **Step 2: Run the edit test and verify RED**
 
 Run: `CI=1 pnpm vitest run src/features/cases/components/__tests__/EditCaseModal.test.tsx`
 
 Expected: FAIL because `dueDate` is absent and read-only fields are still included.
 
-- [ ] **Step 3: Update schema, defaults, and payload builder**
+- [x] **Step 3: Update schema, defaults, and payload builder**
 
 Remove `requestFormId` and `type` from `editCaseSchema`, defaults, reset values, and JSX. Add an optional due date and strict named-link rows:
 
@@ -475,7 +477,7 @@ export const editCaseSchema = z.object({
 });
 ```
 
-Export a pure builder:
+Add the pure builder to `utils/editCase.ts`:
 
 ```ts
 export function buildCaseUpdateRequest(values: EditCaseFormValues): PatchedCaseDetailRequestModel {
@@ -497,7 +499,7 @@ export function buildCaseUpdateRequest(values: EditCaseFormValues): PatchedCaseD
 
 Use `body: buildCaseUpdateRequest(values)` in the mutation.
 
-- [ ] **Step 4: Add the due-date input**
+- [x] **Step 4: Add the due-date input**
 
 Place it beside Study Type on a responsive two-column row:
 
@@ -513,7 +515,7 @@ Place it beside Study Type on a responsive two-column row:
 </div>
 ```
 
-- [ ] **Step 5: Run the edit tests and verify GREEN**
+- [x] **Step 5: Run the edit tests and verify GREEN**
 
 Run: `CI=1 pnpm vitest run src/features/cases/components/__tests__/EditCaseModal.test.tsx`
 
@@ -522,7 +524,7 @@ Expected: PASS.
 - [ ] **Step 6: Commit the edit contract update**
 
 ```bash
-git add src/features/cases/components/EditCaseModal.tsx src/features/cases/components/__tests__/EditCaseModal.test.tsx
+git add src/features/cases/components/EditCaseModal.tsx src/features/cases/components/__tests__/EditCaseModal.test.tsx src/features/cases/utils/editCase.ts
 git commit -m "fix(cases): restrict updates to writable fields"
 ```
 
