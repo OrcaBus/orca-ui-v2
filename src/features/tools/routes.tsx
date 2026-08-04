@@ -9,6 +9,11 @@ const ToolsPage = lazy(() =>
 const SSCheckerPage = lazy(() =>
   import('./sschecker/pages/SSCheckerPage').then((m) => ({ default: m.SSCheckerPage }))
 );
+const DeploymentPulsePage = lazy(() =>
+  import('./deploy-status/pages/DeploymentPulsePage').then((m) => ({
+    default: m.DeploymentPulsePage,
+  }))
+);
 const MapListPage = lazy(() =>
   import('./system-catalog/pages/MapListPage').then((m) => ({
     default: m.MapListPage,
@@ -50,6 +55,10 @@ const Routes: RouteObject = {
     {
       path: 'ss-check',
       element: <SSCheckerPage />,
+    },
+    {
+      path: 'deploy-status',
+      element: <DeploymentPulsePage />,
     },
     {
       path: 'system-catalog',

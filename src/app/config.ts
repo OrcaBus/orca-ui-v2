@@ -14,6 +14,7 @@ const config = {
     htsget: env.VITE_HTSGET_URL as string,
     case: env.VITE_CASE_URL as string,
     systemCatalog: env.VITE_SYSTEM_CATALOG_URL as string,
+    deployStatus: env.VITE_DEPLOY_STATUS_URL as string,
   },
   cognito: {
     REGION: REGION,

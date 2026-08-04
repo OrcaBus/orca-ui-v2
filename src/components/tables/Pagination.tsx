@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { DEFAULT_PAGE_SIZE_OPTIONS } from '@/utils/constants';
 interface PaginationProps {
@@ -19,6 +20,7 @@ export function Pagination({
   onPageSizeChange,
   pageSizeOptions = DEFAULT_PAGE_SIZE_OPTIONS,
 }: PaginationProps) {
+  const rowsPerPageId = useId();
   const startItem = totalItems === 0 ? 0 : (currentPage - 1) * pageSize + 1;
   const endItem = Math.min(currentPage * pageSize, totalItems);
 
@@ -64,14 +66,11 @@ export function Pagination({
       {/* Left side: Rows per page and count */}
       <div className='flex items-center gap-6'>
         <div className='flex items-center gap-2'>
-          <label
-            htmlFor='pagination-rows-per-page'
-            className='text-sm text-neutral-600 dark:text-[#9dabb9]'
-          >
+          <label htmlFor={rowsPerPageId} className='text-sm text-neutral-600 dark:text-[#9dabb9]'>
             Rows per page:
           </label>
           <select
-            id='pagination-rows-per-page'
+            id={rowsPerPageId}
             value={pageSize}
             onChange={(e) => onPageSizeChange(Number(e.target.value))}
             className='rounded border border-neutral-300 bg-white px-2 py-1 text-sm text-neutral-900 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-200 dark:focus:ring-[#137fec]'

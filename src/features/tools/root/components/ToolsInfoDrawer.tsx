@@ -18,8 +18,8 @@ export function ToolsInfoDrawer({ isOpen, onClose }: ToolsInfoDrawerProps) {
       <section>
         <h3 className='text-sm font-semibold text-slate-900 dark:text-white'>Description</h3>
         <p className='mt-2 text-sm leading-relaxed text-slate-600 dark:text-[#9dabb9]'>
-          Tools contains operational utilities such as sample sheet validation and system catalog
-          maps for architecture exploration.
+          Tools contains utilities for sample sheet validation, architecture exploration, and live
+          deployment monitoring across OrcaBus services.
         </p>
       </section>
     </DrawerFrame>

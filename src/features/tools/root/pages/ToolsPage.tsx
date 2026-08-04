@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Link } from 'react-router';
 import { useAppShellHeader } from '@/context/app-shell-context';
-import { Settings, FileCheck, NotebookText, ArrowRight } from 'lucide-react';
+import { Settings, FileCheck, NotebookText, ArrowRight, Activity } from 'lucide-react';
 import { ToolsInfoDrawer } from '../components/ToolsInfoDrawer';
 import { useToolsPageQueryParams } from '../hooks/useToolsPageQueryParams';
 
@@ -46,6 +46,19 @@ export function ToolsPage() {
       hoverBorder: 'hover:border-green-300',
       route: '/tools/system-catalog',
       tags: ['Architecture', 'Services', 'Events', 'Diagrams', 'Planning'],
+      learnMoreUrl: '#',
+    },
+    {
+      id: 'deployment-pulse',
+      name: 'Deployment Pulse',
+      description:
+        'Monitor CloudFormation deployment health, versions, and event history across OrcaBus services.',
+      icon: Activity,
+      iconColor: 'text-cyan-600',
+      iconBg: 'bg-cyan-100',
+      hoverBorder: 'hover:border-cyan-300',
+      route: '/tools/deploy-status',
+      tags: ['Operations', 'Deployments', 'CloudFormation'],
       learnMoreUrl: '#',
     },
   ];
@@ -123,8 +136,8 @@ export function ToolsPage() {
                 Getting Started with Tools
               </h4>
               <p className='text-sm text-blue-700 dark:text-blue-300'>
-                These utilities help you validate inputs before workflow execution and explore
-                available workflow patterns. No interaction with our systems data. Select a tool
+                These utilities help you validate inputs, explore available workflow patterns, and
+                monitor operational services. Some tools read live operational data. Select a tool
                 card above to launch the interface.
               </p>
               <p className='mt-2 text-sm text-blue-700 dark:text-blue-300'>
