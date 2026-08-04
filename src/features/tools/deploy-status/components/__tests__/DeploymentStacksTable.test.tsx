@@ -213,6 +213,6 @@ describe('DeploymentStacksTable', () => {
 
     expect(html).toContain('Unable to load deployment stacks');
     expect(capturedTableProps).toBeNull();
-    expect(capturedDrawerProps?.stackId).toBe('url-stack-not-on-current-page');
+    expect(capturedDrawerProps).toBeNull();
   });
 });
