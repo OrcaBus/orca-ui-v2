@@ -41,6 +41,7 @@ const caseDetail: CaseDetailModel = {
   isNataAccredited: false,
   alias: ['CASE-ALIAS'],
   links: { trello: 'https://example.com/card' },
+  redcapPayload: {},
   dueDate: '2026-08-31',
   externalEntitySet: [],
   userSet: [],

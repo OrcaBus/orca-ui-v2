@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Briefcase, FolderSync } from 'lucide-react';
+import { Briefcase, Database, FolderSync } from 'lucide-react';
 import { DrawerFrame } from '@/components/modals/DrawerFrame';
 import { InfoDrawerActionCard } from '@/components/modals/InfoDrawerActionCard';
+import { ModelViewDialog } from '@/components/modals/ModelViewDialog';
 import { formatTableDate } from '@/utils/timeFormat';
 import { useCaseSyncFromRedcapAutoHistoryModel } from '../api/cases.api';
 // Manual case creation is temporarily unavailable because the Case Manager API
@@ -16,12 +17,16 @@ interface CasesInfoDrawerProps {
   onClose: () => void;
 }
 
+const CASE_MANAGER_SCHEMA_SVG_URL =
+  'https://raw.githubusercontent.com/OrcaBus/service-case-manager/refs/heads/main/case-manager/docs/schema.drawio.svg';
+
 export function CasesInfoDrawer({ isOpen, onClose }: CasesInfoDrawerProps) {
   // Manual case creation is temporarily unavailable. Preserve this state for
   // restoration alongside AddCaseModal when POST /case/ returns.
   // const [showAddCaseModal, setShowAddCaseModal] = useState(false);
   const [showAutoImportModal, setShowAutoImportModal] = useState(false);
   const [showSyncHistoryModal, setShowSyncHistoryModal] = useState(false);
+  const [showSchemaPreviewModal, setShowSchemaPreviewModal] = useState(false);
 
   const {
     data: syncHistoryData,
@@ -78,6 +83,15 @@ export function CasesInfoDrawer({ isOpen, onClose }: CasesInfoDrawerProps) {
               buttonIcon={<FolderSync className='h-4 w-4' />}
               variant='secondary'
             />
+            <InfoDrawerActionCard
+              title='Case Model View'
+              description='Preview the Case Manager model entity relationship diagram used to model case data.'
+              buttonLabel='Case Model View'
+              onClick={() => setShowSchemaPreviewModal(true)}
+              icon={<Database className='h-4 w-4' />}
+              buttonIcon={<Database className='h-4 w-4' />}
+              variant='secondary'
+            />
             {/* Manual case creation is temporarily unavailable because the Case Manager API
                 no longer exposes POST /case/. Restore this card with AddCaseModal when
                 collection create support returns.
@@ -104,6 +118,17 @@ export function CasesInfoDrawer({ isOpen, onClose }: CasesInfoDrawerProps) {
       <AutoImportFromRedcapModal
         isOpen={showAutoImportModal}
         onClose={() => setShowAutoImportModal(false)}
+      />
+
+      <ModelViewDialog
+        isOpen={showSchemaPreviewModal}
+        onClose={() => setShowSchemaPreviewModal(false)}
+        schemaUrl={CASE_MANAGER_SCHEMA_SVG_URL}
+        title='Case Manager Entity Schema'
+        description='Case Manager model entity diagram from service-case-manager.'
+        icon={<Database className='h-5 w-5' />}
+        previewSummary='SVG preview of the current Case Manager model schema.'
+        backgroundNotice='This source is theme-aware, so dark mode can render a dark canvas background.'
       />
     </DrawerFrame>
   );

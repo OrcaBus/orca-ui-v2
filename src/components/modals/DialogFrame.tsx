@@ -95,7 +95,7 @@ export function DialogFrame({
           >
             <div
               className={cn(
-                'border-b border-neutral-200 px-6 py-4 dark:border-[#2d3540]',
+                'shrink-0 border-b border-neutral-200 px-6 py-4 dark:border-[#2d3540]',
                 headerClassName
               )}
             >
@@ -166,7 +166,7 @@ export function DialogFrame({
             {footer && (
               <div
                 className={cn(
-                  'flex flex-wrap items-center justify-end gap-2 border-t border-neutral-200 bg-neutral-50 px-6 py-4',
+                  'flex shrink-0 flex-wrap items-center justify-end gap-2 border-t border-neutral-200 bg-neutral-50 px-6 py-4',
                   'dark:border-[#2d3540] dark:bg-[#1e252e]',
                   footerClassName
                 )}
