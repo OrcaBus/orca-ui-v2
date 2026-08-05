@@ -9,6 +9,9 @@ import { buildSequenceRunsFilterBadges } from '../utils/buildSequenceRunsFilterB
 import { SequenceRunsStatusCards } from '../components/SequenceRunsStatusCards';
 import SequenceRunsTable from '../components/SequenceRunsTable';
 
+const SEQUENCE_RUN_MANAGER_SCHEMA_SVG_URL =
+  'https://raw.githubusercontent.com/OrcaBus/service-sequence-run-manager/refs/heads/main/docs/diagram/sequence-run-manager-entity-diagram.drawio.svg';
+
 export function SequenceRunsPage() {
   const title = 'Sequence Runs';
   const description = 'Monitor instrument runs and sequencing run status.';
@@ -134,6 +137,13 @@ export function SequenceRunsPage() {
         onClose={closeInfoDrawer}
         title={title}
         description={description}
+        modelSchema={{
+          url: SEQUENCE_RUN_MANAGER_SCHEMA_SVG_URL,
+          title: 'Sequence Run Manager Entity Schema',
+          description:
+            'Sequence Run Manager model entity diagram from service-sequence-run-manager.',
+          previewSummary: 'SVG preview of the current Sequence Run Manager model schema.',
+        }}
       />
     </>
   );

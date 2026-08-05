@@ -9,6 +9,9 @@ import WorkflowRunsTable from '../components/WorkflowRunsTable';
 import { buildWorkflowRunsFilterBadges } from '../utils/buildWorkflowRunsFilterBadges';
 import { WorkflowRunsStatsCards } from '../components/WorkflowRunsStatsCards';
 
+const WORKFLOW_MANAGER_SCHEMA_SVG_URL =
+  'https://raw.githubusercontent.com/OrcaBus/service-workflow-manager/refs/heads/main/docs/diagrams/workflow-manager-entity-diagram.drawio.svg';
+
 export function WorkflowRunsPage() {
   const title = 'Workflow Runs';
   const description = 'Monitor workflow executions, run states, and related operational metadata.';
@@ -112,6 +115,12 @@ export function WorkflowRunsPage() {
         onClose={closeInfoDrawer}
         title={title}
         description={description}
+        modelSchema={{
+          url: WORKFLOW_MANAGER_SCHEMA_SVG_URL,
+          title: 'Workflow Manager Entity Schema',
+          description: 'Workflow model entity diagram from service-workflow-manager.',
+          previewSummary: 'SVG preview of the current Workflow Manager model schema.',
+        }}
       />
     </>
   );

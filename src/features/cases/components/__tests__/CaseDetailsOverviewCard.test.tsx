@@ -23,6 +23,7 @@ const caseDetail: CaseDetailModel = {
   isNataAccredited: true,
   alias: ['CASE-ALIAS'],
   links: {},
+  redcapPayload: {},
   dueDate: '2026-08-31',
   externalEntitySet: [],
   userSet: [],
