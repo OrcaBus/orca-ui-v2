@@ -28,62 +28,21 @@ import {
   useWorkflowRunCommentDeleteModel,
   useWorkflowRunCommentUpdateModel,
   useWorkflowRunPayloadModel,
-  useWorkflowRunStateCreateModel,
+  useWorkflowRunStateCancelModel,
+  useWorkflowRunStateDeprecateModel,
+  useWorkflowRunStateResolveModel,
   useWorkflowRunStateUpdateModel,
   type WorkflowRunCommentModel,
   type WorkflowRunStateModel,
 } from '../../shared/api/workflows.api';
 import { useWorkflowRunDetailsContext } from '../context/WorkflowRunDetailsContext';
-
-type ValidationRule =
-  | string[]
-  | {
-      allowed_states?: string[];
-      allowedStates?: string[];
-      excluded_states?: string[];
-      excludedStates?: string[];
-    }
-  | null
-  | undefined;
-
-function normalizeStateValue(value?: string | null): string {
-  return (value ?? '')
-    .trim()
-    .replace(/[\s-]+/g, '_')
-    .toUpperCase();
-}
-
-function formatStateLabel(value: string): string {
-  return value
-    .replace(/[_-]+/g, ' ')
-    .toLowerCase()
-    .replace(/\b\w/g, (char) => char.toUpperCase());
-}
-
-function isStateTransitionAllowed(rule: ValidationRule, currentState?: string | null): boolean {
-  if (!currentState) return true;
-
-  const currentStateKey = normalizeStateValue(currentState);
-
-  if (Array.isArray(rule)) {
-    return rule.some((state) => normalizeStateValue(state) === currentStateKey);
-  }
-
-  if (rule && typeof rule === 'object') {
-    const allowedStates = rule.allowed_states ?? rule.allowedStates;
-    const excludedStates = rule.excluded_states ?? rule.excludedStates;
-
-    if (Array.isArray(allowedStates)) {
-      return allowedStates.some((state) => normalizeStateValue(state) === currentStateKey);
-    }
-
-    if (Array.isArray(excludedStates)) {
-      return !excludedStates.some((state) => normalizeStateValue(state) === currentStateKey);
-    }
-  }
-
-  return true;
-}
+import {
+  dispatchWorkflowRunStateTransition,
+  formatWorkflowRunStateLabel,
+  getAvailableWorkflowRunStateTransitions,
+  normalizeWorkflowRunState,
+  type WorkflowRunStateValidationMap,
+} from '../utils/workflowRunStateTransitions';
 
 function isTimelineStateEvent(
   event: TimelineEvent | null | undefined
@@ -132,32 +91,27 @@ export function WorkflowRunDetailsTimeline() {
   const currentWorkflowState = workflowRunDetail?.currentState?.status ?? null;
   const dialogActorTimestamp = formatBackendDate(new Date());
 
-  const validationMapEntries = useMemo(
-    () =>
-      Object.entries(
-        (workflowRunStateCreationValidMapData ?? {}) as Record<string, ValidationRule>
-      ),
+  const validationMap = useMemo(
+    () => workflowRunStateCreationValidMapData as WorkflowRunStateValidationMap | undefined,
     [workflowRunStateCreationValidMapData]
   );
 
   const editableStateKeys = useMemo(
-    () => new Set(validationMapEntries.map(([status]) => normalizeStateValue(status))),
-    [validationMapEntries]
+    () =>
+      new Set<string>(
+        getAvailableWorkflowRunStateTransitions(validationMap, []).map(({ value }) => value)
+      ),
+    [validationMap]
   );
 
   const availableStateOptions = useMemo(
-    () =>
-      validationMapEntries
-        .filter(([, rule]) => isStateTransitionAllowed(rule, currentWorkflowState))
-        .map(([status]) => ({
-          value: status,
-          label: formatStateLabel(status),
-        }))
-        .sort((a, b) => a.label.localeCompare(b.label)),
-    [currentWorkflowState, validationMapEntries]
+    () => getAvailableWorkflowRunStateTransitions(validationMap, [currentWorkflowState]),
+    [currentWorkflowState, validationMap]
   );
 
-  const createWorkflowRunState = useWorkflowRunStateCreateModel();
+  const cancelWorkflowRunState = useWorkflowRunStateCancelModel();
+  const deprecateWorkflowRunState = useWorkflowRunStateDeprecateModel();
+  const resolveWorkflowRunState = useWorkflowRunStateResolveModel();
   const updateWorkflowRunState = useWorkflowRunStateUpdateModel();
   const createWorkflowRunComment = useWorkflowRunCommentCreateModel();
   const updateWorkflowRunComment = useWorkflowRunCommentUpdateModel();
@@ -166,7 +120,7 @@ export function WorkflowRunDetailsTimeline() {
   const workflowRunTimelineStateData = useMemo<TimelineEvent[]>(
     () =>
       (workflowRunStatesData ?? []).map((state) => {
-        const isEditableState = editableStateKeys.has(normalizeStateValue(state.status));
+        const isEditableState = editableStateKeys.has(normalizeWorkflowRunState(state.status));
 
         return {
           eventId: state.orcabusId,
@@ -304,18 +258,26 @@ export function WorkflowRunDetailsTimeline() {
     if (!workflowRunOrcabusId) {
       throw new Error('Workflow run identifier is required');
     }
+    if (
+      !availableStateOptions.some(
+        ({ value }) => value === normalizeWorkflowRunState(data.stateName)
+      )
+    ) {
+      throw new Error('The selected workflow-run state transition is unavailable');
+    }
 
-    await createWorkflowRunState.mutateAsync({
-      params: {
-        path: {
-          orcabusId: workflowRunOrcabusId,
-        },
-      },
-      body: {
-        status: data.stateName,
+    await dispatchWorkflowRunStateTransition(
+      data.stateName,
+      {
+        workflowrunOrcabusIds: [workflowRunOrcabusId],
         comment: data.comment,
       },
-    });
+      {
+        CANCELLED: (body) => cancelWorkflowRunState.mutateAsync({ body }),
+        DEPRECATED: (body) => deprecateWorkflowRunState.mutateAsync({ body }),
+        RESOLVED: (body) => resolveWorkflowRunState.mutateAsync({ body }),
+      }
+    );
 
     refresh();
   };
@@ -463,6 +425,7 @@ export function WorkflowRunDetailsTimeline() {
         onSubmit={handleAddCustomState}
         availableStates={availableStateOptions}
         hideTimestamp={true}
+        requireComment={true}
         actorEmail={currentUserEmail}
         actorTimestamp={dialogActorTimestamp}
       />
@@ -476,7 +439,7 @@ export function WorkflowRunDetailsTimeline() {
             ? [
                 {
                   value: editingState.status,
-                  label: formatStateLabel(editingState.status),
+                  label: formatWorkflowRunStateLabel(editingState.status),
                 },
               ]
             : []

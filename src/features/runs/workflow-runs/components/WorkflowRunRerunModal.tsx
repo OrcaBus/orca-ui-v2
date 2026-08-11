@@ -31,6 +31,7 @@ interface WorkflowRunRerunModalProps {
   isValid: boolean;
   allowedDatasetChoice: string[];
   validWorkflows: string[];
+  canMarkAsDeprecated: boolean;
 }
 
 // ─── Component ─────────────────────────────────────────────────────────────
@@ -44,6 +45,7 @@ export function WorkflowRunRerunModal({
   isValid,
   allowedDatasetChoice,
   validWorkflows,
+  canMarkAsDeprecated,
 }: WorkflowRunRerunModalProps) {
   const form = useForm<RerunFormValues>({
     resolver: zodResolver(rerunFormSchema),
@@ -192,7 +194,7 @@ export function WorkflowRunRerunModal({
                       id='rerun-mark-deprecated'
                       checked={field.value}
                       onChange={field.onChange}
-                      disabled={!selectedDataset}
+                      disabled={!selectedDataset || !canMarkAsDeprecated}
                       className='mt-0.5 h-4 w-4 rounded border-neutral-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50 dark:border-[#2d3540] dark:bg-[#1e252e]'
                     />
                     <div>
@@ -203,7 +205,9 @@ export function WorkflowRunRerunModal({
                         Mark the current run as &apos;DEPRECATED&apos;
                       </label>
                       <p className='mt-0.5 text-xs text-neutral-500 dark:text-[#9dabb9]'>
-                        This action is irreversible and will mark this workflow run as deprecated.
+                        {canMarkAsDeprecated
+                          ? 'This action is irreversible and will mark this workflow run as deprecated.'
+                          : 'Deprecation is not available for the current workflow state.'}
                       </p>
                     </div>
                   </div>
