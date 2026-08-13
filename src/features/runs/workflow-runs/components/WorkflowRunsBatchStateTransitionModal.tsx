@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -9,23 +10,21 @@ import { SpinnerWithText } from '@/components/ui/Spinner';
 import { cn } from '@/utils/cn';
 import {
   useWorkflowRunStateCreationValidMapModel,
-  useWorkflowRunsBatchStateTransitionModel,
+  useWorkflowRunStateCancelModel,
+  useWorkflowRunStateDeprecateModel,
+  useWorkflowRunStateResolveModel,
   type WorkflowRunListModel,
   WORKFLOWRUNS_LIST_PATH,
   WORKFLOWRUNS_STATUS_COUNT_PATH,
 } from '../../shared/api/workflows.api';
-import { useQueryClient } from '@tanstack/react-query';
-
-type ValidationRule =
-  | string[]
-  | {
-      allowed_states?: string[];
-      allowedStates?: string[];
-      excluded_states?: string[];
-      excludedStates?: string[];
-    }
-  | null
-  | undefined;
+import {
+  dispatchWorkflowRunStateTransition,
+  formatWorkflowRunStateLabel,
+  getAvailableWorkflowRunStateTransitions,
+  getWorkflowRunStateTransitionFeedback,
+  normalizeWorkflowRunState,
+  type WorkflowRunStateValidationMap,
+} from '../utils/workflowRunStateTransitions';
 
 const batchStateTransitionSchema = z.object({
   stateName: z.string().trim().min(1, 'Please select a state'),
@@ -52,45 +51,6 @@ function getDefaultValues(): BatchStateTransitionFormData {
   };
 }
 
-function normalizeStateValue(value?: string | null): string {
-  return (value ?? '')
-    .trim()
-    .replace(/[\s-]+/g, '_')
-    .toUpperCase();
-}
-
-function formatStateLabel(value: string): string {
-  return value
-    .replace(/[_-]+/g, ' ')
-    .toLowerCase()
-    .replace(/\b\w/g, (char) => char.toUpperCase());
-}
-
-function isStateTransitionAllowed(rule: ValidationRule, currentState?: string | null): boolean {
-  if (!currentState) return true;
-
-  const currentStateKey = normalizeStateValue(currentState);
-
-  if (Array.isArray(rule)) {
-    return rule.some((state) => normalizeStateValue(state) === currentStateKey);
-  }
-
-  if (rule && typeof rule === 'object') {
-    const allowedStates = rule.allowed_states ?? rule.allowedStates;
-    const excludedStates = rule.excluded_states ?? rule.excludedStates;
-
-    if (Array.isArray(allowedStates)) {
-      return allowedStates.some((state) => normalizeStateValue(state) === currentStateKey);
-    }
-
-    if (Array.isArray(excludedStates)) {
-      return !excludedStates.some((state) => normalizeStateValue(state) === currentStateKey);
-    }
-  }
-
-  return true;
-}
-
 function pluralize(count: number, singular: string, plural = `${singular}s`): string {
   return count === 1 ? singular : plural;
 }
@@ -100,7 +60,6 @@ export function WorkflowRunsBatchStateTransitionModal({
   onClose,
   workflowRuns,
 }: WorkflowRunsBatchStateTransitionModalProps) {
-  const firstWorkflowRunOrcabusId = workflowRuns[0]?.orcabusId ?? '';
   const workflowRunOrcabusIds = useMemo(
     () => workflowRuns.map((workflowRun) => workflowRun.orcabusId),
     [workflowRuns]
@@ -137,34 +96,25 @@ export function WorkflowRunsBatchStateTransitionModal({
     isError: hasValidationMapError,
     refetch: refetchValidationMap,
   } = useWorkflowRunStateCreationValidMapModel({
-    params: { path: { orcabusId: firstWorkflowRunOrcabusId } },
-    reactQuery: { enabled: isOpen && !!firstWorkflowRunOrcabusId },
+    reactQuery: { enabled: isOpen },
   });
 
-  const batchStateTransition = useWorkflowRunsBatchStateTransitionModel();
+  const cancelWorkflowRunState = useWorkflowRunStateCancelModel();
+  const deprecateWorkflowRunState = useWorkflowRunStateDeprecateModel();
+  const resolveWorkflowRunState = useWorkflowRunStateResolveModel();
 
-  const validationMapEntries = useMemo(
-    () =>
-      Object.entries(
-        (workflowRunStateCreationValidMapData ?? {}) as Record<string, ValidationRule>
-      ),
+  const validationMap = useMemo(
+    () => workflowRunStateCreationValidMapData as WorkflowRunStateValidationMap | undefined,
     [workflowRunStateCreationValidMapData]
   );
 
   const availableStateOptions = useMemo(
     () =>
-      validationMapEntries
-        .filter(([, rule]) =>
-          workflowRuns.every((workflowRun) =>
-            isStateTransitionAllowed(rule, workflowRun.currentState?.status)
-          )
-        )
-        .map(([status]) => ({
-          value: status,
-          label: formatStateLabel(status),
-        }))
-        .sort((a, b) => a.label.localeCompare(b.label)),
-    [validationMapEntries, workflowRuns]
+      getAvailableWorkflowRunStateTransitions(
+        validationMap,
+        workflowRuns.map((workflowRun) => workflowRun.currentState?.status)
+      ),
+    [validationMap, workflowRuns]
   );
 
   const statusCounts = useMemo(() => {
@@ -182,7 +132,7 @@ export function WorkflowRunsBatchStateTransitionModal({
     if (isOpen && !isSubmitting) {
       reset(getDefaultValues());
     }
-  }, [isOpen, isSubmitting, reset, firstWorkflowRunOrcabusId]);
+  }, [isOpen, isSubmitting, reset, workflowRunOrcabusIds]);
 
   useEffect(() => {
     if (
@@ -204,22 +154,42 @@ export function WorkflowRunsBatchStateTransitionModal({
     }
 
     try {
-      const result = await batchStateTransition.mutateAsync({
-        body: {
+      if (
+        !availableStateOptions.some(
+          ({ value }) => value === normalizeWorkflowRunState(data.stateName)
+        )
+      ) {
+        throw new Error('The selected workflow-run state transition is unavailable');
+      }
+
+      const result = await dispatchWorkflowRunStateTransition(
+        data.stateName,
+        {
           workflowrunOrcabusIds: workflowRunOrcabusIds,
-          status: data.stateName,
           comment: data.comment,
         },
-      });
-
-      const createdCount = result?.createdCount ?? workflowRunOrcabusIds.length;
-      toast.success(
-        `Created ${createdCount} state ${pluralize(createdCount, 'transition')} successfully`
+        {
+          CANCELLED: (body) => cancelWorkflowRunState.mutateAsync({ body }),
+          DEPRECATED: (body) => deprecateWorkflowRunState.mutateAsync({ body }),
+          RESOLVED: (body) => resolveWorkflowRunState.mutateAsync({ body }),
+        }
       );
+
+      const feedback = getWorkflowRunStateTransitionFeedback(result);
+      if (feedback.type === 'warning') {
+        toast.warning(feedback.message);
+      } else {
+        toast.success(feedback.message);
+      }
+
       // invalidate both workflow runs list and status counts to reflect the state changes
-      batchStateTransition.reset();
-      await queryClient.invalidateQueries({ queryKey: ['get', WORKFLOWRUNS_LIST_PATH] });
-      await queryClient.invalidateQueries({ queryKey: ['get', WORKFLOWRUNS_STATUS_COUNT_PATH] });
+      cancelWorkflowRunState.reset();
+      deprecateWorkflowRunState.reset();
+      resolveWorkflowRunState.reset();
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['get', WORKFLOWRUNS_LIST_PATH] }),
+        queryClient.invalidateQueries({ queryKey: ['get', WORKFLOWRUNS_STATUS_COUNT_PATH] }),
+      ]);
 
       onClose();
     } catch {
@@ -297,7 +267,7 @@ export function WorkflowRunsBatchStateTransitionModal({
                   key={status}
                   className='rounded-md border border-neutral-200 bg-white px-2 py-1 text-xs font-medium text-neutral-700 dark:border-[#2d3540] dark:bg-[#111418] dark:text-slate-200'
                 >
-                  {formatStateLabel(status)}: {count}
+                  {formatWorkflowRunStateLabel(status)}: {count}
                 </span>
               ))}
             </div>

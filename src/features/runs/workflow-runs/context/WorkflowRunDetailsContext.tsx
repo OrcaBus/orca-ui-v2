@@ -85,10 +85,7 @@ export const WorkflowRunDetailsProvider: FC<PropsWithChildren> = ({ children }) 
     reactQuery: { enabled: !!workflowRunOrcabusId },
   });
 
-  const { data: workflowRunStateCreationValidMapData } = useWorkflowRunStateCreationValidMapModel({
-    params: { path: { orcabusId: workflowRunOrcabusId ?? '' } },
-    reactQuery: { enabled: !!workflowRunOrcabusId },
-  });
+  const { data: workflowRunStateCreationValidMapData } = useWorkflowRunStateCreationValidMapModel();
 
   const { data: workflowRunRerunValidMapData } = useWorkflowRunRerunValidateModel({
     params: { path: { orcabusId: workflowRunOrcabusId ?? '' } },

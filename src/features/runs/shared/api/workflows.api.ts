@@ -44,10 +44,10 @@ export type WorkflowRunPaginatedModel = components['schemas']['PaginatedWorkflow
 export type WorkflowRunRerunValidMapDataModel = components['schemas']['AllowedRerunWorkflow'];
 export type WorkflowRunStateModel = components['schemas']['State'];
 export type WorkflowRunCommentModel = components['schemas']['Comment'];
-export type WorkflowRunBatchStateTransitionRequestModel =
-  components['schemas']['StateBatchTransitionRequestRequest'];
-export type WorkflowRunBatchStateTransitionResponseModel =
-  components['schemas']['StateBatchTransitionResponse'];
+export type WorkflowRunStateTransitionRequestModel =
+  components['schemas']['StateTransitionRequestRequest'];
+export type WorkflowRunStateTransitionResponseModel =
+  components['schemas']['StateTransitionResponse'];
 
 export type AnalysisRunModel = components['schemas']['AnalysisRunDetail'];
 export type AnalysisRunListModel = components['schemas']['AnalysisRun'];
@@ -117,21 +117,25 @@ export const useWorkflowRunStateListModel = createQueryHook(
   workflowApi,
   '/api/v1/workflowrun/{orcabusId}/state/'
 );
-export const useWorkflowRunStateCreateModel = createPostMutationHook(
-  workflowApi,
-  '/api/v1/workflowrun/{orcabusId}/state/'
-);
 export const useWorkflowRunStateUpdateModel = createPatchMutationHook(
   workflowApi,
   '/api/v1/workflowrun/{orcabusId}/state/{id}/'
 );
 export const useWorkflowRunStateCreationValidMapModel = createQueryHook(
   workflowApi,
-  '/api/v1/workflowrun/{orcabusId}/state/get_states_transition_validation_map/'
+  '/api/v1/workflowrun/state/get_states_transition_validation_map/'
 );
-export const useWorkflowRunsBatchStateTransitionModel = createPostMutationHook(
+export const useWorkflowRunStateCancelModel = createPostMutationHook(
   workflowApi,
-  '/api/v1/workflowrun/state/batch-state-transition/'
+  '/api/v1/workflowrun/state/cancel/'
+);
+export const useWorkflowRunStateDeprecateModel = createPostMutationHook(
+  workflowApi,
+  '/api/v1/workflowrun/state/deprecate/'
+);
+export const useWorkflowRunStateResolveModel = createPostMutationHook(
+  workflowApi,
+  '/api/v1/workflowrun/state/resolve/'
 );
 
 // workflow run list model

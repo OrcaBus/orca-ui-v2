@@ -6,21 +6,37 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { useWorkflowRunDetailsContext } from '../context/WorkflowRunDetailsContext';
 import {
   useWorkflowRunRerunModel,
-  useWorkflowRunStateCreateModel,
+  useWorkflowRunStateDeprecateModel,
   type DatasetEnum,
 } from '../../shared/api/workflows.api';
 import { WorkflowRunRerunModal, type RerunFormValues } from './WorkflowRunRerunModal';
+import {
+  isWorkflowRunStateTransitionAvailable,
+  type WorkflowRunStateValidationMap,
+} from '../utils/workflowRunStateTransitions';
 
 export function WorkflowRunDetailsPageHeader() {
-  const { workflowRunDetail, isLoadingWorkflowRunDetail, workflowRunRerunValidMapData, refresh } =
-    useWorkflowRunDetailsContext();
+  const {
+    workflowRunDetail,
+    isLoadingWorkflowRunDetail,
+    workflowRunRerunValidMapData,
+    workflowRunStateCreationValidMapData,
+    refresh,
+  } = useWorkflowRunDetailsContext();
 
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [isRerunModalOpen, setIsRerunModalOpen] = useState(false);
 
   // ── Mutations ─────────────────────────────────────────────────────────────
   const rerunMutation = useWorkflowRunRerunModel();
-  const createStateMutation = useWorkflowRunStateCreateModel();
+  const deprecateStateMutation = useWorkflowRunStateDeprecateModel();
+
+  const currentWorkflowState = workflowRunDetail?.currentState?.status ?? null;
+  const canMarkAsDeprecated = isWorkflowRunStateTransitionAvailable(
+    workflowRunStateCreationValidMapData as WorkflowRunStateValidationMap | undefined,
+    'DEPRECATED',
+    currentWorkflowState
+  );
 
   // ── Handlers ──────────────────────────────────────────────────────────────
   const handleCopy = async (text: string, id: string) => {
@@ -36,19 +52,22 @@ export function WorkflowRunDetailsPageHeader() {
 
   const handleOpenRerunModal = () => {
     rerunMutation.reset();
-    createStateMutation.reset();
+    deprecateStateMutation.reset();
     setIsRerunModalOpen(true);
   };
 
   const handleCloseRerunModal = () => {
     setIsRerunModalOpen(false);
     rerunMutation.reset();
-    createStateMutation.reset();
+    deprecateStateMutation.reset();
   };
 
   const handleRerunSubmit = async (values: RerunFormValues) => {
     const orcabusId = workflowRunDetail?.orcabusId;
     if (!orcabusId) throw new Error('Missing orcabusId');
+    if (values.markAsDeprecated && !canMarkAsDeprecated) {
+      throw new Error('Deprecation is not available for the current workflow state');
+    }
 
     await rerunMutation.mutateAsync({
       params: { path: { orcabusId } },
@@ -59,10 +78,9 @@ export function WorkflowRunDetailsPageHeader() {
     });
 
     if (values.markAsDeprecated) {
-      await createStateMutation.mutateAsync({
-        params: { path: { orcabusId } },
+      await deprecateStateMutation.mutateAsync({
         body: {
-          status: 'DEPRECATED',
+          workflowrunOrcabusIds: [orcabusId],
           comment: 'Marked as deprecated due to workflow rerun.',
         },
       });
@@ -160,6 +178,7 @@ export function WorkflowRunDetailsPageHeader() {
         isValid={workflowRunRerunValidMapData?.isValid ?? false}
         allowedDatasetChoice={workflowRunRerunValidMapData?.allowedDatasetChoice ?? []}
         validWorkflows={workflowRunRerunValidMapData?.validWorkflows ?? []}
+        canMarkAsDeprecated={canMarkAsDeprecated}
       />
     </div>
   );
