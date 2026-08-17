@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { useParams } from 'react-router-dom';
 import { useAuthContext } from '@/context/auth-context';
 import { DialogFrame } from '@/components/modals/DialogFrame';
+import { Button } from '@/components/ui/Button';
 import { cn } from '@/utils/cn';
 import { useSequenceRunAddSampleSheetModel } from '../../shared/api/sequence.api';
 
@@ -151,12 +152,7 @@ export function SampleSheetUploadModal({
           >
             Cancel
           </button>
-          <button
-            type='submit'
-            form={SAMPLE_SHEET_UPLOAD_FORM_ID}
-            disabled={isSubmitting}
-            className='flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#137fec] dark:hover:bg-blue-600'
-          >
+          <Button type='submit' form={SAMPLE_SHEET_UPLOAD_FORM_ID} disabled={isSubmitting}>
             {isSubmitting ? (
               <>
                 <div className='h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent' />
@@ -164,11 +160,11 @@ export function SampleSheetUploadModal({
               </>
             ) : (
               <>
-                <Upload className='h-4 w-4' />
+                <Upload />
                 Upload
               </>
             )}
-          </button>
+          </Button>
         </>
       }
     >

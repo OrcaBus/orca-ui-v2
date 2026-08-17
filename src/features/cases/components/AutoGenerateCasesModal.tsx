@@ -1,5 +1,6 @@
 import { Info, Loader2, Sparkles } from 'lucide-react';
 import { DialogFrame } from '@/components/modals/DialogFrame';
+import { Button } from '@/components/ui/Button';
 
 interface AutoGenerateCasesModalProps {
   isOpen: boolean;
@@ -30,24 +31,19 @@ export function AutoGenerateCasesModal({
           >
             Cancel
           </button>
-          <button
-            type='button'
-            onClick={onConfirm}
-            disabled={isGenerating}
-            className='flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#137fec] dark:hover:bg-blue-600'
-          >
+          <Button type='button' onClick={onConfirm} disabled={isGenerating}>
             {isGenerating ? (
               <>
-                <Loader2 className='h-4 w-4 animate-spin' />
+                <Loader2 className='animate-spin' />
                 Generating...
               </>
             ) : (
               <>
-                <Sparkles className='h-4 w-4' />
+                <Sparkles />
                 Generate
               </>
             )}
-          </button>
+          </Button>
         </>
       }
     >

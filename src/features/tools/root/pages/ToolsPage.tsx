@@ -3,6 +3,7 @@ import { Link } from 'react-router';
 import { useAppShellHeader } from '@/context/app-shell-context';
 import { Settings, FileCheck, NotebookText, ArrowRight, Activity } from 'lucide-react';
 import { ToolsInfoDrawer } from '../components/ToolsInfoDrawer';
+import { Button } from '@/components/ui/Button';
 import { useToolsPageQueryParams } from '../hooks/useToolsPageQueryParams';
 
 export function ToolsPage() {
@@ -106,13 +107,15 @@ export function ToolsPage() {
 
                 {/* Actions */}
                 <div className='flex items-center gap-3'>
-                  <Link
-                    to={tool.route}
-                    className='group/button flex flex-1 items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700'
+                  <Button
+                    asChild
+                    className='group/button flex-1 bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600'
                   >
-                    Open
-                    <ArrowRight className='h-4 w-4 transition-transform group-hover/button:translate-x-0.5' />
-                  </Link>
+                    <Link to={tool.route}>
+                      Open
+                      <ArrowRight className='transition-transform group-hover/button:translate-x-0.5' />
+                    </Link>
+                  </Button>
                   {/* external link */}
                   {/* <a
                   href={tool.learnMoreUrl}

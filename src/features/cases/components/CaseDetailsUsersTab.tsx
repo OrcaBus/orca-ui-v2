@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useParams } from 'react-router';
 import { UserPlus } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
 import { type CaseUserLinkModel } from '../api/cases.api';
 import { useCaseDetailsContext } from '../context/CaseDetailsContext';
 import { CaseDetailsAddUserModal } from './CaseDetailsAddUserModal';
@@ -21,13 +22,10 @@ export function CaseDetailsUsersTab() {
     <>
       <div className='mb-4 flex items-center justify-between'>
         <h3 className='text-sm font-semibold text-neutral-900 dark:text-neutral-100'>Case Users</h3>
-        <button
-          onClick={() => setIsAddModalOpen(true)}
-          className='flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 dark:bg-[#137fec] dark:hover:bg-blue-600'
-        >
-          <UserPlus className='h-4 w-4' />
+        <Button onClick={() => setIsAddModalOpen(true)}>
+          <UserPlus />
           Add User
-        </button>
+        </Button>
       </div>
 
       <CaseDetailsUsersTable

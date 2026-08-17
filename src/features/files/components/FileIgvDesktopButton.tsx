@@ -4,7 +4,7 @@ import { useFilePresignedURLListModel, useFilePresignedURLModel } from '../api/f
 import { Spinner } from '@/components/ui/Spinner';
 import { Monitor } from 'lucide-react';
 import { toast } from 'sonner';
-import { cn } from '@/utils/cn';
+import { Button } from '@/components/ui/Button';
 
 type Props = {
   s3ObjectId: string;
@@ -92,21 +92,10 @@ export const FileIgvDesktopButton = ({ s3ObjectId, bucket, s3Key, className, ico
           )}
         </button>
       ) : (
-        <button
-          type='button'
-          onClick={() => void handleOpenInDesktop()}
-          disabled={isOpening}
-          className={cn(
-            'inline-flex items-center gap-2 rounded-md bg-blue-600 px-3 py-2',
-            'text-sm font-medium text-white transition-colors hover:bg-blue-700',
-            'focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none',
-            'disabled:cursor-not-allowed disabled:opacity-60',
-            'dark:bg-[#137fec] dark:hover:bg-blue-600 dark:focus:ring-[#137fec] dark:focus:ring-offset-[#111418]'
-          )}
-        >
+        <Button type='button' onClick={() => void handleOpenInDesktop()} disabled={isOpening}>
           {isOpening ? <Spinner className='size-4' /> : <Monitor className='size-4' />}
           Add track to IGV desktop
-        </button>
+        </Button>
       )}
     </div>
   );

@@ -5,7 +5,14 @@ import { toLocalStartOfDay } from '@/utils/timeFormat';
 import { toFirstString } from '@/utils/queryParams';
 
 export type WorkflowRunStatus =
-  'draft' | 'succeeded' | 'failed' | 'aborted' | 'resolved' | 'deprecated' | 'ongoing';
+  | 'draft'
+  | 'succeeded'
+  | 'failed'
+  | 'aborted'
+  | 'cancelled'
+  | 'resolved'
+  | 'deprecated'
+  | 'ongoing';
 
 const PARAM_STATUS = 'wfStatus';
 const PARAM_TYPE = 'wfType';

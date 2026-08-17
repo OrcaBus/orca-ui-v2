@@ -1,7 +1,7 @@
 import { Activity, FlaskConical, Network } from 'lucide-react';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Skeleton } from '@/components/ui/Skeleton';
-import { RelationshipLinkTag } from '@/components/ui/RelationshipLinkTag';
+import { PillTag } from '@/components/ui/PillTag';
 import { useAnalysisRunDetailsContext } from '../context/AnalysisRunDetailsContext';
 import { useAnalysisRunDetailsTab } from '../hooks/useAnalysisRunDetailsTab';
 
@@ -134,13 +134,13 @@ export function AnalysisRunDetailsOverviewCard() {
                 <div className='flex flex-wrap gap-1'>
                   {ar?.contexts?.length ? (
                     ar.contexts.map((ctx) => (
-                      <RelationshipLinkTag
+                      <PillTag
                         key={ctx.orcabusId}
-                        color='purple'
+                        variant='purple'
                         onClick={() => setActiveTab('run-context')}
                       >
                         {ctx.name}
-                      </RelationshipLinkTag>
+                      </PillTag>
                     ))
                   ) : (
                     <span className='text-sm text-neutral-400'>—</span>
@@ -155,13 +155,13 @@ export function AnalysisRunDetailsOverviewCard() {
                 <div className='flex flex-wrap gap-1'>
                   {ar?.libraries?.length ? (
                     ar.libraries.map((lib) => (
-                      <RelationshipLinkTag
+                      <PillTag
                         key={lib.orcabusId}
-                        color='green'
+                        variant='green'
                         href={`/lab/libraries/libid/${lib.libraryId}`}
                       >
                         {lib.libraryId}
-                      </RelationshipLinkTag>
+                      </PillTag>
                     ))
                   ) : (
                     <span className='text-sm text-neutral-400'>—</span>

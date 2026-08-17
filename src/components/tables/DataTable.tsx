@@ -668,12 +668,10 @@ export function DataTable<T>({
                         }
                       }}
                       className={[
-                        'flex h-4 w-4 cursor-pointer items-center justify-center rounded border transition-colors focus:ring-2 focus:ring-blue-500 focus:outline-none',
-                        allPageSelected
-                          ? 'border-blue-600 bg-blue-600 text-white dark:border-[#137fec] dark:bg-[#137fec]'
-                          : somePageSelected
-                            ? 'border-blue-600 bg-blue-600 text-white dark:border-[#137fec] dark:bg-[#137fec]'
-                            : 'border-neutral-300 bg-white dark:border-[#2d3540] dark:bg-[#1e252e]',
+                        'focus:ring-ring flex h-4 w-4 cursor-pointer items-center justify-center rounded border transition-colors focus:ring-2 focus:outline-none',
+                        allPageSelected || somePageSelected
+                          ? 'border-primary bg-primary text-primary-foreground'
+                          : 'border-neutral-300 bg-white dark:border-[#2d3540] dark:bg-[#1e252e]',
                       ].join(' ')}
                     >
                       {allPageSelected && <Check className='h-3 w-3' aria-hidden='true' />}
@@ -744,7 +742,7 @@ export function DataTable<T>({
                         ? 'cursor-pointer transition-colors hover:bg-neutral-50 dark:hover:bg-[#1e252e]/50'
                         : '',
                       striped && index % 2 === 1 ? 'bg-neutral-50/80 dark:bg-[#1e252e]/40' : '',
-                      isRowSelected ? 'bg-blue-50/60 dark:bg-blue-500/5' : '',
+                      isRowSelected ? 'bg-primary/5' : '',
                     ].join(' ')}
                     onClick={() => onRowClick?.(item)}
                   >
@@ -768,9 +766,9 @@ export function DataTable<T>({
                               }
                             }}
                             className={[
-                              'flex h-4 w-4 cursor-pointer items-center justify-center rounded border transition-colors focus:ring-2 focus:ring-blue-500 focus:outline-none',
+                              'focus:ring-ring flex h-4 w-4 cursor-pointer items-center justify-center rounded border transition-colors focus:ring-2 focus:outline-none',
                               isRowSelected
-                                ? 'border-blue-600 bg-blue-600 text-white dark:border-[#137fec] dark:bg-[#137fec]'
+                                ? 'border-primary bg-primary text-primary-foreground'
                                 : 'border-neutral-300 bg-white dark:border-[#2d3540] dark:bg-[#1e252e]',
                             ].join(' ')}
                           >

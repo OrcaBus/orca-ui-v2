@@ -70,7 +70,7 @@ export type ListAnalysisContextModel = operations['analysiscontextList']['parame
 export type ListRunContextModel = operations['runcontextList']['parameters']['query'];
 export type DatasetEnum = components['schemas']['DatasetEnum'];
 
-export type WorkflowRunStatsStatusCountModel = components['schemas']['WorkflowRunStatusCount'];
+export type WorkflowRunStatusCountModel = components['schemas']['WorkflowRunStatusCount'];
 export type WorkflowStatusCountModel = components['schemas']['WorkflowStatusCount'];
 export type AnalysisRunStatusCountModel = components['schemas']['AnalysisRunStatusCount'];
 export type AnalysisStatusCountModel = components['schemas']['AnalysisStatusCount'];

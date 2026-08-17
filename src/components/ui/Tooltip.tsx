@@ -400,6 +400,10 @@ function TooltipContent({
           actualSide === 'left' && 'border-t border-r border-slate-200 dark:border-slate-700'
         );
 
+  // No DOM to portal into (SSR / renderToStaticMarkup) — a tooltip has nothing
+  // useful to say without hover/focus interaction anyway, so render nothing.
+  if (typeof document === 'undefined') return null;
+
   // The wrapper is the positioning/transition container (no bg).
   // The card is a separate inner div with bg/border/shadow.
   // Arrow renders first → card (later in DOM) paints on top and covers arrow's inner half.

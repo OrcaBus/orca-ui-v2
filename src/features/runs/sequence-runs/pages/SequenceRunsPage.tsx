@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { Dna } from 'lucide-react';
 import { FilterBar } from '@/components/tables/FilterBar';
+import { Input } from '@/components/ui/Input';
 import { useAppShellHeader } from '@/context/app-shell-context';
 import { RunsInfoDrawer } from '../../shared/components/RunsInfoDrawer';
 import { useSequenceRunsPageQueryParams } from '../hooks/useSequenceRunsPageQueryParams';
@@ -100,12 +101,12 @@ export function SequenceRunsPage() {
                 >
                   From:
                 </label>
-                <input
+                <Input
                   id='sequence-start-from'
                   type='date'
                   value={startTimeFrom}
                   onChange={(e) => setStartTimeFrom(e.target.value)}
-                  className='rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-100 dark:focus:ring-[#137fec]'
+                  className='h-auto w-auto py-1.5 text-sm'
                 />
               </div>
               <div className='flex items-center gap-2'>
@@ -115,12 +116,12 @@ export function SequenceRunsPage() {
                 >
                   To:
                 </label>
-                <input
+                <Input
                   id='sequence-start-to'
                   type='date'
                   value={startTimeTo}
                   onChange={(e) => setStartTimeTo(e.target.value)}
-                  className='rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-100 dark:focus:ring-[#137fec]'
+                  className='h-auto w-auto py-1.5 text-sm'
                 />
               </div>
             </>

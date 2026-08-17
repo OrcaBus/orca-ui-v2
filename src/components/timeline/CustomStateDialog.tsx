@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { CirclePlus } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -133,18 +134,9 @@ export function CustomStateDialog({
           >
             Close
           </button>
-          <button
-            type='submit'
-            form='timeline-custom-state-form'
-            disabled={isSubmitDisabled}
-            className={cn(
-              'rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors',
-              'hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:outline-none',
-              'disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#137fec] dark:hover:bg-blue-600'
-            )}
-          >
+          <Button type='submit' form='timeline-custom-state-form' disabled={isSubmitDisabled}>
             {isSubmitting ? 'Saving...' : actionLabel}
-          </button>
+          </Button>
         </>
       }
     >
@@ -210,7 +202,7 @@ export function CustomStateDialog({
                       <span
                         className={cn(
                           'mt-0.5 h-4 w-4 rounded-full border',
-                          isSelected ? 'border-blue-600 bg-blue-600' : 'border-neutral-300',
+                          isSelected ? 'border-primary bg-primary' : 'border-neutral-300',
                           'dark:border-[#2d3540]'
                         )}
                       />

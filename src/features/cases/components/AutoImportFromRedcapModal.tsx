@@ -3,6 +3,7 @@ import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 import { cn } from '@/utils/cn';
 import { DialogFrame } from '@/components/modals/DialogFrame';
+import { Button } from '@/components/ui/Button';
 import { useCaseSyncFromRedcapAutoModel, CASE_LIST_PATH } from '../api/cases.api';
 
 interface AutoImportFromRedcapModalProps {
@@ -56,25 +57,16 @@ export function AutoImportFromRedcapModal({
           >
             Cancel
           </button>
-          <button
-            type='button'
-            onClick={handleConfirm}
-            disabled={isLoading}
-            className={cn(
-              'flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors',
-              'hover:bg-blue-700 disabled:opacity-50',
-              'dark:bg-[#137fec] dark:hover:bg-blue-600'
-            )}
-          >
+          <Button type='button' onClick={handleConfirm} disabled={isLoading}>
             {isLoading ? (
               <>
-                <Loader2 className='h-4 w-4 animate-spin' />
+                <Loader2 className='animate-spin' />
                 Importing...
               </>
             ) : (
               'Auto Import'
             )}
-          </button>
+          </Button>
         </div>
       }
     >

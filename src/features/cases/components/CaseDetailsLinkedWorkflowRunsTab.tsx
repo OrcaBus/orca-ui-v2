@@ -3,6 +3,7 @@ import { useParams } from 'react-router';
 import { Link as LinkIcon, ListFilter, ArrowLeft, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { ApiErrorState } from '@/components/ui/ApiErrorState';
+import { Button } from '@/components/ui/Button';
 import { DEFAULT_NON_PAGINATE_PAGE_SIZE } from '@/utils/constants';
 import { useWorkflowRunListModel } from '@/features/runs/shared/api/workflows.api';
 import { useCaseUnlinkEntityModel } from '../api/cases.api';
@@ -194,13 +195,10 @@ export function CaseDetailsLinkedWorkflowRunsTab() {
           <h3 className='text-sm font-semibold text-neutral-900 dark:text-neutral-100'>
             Linked Workflow Runs
           </h3>
-          <button
-            onClick={() => setIsLinkModalOpen(true)}
-            className='flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 dark:bg-[#137fec] dark:hover:bg-blue-600'
-          >
-            <LinkIcon className='h-4 w-4' />
+          <Button onClick={() => setIsLinkModalOpen(true)}>
+            <LinkIcon />
             Link Workflow Runs
-          </button>
+          </Button>
         </div>
         <ApiErrorState error={workflowRunsError} onRetry={() => void refetchWorkflowRuns()} />
         <CaseDetailsLinkWorkflowRunsModal
@@ -223,13 +221,10 @@ export function CaseDetailsLinkedWorkflowRunsTab() {
         <h3 className='text-sm font-semibold text-neutral-900 dark:text-neutral-100'>
           Linked Workflow Runs
         </h3>
-        <button
-          onClick={() => setIsLinkModalOpen(true)}
-          className='flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 dark:bg-[#137fec] dark:hover:bg-blue-600'
-        >
-          <LinkIcon className='h-4 w-4' />
+        <Button onClick={() => setIsLinkModalOpen(true)}>
+          <LinkIcon />
           Link Workflow Runs
-        </button>
+        </Button>
       </div>
 
       {/* Two-panel layout */}

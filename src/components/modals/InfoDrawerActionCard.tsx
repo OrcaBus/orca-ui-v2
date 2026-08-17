@@ -13,8 +13,7 @@ interface InfoDrawerActionCardProps {
 }
 
 const buttonClassName = {
-  primary:
-    'bg-blue-600 text-white hover:bg-blue-700 dark:bg-[#137fec] dark:hover:bg-blue-600 disabled:hover:bg-blue-600 dark:disabled:hover:bg-[#137fec]',
+  primary: 'bg-primary text-primary-foreground hover:bg-primary/90 disabled:hover:bg-primary',
   secondary:
     'border border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-50 dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-200 dark:hover:bg-[#2d3540]',
 };

@@ -141,7 +141,7 @@ export function Pagination({
                 onClick={() => onPageChange(pageNum)}
                 className={`min-w-[32px] rounded px-2 py-1 text-sm transition-colors ${
                   isActive
-                    ? 'bg-blue-600 font-medium text-white dark:bg-[#137fec]'
+                    ? 'bg-primary text-primary-foreground font-medium'
                     : 'text-neutral-700 hover:bg-neutral-200 dark:text-[#9dabb9] dark:hover:bg-[#1e252e]'
                 }`}
               >

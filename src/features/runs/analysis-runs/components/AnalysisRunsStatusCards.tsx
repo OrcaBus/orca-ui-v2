@@ -68,8 +68,8 @@ export function AnalysisRunsStatusCards({
     resolved: analysisRunStatusCountsData?.resolved ?? 0,
     ongoing: analysisRunStatusCountsData?.ongoing ?? 0,
     deprecated: analysisRunStatusCountsData?.deprecated ?? 0,
+    cancelled: analysisRunStatusCountsData?.cancelled ?? 0,
   };
-
   const total = counts.all;
 
   return (

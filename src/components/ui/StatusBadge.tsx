@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
   CheckCircle,
   XCircle,
@@ -12,6 +11,7 @@ import {
   Loader,
   CircleOff,
 } from 'lucide-react';
+import { Tooltip, TooltipTrigger, TooltipContent } from './Tooltip';
 
 const statusConfig = {
   draft: {
@@ -195,8 +195,6 @@ interface StatusBadgeProps {
 }
 
 export function StatusBadge({ status, size = 'sm', showTooltip = true }: StatusBadgeProps) {
-  const [showTooltipState, setShowTooltipState] = useState(false);
-
   const canonicalStatus = normalizeStatusBadgeKey(status);
   const config = statusConfig[canonicalStatus];
   const Icon = config.icon;
@@ -212,23 +210,27 @@ export function StatusBadge({ status, size = 'sm', showTooltip = true }: StatusB
     },
   };
 
-  return (
-    <div className='relative inline-block'>
-      <span
-        className={`inline-flex items-center rounded border font-medium ${config.className} ${sizes[size].badge}`}
-        onMouseEnter={() => showTooltip && setShowTooltipState(true)}
-        onMouseLeave={() => setShowTooltipState(false)}
-      >
-        <Icon className={sizes[size].icon} />
-        {config.label}
-      </span>
+  const badge = (
+    <span
+      tabIndex={showTooltip ? 0 : undefined}
+      className={`inline-flex items-center rounded border font-medium outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${config.className} ${sizes[size].badge}`}
+    >
+      <Icon className={sizes[size].icon} />
+      {config.label}
+    </span>
+  );
 
-      {showTooltip && showTooltipState && (
-        <div className='pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 -translate-x-1/2 rounded-md bg-neutral-900 px-3 py-2 text-xs whitespace-nowrap text-white shadow-lg dark:border dark:border-[#2d3540] dark:bg-[#1e252e] dark:shadow-black/40'>
-          {config.tooltip}
-          <div className='absolute top-full left-1/2 -mt-1 -translate-x-1/2 border-4 border-transparent border-t-neutral-900 dark:border-t-[#1e252e]' />
-        </div>
-      )}
-    </div>
+  if (!showTooltip) return badge;
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>{badge}</TooltipTrigger>
+      <TooltipContent
+        showArrow={false}
+        className='bg-neutral-900 px-3 py-2 text-xs whitespace-nowrap text-white shadow-lg dark:border dark:border-[#2d3540] dark:bg-[#1e252e] dark:shadow-black/40'
+      >
+        {config.tooltip}
+      </TooltipContent>
+    </Tooltip>
   );
 }

@@ -4,6 +4,7 @@ import { Link as LinkIcon, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { DialogFrame } from '@/components/modals/DialogFrame';
 import { StatusBadge } from '@/components/ui/StatusBadge';
+import { Button } from '@/components/ui/Button';
 import { useWorkflowRunListModel } from '@/features/runs/shared/api/workflows.api';
 import { useCaseExternalEntityCreateModel } from '../api/cases.api';
 
@@ -105,17 +106,16 @@ export function CaseDetailsLinkWorkflowRunsModal({
             >
               Cancel
             </button>
-            <button
+            <Button
               type='button'
               onClick={() => void handleConfirm()}
               disabled={selectedIds.length === 0 || isSubmitting}
-              className='flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#137fec] dark:hover:bg-blue-600'
             >
-              <LinkIcon className='h-4 w-4' />
+              <LinkIcon />
               {isSubmitting
                 ? 'Linking...'
                 : `Link${selectedIds.length > 0 ? ` (${selectedIds.length})` : ''}`}
-            </button>
+            </Button>
           </div>
         </div>
       }

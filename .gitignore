@@ -72,6 +72,13 @@ src/api/types/*
 
 # Ignore AI agents files and skills
 .github/skills
+.github/agents
+.github/hooks
 .agents
 .claude
 .cursor
+.impeccable
+.codex
+
+DESIGN.md
+PRODUCT.md

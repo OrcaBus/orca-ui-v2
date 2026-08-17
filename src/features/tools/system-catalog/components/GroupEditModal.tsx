@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { X, Plus, ChevronDown } from 'lucide-react';
 import { DialogFrame } from '@/components/modals/DialogFrame';
+import { Button } from '@/components/ui/Button';
 import type { CatalogNodeLookupItem } from '../types/system-catalog.types';
 import { getNodeAccentColor, getNodeDetailLabel } from '../utils/nodeDisplay';
 
@@ -123,15 +124,10 @@ export function GroupEditModal({
           >
             Cancel
           </button>
-          <button
-            type='submit'
-            form={GROUP_FORM_ID}
-            disabled={!isValid || isSubmitting}
-            className='inline-flex items-center gap-1.5 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-blue-500 dark:hover:bg-blue-600'
-          >
-            <Plus className='h-3.5 w-3.5' />
+          <Button type='submit' form={GROUP_FORM_ID} disabled={!isValid || isSubmitting}>
+            <Plus />
             {isEditing ? 'Save Changes' : 'Add Group'}
-          </button>
+          </Button>
         </>
       }
     >
