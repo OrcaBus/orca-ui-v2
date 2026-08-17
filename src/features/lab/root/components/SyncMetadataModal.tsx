@@ -455,8 +455,7 @@ function Stepper({ labels, activeIndex }: { labels: string[]; activeIndex: numbe
             <div
               className={cn(
                 'flex h-7 min-w-7 items-center justify-center rounded-full border text-xs font-semibold transition-colors',
-                isActive &&
-                  'border-blue-600 bg-blue-600 text-white dark:border-[#137fec] dark:bg-[#137fec]',
+                isActive && 'border-primary bg-primary text-primary-foreground',
                 isComplete &&
                   'border-emerald-500 bg-emerald-500 text-white dark:border-emerald-400 dark:bg-emerald-500',
                 !isActive &&
@@ -508,9 +507,9 @@ function SourceStep({
             onClick={() => onChange(option.value)}
             disabled={disabled}
             className={cn(
-              'min-h-36 rounded-lg border p-4 text-left transition-all focus:ring-2 focus:ring-blue-500 focus:outline-none',
+              'focus:ring-ring min-h-36 rounded-lg border p-4 text-left transition-all focus:ring-2 focus:outline-none',
               checked
-                ? 'border-blue-500 bg-blue-50 shadow-sm dark:border-[#137fec] dark:bg-[#137fec]/10'
+                ? 'border-primary bg-primary/10 shadow-sm'
                 : 'border-neutral-200 bg-white hover:border-neutral-300 hover:bg-neutral-50 dark:border-[#2d3540] dark:bg-[#111418] dark:hover:border-[#3d4550] dark:hover:bg-[#1e252e]',
               disabled && 'cursor-not-allowed opacity-60'
             )}
@@ -521,7 +520,7 @@ function SourceStep({
                   className={cn(
                     'flex h-9 w-9 items-center justify-center rounded-md',
                     checked
-                      ? 'bg-blue-600 text-white dark:bg-[#137fec]'
+                      ? 'bg-primary text-primary-foreground'
                       : 'bg-neutral-100 text-neutral-600 dark:bg-[#1e252e] dark:text-[#9dabb9]'
                   )}
                 >
@@ -531,7 +530,7 @@ function SourceStep({
                   className={cn(
                     'mt-1 h-4 w-4 rounded-full border',
                     checked
-                      ? 'border-blue-600 bg-blue-600 ring-2 ring-blue-100 dark:border-[#137fec] dark:bg-[#137fec] dark:ring-[#137fec]/20'
+                      ? 'border-primary bg-primary ring-primary/20 ring-2'
                       : 'border-neutral-300 dark:border-[#3d4550]'
                   )}
                   aria-hidden
@@ -1062,14 +1061,13 @@ function SyncModalFooter({
 
 const secondaryButtonClassName = cn(
   'inline-flex items-center justify-center gap-2 rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition-colors',
-  'hover:bg-neutral-50 focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+  'hover:bg-neutral-50 focus:ring-2 focus:ring-ring focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
   'dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-[#9dabb9] dark:hover:bg-[#2d3540]'
 );
 
 const primaryButtonClassName = cn(
-  'inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors',
-  'hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
-  'dark:bg-[#137fec] dark:hover:bg-blue-600'
+  'inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors',
+  'hover:bg-primary/90 focus:ring-2 focus:ring-ring focus:outline-none disabled:cursor-not-allowed disabled:opacity-50'
 );
 
 const successButtonClassName = cn(

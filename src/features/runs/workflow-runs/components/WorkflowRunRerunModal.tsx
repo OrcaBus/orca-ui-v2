@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { RefreshCw, AlertTriangle, Info } from 'lucide-react';
 import { toast } from 'sonner';
 import { DialogFrame } from '@/components/modals/DialogFrame';
+import { Button } from '@/components/ui/Button';
 import { RNASUMDatasetSelect } from './RNASUMDatasetSelect';
 
 // ─── Schema (private) ──────────────────────────────────────────────────────
@@ -97,15 +98,14 @@ export function WorkflowRunRerunModal({
             Close
           </button>
           {isValid && (
-            <button
+            <Button
               type='submit'
               form='workflow-run-rerun-form'
               disabled={isSubmitting || !isFormValid}
-              className='flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#137fec] dark:hover:bg-blue-600'
             >
-              <RefreshCw className={`h-4 w-4 ${isSubmitting ? 'animate-spin' : ''}`} />
+              <RefreshCw className={isSubmitting ? 'animate-spin' : ''} />
               {isSubmitting ? 'Triggering...' : 'Rerun'}
-            </button>
+            </Button>
           )}
         </>
       }

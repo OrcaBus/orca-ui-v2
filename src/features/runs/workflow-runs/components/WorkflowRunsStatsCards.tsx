@@ -1,7 +1,10 @@
 import { keepPreviousData } from '@tanstack/react-query';
 import { ApiErrorState } from '@/components/ui/ApiErrorState';
 import { StatusCard } from '@/components/ui/StatusCard';
-import { useWorkflowRunStatusCountModel } from '../../shared/api/workflows.api';
+import {
+  useWorkflowRunStatusCountModel,
+  type WorkflowRunStatusCountModel,
+} from '../../shared/api/workflows.api';
 import { toLocalStartOfDay } from '@/utils/timeFormat';
 import { getRunsStatusIcon } from '../../shared/utils/statusIcons';
 import {
@@ -22,6 +25,7 @@ const statusCards: Array<{
   { label: 'Succeeded', status: 'succeeded', variant: 'success' },
   { label: 'Failed', status: 'failed', variant: 'error' },
   { label: 'Aborted', status: 'aborted', variant: 'neutral' },
+  { label: 'Cancelled', status: 'cancelled', variant: 'neutral' },
   { label: 'Resolved', status: 'resolved', variant: 'info' },
   { label: 'Deprecated', status: 'deprecated', variant: 'neutral' },
   { label: 'Draft', status: 'draft', variant: 'neutral' },
@@ -55,7 +59,7 @@ export function WorkflowRunsStatsCards({ status, onStatusCardClick }: WorkflowRu
     return <ApiErrorState error={workflowStatusCountsError} className='mb-4' />;
   }
 
-  const counts = {
+  const counts: Required<WorkflowRunStatusCountModel> = {
     all: workflowStatusCountsData?.all ?? 0,
     succeeded: workflowStatusCountsData?.succeeded ?? 0,
     aborted: workflowStatusCountsData?.aborted ?? 0,
@@ -64,13 +68,14 @@ export function WorkflowRunsStatsCards({ status, onStatusCardClick }: WorkflowRu
     draft: workflowStatusCountsData?.draft ?? 0,
     ongoing: workflowStatusCountsData?.ongoing ?? 0,
     deprecated: workflowStatusCountsData?.deprecated ?? 0,
+    cancelled: workflowStatusCountsData?.cancelled ?? 0,
   };
 
   const showLoadingCards = isLoadingWorkflowStatusCounts && !workflowStatusCountsData;
   const total = counts.all;
 
   return (
-    <div className='mb-6 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-7'>
+    <div className='mb-6 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-8'>
       {showLoadingCards
         ? statusCards.map((card) => <StatusCard key={card.status} label='' value={0} isLoading />)
         : statusCards.map((card) => {

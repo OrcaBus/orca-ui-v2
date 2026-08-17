@@ -45,8 +45,8 @@ export function Sidebar() {
       className={`${isCollapsed ? 'w-16' : 'w-48'} flex shrink-0 flex-col border-r border-slate-200 bg-white transition-all duration-300 dark:border-[#2d3540] dark:bg-[#111418]`}
     >
       <div className={`flex items-center p-4 ${isCollapsed ? 'justify-center' : 'gap-3'}`}>
-        <div className='flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-600 shadow-lg dark:bg-[#137fec] dark:shadow-[#137fec]/20'>
-          <Database className='h-5 w-5 text-white' />
+        <div className='bg-primary dark:shadow-primary/20 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg shadow-lg'>
+          <Database className='text-primary-foreground h-5 w-5' />
         </div>
         {!isCollapsed && (
           <div>

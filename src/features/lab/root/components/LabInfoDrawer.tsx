@@ -47,6 +47,7 @@ export function LabInfoDrawer({ isOpen, onClose }: LabInfoDrawerProps) {
                 }}
                 icon={<LibraryBig className='h-4 w-4' />}
                 buttonIcon={<RefreshCw className='h-4 w-4' />}
+                variant='secondary'
               />
 
               <InfoDrawerActionCard

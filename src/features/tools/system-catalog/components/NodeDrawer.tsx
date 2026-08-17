@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { X, Tag, Cpu, ArrowRight, ChevronRight, Plus, Pencil, Trash2 } from 'lucide-react';
 import type { EventDef, MapGroup, MapNode } from '../data/dynamodb-schema';
 import { EventCard } from './EventCard';
+import { Button } from '@/components/ui/Button';
 import { EventModal } from './EventModal';
 import { DeleteEventConfirmDialog } from './DeleteEventConfirmDialog';
 import { getNodeAccentColor, getNodeDetailLabel, getNodeKindLabel } from '../utils/nodeDisplay';
@@ -149,14 +150,10 @@ export function NodeDrawer({
         </p>
 
         <div className='mt-4 flex items-center gap-2'>
-          <button
-            type='button'
-            onClick={() => onEdit(nodeId)}
-            className='inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600'
-          >
-            <Pencil className='h-3.5 w-3.5' />
+          <Button type='button' onClick={() => onEdit(nodeId)} className='flex-1'>
+            <Pencil />
             Edit
-          </button>
+          </Button>
           <button
             type='button'
             onClick={() => onDelete(nodeId)}

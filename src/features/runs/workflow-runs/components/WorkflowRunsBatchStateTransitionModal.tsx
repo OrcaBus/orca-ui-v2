@@ -7,6 +7,7 @@ import { AlertTriangle, ArrowLeftRight, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { DialogFrame } from '@/components/modals/DialogFrame';
 import { SpinnerWithText } from '@/components/ui/Spinner';
+import { Button } from '@/components/ui/Button';
 import { cn } from '@/utils/cn';
 import {
   useWorkflowRunStateCreationValidMapModel,
@@ -229,19 +230,14 @@ export function WorkflowRunsBatchStateTransitionModal({
           >
             Close
           </button>
-          <button
+          <Button
             type='submit'
             form='workflow-runs-batch-state-transition-form'
             disabled={isSubmitDisabled}
-            className={cn(
-              'inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors',
-              'hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:outline-none',
-              'disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#137fec] dark:hover:bg-blue-600'
-            )}
           >
-            {isSubmitting && <Loader2 className='h-4 w-4 animate-spin' aria-hidden='true' />}
+            {isSubmitting && <Loader2 className='animate-spin' aria-hidden='true' />}
             {isSubmitting ? 'Transitioning...' : 'Transition Runs'}
-          </button>
+          </Button>
         </>
       }
     >
@@ -344,14 +340,14 @@ export function WorkflowRunsBatchStateTransitionModal({
                     className={cn(
                       'flex w-full items-center gap-3 rounded-md border p-3 text-left text-sm transition-colors',
                       isSelected
-                        ? 'border-blue-500 bg-blue-50 dark:border-[#137fec] dark:bg-[#137fec]/10'
+                        ? 'border-primary bg-primary/10'
                         : 'border-neutral-200 hover:border-neutral-300 dark:border-[#2d3540] dark:hover:border-[#3d4550]'
                     )}
                   >
                     <span
                       className={cn(
                         'mt-0.5 h-4 w-4 rounded-full border',
-                        isSelected ? 'border-blue-600 bg-blue-600' : 'border-neutral-300',
+                        isSelected ? 'border-primary bg-primary' : 'border-neutral-300',
                         'dark:border-[#2d3540]'
                       )}
                     />

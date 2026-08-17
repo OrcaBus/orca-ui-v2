@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Zap, Info } from 'lucide-react';
 import { DialogFrame } from '@/components/modals/DialogFrame';
+import { Button } from '@/components/ui/Button';
 import { useLastPresent } from '@/hooks/useLastPresent';
 import { tryPrettyJson } from '@/utils/json';
 import type { EventDef } from '../data/dynamodb-schema';
@@ -91,13 +92,9 @@ export function EventModal({
           >
             Cancel
           </button>
-          <button
-            type='submit'
-            form={FORM_ID}
-            className='rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600'
-          >
+          <Button type='submit' form={FORM_ID}>
             {shownMode === 'add' ? 'Save Event' : 'Save Changes'}
-          </button>
+          </Button>
         </>
       }
     >

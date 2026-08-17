@@ -13,6 +13,7 @@ import { Column } from '@/components/tables/DataTable';
 import { SampleSheetUploadModal } from './SampleSheetUploadModal';
 import { SampleSheetViewModal } from './SampleSheetViewModal';
 import { ApiErrorState } from '@/components/ui/ApiErrorState';
+import { Button } from '@/components/ui/Button';
 
 export function SequenceRunDetailsSampleSheetsTab() {
   const { instrumentRunId } = useParams<{ instrumentRunId: string }>();
@@ -128,13 +129,10 @@ export function SequenceRunDetailsSampleSheetsTab() {
         <h3 className='text-sm font-medium text-neutral-700 dark:text-neutral-300'>
           Sample Sheets
         </h3>
-        <button
-          onClick={() => setIsUploadModalOpen(true)}
-          className='flex items-center gap-2 rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 dark:bg-[#137fec] dark:hover:bg-blue-600'
-        >
-          <Upload className='h-4 w-4' />
+        <Button size='sm' onClick={() => setIsUploadModalOpen(true)}>
+          <Upload />
           Upload Sample Sheet
-        </button>
+        </Button>
       </div>
 
       <SimpleTable

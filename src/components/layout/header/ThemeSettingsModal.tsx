@@ -64,11 +64,7 @@ export function ThemeSettingsModal({ isOpen, onClose }: ThemeSettingsModalProps)
               className={`h-5 w-5 ${theme === 'system' ? 'text-white' : 'text-neutral-600 dark:text-[#9dabb9]'}`}
             />
           }
-          iconBg={
-            theme === 'system'
-              ? 'bg-blue-600 dark:bg-[#137fec]'
-              : 'bg-neutral-100 dark:bg-[#1e252e]'
-          }
+          iconBg={theme === 'system' ? 'bg-primary' : 'bg-neutral-100 dark:bg-[#1e252e]'}
         />
       </div>
     </DialogFrame>
@@ -96,7 +92,7 @@ function ThemeOption({
       onClick={onClick}
       className={`flex w-full items-center gap-4 rounded-lg border-2 p-4 transition-all ${
         active
-          ? 'border-blue-500 bg-blue-50 dark:border-[#137fec] dark:bg-[#137fec]/10'
+          ? 'border-primary bg-primary/10'
           : 'border-slate-200 bg-white hover:bg-slate-50 dark:border-[#2d3540] dark:bg-[#111418] dark:hover:bg-[#1e252e]'
       }`}
     >
@@ -108,8 +104,13 @@ function ThemeOption({
         <div className='text-[11px] text-slate-500 dark:text-[#9dabb9]'>{description}</div>
       </div>
       {active && (
-        <div className='flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 dark:bg-[#137fec]'>
-          <svg className='h-3 w-3 text-white' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+        <div className='bg-primary flex h-5 w-5 items-center justify-center rounded-full'>
+          <svg
+            className='text-primary-foreground h-3 w-3'
+            fill='none'
+            viewBox='0 0 24 24'
+            stroke='currentColor'
+          >
             <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={3} d='M5 13l4 4L19 7' />
           </svg>
         </div>

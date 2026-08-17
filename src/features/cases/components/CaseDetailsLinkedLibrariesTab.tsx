@@ -5,6 +5,7 @@ import { Link as LinkIcon, Unlink, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { DataTable, type Column } from '@/components/tables/DataTable';
 import { PillTag, type PillTagVariant } from '@/components/ui/PillTag';
+import { Button } from '@/components/ui/Button';
 import { ApiErrorState } from '@/components/ui/ApiErrorState';
 import { useTablePagination } from '@/components/tables/useTablePagination';
 import { DEFAULT_NON_PAGINATE_PAGE_SIZE } from '@/utils/constants';
@@ -192,16 +193,15 @@ function CaseDetailsLinkLibrariesModal({
               >
                 Cancel
               </button>
-              <button
+              <Button
                 onClick={() => void handleConfirm()}
                 disabled={selectedIds.length === 0 || isSubmitting}
-                className='flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#137fec] dark:hover:bg-blue-600'
               >
-                <LinkIcon className='h-4 w-4' />
+                <LinkIcon />
                 {isSubmitting
                   ? 'Linking...'
                   : `Link${selectedIds.length > 0 ? ` (${selectedIds.length})` : ''}`}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -386,13 +386,10 @@ export function CaseDetailsLinkedLibrariesTab() {
         <h3 className='text-sm font-semibold text-neutral-900 dark:text-neutral-100'>
           Linked Libraries
         </h3>
-        <button
-          onClick={() => setIsLinkModalOpen(true)}
-          className='flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 dark:bg-[#137fec] dark:hover:bg-blue-600'
-        >
-          <LinkIcon className='h-4 w-4' />
+        <Button onClick={() => setIsLinkModalOpen(true)}>
+          <LinkIcon />
           Link Libraries
-        </button>
+        </Button>
       </div>
 
       <DataTable

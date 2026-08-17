@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react';
 import { Search, X, SlidersHorizontal, ChevronUp, Filter } from 'lucide-react';
 import { PillTag } from '../ui/PillTag';
 import { MultiSelect } from '../ui/MultiSelect';
+import { Button } from '../ui/Button';
 import { useDebouncedSearchInput } from '@/hooks/useDebouncedSearchInput';
 
 interface TextFilterField {
@@ -189,14 +190,14 @@ export function AdvancedFilterBar({
           onClick={handleToggleOpen}
           className={`flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors ${
             hasActiveFilters
-              ? 'border-blue-600 bg-blue-50 text-blue-700 dark:border-[#137fec] dark:bg-[#137fec]/10 dark:text-[#137fec]'
+              ? 'border-primary bg-primary/10 text-primary'
               : 'border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-50 dark:border-[#2d3540] dark:bg-[#111418] dark:text-[#9dabb9] dark:hover:bg-[#1e252e]'
           }`}
         >
           <SlidersHorizontal className='h-4 w-4' />
           More Filters
           {hasActiveFilters && (
-            <span className='rounded-full bg-blue-600 px-1.5 py-0.5 text-xs text-white dark:bg-[#137fec]'>
+            <span className='bg-primary text-primary-foreground rounded-full px-1.5 py-0.5 text-xs'>
               {activeCount}
             </span>
           )}
@@ -323,13 +324,10 @@ export function AdvancedFilterBar({
               >
                 Reset
               </button>
-              <button
-                onClick={handleApply}
-                className='flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 dark:bg-[#137fec] dark:hover:bg-blue-700'
-              >
-                <Filter className='h-3.5 w-3.5' />
+              <Button onClick={handleApply}>
+                <Filter />
                 Apply Filters
-              </button>
+              </Button>
             </div>
           </div>
         </div>

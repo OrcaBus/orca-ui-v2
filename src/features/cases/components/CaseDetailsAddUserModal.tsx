@@ -7,6 +7,7 @@ import { UserPlus } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/utils/cn';
 import { DialogFrame } from '@/components/modals/DialogFrame';
+import { Button } from '@/components/ui/Button';
 import { useCaseAddUserModel } from '../api/cases.api';
 import { useCaseDetailsContext } from '../context/CaseDetailsContext';
 
@@ -111,20 +112,10 @@ export function CaseDetailsAddUserModal({
           >
             Cancel
           </button>
-          <button
-            type='submit'
-            form='add-user-form'
-            disabled={isSubmitting}
-            className={cn(
-              'flex cursor-pointer items-center gap-2 rounded-md bg-blue-600 px-5 py-2 text-sm font-medium text-white transition-colors',
-              'hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:outline-none',
-              'disabled:cursor-not-allowed disabled:opacity-50',
-              'dark:bg-[#137fec] dark:hover:bg-blue-600'
-            )}
-          >
-            <UserPlus className='h-4 w-4' />
+          <Button type='submit' form='add-user-form' disabled={isSubmitting}>
+            <UserPlus />
             {isSubmitting ? 'Adding…' : 'Add User'}
-          </button>
+          </Button>
         </div>
       }
     >

@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from 'react';
 import { CirclePlay } from 'lucide-react';
 import { FilterBar } from '@/components/tables/FilterBar';
+import { Input } from '@/components/ui/Input';
 import { useAppShellHeader } from '@/context/app-shell-context';
 import { RunsInfoDrawer } from '../../shared/components/RunsInfoDrawer';
 import type { WorkflowRunStatus } from '../hooks/useWorkflowRunListQueryParams';
@@ -74,33 +75,35 @@ export function WorkflowRunsPage() {
           filters={
             <>
               <div className='flex items-center gap-2'>
-                <label className='text-sm whitespace-nowrap text-neutral-600 dark:text-neutral-400'>
+                <label
+                  htmlFor='workflow-start-from'
+                  className='text-sm whitespace-nowrap text-neutral-600 dark:text-neutral-400'
+                >
                   From:
                 </label>
-                <input
+                <Input
+                  id='workflow-start-from'
                   type='date'
                   value={dateFrom}
                   onChange={(e) => setDateFrom(e.target.value)}
-                  className='rounded-md border border-neutral-300 px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100'
+                  className='h-auto w-auto py-1.5 text-sm'
                 />
               </div>
               <div className='flex items-center gap-2'>
-                <label className='text-sm whitespace-nowrap text-neutral-600 dark:text-neutral-400'>
+                <label
+                  htmlFor='workflow-start-to'
+                  className='text-sm whitespace-nowrap text-neutral-600 dark:text-neutral-400'
+                >
                   To:
                 </label>
-                <input
+                <Input
+                  id='workflow-start-to'
                   type='date'
                   value={dateTo}
                   onChange={(e) => setDateTo(e.target.value)}
-                  className='rounded-md border border-neutral-300 px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100'
+                  className='h-auto w-auto py-1.5 text-sm'
                 />
               </div>
-              {/* <MultiSelect
-              values={typeValues}
-              onChange={setTypeValues}
-              options={workflowTypeOptions.map((type) => ({ value: type, label: type }))}
-              placeholder='All Workflow Types'
-            /> */}
             </>
           }
           activeFilterBadges={activeFilterBadges}

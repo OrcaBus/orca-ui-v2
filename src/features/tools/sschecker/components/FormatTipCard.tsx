@@ -12,8 +12,8 @@ export function FormatTipCard() {
   return (
     <div className='rounded-xl border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-950'>
       <div className='flex items-start gap-2.5'>
-        <span className='mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-600'>
-          <Info className='h-3 w-3 text-white' />
+        <span className='bg-primary mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full'>
+          <Info className='text-primary-foreground h-3 w-3' />
         </span>
         <div>
           <p className='mb-1 text-sm font-semibold text-blue-900 dark:text-blue-100'>Format Tip</p>

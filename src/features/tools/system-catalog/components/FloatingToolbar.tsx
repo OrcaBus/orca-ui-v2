@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router';
+import { Button } from '@/components/ui/Button';
 import {
   ArrowLeft,
   Search,
@@ -283,14 +284,10 @@ export function FloatingToolbar({
         <div className='mx-0.5 h-5 w-px bg-slate-200 dark:bg-[#2d3540]' />
 
         {/* Add node */}
-        <button
-          type='button'
-          onClick={onAddNode}
-          className='flex h-8 items-center gap-1.5 rounded-lg bg-blue-600 px-3 text-sm font-medium text-white transition-colors hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600'
-        >
-          <Plus className='h-3.5 w-3.5' />
+        <Button type='button' size='sm' onClick={onAddNode} className='rounded-lg'>
+          <Plus />
           <span className='hidden sm:inline'>Add Node</span>
-        </button>
+        </Button>
 
         <div className='mx-0.5 h-5 w-px bg-slate-200 dark:bg-[#2d3540]' />
 

@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { X, Plus, ChevronDown, NotebookText } from 'lucide-react';
 import type { SystemCatalogMapStatus } from '../api/system-catalog.api';
 import { DialogFrame } from '@/components/modals/DialogFrame';
+import { Button } from '@/components/ui/Button';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -173,15 +174,10 @@ export function MapEditModal({
           >
             Cancel
           </button>
-          <button
-            type='submit'
-            form='map-edit-form'
-            disabled={!isValid || isSubmitting}
-            className='inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-blue-500 dark:hover:bg-blue-600'
-          >
-            <Plus className='h-3.5 w-3.5' />
+          <Button type='submit' form='map-edit-form' disabled={!isValid || isSubmitting}>
+            <Plus />
             {submitLabel ?? (isEditing ? 'Save Changes' : 'Create Map')}
-          </button>
+          </Button>
         </div>
       }
     >

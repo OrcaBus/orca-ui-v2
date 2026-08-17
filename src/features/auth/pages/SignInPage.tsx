@@ -56,8 +56,8 @@ export function SignInPage() {
       <div className='relative z-10 mx-auto w-full max-w-md px-6'>
         {/* Logo + branding */}
         <div className='mb-8 flex flex-col items-center gap-4'>
-          <div className='flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-600 shadow-lg shadow-blue-600/30'>
-            <Database className='h-7 w-7 text-white' />
+          <div className='bg-primary shadow-primary/30 flex h-14 w-14 items-center justify-center rounded-2xl shadow-lg'>
+            <Database className='text-primary-foreground h-7 w-7' />
           </div>
           <div className='text-center'>
             <h1 className='text-2xl font-bold tracking-tight text-white'>Orcabus</h1>

@@ -6,6 +6,7 @@ import { useLastPresent } from '@/hooks/useLastPresent';
 import { getFileTypeBadgeStyle, formatBytes, getFilename, getFileExtension } from '@/utils/files';
 import { formatTableDate } from '@/utils/timeFormat';
 import { Spinner } from '@/components/ui/Spinner';
+import { Button } from '@/components/ui/Button';
 import { type S3Record, useFilePresignedURLModel } from '../api/files.api';
 import { FilePathSegments } from './FilePathSegments';
 
@@ -269,15 +270,15 @@ function FileRecordDetailsBody({ file }: { file: S3Record }) {
 
       {/* Actions */}
       <div className='space-y-2.5 border-t border-neutral-200 pt-6 dark:border-neutral-700'>
-        <button
+        <Button
           type='button'
           disabled={isLoading}
           onClick={() => void handleDownload()}
-          className='flex w-full items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50'
+          className='w-full'
         >
-          {isLoading ? <Spinner className='h-4 w-4' /> : <Download className='h-4 w-4' />}
+          {isLoading ? <Spinner className='h-4 w-4' /> : <Download />}
           Download
-        </button>
+        </Button>
         <button
           type='button'
           disabled={isLoading}
