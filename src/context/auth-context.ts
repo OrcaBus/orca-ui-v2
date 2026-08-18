@@ -4,6 +4,7 @@ import type { FetchUserAttributesOutput } from 'aws-amplify/auth';
 export interface AuthContextValue {
   isAuthenticated: boolean;
   user: FetchUserAttributesOutput;
+  groups: string[];
   isLoading: boolean;
   signInWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;

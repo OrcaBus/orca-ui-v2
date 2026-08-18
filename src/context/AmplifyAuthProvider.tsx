@@ -1,6 +1,7 @@
 import { Suspense, use, useCallback, useEffect, useReducer, useMemo, type ReactNode } from 'react';
 import {
   fetchUserAttributes,
+  fetchAuthSession,
   signInWithRedirect,
   signOut,
   type FetchUserAttributesOutput,
@@ -41,26 +42,34 @@ function hasCognitoSession(): boolean {
 interface AuthState {
   isAuthenticated: boolean;
   user: FetchUserAttributesOutput;
+  groups: string[];
   isLoading: boolean;
 }
 
 const initialState: AuthState = {
   isAuthenticated: false,
   user: {},
+  groups: [],
   isLoading: false,
 };
 
 type AuthAction =
-  | { type: 'AUTHENTICATED'; user: FetchUserAttributesOutput }
+  | { type: 'AUTHENTICATED'; user: FetchUserAttributesOutput; groups: string[] }
   | { type: 'UNAUTHENTICATED' }
   | { type: 'SET_LOADING'; isLoading: boolean };
 
 function authReducer(state: AuthState, action: AuthAction): AuthState {
   switch (action.type) {
     case 'AUTHENTICATED':
-      return { ...state, isAuthenticated: true, user: action.user, isLoading: false };
+      return {
+        ...state,
+        isAuthenticated: true,
+        user: action.user,
+        groups: action.groups,
+        isLoading: false,
+      };
     case 'UNAUTHENTICATED':
-      return { ...state, isAuthenticated: false, user: {}, isLoading: false };
+      return { ...state, isAuthenticated: false, user: {}, groups: [], isLoading: false };
     case 'SET_LOADING':
       return { ...state, isLoading: action.isLoading };
   }
@@ -72,8 +81,10 @@ async function resolveCurrentAuthState(): Promise<AuthState> {
   }
 
   try {
-    const user = await fetchUserAttributes();
-    return { ...initialState, isAuthenticated: true, user };
+    const [user, session] = await Promise.all([fetchUserAttributes(), fetchAuthSession()]);
+    const groups =
+      (session.tokens?.idToken?.payload['cognito:groups'] as string[] | undefined) ?? [];
+    return { ...initialState, isAuthenticated: true, user, groups };
   } catch (error) {
     console.error('Failed to initialize auth:', error);
     toast.error('Failed to authenticate user');
@@ -124,7 +135,7 @@ function ResolvedAuthProvider({ children }: { children: ReactNode }) {
     cacheInitialAuthState(nextState);
 
     if (nextState.isAuthenticated) {
-      dispatch({ type: 'AUTHENTICATED', user: nextState.user });
+      dispatch({ type: 'AUTHENTICATED', user: nextState.user, groups: nextState.groups });
     } else {
       dispatch({ type: 'UNAUTHENTICATED' });
     }

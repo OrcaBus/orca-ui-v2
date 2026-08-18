@@ -1,4 +1,4 @@
-import { Mail, ShieldCheck, ShieldAlert, Fingerprint, Globe, User } from 'lucide-react';
+import { Mail, ShieldCheck, ShieldAlert, Fingerprint, Globe, User, Users } from 'lucide-react';
 import type { FetchUserAttributesOutput } from 'aws-amplify/auth';
 import { getUsername } from '@/utils/string';
 import { DialogFrame } from '@/components/modals/DialogFrame';
@@ -14,6 +14,7 @@ interface Identity {
 
 interface UserProfileModalProps {
   user: FetchUserAttributesOutput;
+  groups?: string[];
   isOpen: boolean;
   onClose: () => void;
 }
@@ -51,7 +52,7 @@ function IdentityRow({ label, value, mono }: { label: string; value: string; mon
   );
 }
 
-export function UserProfileModal({ user, isOpen, onClose }: UserProfileModalProps) {
+export function UserProfileModal({ user, groups = [], isOpen, onClose }: UserProfileModalProps) {
   const userName = user.name || getUsername(user.email as string);
   const userEmail = user.email ?? '';
   const isEmailVerified = user.email_verified === 'true';
@@ -126,6 +127,28 @@ export function UserProfileModal({ user, isOpen, onClose }: UserProfileModalProp
             </div>
           </div>
         </div>
+
+        {/* Groups */}
+        {groups.length > 0 && (
+          <div>
+            <p className='mb-2 text-[11px] font-semibold tracking-wider text-slate-400 uppercase dark:text-neutral-500'>
+              Groups
+            </p>
+            <div className='flex items-start gap-3 rounded-lg border border-slate-200 px-4 py-3 dark:border-[#2d3540]'>
+              <Users className='mt-0.5 h-4 w-4 shrink-0 text-slate-400 dark:text-[#9dabb9]' />
+              <div className='flex min-w-0 flex-1 flex-wrap gap-1.5'>
+                {groups.map((g) => (
+                  <span
+                    key={g}
+                    className='inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-medium text-slate-700 dark:bg-[#2d3540] dark:text-slate-300'
+                  >
+                    {g}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Identity providers */}
         {identities.length > 0 && (

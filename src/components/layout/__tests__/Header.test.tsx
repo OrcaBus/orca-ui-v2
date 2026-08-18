@@ -20,6 +20,7 @@ vi.mock('@/context/theme-context', () => ({
 const authValue: AuthContextValue = {
   isAuthenticated: true,
   user: { name: 'Ray Liu', email: 'ray@example.com' },
+  groups: [],
   isLoading: false,
   signInWithGoogle: vi.fn(() => Promise.resolve(undefined)),
   logout: vi.fn(() => Promise.resolve(undefined)),

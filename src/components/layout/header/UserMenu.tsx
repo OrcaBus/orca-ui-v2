@@ -16,7 +16,7 @@ import { UserProfileModal } from './UserProfileModal';
 import { UserTokenModal } from './UserTokenModal';
 
 export function UserMenu() {
-  const { user: userInformation, logout } = useAuthContext();
+  const { user: userInformation, groups, logout } = useAuthContext();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [tokenOpen, setTokenOpen] = useState(false);
@@ -129,6 +129,7 @@ export function UserMenu() {
       <ThemeSettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
       <UserProfileModal
         user={userInformation}
+        groups={groups}
         isOpen={profileOpen}
         onClose={() => setProfileOpen(false)}
       />
