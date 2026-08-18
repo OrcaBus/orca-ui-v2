@@ -19,7 +19,7 @@ export interface FileRecordDetailsDrawerProps {
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h3 className='mb-2 text-[10px] font-semibold tracking-wider text-neutral-400 uppercase dark:text-neutral-500'>
+    <h3 className='text-caption mb-2 font-semibold tracking-wider text-neutral-400 uppercase dark:text-neutral-500'>
       {children}
     </h3>
   );
@@ -40,11 +40,11 @@ function InfoRow({ label, children }: { label: string; children: React.ReactNode
 
 function BoolBadge({ value }: { value: boolean }) {
   return value ? (
-    <span className='inline-flex items-center rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400'>
+    <span className='text-caption inline-flex items-center rounded bg-emerald-100 px-1.5 py-0.5 font-semibold text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400'>
       Yes
     </span>
   ) : (
-    <span className='inline-flex items-center rounded bg-neutral-100 px-1.5 py-0.5 text-[10px] font-semibold text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400'>
+    <span className='text-caption inline-flex items-center rounded bg-neutral-100 px-1.5 py-0.5 font-semibold text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400'>
       No
     </span>
   );
@@ -138,14 +138,14 @@ function FileRecordDetailsBody({ file }: { file: S3Record }) {
         </InfoRow>
         <InfoRow label='Type'>
           <span
-            className={`inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-bold uppercase ${getFileTypeBadgeStyle(ext)}`}
+            className={`text-caption inline-flex items-center rounded px-1.5 py-0.5 font-bold uppercase ${getFileTypeBadgeStyle(ext)}`}
           >
             {ext}
           </span>
         </InfoRow>
         <InfoRow label='Size'>{file.size != null ? formatBytes(file.size) : '—'}</InfoRow>
         <InfoRow label='S3 Object ID'>
-          <span className='font-mono text-[11px]'>{file.s3ObjectId}</span>
+          <span className='text-caption font-mono'>{file.s3ObjectId}</span>
         </InfoRow>
       </div>
 
@@ -154,13 +154,13 @@ function FileRecordDetailsBody({ file }: { file: S3Record }) {
         <SectionTitle>S3 Location</SectionTitle>
         <div className='mb-3 rounded-md border border-neutral-200 bg-neutral-50 p-3 dark:border-neutral-700 dark:bg-neutral-800/50'>
           <div className='mb-1.5 flex items-center justify-between'>
-            <span className='text-[10px] font-semibold tracking-wider text-neutral-400 uppercase dark:text-neutral-500'>
+            <span className='text-caption font-semibold tracking-wider text-neutral-400 uppercase dark:text-neutral-500'>
               S3 Path
             </span>
             <button
               type='button'
               onClick={handleCopyS3Uri}
-              className='flex items-center gap-1 text-[11px] text-blue-600 hover:underline dark:text-blue-400'
+              className='text-caption flex items-center gap-1 text-blue-600 hover:underline dark:text-blue-400'
             >
               {copiedS3UriId === file.s3ObjectId ? (
                 <>
@@ -175,7 +175,7 @@ function FileRecordDetailsBody({ file }: { file: S3Record }) {
               )}
             </button>
           </div>
-          <p className='font-mono text-[11px] break-all text-neutral-800 dark:text-neutral-200'>
+          <p className='text-caption font-mono break-all text-neutral-800 dark:text-neutral-200'>
             s3://{file.bucket}/{file.key}
           </p>
         </div>
@@ -188,7 +188,7 @@ function FileRecordDetailsBody({ file }: { file: S3Record }) {
           </InfoRow>
         )}
         <InfoRow label='Version ID'>
-          <span className='font-mono text-[11px]'>{file.versionId}</span>
+          <span className='text-caption font-mono'>{file.versionId}</span>
         </InfoRow>
       </div>
 
@@ -200,12 +200,12 @@ function FileRecordDetailsBody({ file }: { file: S3Record }) {
           {file.archiveStatus && <InfoRow label='Archive Status'>{file.archiveStatus}</InfoRow>}
           {file.eTag && (
             <InfoRow label='ETag'>
-              <span className='font-mono text-[11px]'>{file.eTag}</span>
+              <span className='text-caption font-mono'>{file.eTag}</span>
             </InfoRow>
           )}
           {file.sha256 && (
             <InfoRow label='SHA-256'>
-              <span className='font-mono text-[11px]'>{file.sha256}</span>
+              <span className='text-caption font-mono'>{file.sha256}</span>
             </InfoRow>
           )}
         </div>
@@ -222,12 +222,12 @@ function FileRecordDetailsBody({ file }: { file: S3Record }) {
         )}
         {file.ingestId && (
           <InfoRow label='Ingest ID'>
-            <span className='font-mono text-[11px]'>{file.ingestId}</span>
+            <span className='text-caption font-mono'>{file.ingestId}</span>
           </InfoRow>
         )}
         {file.sequencer && (
           <InfoRow label='Sequencer'>
-            <span className='font-mono text-[11px]'>{file.sequencer}</span>
+            <span className='text-caption font-mono'>{file.sequencer}</span>
           </InfoRow>
         )}
         <InfoRow label='Duplicate Events'>{file.numberDuplicateEvents}</InfoRow>
@@ -251,7 +251,7 @@ function FileRecordDetailsBody({ file }: { file: S3Record }) {
         )}
         {file.deletedSequencer && (
           <InfoRow label='Deleted Sequencer'>
-            <span className='font-mono text-[11px]'>{file.deletedSequencer}</span>
+            <span className='text-caption font-mono'>{file.deletedSequencer}</span>
           </InfoRow>
         )}
       </div>
@@ -262,7 +262,7 @@ function FileRecordDetailsBody({ file }: { file: S3Record }) {
           <SectionTitle>Attributes</SectionTitle>
           {Object.entries(attributes).map(([k, v]) => (
             <InfoRow key={k} label={k}>
-              <span className='font-mono text-[11px]'>{String(v)}</span>
+              <span className='text-caption font-mono'>{String(v)}</span>
             </InfoRow>
           ))}
         </div>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Copy, Edit } from 'lucide-react';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { PillTag } from '@/components/ui/PillTag';
 import { useCaseDetailsContext } from '../context/CaseDetailsContext';
@@ -10,8 +11,7 @@ export function CaseDetailsPageHeader() {
   const { caseDetail, isLoadingCaseDetail } = useCaseDetailsContext();
   const [isEditOpen, setIsEditOpen] = useState(false);
 
-  const handleCopyOrcabusId = (e: React.MouseEvent | React.KeyboardEvent) => {
-    e.stopPropagation();
+  const handleCopyOrcabusId = () => {
     void navigator.clipboard.writeText(caseDetail?.orcabusId ?? '');
     toast.success('Orcabus ID copied to clipboard');
   };
@@ -48,30 +48,24 @@ export function CaseDetailsPageHeader() {
               <span className='flex items-center gap-1.5'>
                 Orcabus ID: <span className='font-mono'>{caseDetail?.orcabusId ?? '—'}</span>
                 {caseDetail?.orcabusId && (
-                  <span
-                    role='button'
-                    tabIndex={0}
+                  <button
+                    type='button'
                     onClick={handleCopyOrcabusId}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') handleCopyOrcabusId(e);
-                    }}
+                    aria-label='Copy Orcabus ID'
                     className='rounded p-0.5 transition-colors hover:bg-neutral-200 dark:hover:bg-[#2d3540]'
                   >
                     <Copy className='h-3.5 w-3.5 text-neutral-400 hover:text-neutral-600 dark:text-[#9dabb9] dark:hover:text-white' />
-                  </span>
+                  </button>
                 )}
               </span>
             )}
           </div>
         </div>
         <div className='flex items-center gap-2'>
-          <button
-            onClick={() => setIsEditOpen(true)}
-            className='flex items-center gap-2 rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-neutral-600 dark:bg-[#1e252e] dark:text-neutral-200 dark:hover:bg-neutral-700/50'
-          >
+          <Button onClick={() => setIsEditOpen(true)}>
             <Edit className='h-4 w-4' />
             Edit Case
-          </button>
+          </Button>
         </div>
       </div>
 

@@ -1,16 +1,18 @@
 import type { LucideIcon } from 'lucide-react';
 import Skeleton from 'react-loading-skeleton';
 import { ApiErrorState } from '@/components/ui/ApiErrorState';
+import { FAMILY_TILE_ACCENT, type StatusFamily } from '@/components/ui/status-config';
 
 export interface OverviewStatItem {
   label: string;
   value: string | number;
   icon: LucideIcon;
-  color: string;
-  bgColor: string;
-  darkColor: string;
-  darkBgColor: string;
-  accentColor: string;
+  /** Which of the app's status families this metric reads as — same
+   * source of truth as StatusBadge/StatusCard, rather than a one-off color
+   * chosen per metric (this used to be 5 separate color props, one of
+   * which put "Active Workflow Runs" in a dedicated qc-purple family —
+   * since retired entirely, folded into "info"). */
+  family: StatusFamily;
   summary?: string;
   detailRows?: Array<{
     label: string;
@@ -67,14 +69,15 @@ export function OverviewStatsStrip({
     <div className='mb-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4'>
       {stats.map((stat, index) => {
         const Icon = stat.icon;
+        const accent = FAMILY_TILE_ACCENT[stat.family];
         return (
           <div
             key={index}
-            className={`flex min-h-49 flex-col rounded-lg border border-t-4 border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/40 transition-colors dark:border-[#2d3540] dark:bg-[#111418] dark:shadow-none ${stat.accentColor}`}
+            className={`flex min-h-49 flex-col rounded-lg border border-t-4 border-slate-200 bg-white p-4 transition-colors dark:border-[#2d3540] dark:bg-[#111418] ${accent.topBorder}`}
           >
             <div className='mb-5 flex items-start justify-between'>
-              <div className={`rounded-lg p-2.5 ${stat.bgColor} ${stat.darkBgColor}`}>
-                <Icon className={`h-5 w-5 ${stat.color} ${stat.darkColor}`} />
+              <div className={`rounded-lg p-2.5 ${accent.iconBg}`}>
+                <Icon className={`h-5 w-5 ${accent.iconColor}`} />
               </div>
             </div>
             <div className='mb-1 text-3xl font-bold tracking-tight text-slate-950 dark:text-white'>
@@ -90,7 +93,7 @@ export function OverviewStatsStrip({
               <div className='mt-auto space-y-2 border-t border-slate-100 pt-3 dark:border-[#2d3540]'>
                 {stat.detailRows.map((row) => (
                   <div key={row.label} className='flex items-center justify-between gap-3'>
-                    <span className='text-[11px] font-semibold tracking-wide text-slate-400 uppercase dark:text-[#6b7a8d]'>
+                    <span className='text-caption font-semibold tracking-wide text-slate-400 uppercase dark:text-[#6b7a8d]'>
                       {row.label}
                     </span>
                     <span className='font-mono text-xs font-semibold text-slate-700 dark:text-slate-200'>

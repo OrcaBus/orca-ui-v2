@@ -102,7 +102,7 @@ const inputCls =
 
 const labelCls = 'block text-sm font-medium text-neutral-700 dark:text-neutral-300';
 
-const errorCls = 'text-sm font-medium text-red-500 dark:text-red-400';
+const errorCls = 'text-sm font-medium text-destructive';
 
 // ─── component ────────────────────────────────────────────────────────────────
 

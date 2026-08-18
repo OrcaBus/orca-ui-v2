@@ -64,7 +64,7 @@ export function FilesTable() {
           return (
             <div className='flex items-center gap-3'>
               <span
-                className={`inline-flex items-center justify-center rounded px-2 py-0.5 text-[10px] font-bold tracking-wide uppercase ${getFileTypeBadgeStyle(ext)}`}
+                className={`text-caption inline-flex items-center justify-center rounded px-2 py-0.5 font-bold tracking-wide uppercase ${getFileTypeBadgeStyle(ext)}`}
               >
                 {ext}
               </span>
@@ -141,6 +141,7 @@ export function FilesTable() {
         key: 'size',
         header: 'Size',
         sortable: true,
+        align: 'right',
         render: (file) => (
           <span className='text-sm text-neutral-900 dark:text-[#9dabb9]'>
             {file.size != null ? formatBytes(file.size) : '-'}

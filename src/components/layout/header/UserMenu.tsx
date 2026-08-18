@@ -51,7 +51,7 @@ export function UserMenu() {
           className='z-50 w-48 origin-top-right rounded-md border border-slate-200 bg-white shadow-lg transition duration-200 ease-out outline-none [--anchor-gap:--spacing(1)] data-closed:scale-95 data-closed:opacity-0 dark:border-[#2d3540] dark:bg-[#111418] dark:shadow-black/40'
         >
           <MenuSection className='border-b border-slate-200 p-2 dark:border-[#2d3540]'>
-            <MenuHeading className='text-[11px] font-normal text-slate-400 dark:text-[#9dabb9]'>
+            <MenuHeading className='text-caption font-normal text-slate-400 dark:text-[#9dabb9]'>
               Signed in as
             </MenuHeading>
             <div className='mt-0.5 text-[13px] font-medium text-slate-900 dark:text-white'>

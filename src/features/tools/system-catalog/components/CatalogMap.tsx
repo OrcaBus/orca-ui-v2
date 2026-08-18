@@ -72,7 +72,7 @@ function PipelineNode({ data, selected }: NodeProps) {
 
       <div className='pt-3 pr-3 pb-3 pl-4'>
         <div
-          className='mb-2 inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold'
+          className='text-caption mb-2 inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 font-semibold'
           style={{ background: `${nodeColor}18`, color: nodeColor }}
         >
           <Cpu className='h-2.5 w-2.5' />
@@ -81,7 +81,7 @@ function PipelineNode({ data, selected }: NodeProps) {
         <div className='text-[13px] leading-tight font-semibold text-slate-900 dark:text-white'>
           {node.label}
         </div>
-        <div className='mt-0.5 text-[11px] text-slate-400 dark:text-[#9dabb9]'>{node.version}</div>
+        <div className='text-caption mt-0.5 text-slate-400 dark:text-[#9dabb9]'>{node.version}</div>
       </div>
 
       <Handle type='target' position={Position.Left} style={{ opacity: 0 }} />

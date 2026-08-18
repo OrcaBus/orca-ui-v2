@@ -1,4 +1,3 @@
-export { AnalysisRunDetailsPageBreadcrumb } from './AnalysisRunDetailsPageBreadcrumb';
 export { AnalysisRunDetailsPageHeader } from './AnalysisRunDetailsPageHeader';
 export { AnalysisRunDetailsOverviewCard } from './AnalysisRunDetailsOverviewCard';
 export { AnalysisRunDetailsTabs } from './AnalysisRunDetailsTabs';

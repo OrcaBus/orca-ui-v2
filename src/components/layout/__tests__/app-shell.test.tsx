@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type { ReactNode } from 'react';
 import { AuthContext, type AuthContextValue } from '@/context/auth-context';
 import { EnvironmentContext } from '@/context/environment-context';
+import { NotificationProvider } from '@/context/NotificationProvider';
 import { AppShellContext, type AppShellContextValue } from '../../../context/app-shell-context';
 import type { AppShellHeaderConfig } from '../../../context/app-shell-context';
 import type { SecondarySidebarGroup, SecondarySidebarItem } from '../SecondarySidebar';
@@ -72,13 +73,18 @@ function renderRoot({
     <MemoryRouter initialEntries={['/runs/overview']}>
       <AuthContext.Provider value={authValue}>
         <EnvironmentContext.Provider value={{ environment: 'dev', label: 'Dev' }}>
-          <AppShellContext.Provider value={contextValue}>
-            <Routes>
-              <Route element={<Root />}>
-                <Route path='*' element={<div data-testid='page-content'>Runs page content</div>} />
-              </Route>
-            </Routes>
-          </AppShellContext.Provider>
+          <NotificationProvider>
+            <AppShellContext.Provider value={contextValue}>
+              <Routes>
+                <Route element={<Root />}>
+                  <Route
+                    path='*'
+                    element={<div data-testid='page-content'>Runs page content</div>}
+                  />
+                </Route>
+              </Routes>
+            </AppShellContext.Provider>
+          </NotificationProvider>
         </EnvironmentContext.Provider>
       </AuthContext.Provider>
     </MemoryRouter>

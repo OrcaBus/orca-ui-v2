@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router';
 import { DataTable, type Column } from '../../../components/tables/DataTable';
 import { ApiErrorState } from '../../../components/ui/ApiErrorState';
 import { PillTag } from '../../../components/ui/PillTag';
+import { StatusBadge } from '@/components/ui/StatusBadge';
 import { DEFAULT_PAGE_SIZE } from '@/utils/constants';
 import { useCasesListQueryParams } from '../hooks/useCasesListQueryParams';
 import { useCaseListModel, type CaseDetailModel } from '../api/cases.api';
-import { getCaseStatusVisual } from '../utils/caseStatus.visuals';
 import { formatCaseText } from '../utils/caseDisplay';
 import { formatCalendarDate } from '@/utils/timeFormat';
 import { orderByParam } from '@/utils/queryParams';
@@ -129,17 +129,12 @@ export function CasesListTable() {
         key: 'status',
         header: 'Status',
         sortable: false,
-        render: (case_) => {
-          if (!case_.latestState?.status) {
-            return <span className='text-sm text-neutral-400 dark:text-neutral-600'>—</span>;
-          }
-          const { variant, label } = getCaseStatusVisual(case_.latestState.status);
-          return (
-            <PillTag variant={variant} size='sm'>
-              {label}
-            </PillTag>
-          );
-        },
+        render: (case_) =>
+          case_.latestState?.status ? (
+            <StatusBadge status={case_.latestState.status} />
+          ) : (
+            <span className='text-sm text-neutral-400 dark:text-neutral-600'>—</span>
+          ),
       },
       {
         key: 'dueDate',

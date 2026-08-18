@@ -10,7 +10,7 @@ export function DeploymentStatusBadge({ status }: DeploymentStatusBadgeProps) {
 
   return (
     <PillTag variant={visual.variant}>
-      <span className='font-mono text-[11px]'>{visual.label}</span>
+      <span className='text-caption font-mono'>{visual.label}</span>
     </PillTag>
   );
 }

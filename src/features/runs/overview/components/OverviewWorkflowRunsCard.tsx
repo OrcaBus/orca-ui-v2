@@ -37,13 +37,13 @@ export function OverviewWorkflowRunsCard({
         <table className='w-full'>
           <thead className='border-b border-slate-200 bg-slate-50 dark:border-[#2d3540] dark:bg-[#111418]'>
             <tr>
-              <th className='px-4 py-2 text-left text-[11px] font-semibold tracking-wider text-slate-500 uppercase dark:text-[#9dabb9]'>
+              <th className='text-caption px-4 py-2 text-left font-semibold tracking-wider text-slate-500 uppercase dark:text-[#9dabb9]'>
                 Run Name
               </th>
-              <th className='px-4 py-2 text-left text-[11px] font-semibold tracking-wider text-slate-500 uppercase dark:text-[#9dabb9]'>
+              <th className='text-caption px-4 py-2 text-left font-semibold tracking-wider text-slate-500 uppercase dark:text-[#9dabb9]'>
                 Status
               </th>
-              <th className='px-4 py-2 text-left text-[11px] font-semibold tracking-wider text-slate-500 uppercase dark:text-[#9dabb9]'>
+              <th className='text-caption px-4 py-2 text-left font-semibold tracking-wider text-slate-500 uppercase dark:text-[#9dabb9]'>
                 Start time
               </th>
             </tr>
@@ -68,10 +68,7 @@ export function OverviewWorkflowRunsCard({
               </tr>
             ) : runs.length === 0 ? (
               <tr>
-                <td
-                  colSpan={3}
-                  className='px-4 py-8 text-center text-sm text-slate-500 dark:text-[#9dabb9]'
-                >
+                <td colSpan={3} className='text-muted-foreground px-4 py-8 text-center text-sm'>
                   No recent workflow runs
                 </td>
               </tr>
@@ -98,7 +95,7 @@ export function OverviewWorkflowRunsCard({
                         {formatTableDate(workflow.startTime)}
                       </div>
                     ) : (
-                      <span className='text-[13px] text-slate-500 dark:text-[#9dabb9]'>-</span>
+                      <span className='text-muted-foreground text-[13px]'>-</span>
                     )}
                   </td>
                 </tr>

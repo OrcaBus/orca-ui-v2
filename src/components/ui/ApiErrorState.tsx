@@ -98,7 +98,7 @@ export function ApiErrorState({
             {statusCode && (
               <span
                 className={cn(
-                  'rounded-full px-2 py-0.5 font-mono text-[10px] font-semibold',
+                  'text-caption rounded-full px-2 py-0.5 font-mono font-semibold',
                   config.badge
                 )}
               >
@@ -106,7 +106,7 @@ export function ApiErrorState({
               </span>
             )}
           </div>
-          <p className='mx-auto max-w-sm text-xs leading-relaxed whitespace-pre-line text-slate-500 dark:text-[#9dabb9]'>
+          <p className='text-muted-foreground mx-auto max-w-sm text-xs leading-relaxed whitespace-pre-line'>
             {displayMessage}
           </p>
         </div>

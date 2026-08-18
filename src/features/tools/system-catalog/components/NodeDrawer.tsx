@@ -118,14 +118,14 @@ export function NodeDrawer({
           <div className='min-w-0 flex-1 pr-3'>
             <div className='mb-1 flex items-center gap-2'>
               <span
-                className='inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold'
+                className='text-caption inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-semibold'
                 style={{ background: `${nodeColor}18`, color: nodeColor }}
               >
                 <Cpu className='h-2.5 w-2.5' />
                 {getNodeKindLabel(node)}
               </span>
               <span
-                className='inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold'
+                className='text-caption inline-flex items-center rounded-full px-2 py-0.5 font-semibold'
                 style={{ background: `${nodeColor}18`, color: nodeColor }}
               >
                 {getNodeDetailLabel(node)}
@@ -278,7 +278,7 @@ export function NodeDrawer({
               ))}
             </div>
           ) : (
-            <p className='text-sm text-slate-500 dark:text-[#9dabb9]'>No tags configured.</p>
+            <p className='text-muted-foreground text-sm'>No tags configured.</p>
           )}
         </section>
 

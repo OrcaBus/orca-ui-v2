@@ -16,6 +16,7 @@ import {
 } from '@/components/timeline';
 import { TimelineDialogFrame } from '@/components/timeline/TimelineDialogFrame';
 import { useAuthContext } from '@/context/auth-context';
+import { Button } from '@/components/ui/Button';
 import { SpinnerWithText } from '@/components/ui/Spinner';
 import { isEmail } from '@/utils/string';
 import { formatBackendDate } from '@/utils/timeFormat';
@@ -29,7 +30,7 @@ import {
   type CaseStatusEnum,
 } from '../api/cases.api';
 import { useCaseDetailsContext } from '../context/CaseDetailsContext';
-import { CASE_STATUS_VISUALS } from '../utils/caseStatus.visuals';
+import { CASE_STATUS_LABELS } from '../utils/caseStatus.visuals';
 import { getCaseStateTimelineTimestamp } from '../utils/caseStateDate';
 
 type ArchiveTimelineRecordDialogProps = {
@@ -80,22 +81,17 @@ function ArchiveTimelineRecordDialog({
       icon={<Archive className='h-5 w-5' />}
       footer={
         <>
-          <button
-            type='button'
-            onClick={onClose}
-            disabled={isArchiving}
-            className='rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-[#9dabb9] dark:hover:bg-[#2d3540]'
-          >
+          <Button type='button' variant='outline' onClick={onClose} disabled={isArchiving}>
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             type='button'
+            variant='destructive'
             onClick={() => void handleArchive()}
             disabled={isArchiving}
-            className='rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:bg-red-600 dark:hover:bg-red-700'
           >
             {isArchiving ? 'Archiving...' : 'Archive'}
-          </button>
+          </Button>
         </>
       }
     >
@@ -136,10 +132,10 @@ export function CaseDetailsTimeline() {
 
   const availableStateOptions = useMemo(
     () =>
-      Object.entries(CASE_STATUS_VISUALS)
-        .map(([status, visual]) => ({
+      Object.entries(CASE_STATUS_LABELS)
+        .map(([status, label]) => ({
           value: status as CaseStatusEnum,
-          label: visual.label || formatStateLabel(status),
+          label,
         }))
         .sort((a, b) => a.label.localeCompare(b.label)),
     []

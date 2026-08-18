@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { X, ChevronDown, Plus } from 'lucide-react';
 import { DialogFrame } from '@/components/modals/DialogFrame';
 import { Button } from '@/components/ui/Button';
+import { Select } from '@/components/ui/Select';
 import { tryPrettyJson } from '@/utils/json';
 import type { MapEdgeType, MapGroup, ResourceType, WorkflowEngine } from '../data/dynamodb-schema';
 import type { CatalogNodeLookupItem, NodeFormData } from '../types/system-catalog.types';
@@ -252,29 +253,33 @@ export function NodeModal({
             </label>
             <div className='relative'>
               {selectedNodeType === 'resource' ? (
-                <select
+                <Select
                   id='node-resource-type'
                   {...register('resourceType')}
                   className={inputClassName + ' appearance-none pr-8'}
-                >
-                  {RESOURCE_TYPE_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
+                  value={selectedNodeType === 'resource' ? initialData.resourceType : ''}
+                  options={RESOURCE_TYPE_OPTIONS.map((option) => ({
+                    value: option.value,
+                    label: option.label,
+                  }))}
+                  onChange={(value) =>
+                    setValue('resourceType', value as ResourceType, { shouldValidate: true })
+                  }
+                ></Select>
               ) : (
-                <select
+                <Select
                   id='node-workflow-engine'
                   {...register('workflowEngine')}
                   className={inputClassName + ' appearance-none pr-8'}
-                >
-                  {WORKFLOW_ENGINE_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
+                  value={selectedNodeType === 'workflow' ? initialData.workflowEngine : ''}
+                  options={WORKFLOW_ENGINE_OPTIONS.map((option) => ({
+                    value: option.value,
+                    label: option.label,
+                  }))}
+                  onChange={(value) =>
+                    setValue('workflowEngine', value as WorkflowEngine, { shouldValidate: true })
+                  }
+                ></Select>
               )}
               <ChevronDown className='pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-slate-400' />
             </div>
@@ -294,16 +299,16 @@ export function NodeModal({
                     ? 'Select groups...'
                     : `${selectedGroupIds.length} group${selectedGroupIds.length === 1 ? '' : 's'} selected`}
                 </span>
-                <button
-                  type='button'
+                <Button
                   onClick={(event) => {
                     event.stopPropagation();
                     setIsGroupDropdownOpen((open) => !open);
                   }}
+                  aria-label='Select groups'
                   className='ml-auto shrink-0 rounded-md p-0.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-[#2d3540] dark:hover:text-white'
                 >
                   <Plus className='h-4 w-4' />
-                </button>
+                </Button>
               </div>
 
               {selectedGroupIds.length > 0 && (
@@ -335,6 +340,7 @@ export function NodeModal({
                               { shouldValidate: true }
                             )
                           }
+                          aria-label={`Remove group ${group.name}`}
                           className='rounded-md p-0.5 text-slate-300 transition-colors hover:bg-slate-100 hover:text-slate-500 dark:text-[#4a5568] dark:hover:bg-[#2d3540] dark:hover:text-white'
                         >
                           <X className='h-3 w-3' />
@@ -388,6 +394,7 @@ export function NodeModal({
                     event.stopPropagation();
                     setIsParentDropdownOpen((open) => !open);
                   }}
+                  aria-label='Select parent nodes'
                   className='ml-auto shrink-0 rounded-md p-0.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-[#2d3540] dark:hover:text-white'
                 >
                   <Plus className='h-4 w-4' />
@@ -452,6 +459,7 @@ export function NodeModal({
                               { shouldValidate: true }
                             );
                           }}
+                          aria-label={`Remove parent node ${parentNode?.label ?? parentLink.nodeId}`}
                           className='-mr-1 rounded-md p-1 text-slate-300 transition-colors hover:bg-slate-100 hover:text-slate-500 dark:text-[#4a5568] dark:hover:bg-[#2d3540] dark:hover:text-white'
                         >
                           <X className='h-3.5 w-3.5' />
@@ -528,9 +536,7 @@ export function NodeModal({
                 {errors.configJson.message}
               </p>
             )}
-            <p className='mt-1 text-xs text-slate-500 dark:text-[#9dabb9]'>
-              JSON object with string values.
-            </p>
+            <p className='text-muted-foreground mt-1 text-xs'>JSON object with string values.</p>
           </div>
 
           <div className='col-span-2'>

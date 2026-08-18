@@ -248,6 +248,7 @@ export function GroupEditModal({
                     event.stopPropagation();
                     setIsNodeDropdownOpen((open) => !open);
                   }}
+                  aria-label='Select nodes'
                   className='ml-auto shrink-0 rounded-md p-0.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-[#2d3540] dark:hover:text-white'
                 >
                   <Plus className='h-4 w-4' />
@@ -281,6 +282,7 @@ export function GroupEditModal({
                               { shouldValidate: true }
                             )
                           }
+                          aria-label={`Remove node ${node?.label ?? nodeId}`}
                           className='rounded-md p-0.5 text-slate-300 transition-colors hover:bg-slate-100 hover:text-slate-500 dark:text-[#4a5568] dark:hover:bg-[#2d3540] dark:hover:text-white'
                         >
                           <X className='h-3 w-3' />

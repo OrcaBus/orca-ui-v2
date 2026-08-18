@@ -1,7 +1,9 @@
 import { Activity, GitBranch, BarChart2 } from 'lucide-react';
+import { Link } from 'react-router';
 import { PillTag } from '@/components/ui/PillTag';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { StatusBadge } from '@/components/ui/StatusBadge';
+import { useCaseExternalEntityDetailModel } from '@/features/cases/api/cases.api';
 import { useWorkflowRunDetailsContext } from '../context/WorkflowRunDetailsContext';
 
 export function WorkflowRunDetailsOverviewCard() {
@@ -9,6 +11,20 @@ export function WorkflowRunDetailsOverviewCard() {
 
   const wf = workflowRunDetail;
   const analysisRun = wf?.analysisRun;
+
+  // Workflow runs don't carry a case reference on their own detail payload
+  // (see api/types/workflow.openapi.d.ts WorkflowRunDetail) — the link only
+  // exists on the Case side, as an external-entity reference. The generic
+  // external-entity endpoint gives the reverse lookup: fetch the entity
+  // record keyed by *this workflow run's own* orcabusId, and read back
+  // whichever case(s) reference it. A workflow run with no case link is the
+  // common case, not an error, so a failed/empty lookup just means the
+  // "Linked Case" field doesn't render — it isn't surfaced as ApiErrorState.
+  const { data: linkedEntity } = useCaseExternalEntityDetailModel({
+    params: { path: { orcabusId: wf?.orcabusId ?? '' } },
+    reactQuery: { enabled: Boolean(wf?.orcabusId), retry: false },
+  });
+  const linkedCase = linkedEntity?.case?.[0]?.case;
 
   return (
     <div className='rounded-lg border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900'>
@@ -68,6 +84,21 @@ export function WorkflowRunDetailsOverviewCard() {
                 )}
               </div>
             </div>
+            {linkedCase && (
+              <div>
+                <div className='mb-0.5 text-xs text-neutral-600 dark:text-neutral-400'>
+                  Linked Case
+                </div>
+                <div className='text-sm'>
+                  <Link
+                    to={`/cases/${linkedCase.orcabusId}`}
+                    className='text-primary hover:underline'
+                  >
+                    {linkedCase.requestFormId}
+                  </Link>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -153,8 +184,13 @@ export function WorkflowRunDetailsOverviewCard() {
                 <div className='mb-0.5 text-xs text-neutral-600 dark:text-neutral-400'>
                   Analysis Run Name
                 </div>
-                <div className='text-sm text-neutral-900 dark:text-neutral-100'>
-                  {analysisRun.analysisRunName}
+                <div className='text-sm'>
+                  <Link
+                    to={`/runs/analysis-runs/${analysisRun.orcabusId}`}
+                    className='text-primary hover:underline'
+                  >
+                    {analysisRun.analysisRunName}
+                  </Link>
                 </div>
               </div>
               <div>

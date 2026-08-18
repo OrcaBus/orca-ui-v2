@@ -3,7 +3,6 @@ export { SequenceRunDetailsOverviewCard } from './SequenceRunDetailsOverviewCard
 export { SequenceRunDetailsTabs } from './SequenceRunDetailsTabs';
 export { SequenceRunDetailsTimeline } from './SequenceRunDetailsTimeline';
 export { SequenceRunDetailsSampleSheetsTab } from './SequenceRunDetailsSampleSheetsTab';
-export { SequenceWorkflowRunsTab } from './SequenceWorkflowRunsTab';
 export { SequenceRunDetailsLibrariesTable } from './SequenceRunDetailsLibrariesTable';
 export { SampleSheetUploadModal } from './SampleSheetUploadModal';
 export { SampleSheetViewModal } from './SampleSheetViewModal';

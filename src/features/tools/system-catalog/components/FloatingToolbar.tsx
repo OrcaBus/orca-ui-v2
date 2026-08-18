@@ -263,6 +263,7 @@ export function FloatingToolbar({
                     onSearchChange('');
                     searchInputRef.current?.focus();
                   }}
+                  aria-label='Clear search'
                   className='absolute top-1/2 right-2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:text-[#6b7a8d] dark:hover:text-white'
                 >
                   <X className='h-3 w-3' />
@@ -284,7 +285,13 @@ export function FloatingToolbar({
         <div className='mx-0.5 h-5 w-px bg-slate-200 dark:bg-[#2d3540]' />
 
         {/* Add node */}
-        <Button type='button' size='sm' onClick={onAddNode} className='rounded-lg'>
+        <Button
+          type='button'
+          size='sm'
+          onClick={onAddNode}
+          aria-label='Add Node'
+          className='rounded-lg'
+        >
           <Plus />
           <span className='hidden sm:inline'>Add Node</span>
         </Button>
@@ -315,17 +322,24 @@ export function FloatingToolbar({
 
         <div className='mx-0.5 h-5 w-px bg-slate-200 dark:bg-[#2d3540]' />
 
-        <button
+        {/* Prominent (primary) while there are unsaved changes to lose;
+            quiet once saved — the reverse of the old fixed outline style,
+            which gave this data-loss-prevention action the same visual
+            weight at all times as routine utilities like Auto Layout. */}
+        <Button
           type='button'
+          size='sm'
+          variant={isDirty ? 'default' : 'outline'}
           onClick={onSave}
           disabled={!isDirty || isSaving}
-          className='flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 px-3 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-[#2d3540] dark:text-slate-200 dark:hover:bg-[#1e252e]'
+          aria-label={isSaving ? 'Saving' : isDirty ? 'Save' : 'Saved'}
+          className='rounded-lg'
         >
           <Save className='h-3.5 w-3.5' />
           <span className='hidden sm:inline'>
             {isSaving ? 'Saving…' : isDirty ? 'Save' : 'Saved'}
           </span>
-        </button>
+        </Button>
 
         <div className='mx-0.5 h-5 w-px bg-slate-200 dark:bg-[#2d3540]' />
 

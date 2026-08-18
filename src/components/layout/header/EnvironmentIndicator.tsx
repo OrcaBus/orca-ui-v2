@@ -42,7 +42,7 @@ export function EnvironmentIndicator() {
       <Menu as='div' className='relative'>
         <MenuButton
           aria-label={`Open another environment (current: ${label})`}
-          className={`rounded-md px-2.5 py-1 text-[11px]! font-semibold! tracking-wider uppercase focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none ${ENV_BADGE_STYLES[environment]}`}
+          className={`text-caption! rounded-md px-2.5 py-1 font-semibold! tracking-wider uppercase focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none ${ENV_BADGE_STYLES[environment]}`}
         >
           {label}
         </MenuButton>
@@ -53,7 +53,7 @@ export function EnvironmentIndicator() {
           className='z-50 w-56 origin-top-right rounded-md border border-slate-200 bg-white shadow-lg transition duration-200 ease-out outline-none [--anchor-gap:--spacing(1)] data-closed:scale-95 data-closed:opacity-0 dark:border-[#2d3540] dark:bg-[#111418] dark:shadow-black/40'
         >
           <div className='border-b border-slate-200 px-3 py-2 dark:border-[#2d3540]'>
-            <p className='text-[11px] font-normal tracking-wide text-slate-400 uppercase dark:text-[#9dabb9]'>
+            <p className='text-caption font-normal tracking-wide text-slate-400 uppercase dark:text-[#9dabb9]'>
               Open in new tab
             </p>
           </div>
@@ -69,7 +69,7 @@ export function EnvironmentIndicator() {
                   <span className={`h-2 w-2 shrink-0 rounded-full ${ENV_DOT_STYLES[env]}`} />
                   <span className='flex min-w-0 flex-col'>
                     <span className='font-medium'>{getEnvironmentLabel(env)}</span>
-                    <span className='truncate text-[11px] text-slate-400 dark:text-[#9dabb9]'>
+                    <span className='text-caption truncate text-slate-400 dark:text-[#9dabb9]'>
                       {ENVIRONMENT_HOSTNAMES[env]}
                     </span>
                   </span>

@@ -19,7 +19,7 @@ function getSequenceStatusIcon(status: InstrumentRunStatus) {
         <CheckCircle className='h-5 w-5 text-green-500 dark:text-green-400' {...filledIconProps} />
       );
     case 'FAILED':
-      return <XCircle className='h-5 w-5 text-red-500 dark:text-red-400' {...filledIconProps} />;
+      return <XCircle className='text-destructive h-5 w-5' {...filledIconProps} />;
     case 'STARTED':
       return (
         <PlayCircle className='h-5 w-5 text-amber-500 dark:text-amber-400' {...filledIconProps} />

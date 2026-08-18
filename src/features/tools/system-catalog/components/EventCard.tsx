@@ -22,16 +22,16 @@ export function EventCard({ event, variant, onEdit, onDelete }: EventCardProps) 
       >
         <Zap className='mt-0.5 h-3.5 w-3.5 shrink-0' style={{ color: accentColor }} />
         <div className='min-w-0 flex-1'>
-          <div className='truncate font-mono text-[11px] font-semibold text-slate-800 dark:text-white'>
+          <div className='text-caption truncate font-mono font-semibold text-slate-800 dark:text-white'>
             {event.name}
           </div>
           {event.topic && (
-            <div className='mt-0.5 text-[10px] text-slate-400 dark:text-[#9dabb9]'>
+            <div className='text-caption mt-0.5 text-slate-400 dark:text-[#9dabb9]'>
               Topic: <span style={{ color: accentColor }}>{event.topic}</span>
             </div>
           )}
           {event.condition && (
-            <div className='mt-0.5 text-[10px] text-slate-400 dark:text-[#9dabb9]'>
+            <div className='text-caption mt-0.5 text-slate-400 dark:text-[#9dabb9]'>
               Condition:{' '}
               <span className='font-mono text-amber-600 dark:text-amber-400'>
                 {event.condition}
@@ -79,13 +79,13 @@ export function EventCard({ event, variant, onEdit, onDelete }: EventCardProps) 
           <div
             className={
               variant === 'input'
-                ? 'mb-1.5 text-[10px] font-semibold text-blue-700 dark:text-blue-400'
-                : 'mb-1.5 text-[10px] font-semibold text-emerald-700 dark:text-emerald-400'
+                ? 'text-caption mb-1.5 font-semibold text-blue-700 dark:text-blue-400'
+                : 'text-caption mb-1.5 font-semibold text-emerald-700 dark:text-emerald-400'
             }
           >
             Example Payload
           </div>
-          <pre className='overflow-x-auto rounded-lg bg-slate-900 p-2.5 font-mono text-[10px] leading-relaxed text-slate-300 dark:bg-slate-950 dark:text-slate-400'>
+          <pre className='text-caption overflow-x-auto rounded-lg bg-slate-900 p-2.5 font-mono leading-relaxed text-slate-300 dark:bg-slate-950 dark:text-slate-400'>
             <code>{JSON.stringify(event.payload, null, 2)}</code>
           </pre>
         </div>

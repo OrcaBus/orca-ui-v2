@@ -66,7 +66,7 @@ export function CaseDetailsLinkedWorkflowRunFilesTable({
           return (
             <div className='flex items-center gap-3'>
               <span
-                className={`inline-flex items-center justify-center rounded px-2 py-0.5 text-[10px] font-bold tracking-wide uppercase ${getFileTypeBadgeStyle(ext)}`}
+                className={`text-caption inline-flex items-center justify-center rounded px-2 py-0.5 font-bold tracking-wide uppercase ${getFileTypeBadgeStyle(ext)}`}
               >
                 {ext}
               </span>

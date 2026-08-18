@@ -301,7 +301,7 @@ export function WorkflowRunsBatchStateTransitionModal({
         ) : hasValidationMapError ? (
           <div className='rounded-md border border-red-200 bg-red-50 p-4 dark:border-red-900/50 dark:bg-red-950/20'>
             <div className='flex items-start gap-3'>
-              <AlertTriangle className='mt-0.5 h-4 w-4 shrink-0 text-red-500 dark:text-red-400' />
+              <AlertTriangle className='text-destructive mt-0.5 h-4 w-4 shrink-0' />
               <div className='min-w-0 flex-1'>
                 <p className='text-sm font-medium text-red-700 dark:text-red-400'>
                   State transition validation could not be loaded.
@@ -359,9 +359,7 @@ export function WorkflowRunsBatchStateTransitionModal({
               })}
             </div>
             {errors.stateName && (
-              <p className='text-sm font-medium text-red-500 dark:text-red-400'>
-                {errors.stateName.message}
-              </p>
+              <p className='text-destructive text-sm font-medium'>{errors.stateName.message}</p>
             )}
           </div>
         ) : (
@@ -385,9 +383,7 @@ export function WorkflowRunsBatchStateTransitionModal({
             className='min-h-35 w-full resize-none rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 shadow-sm placeholder:text-neutral-400 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-100 dark:placeholder-[#9dabb9] dark:focus:ring-[#137fec]'
           />
           {errors.comment && (
-            <p className='text-sm font-medium text-red-500 dark:text-red-400'>
-              {errors.comment.message}
-            </p>
+            <p className='text-destructive text-sm font-medium'>{errors.comment.message}</p>
           )}
         </div>
       </form>

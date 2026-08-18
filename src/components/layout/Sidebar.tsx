@@ -31,9 +31,11 @@ const navItems: PrimaryNavItem[] = [
 ];
 
 function isNavItemActive(pathname: string, path: string) {
-  if (path === '/' && pathname === '/') return true;
-  if (path !== '/' && pathname.startsWith(path)) return true;
-  return false;
+  // Cases is registered at '/' but also served at '/cases' and '/cases/:id'
+  // (see src/features/cases/routes.tsx) — treat the whole section as active,
+  // not just the bare root.
+  if (path === '/') return pathname === '/' || pathname.startsWith('/cases');
+  return pathname.startsWith(path);
 }
 
 export function Sidebar() {
@@ -53,7 +55,7 @@ export function Sidebar() {
             <div className='text-sm leading-tight font-bold text-slate-900 dark:text-white'>
               Orcabus
             </div>
-            <div className='mt-0.5 text-[11px] leading-tight font-semibold tracking-wider text-slate-400 uppercase dark:text-[#9dabb9]/60'>
+            <div className='text-caption mt-0.5 leading-tight font-semibold tracking-wider text-slate-400 uppercase dark:text-[#9dabb9]/60'>
               LIMS Console
             </div>
           </div>

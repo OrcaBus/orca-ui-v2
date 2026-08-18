@@ -72,6 +72,7 @@ export function FastqsPage() {
         key: 'size',
         header: 'Size',
         sortable: true,
+        align: 'right',
         render: (file) => (
           <span className='text-sm text-neutral-900 dark:text-neutral-100'>{file.size}</span>
         ),

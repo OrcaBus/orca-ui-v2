@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
-import { PillTag, type PillTagVariant } from '@/components/ui/PillTag';
+import { PillTag } from '@/components/ui/PillTag';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/Tooltip';
 import { formatBytes, getFileExtension, getFileTypeBadgeStyle } from '@/utils/files';
 import { FilePathSegments } from '@/features/files/components/FilePathSegments';
 import { FilePreviewDrawer } from '@/features/files/components/FilePreviewDrawer';
 import { useLibraryDetails } from '../context/LibraryDetailsContext';
 import { useLibraryLinkageFiles } from '../hooks/useLibraryLinkageFiles';
+import { getQualityVariant } from '../utils/libraryDisplay';
 import type {
   LibraryLinkageFileGroup,
   LibraryLinkageFileGroupKey,
@@ -126,28 +127,28 @@ function FileNameBadge({
               {filename}
             </div>
             <div className='grid grid-cols-[auto_minmax(0,1fr)] items-start gap-x-3 gap-y-1.5'>
-              <span className='text-[11px] text-neutral-500 dark:text-neutral-400'>Type</span>
+              <span className='text-caption text-neutral-500 dark:text-neutral-400'>Type</span>
               <span
-                className={`inline-flex w-fit items-center rounded px-1.5 py-0.5 text-[10px] font-bold uppercase ${getFileTypeBadgeStyle(ext)}`}
+                className={`text-caption inline-flex w-fit items-center rounded px-1.5 py-0.5 font-bold uppercase ${getFileTypeBadgeStyle(ext)}`}
               >
                 {ext}
               </span>
-              <span className='text-[11px] text-neutral-500 dark:text-neutral-400'>Size</span>
-              <span className='text-[11px] text-neutral-700 dark:text-neutral-200'>
+              <span className='text-caption text-neutral-500 dark:text-neutral-400'>Size</span>
+              <span className='text-caption text-neutral-700 dark:text-neutral-200'>
                 {record.size != null ? formatBytes(record.size) : FALLBACK_VALUE}
               </span>
-              <span className='text-[11px] text-neutral-500 dark:text-neutral-400'>Location</span>
+              <span className='text-caption text-neutral-500 dark:text-neutral-400'>Location</span>
               <span className='min-w-0'>
                 {dir ? (
                   <FilePathSegments path={dir} />
                 ) : (
-                  <span className='text-[11px] text-neutral-400 dark:text-neutral-500'>
+                  <span className='text-caption text-neutral-400 dark:text-neutral-500'>
                     {FALLBACK_VALUE}
                   </span>
                 )}
               </span>
             </div>
-            <div className='border-t border-neutral-100 pt-1.5 text-[11px] text-neutral-400 dark:border-neutral-700 dark:text-neutral-500'>
+            <div className='text-caption border-t border-neutral-100 pt-1.5 text-neutral-400 dark:border-neutral-700 dark:text-neutral-500'>
               Click to preview
             </div>
           </div>
@@ -172,7 +173,7 @@ function LinkageFileGroupList({ groups }: { groups: LibraryLinkageFileGroup[] })
             <h4 className='text-xs font-medium text-neutral-600 dark:text-[#9dabb9]'>
               {group.label}
             </h4>
-            <span className='rounded-full bg-neutral-100 px-1.5 py-0.5 text-[10px] font-medium text-neutral-500 dark:bg-[#2d3540] dark:text-[#9dabb9]'>
+            <span className='text-caption rounded-full bg-neutral-100 px-1.5 py-0.5 font-medium text-neutral-500 dark:bg-[#2d3540] dark:text-[#9dabb9]'>
               {group.files.length}
             </span>
           </div>
@@ -349,22 +350,4 @@ function formatDisplayValue(
   }
 
   return displayValue.charAt(0).toUpperCase() + displayValue.slice(1);
-}
-
-function getQualityVariant(quality: string): PillTagVariant {
-  const normalizedQuality = quality.toLowerCase();
-
-  if (normalizedQuality === 'good') {
-    return 'green';
-  }
-
-  if (normalizedQuality === 'borderline') {
-    return 'amber';
-  }
-
-  if (normalizedQuality === 'poor' || normalizedQuality === 'very-poor') {
-    return 'red';
-  }
-
-  return 'neutral';
 }

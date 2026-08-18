@@ -119,7 +119,7 @@ export function WorkflowRunRerunModal({
           /* ── Not eligible for rerun ── */
           <div className='rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-900/50 dark:bg-red-950/20'>
             <div className='flex items-start gap-2.5'>
-              <AlertTriangle className='mt-0.5 h-4 w-4 shrink-0 text-red-500 dark:text-red-400' />
+              <AlertTriangle className='text-destructive mt-0.5 h-4 w-4 shrink-0' />
               <div className='space-y-1'>
                 <p className='text-sm font-medium text-red-700 dark:text-red-400'>
                   This workflow run is not eligible for rerun.
@@ -171,7 +171,7 @@ export function WorkflowRunRerunModal({
                   {errors.dataset && (
                     <p
                       id='workflow-run-rerun-dataset-error'
-                      className='text-sm font-medium text-red-500 dark:text-red-400'
+                      className='text-destructive text-sm font-medium'
                     >
                       {errors.dataset.message}
                     </p>
@@ -225,7 +225,7 @@ export function WorkflowRunRerunModal({
 
             <div className='h-px bg-neutral-100 dark:bg-[#2d3540]' />
 
-            <p className='text-sm font-medium text-red-500 dark:text-red-400'>
+            <p className='text-destructive text-sm font-medium'>
               Are you sure you want to rerun this workflow?
             </p>
           </div>

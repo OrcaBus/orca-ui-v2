@@ -267,6 +267,7 @@ export function MapEditModal({
                   <button
                     type='button'
                     onClick={() => removeTag(key)}
+                    aria-label={`Remove tag ${key}`}
                     className='ml-0.5 rounded-full p-0.5 text-slate-300 transition-colors hover:bg-slate-200 hover:text-slate-500 dark:text-[#4a5568] dark:hover:bg-[#2d3540] dark:hover:text-white'
                   >
                     <X className='h-3 w-3' />
@@ -308,6 +309,7 @@ export function MapEditModal({
               type='button'
               onClick={addTag}
               disabled={!tagKey.trim()}
+              aria-label='Add tag'
               className='flex h-10.5 w-10.5 shrink-0 items-center justify-center rounded-lg border border-slate-200 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 disabled:cursor-not-allowed disabled:opacity-40 dark:border-[#2d3540] dark:hover:bg-[#1e252e] dark:hover:text-white'
             >
               <Plus className='h-4 w-4' />

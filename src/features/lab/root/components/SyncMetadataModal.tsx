@@ -624,10 +624,7 @@ function ConfigureStep({
                 ))}
               </select>
               {errors.year && (
-                <p
-                  id='sync-metadata-year-error'
-                  className='text-sm font-medium text-red-500 dark:text-red-400'
-                >
+                <p id='sync-metadata-year-error' className='text-destructive text-sm font-medium'>
                   {errors.year.message}
                 </p>
               )}
@@ -674,10 +671,7 @@ function ConfigureStep({
                 className='w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 shadow-sm placeholder:text-neutral-400 focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-100 dark:placeholder-[#9dabb9] dark:focus:ring-[#137fec]'
               />
               {errors.ranges && (
-                <p
-                  id='sync-metadata-ranges-error'
-                  className='text-sm font-medium text-red-500 dark:text-red-400'
-                >
+                <p id='sync-metadata-ranges-error' className='text-destructive text-sm font-medium'>
                   {errors.ranges.message}
                 </p>
               )}
@@ -719,7 +713,7 @@ function ConfigureStep({
                 {errors.presignedUrl && (
                   <p
                     id='sync-metadata-presigned-url-error'
-                    className='text-sm font-medium text-red-500 dark:text-red-400'
+                    className='text-destructive text-sm font-medium'
                   >
                     {errors.presignedUrl.message}
                   </p>
@@ -754,7 +748,7 @@ function ConfigureStep({
                 {errors.reason && (
                   <p
                     id='sync-metadata-reason-error'
-                    className='text-sm font-medium text-red-500 dark:text-red-400'
+                    className='text-destructive text-sm font-medium'
                   >
                     {errors.reason.message}
                   </p>

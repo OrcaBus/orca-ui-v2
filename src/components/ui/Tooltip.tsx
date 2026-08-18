@@ -34,9 +34,9 @@ export type TooltipSize = 'sm' | 'md' | 'lg';
 // ─── Variant / size styles ────────────────────────────────────────────────────
 
 const variantClasses: Record<TooltipVariant, string> = {
-  dark: 'bg-slate-900 text-white shadow-md dark:bg-slate-100 dark:text-slate-900',
+  dark: 'bg-slate-900 text-white shadow-lg dark:bg-slate-100 dark:text-slate-900',
   light:
-    'bg-white text-slate-700 border border-slate-200 shadow-md dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700',
+    'bg-white text-slate-700 border border-slate-200 shadow-lg dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700',
 };
 
 const sizeClasses: Record<TooltipSize, string> = {

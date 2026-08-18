@@ -138,7 +138,7 @@ export function EditCaseModal({ isOpen, onClose }: EditCaseModalProps) {
               htmlFor='edit-studyType'
               className='text-sm font-medium text-neutral-700 dark:text-neutral-300'
             >
-              Study Type <span className='text-red-500 dark:text-red-400'>*</span>
+              Study Type <span className='text-destructive'>*</span>
             </label>
             <select
               id='edit-studyType'
@@ -210,7 +210,7 @@ export function EditCaseModal({ isOpen, onClose }: EditCaseModalProps) {
                   </button>
                 </div>
                 {(errors.links?.[idx]?.key || errors.links?.[idx]?.value) && (
-                  <p className='text-sm text-red-500 dark:text-red-400'>
+                  <p className='text-destructive text-sm'>
                     {errors.links[idx]?.key?.message ?? errors.links[idx]?.value?.message}
                   </p>
                 )}

@@ -1,8 +1,8 @@
 import { PillTag } from '../../../components/ui/PillTag';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { StatusBadge } from '@/components/ui/StatusBadge';
 import { formatCalendarDate, formatDetailDate } from '../../../utils/timeFormat';
 import { getCaseStudyTypeVariant } from '../utils/getCaseVariants';
-import { getCaseStatusVisual } from '../utils/caseStatus.visuals';
 import { formatCaseText } from '../utils/caseDisplay';
 import { useCaseDetailsContext } from '../context/CaseDetailsContext';
 
@@ -71,14 +71,7 @@ export function CaseDetailsOverviewCard() {
           {isLoadingCaseDetail ? (
             <Skeleton className='h-5 w-28' />
           ) : caseDetail?.latestState ? (
-            (() => {
-              const { variant, label } = getCaseStatusVisual(caseDetail.latestState.status);
-              return (
-                <PillTag variant={variant} size='sm'>
-                  {label}
-                </PillTag>
-              );
-            })()
+            <StatusBadge status={caseDetail.latestState.status} />
           ) : (
             <span className='text-sm text-neutral-500 dark:text-neutral-400'>—</span>
           )}

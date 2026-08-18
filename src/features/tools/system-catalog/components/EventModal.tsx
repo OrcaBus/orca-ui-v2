@@ -178,7 +178,7 @@ export function EventModal({
           {payloadError && (
             <p className='mt-1 text-sm text-red-600 dark:text-red-400'>{payloadError}</p>
           )}
-          <p className='mt-1.5 flex items-center gap-1.5 text-xs text-slate-500 dark:text-[#9dabb9]'>
+          <p className='text-muted-foreground mt-1.5 flex items-center gap-1.5 text-xs'>
             <Info className='h-3.5 w-3.5 shrink-0' />
             Ensure payload follows the Orcabus schema definition.
           </p>
