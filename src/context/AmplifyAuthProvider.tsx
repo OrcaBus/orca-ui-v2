@@ -37,7 +37,7 @@ function hasCognitoSession(): boolean {
   return Object.keys(localStorage).some((key) => key.startsWith(COGNITO_STORAGE_PREFIX));
 }
 
-// Cognito auto-creates a group like "ap-southeast-2_iWOHnsurL_Google" for federated IDP users
+// Cognito auto-creates a group like "ap-southeast-2_abcdefg1234_Google" for federated IDP users
 const COGNITO_IDP_GROUP_RE = /^[a-z]+-[a-z]+-\d+_[A-Za-z0-9]+_(\w+)$/;
 
 function normalizeGroupName(group: string): string {
