@@ -37,6 +37,14 @@ function hasCognitoSession(): boolean {
   return Object.keys(localStorage).some((key) => key.startsWith(COGNITO_STORAGE_PREFIX));
 }
 
+// Cognito auto-creates a group like "ap-southeast-2_iWOHnsurL_Google" for federated IDP users
+const COGNITO_IDP_GROUP_RE = /^[a-z]+-[a-z]+-\d+_[A-Za-z0-9]+_(\w+)$/;
+
+function normalizeGroupName(group: string): string {
+  const match = COGNITO_IDP_GROUP_RE.exec(group);
+  return match ? `${match[1]} (default)` : group;
+}
+
 // ---------- State management ----------
 
 interface AuthState {
@@ -82,8 +90,9 @@ async function resolveCurrentAuthState(): Promise<AuthState> {
 
   try {
     const [user, session] = await Promise.all([fetchUserAttributes(), fetchAuthSession()]);
-    const groups =
+    const rawGroups =
       (session.tokens?.idToken?.payload['cognito:groups'] as string[] | undefined) ?? [];
+    const groups = rawGroups.map(normalizeGroupName);
     return { ...initialState, isAuthenticated: true, user, groups };
   } catch (error) {
     console.error('Failed to initialize auth:', error);
