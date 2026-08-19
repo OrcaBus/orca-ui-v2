@@ -1,4 +1,5 @@
 import {
+  CircleArrowUp,
   CheckCircle,
   XCircle,
   Clock,
@@ -96,6 +97,31 @@ export const statusConfig = {
     icon: CircleOff,
     tooltip: 'Workflow run is in draft and not yet finalized',
   },
+  submitted: {
+    family: 'neutral',
+    label: 'Submitted',
+    icon: CircleArrowUp,
+    tooltip: 'Workflow has been submitted to the orchestration system',
+  },
+  runnable: {
+    family: 'neutral',
+    label: 'Runnable',
+    icon: PlayCircle,
+    tooltip: 'Workflow is eligible to start when execution capacity is available',
+  },
+  starting: {
+    family: 'neutral',
+    label: 'Starting',
+    icon: Clock,
+    tooltip: 'Workflow is preparing to start execution',
+  },
+  started: {
+    family: 'info',
+    label: 'Started',
+    icon: Loader,
+    tooltip: 'Workflow execution has started',
+    animate: true,
+  },
   succeeded: {
     family: 'success',
     label: 'Succeeded',
@@ -170,6 +196,12 @@ export const statusConfig = {
     label: 'Aborted',
     icon: Ban,
     tooltip: 'Workflow was manually aborted or cancelled',
+  },
+  cancelled: {
+    family: 'neutral',
+    label: 'Cancelled',
+    icon: Ban,
+    tooltip: 'Workflow execution was cancelled',
   },
   resolved: {
     family: 'info',
@@ -329,15 +361,26 @@ export const statusConfig = {
 
 export type StatusBadgeStatus = keyof typeof statusConfig;
 
+const STATUS_ALIASES = {
+  canceled: 'cancelled',
+  complete: 'succeeded',
+  success: 'succeeded',
+  error: 'failed',
+  initializing: 'started',
+} as const satisfies Record<string, StatusBadgeStatus>;
+
 export function normalizeStatusBadgeKey(raw: string | null | undefined): StatusBadgeStatus {
   if (raw == null || String(raw).trim() === '') {
     return 'unknown';
   }
-  const normalized = String(raw).trim().toLowerCase().replace(/_/g, '-');
-  if (normalized in statusConfig) {
-    return normalized as StatusBadgeStatus;
+  const normalized = String(raw)
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_-]+/g, '-');
+  const aliased = STATUS_ALIASES[normalized as keyof typeof STATUS_ALIASES] ?? normalized;
+  if (aliased in statusConfig) {
+    return aliased;
   }
-  // Common typo for "unknown" (e.g. UNKOWN, Unkown)
   if (normalized === 'unkown') {
     return 'unknown';
   }
