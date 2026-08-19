@@ -11,6 +11,8 @@ import { useCaseDetailsContext } from '../context/CaseDetailsContext';
 import { CaseDetailsLinkWorkflowRunsModal } from './CaseDetailsLinkWorkflowRunsModal';
 import { CaseDetailsLinkedWorkflowRunsTable } from './CaseDetailsLinkedWorkflowRunsTable';
 import { CaseDetailsLinkedWorkflowRunFilesTable } from './CaseDetailsLinkedWorkflowRunFilesTable';
+import { CaseDetailsUnlinkEntityModal } from './CaseDetailsUnlinkEntityModal';
+import { submitCaseUnlink, type CaseUnlinkTarget } from '../utils/caseUnlink';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -77,6 +79,7 @@ export function CaseDetailsLinkedWorkflowRunsTab() {
   const [selectedPortalRunId, setSelectedPortalRunId] = useState<string | null>(null);
   const [runSearch, setRunSearch] = useState('');
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
+  const [unlinkTarget, setUnlinkTarget] = useState<CaseUnlinkTarget | null>(null);
 
   // Collect all linked workflow run orcabusIds from case external entities.
   const wfrOrcabusIdArray = useMemo(() => {
@@ -149,28 +152,21 @@ export function CaseDetailsLinkedWorkflowRunsTab() {
 
   const unlinkMutation = useCaseUnlinkEntityModel();
 
-  const handleUnlink = (wfrOrcabusId: string) => {
-    if (!caseOrcabusId) return;
-    unlinkMutation.mutate(
-      {
-        params: {
-          path: {
-            orcabusId: caseOrcabusId,
-            externalEntityOrcabusId: wfrOrcabusId,
-          },
-        },
+  const handleConfirmUnlink = () => {
+    submitCaseUnlink({
+      caseOrcabusId,
+      target: unlinkTarget,
+      mutate: unlinkMutation.mutate,
+      onSuccess: () => {
+        toast.success('Workflow run unlinked');
+        setUnlinkTarget(null);
+        setSelectedPortalRunId(null);
+        refresh();
       },
-      {
-        onSuccess: () => {
-          toast.success('Workflow run unlinked');
-          if (selectedPortalRunId) setSelectedPortalRunId(null);
-          refresh();
-        },
-        onError: () => {
-          toast.error('Failed to unlink workflow run');
-        },
-      }
-    );
+      onError: () => {
+        toast.error('Failed to unlink workflow run');
+      },
+    });
   };
 
   const handleSelectWorkflowType = (key: string | null) => {
@@ -328,7 +324,13 @@ export function CaseDetailsLinkedWorkflowRunsTab() {
                       : 'No workflow runs found for this workflow type.'
                 }
                 onViewFiles={setSelectedPortalRunId}
-                onUnlink={handleUnlink}
+                onUnlink={(run) =>
+                  setUnlinkTarget({
+                    type: 'workflow run',
+                    orcabusId: run.orcabusId,
+                    label: run.workflowRunName ?? run.portalRunId,
+                  })
+                }
                 unlinkIsPending={unlinkMutation.isPending}
               />
             )}
@@ -344,6 +346,13 @@ export function CaseDetailsLinkedWorkflowRunsTab() {
           setIsLinkModalOpen(false);
           refresh();
         }}
+      />
+      <CaseDetailsUnlinkEntityModal
+        isOpen={unlinkTarget !== null}
+        target={unlinkTarget}
+        isPending={unlinkMutation.isPending}
+        onCancel={() => setUnlinkTarget(null)}
+        onConfirm={handleConfirmUnlink}
       />
     </>
   );
