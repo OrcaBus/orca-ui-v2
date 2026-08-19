@@ -4,7 +4,7 @@
 import { createContext, useCallback, useContext } from 'react';
 import type { FC, PropsWithChildren } from 'react';
 import { useCaseDetailModel, useCaseStatesModel } from '../api/cases.api';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { SpinnerWithText } from '@/components/ui/Spinner';
 import { ApiErrorState } from '@/components/ui/ApiErrorState';
 import { DEFAULT_NON_PAGINATE_PAGE_SIZE } from '@/utils/constants';

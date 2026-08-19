@@ -7,7 +7,7 @@ import {
   useAnalysisRunDetailModel,
   useAnalysisRunCommentListModel,
 } from '../../shared/api/workflows.api';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { SpinnerWithText } from '@/components/ui/Spinner';
 import { ApiErrorState } from '@/components/ui/ApiErrorState';
 

@@ -7,7 +7,7 @@ import {
   useQueryMetadataDetailLibraryModel,
   type LibraryDetailType,
 } from '../../shared/api/lab.api';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { SpinnerWithText } from '@/components/ui/Spinner';
 import { ApiErrorState } from '@/components/ui/ApiErrorState';
 

@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { formatTableDate } from '@/utils/timeFormat';

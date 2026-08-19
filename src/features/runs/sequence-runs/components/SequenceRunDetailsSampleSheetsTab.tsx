@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Upload, FileText } from 'lucide-react';
 import { formatTableDate } from '@/utils/timeFormat';
 import { useSequenceRunDetailsContext } from '../context/SequenceRunDetailsContext';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import {
   useSequenceRunSampleSheetsByInstrumentRunIdModel,

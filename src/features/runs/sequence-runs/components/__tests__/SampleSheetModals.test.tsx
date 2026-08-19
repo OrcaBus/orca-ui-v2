@@ -37,8 +37,8 @@ vi.mock('@headlessui/react', () => ({
   ),
 }));
 
-vi.mock('react-router-dom', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('react-router-dom')>()),
+vi.mock('react-router', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('react-router')>()),
   useParams: () => ({ instrumentRunId: '240101_A00000_0000_TEST' }),
 }));
 

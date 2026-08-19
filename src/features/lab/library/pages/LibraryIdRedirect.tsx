@@ -1,4 +1,4 @@
-import { useParams, Navigate, Link } from 'react-router-dom';
+import { useParams, Navigate, Link } from 'react-router';
 import { useQueryMetadataLibraryModel } from '../../shared/api/lab.api';
 import { SpinnerWithText } from '@/components/ui/Spinner';
 import { ApiErrorState } from '@/components/ui/ApiErrorState';

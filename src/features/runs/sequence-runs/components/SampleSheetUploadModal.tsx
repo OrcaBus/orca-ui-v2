@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Upload, FileText } from 'lucide-react';
 import { toast } from 'sonner';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { useAuthContext } from '@/context/auth-context';
 import { DialogFrame } from '@/components/modals/DialogFrame';
 import { Button } from '@/components/ui/Button';

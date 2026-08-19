@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Copy, Check } from 'lucide-react';
 import { toast } from 'sonner';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { useSequenceRunDetailsContext } from '../context/SequenceRunDetailsContext';
