@@ -17,12 +17,9 @@ import {
 
 const filledIconProps = { fill: 'currentColor', stroke: 'white', strokeWidth: 1.5 } as const;
 
-// Both functions below key off the same five-family vocabulary StatusBadge
-// uses (getStatusFamily/FAMILY_ACCENT) rather than choosing their own
-// per-status colors — they used to disagree with StatusBadge (and with the
-// timeline) about e.g. "deprecated" or "unvalidated". Icon choice and
-// which states get the filled/outlined treatment stay local, since that's
-// a legitimate presentational difference for a larger stat-tile icon.
+// Validation-state icons use the shared family accents while retaining their
+// domain-specific icon and filled treatment. Run-status icons below render
+// directly from the shared status registry.
 
 export function getValidationStateIcon(state: string) {
   const accent = FAMILY_ACCENT[getStatusFamily(state)];
