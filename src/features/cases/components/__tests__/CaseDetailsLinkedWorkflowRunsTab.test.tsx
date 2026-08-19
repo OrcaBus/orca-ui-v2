@@ -133,6 +133,13 @@ function unlinkCallbacks(callIndex: number): UnlinkCallbacks {
   return mocks.unlinkMutate.mock.calls[callIndex]?.[1] as UnlinkCallbacks;
 }
 
+function openFilesViewWhileUnlinkModalIsOpen(fileAction: HTMLElement) {
+  // Construct this defensive simultaneous state because modal inertness prevents the user interaction; ordinary paths use userEvent.
+  act(() => {
+    fileAction.click();
+  });
+}
+
 afterEach(cleanup);
 
 describe('CaseDetailsLinkedWorkflowRunsTab', () => {
@@ -200,9 +207,7 @@ describe('CaseDetailsLinkedWorkflowRunsTab', () => {
     const fileAction = viewFilesAction();
 
     await user.click(unlinkAction());
-    act(() => {
-      fileAction.click();
-    });
+    openFilesViewWhileUnlinkModalIsOpen(fileAction);
 
     expect(screen.getByText('Files for portal-run-distinct')).toBeTruthy();
     await user.click(confirmAction());
@@ -225,9 +230,7 @@ describe('CaseDetailsLinkedWorkflowRunsTab', () => {
     const fileAction = viewFilesAction();
 
     await user.click(unlinkAction());
-    act(() => {
-      fileAction.click();
-    });
+    openFilesViewWhileUnlinkModalIsOpen(fileAction);
     expect(screen.getByText('Files for portal-run-distinct')).toBeTruthy();
 
     await user.click(confirmAction());
