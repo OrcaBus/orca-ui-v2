@@ -41,6 +41,9 @@ build.zip
 # pnpm lcoal package cache folder https://pnpm.io/cli/store
 .pnpm-store
 
+# Local git worktrees
+/.worktrees/
+
 # storybook
 *.storybook.log
 storybook-static/*
