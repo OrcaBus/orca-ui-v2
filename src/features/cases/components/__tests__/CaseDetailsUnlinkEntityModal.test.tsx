@@ -32,24 +32,34 @@ describe('CaseDetailsUnlinkEntityModal', () => {
     expect(onCancel).not.toHaveBeenCalled();
   });
 
-  it('disables dismissal and actions while unlinking', () => {
+  it('disables dismissal and actions while unlinking', async () => {
+    const user = userEvent.setup();
+    const onCancel = vi.fn();
+
     render(
       <CaseDetailsUnlinkEntityModal
         isOpen
         target={{ type: 'workflow run', orcabusId: 'wfr.01TEST', label: 'Alignment run' }}
         isPending
-        onCancel={vi.fn()}
+        onCancel={onCancel}
         onConfirm={vi.fn()}
       />
     );
 
     expect(screen.getByRole('button', { name: 'Close dialog' }).matches(':disabled')).toBe(true);
     expect(screen.getByRole('button', { name: 'Cancel' }).matches(':disabled')).toBe(true);
-    expect(
-      screen
-        .getByRole('button', { name: 'Confirm unlink workflow run Alignment run' })
-        .matches(':disabled')
-    ).toBe(true);
+    const confirmButton = screen.getByRole('button', {
+      name: 'Confirm unlink workflow run Alignment run',
+    });
+    expect(confirmButton.matches(':disabled')).toBe(true);
+    expect(confirmButton.getAttribute('aria-busy')).toBe('true');
+    const status = screen.getByRole('status');
+    expect(status.textContent).toBe('Unlinking workflow run Alignment run');
+    expect(confirmButton.getAttribute('aria-describedby')).toBe(status.id);
     expect(screen.getByText('Unlinking…')).toBeTruthy();
+
+    await user.keyboard('{Escape}');
+
+    expect(onCancel).not.toHaveBeenCalled();
   });
 });

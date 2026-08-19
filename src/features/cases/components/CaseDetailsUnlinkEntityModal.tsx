@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import { Unlink } from 'lucide-react';
 import { DialogFrame } from '@/components/modals/DialogFrame';
 import { Button } from '@/components/ui/Button';
@@ -27,6 +28,7 @@ export function CaseDetailsUnlinkEntityModal({
   const entityTitle = shownTarget ? titleCaseEntity(shownTarget.type) : 'Entity';
   const entityLabel = shownTarget?.label ?? '';
   const entityType = shownTarget?.type ?? 'entity';
+  const pendingStatusId = useId();
 
   return (
     <DialogFrame
@@ -48,10 +50,17 @@ export function CaseDetailsUnlinkEntityModal({
             onClick={onConfirm}
             disabled={isPending || !shownTarget}
             aria-label={`Confirm unlink ${entityType} ${entityLabel}`}
+            aria-busy={isPending}
+            aria-describedby={isPending ? pendingStatusId : undefined}
           >
             <Unlink className='h-4 w-4' aria-hidden='true' />
             {isPending ? 'Unlinking…' : 'Unlink'}
           </Button>
+          {isPending && (
+            <span id={pendingStatusId} className='sr-only' role='status' aria-live='polite'>
+              Unlinking {entityType} {entityLabel}
+            </span>
+          )}
         </>
       }
     >
