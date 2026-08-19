@@ -45,6 +45,7 @@ describe('workflow status registry', () => {
     ['not_started', 'not-started'],
     ['request received', 'request-received'],
     ['request__  received', 'request-received'],
+    ['request--__  received', 'request-received'],
   ] as const)('normalizes formatting in %s', (raw, canonical) => {
     expect(normalizeStatusBadgeKey(raw)).toBe(canonical);
   });
