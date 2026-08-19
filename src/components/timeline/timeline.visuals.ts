@@ -89,17 +89,15 @@ const ARCHIVED_EVENT_VISUAL: TimelineVisual = {
 export const STATE_VISUALS: Record<string, TimelineVisual> = {
   DRAFT: visualFor(getStatusFamily('draft'), FilePenLine),
   READY: visualFor(getStatusFamily('ready'), CheckCircle),
-  // No StatusBadge counterpart for these three (workflow-orchestration-only
-  // pre-execution states) — left as the neutral family they already were,
-  // rather than introducing a new, unreviewed color judgment call here.
-  SUBMITTED: visualFor('neutral', CircleArrowUp),
-  RUNNABLE: visualFor('neutral', PlayCircle),
-  STARTING: visualFor('neutral', Clock),
+  SUBMITTED: visualFor(getStatusFamily('submitted'), CircleArrowUp),
+  RUNNABLE: visualFor(getStatusFamily('runnable'), PlayCircle),
+  STARTING: visualFor(getStatusFamily('starting'), Clock),
   RUNNING: visualFor(getStatusFamily('running'), LoaderCircle),
-  STARTED: visualFor('info', LoaderCircle),
+  STARTED: visualFor(getStatusFamily('started'), LoaderCircle),
   SUCCEEDED: visualFor(getStatusFamily('succeeded'), CheckCircle),
   FAILED: visualFor(getStatusFamily('failed'), XCircle),
   ABORTED: visualFor(getStatusFamily('aborted'), Ban),
+  CANCELLED: visualFor(getStatusFamily('cancelled'), Ban),
   RESOLVED: visualFor(getStatusFamily('resolved'), CheckCircle),
   DEPRECATED: visualFor(getStatusFamily('deprecated'), Archive),
   // Case-timeline milestones. Partial failure is "warning" (degraded, not
@@ -119,8 +117,7 @@ const STATE_ALIASES: Record<string, string> = {
   QUEUED: 'DRAFT',
   PENDING: 'DRAFT',
   ERROR: 'FAILED',
-  CANCELLED: 'ABORTED',
-  CANCELED: 'ABORTED',
+  CANCELED: 'CANCELLED',
   REQUEST_RECEIVED: 'STARTED',
   SAMPLE_RECEIVED: 'STARTED',
   LIBRARY_PARTIALLY_FAILED: 'CASE_PARTIALLY_FAILED',

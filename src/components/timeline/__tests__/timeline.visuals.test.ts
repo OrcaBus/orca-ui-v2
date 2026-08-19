@@ -9,6 +9,17 @@ import {
 
 describe('getTimelineStateVisual', () => {
   it.each([
+    ['SUBMITTED', 'neutral-100'],
+    ['RUNNABLE', 'neutral-100'],
+    ['STARTING', 'neutral-100'],
+    ['STARTED', 'blue'],
+    ['CANCELLED', 'neutral-100'],
+    ['CANCELED', 'neutral-100'],
+  ])('uses the registry family for workflow state %s', (status, expectedClassPart) => {
+    expect(getTimelineStateVisual(status).badgeClassName).toContain(expectedClassPart);
+  });
+
+  it.each([
     ['request_received', 'blue'],
     ['sequencing_started', 'blue'],
     ['library_partially_failed', 'amber'],

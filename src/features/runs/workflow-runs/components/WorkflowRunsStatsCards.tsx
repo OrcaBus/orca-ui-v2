@@ -7,6 +7,7 @@ import {
 } from '../../shared/api/workflows.api';
 import { toLocalStartOfDay } from '@/utils/timeFormat';
 import { getRunsStatusIcon } from '../../shared/utils/statusIcons';
+import { getStatusFamily } from '@/components/ui/status-config';
 import {
   useWorkflowRunListQueryParams,
   type WorkflowRunStatus,
@@ -20,16 +21,15 @@ interface WorkflowRunsStatsCardsProps {
 const statusCards: Array<{
   label: string;
   status: Exclude<WorkflowRunStatus, 'all'>;
-  variant: 'success' | 'error' | 'warning' | 'neutral' | 'info';
 }> = [
-  { label: 'Succeeded', status: 'succeeded', variant: 'success' },
-  { label: 'Failed', status: 'failed', variant: 'error' },
-  { label: 'Aborted', status: 'aborted', variant: 'neutral' },
-  { label: 'Cancelled', status: 'cancelled', variant: 'neutral' },
-  { label: 'Resolved', status: 'resolved', variant: 'info' },
-  { label: 'Deprecated', status: 'deprecated', variant: 'neutral' },
-  { label: 'Draft', status: 'draft', variant: 'neutral' },
-  { label: 'Ongoing', status: 'ongoing', variant: 'warning' },
+  { label: 'Succeeded', status: 'succeeded' },
+  { label: 'Failed', status: 'failed' },
+  { label: 'Aborted', status: 'aborted' },
+  { label: 'Cancelled', status: 'cancelled' },
+  { label: 'Resolved', status: 'resolved' },
+  { label: 'Deprecated', status: 'deprecated' },
+  { label: 'Draft', status: 'draft' },
+  { label: 'Ongoing', status: 'ongoing' },
 ];
 
 export function WorkflowRunsStatsCards({ status, onStatusCardClick }: WorkflowRunsStatsCardsProps) {
@@ -88,7 +88,7 @@ export function WorkflowRunsStatsCards({ status, onStatusCardClick }: WorkflowRu
                 value={count}
                 percentage={percentage}
                 icon={getRunsStatusIcon(card.status)}
-                variant={card.variant}
+                variant={getStatusFamily(card.status)}
                 selected={status === card.status}
                 onClick={() => onStatusCardClick(card.status)}
               />

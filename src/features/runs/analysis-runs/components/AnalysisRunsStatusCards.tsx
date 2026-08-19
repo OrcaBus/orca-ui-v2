@@ -6,6 +6,7 @@ import {
   type AnalysisRunStatusCountModel,
 } from '../../shared/api/workflows.api';
 import { getRunsStatusIcon } from '../../shared/utils/statusIcons';
+import { getStatusFamily } from '@/components/ui/status-config';
 import {
   useAnalysisRunsListQueryParams,
   type AnalysisRunStatus,
@@ -20,14 +21,13 @@ interface AnalysisRunsStatusCardsProps {
 const statusCards: Array<{
   label: string;
   status: Exclude<AnalysisRunStatus, 'draft'>;
-  variant: 'success' | 'error' | 'warning' | 'neutral' | 'info';
 }> = [
-  { label: 'Succeeded', status: 'succeeded', variant: 'success' },
-  { label: 'Failed', status: 'failed', variant: 'error' },
-  { label: 'Aborted', status: 'aborted', variant: 'neutral' },
-  { label: 'Resolved', status: 'resolved', variant: 'info' },
-  { label: 'Deprecated', status: 'deprecated', variant: 'neutral' },
-  { label: 'Ongoing', status: 'ongoing', variant: 'warning' },
+  { label: 'Succeeded', status: 'succeeded' },
+  { label: 'Failed', status: 'failed' },
+  { label: 'Aborted', status: 'aborted' },
+  { label: 'Resolved', status: 'resolved' },
+  { label: 'Deprecated', status: 'deprecated' },
+  { label: 'Ongoing', status: 'ongoing' },
 ];
 
 export function AnalysisRunsStatusCards({
@@ -86,7 +86,7 @@ export function AnalysisRunsStatusCards({
                 value={count}
                 percentage={percentage}
                 icon={getRunsStatusIcon(card.status)}
-                variant={card.variant}
+                variant={getStatusFamily(card.status)}
                 selected={status === card.status}
                 onClick={() => onStatusCardClick(card.status)}
               />

@@ -1,19 +1,19 @@
 import {
-  CheckCircle,
   XCircle,
-  Ban,
   Archive,
-  Loader,
   ShieldCheck,
   ShieldQuestion,
   CircleDot,
   CircleOff,
   Hash,
-  MessageCircleCheck,
-  NotebookPen,
 } from 'lucide-react';
 import { cn } from '@/utils/cn';
-import { getStatusFamily, FAMILY_ACCENT } from '@/components/ui/status-config';
+import {
+  FAMILY_ACCENT,
+  getStatusFamily,
+  normalizeStatusBadgeKey,
+  statusConfig,
+} from '@/components/ui/status-config';
 
 const filledIconProps = { fill: 'currentColor', stroke: 'white', strokeWidth: 1.5 } as const;
 
@@ -63,24 +63,18 @@ export function getWorkflowTypeIcon(type: string) {
 }
 
 export function getRunsStatusIcon(status: string) {
-  const accent = FAMILY_ACCENT[getStatusFamily(status)];
-  switch (status) {
-    case 'succeeded':
-      return <CheckCircle className={cn('h-5 w-5', accent)} {...filledIconProps} />;
-    case 'failed':
-      return <XCircle className={cn('h-5 w-5', accent)} {...filledIconProps} />;
-    case 'aborted':
-      return <Ban className={cn('h-5 w-5', accent)} {...filledIconProps} />;
-    case 'resolved':
-      return <MessageCircleCheck className={cn('h-5 w-5', accent)} {...filledIconProps} />;
-    case 'deprecated':
-      return <Archive className={cn('h-5 w-5', accent)} {...filledIconProps} />;
-    case 'ongoing':
-    case 'running':
-      return <Loader className={cn('h-5 w-5 motion-safe:animate-spin', accent)} />;
-    case 'draft':
-      return <NotebookPen className={cn('h-5 w-5', accent)} {...filledIconProps} />;
-    default:
-      return null;
-  }
+  const canonicalStatus = normalizeStatusBadgeKey(status);
+  if (canonicalStatus === 'unknown') return null;
+  const config = statusConfig[canonicalStatus];
+  const Icon = config.icon;
+  const shouldAnimate = 'animate' in config && config.animate;
+  return (
+    <Icon
+      className={cn(
+        'h-5 w-5',
+        shouldAnimate && 'motion-safe:animate-spin',
+        FAMILY_ACCENT[config.family]
+      )}
+    />
+  );
 }
