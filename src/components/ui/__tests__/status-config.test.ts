@@ -44,11 +44,12 @@ describe('workflow status registry', () => {
     [' SUBMITTED ', 'submitted'],
     ['not_started', 'not-started'],
     ['request received', 'request-received'],
+    ['request__  received', 'request-received'],
   ] as const)('normalizes formatting in %s', (raw, canonical) => {
     expect(normalizeStatusBadgeKey(raw)).toBe(canonical);
   });
 
-  it.each([null, undefined, '', '   ', 'unkown', 'brand-new-state'])(
+  it.each([null, undefined, '', '   ', 'unkown', 'brand-new-state', 'constructor'])(
     'falls back to unknown for %s',
     (raw) => {
       expect(normalizeStatusBadgeKey(raw)).toBe('unknown');

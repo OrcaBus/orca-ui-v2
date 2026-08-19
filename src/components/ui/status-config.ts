@@ -378,7 +378,7 @@ export function normalizeStatusBadgeKey(raw: string | null | undefined): StatusB
     .toLowerCase()
     .replace(/[\s_-]+/g, '-');
   const aliased = STATUS_ALIASES[normalized as keyof typeof STATUS_ALIASES] ?? normalized;
-  if (aliased in statusConfig) {
+  if (Object.prototype.hasOwnProperty.call(statusConfig, aliased)) {
     return aliased;
   }
   if (normalized === 'unkown') {
