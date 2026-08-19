@@ -16,6 +16,8 @@ import {
 } from '@/features/lab/shared/api/lab.api';
 import { useCaseExternalEntityCreateModel, useCaseUnlinkEntityModel } from '../api/cases.api';
 import { useCaseDetailsContext } from '../context/CaseDetailsContext';
+import { CaseDetailsUnlinkEntityModal } from './CaseDetailsUnlinkEntityModal';
+import { submitCaseUnlink, type CaseUnlinkTarget } from '../utils/caseUnlink';
 
 // ---------------------------------------------------------------------------
 // Link Libraries Modal
@@ -220,6 +222,7 @@ export function CaseDetailsLinkedLibrariesTab() {
   const navigate = useNavigate();
 
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
+  const [unlinkTarget, setUnlinkTarget] = useState<CaseUnlinkTarget | null>(null);
 
   // Build a map: libraryOrcabusId → externalEntityOrcabusId (for unlinking).
   // We only care about external entities from the metadata service of type 'library'.
@@ -259,27 +262,20 @@ export function CaseDetailsLinkedLibrariesTab() {
 
   const unlinkMutation = useCaseUnlinkEntityModel();
 
-  const handleUnlink = (libraryOrcabusId: string) => {
-    if (!caseOrcabusId) return;
-    unlinkMutation.mutate(
-      {
-        params: {
-          path: {
-            orcabusId: caseOrcabusId,
-            externalEntityOrcabusId: libraryOrcabusId,
-          },
-        },
+  const handleConfirmUnlink = () => {
+    submitCaseUnlink({
+      caseOrcabusId,
+      target: unlinkTarget,
+      mutate: unlinkMutation.mutate,
+      onSuccess: () => {
+        toast.success('Library unlinked');
+        setUnlinkTarget(null);
+        refresh();
       },
-      {
-        onSuccess: () => {
-          toast.success('Library unlinked');
-          refresh();
-        },
-        onError: () => {
-          toast.error('Failed to unlink library');
-        },
-      }
-    );
+      onError: () => {
+        toast.error('Failed to unlink library');
+      },
+    });
   };
 
   const linkedLibraries = libraryData?.results ?? [];
@@ -364,11 +360,15 @@ export function CaseDetailsLinkedLibrariesTab() {
         <button
           onClick={(e) => {
             e.stopPropagation();
-            handleUnlink(lib.orcabusId);
+            setUnlinkTarget({
+              type: 'library',
+              orcabusId: lib.orcabusId,
+              label: lib.libraryId ?? lib.orcabusId,
+            });
           }}
           disabled={unlinkMutation.isPending}
-          className='rounded p-1.5 text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50 dark:text-red-400 dark:hover:bg-red-500/10'
-          title='Unlink library'
+          aria-label={`Unlink library ${lib.libraryId ?? lib.orcabusId}`}
+          className='rounded p-1.5 text-red-600 transition-colors hover:bg-red-50 focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:outline-none disabled:opacity-50 dark:text-red-400 dark:hover:bg-red-500/10'
         >
           <Unlink className='h-4 w-4' />
         </button>
@@ -408,6 +408,13 @@ export function CaseDetailsLinkedLibrariesTab() {
           setIsLinkModalOpen(false);
           refresh();
         }}
+      />
+      <CaseDetailsUnlinkEntityModal
+        isOpen={unlinkTarget !== null}
+        target={unlinkTarget}
+        isPending={unlinkMutation.isPending}
+        onCancel={() => setUnlinkTarget(null)}
+        onConfirm={handleConfirmUnlink}
       />
     </>
   );
