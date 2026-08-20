@@ -12,6 +12,8 @@ export default defineConfig([
     'dist',
     'build',
     'coverage',
+    '.pnpm-store',
+    '.worktrees',
     'src/api/types',
     'docs',
     '.agents',
