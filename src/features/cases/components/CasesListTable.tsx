@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/Button';
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router';
 import { DataTable, type Column } from '../../../components/tables/DataTable';
@@ -40,12 +41,13 @@ export function CasesListTable() {
         defaultSortDirection: 'desc',
         onSort: (direction) => setOrderBy(orderByParam(direction, 'request_form_id')),
         render: (case_) => (
-          <button
+          <Button
+            variant='ghost'
             onClick={() => void navigate(`/cases/${case_.orcabusId}`)}
             className='text-left text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline dark:text-blue-400 dark:hover:text-blue-300'
           >
             {case_.requestFormId}
-          </button>
+          </Button>
         ),
       },
       {

@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/Button';
 import { useState } from 'react';
 import { Briefcase, Database, FolderSync } from 'lucide-react';
 import { DrawerFrame } from '@/components/modals/DrawerFrame';
@@ -60,13 +61,14 @@ export function CasesInfoDrawer({ isOpen, onClose }: CasesInfoDrawerProps) {
           {lastSyncedLabel && (
             <p className='mt-3 text-sm text-slate-600 dark:text-[#9dabb9]'>
               Last synced at{' '}
-              <button
+              <Button
+                variant='ghost'
                 type='button'
                 onClick={() => setShowSyncHistoryModal(true)}
                 className='font-medium text-blue-600 underline-offset-2 hover:underline dark:text-blue-400'
               >
                 {lastSyncedLabel}
-              </button>
+              </Button>
             </p>
           )}
         </section>

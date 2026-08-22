@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/Button';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AlignJustify, Check, Copy, ExternalLink, Info, Link } from 'lucide-react';
 import { toast } from 'sonner';
@@ -22,7 +23,8 @@ function MenuItem({
   disabled?: boolean;
 }) {
   return (
-    <button
+    <Button
+      variant='ghost'
       type='button'
       onClick={onClick}
       disabled={disabled}
@@ -30,7 +32,7 @@ function MenuItem({
     >
       <span className='shrink-0 text-neutral-400 dark:text-neutral-500'>{icon}</span>
       {label}
-    </button>
+    </Button>
   );
 }
 
@@ -116,7 +118,8 @@ export function FileMoreActionsDropdown({ s3Record, onViewDetails }: Props) {
 
   return (
     <div ref={dropdownRef} className='relative'>
-      <button
+      <Button
+        variant='ghost'
         type='button'
         onClick={() => setIsOpen((o) => !o)}
         className='rounded p-1.5 transition-colors hover:bg-neutral-100 dark:hover:bg-[#2d3540]'
@@ -125,7 +128,7 @@ export function FileMoreActionsDropdown({ s3Record, onViewDetails }: Props) {
         aria-expanded={isOpen}
       >
         <AlignJustify className='h-4 w-4 text-neutral-600 dark:text-[#8892a2]' />
-      </button>
+      </Button>
 
       {isOpen && (
         <div className='absolute top-full right-0 z-50 mt-1 min-w-52 overflow-hidden rounded-lg border border-neutral-200 bg-white py-1 shadow-lg dark:border-[#2d3540] dark:bg-[#1e252e]'>

@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/Button';
 import { useState, useCallback, useMemo } from 'react';
 import { FileSearch } from 'lucide-react';
 import { FileDownloadButton } from './FileDownloadButton';
@@ -69,13 +70,14 @@ export function FilesTable() {
                 {ext}
               </span>
               <div>
-                <button
+                <Button
+                  variant='ghost'
                   type='button'
                   onClick={() => openDetail(file)}
                   className='text-left text-sm font-medium text-neutral-900 hover:underline dark:text-white'
                 >
                   {name}
-                </button>
+                </Button>
                 {dir && (
                   <Tooltip>
                     <TooltipTrigger asChild>

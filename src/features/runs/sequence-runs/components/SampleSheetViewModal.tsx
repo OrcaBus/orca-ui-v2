@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/Button';
 import {
   FileText,
   Clock,
@@ -118,7 +119,8 @@ function AccordionSection({
   const [open, setOpen] = useState(defaultOpen);
   return (
     <div className='rounded-lg border border-neutral-200 dark:border-neutral-700'>
-      <button
+      <Button
+        variant='ghost'
         type='button'
         onClick={() => setOpen((v) => !v)}
         className='flex w-full items-center justify-between px-4 py-3 text-left text-sm font-semibold text-neutral-800 hover:bg-neutral-50 dark:text-neutral-200 dark:hover:bg-neutral-800/50'
@@ -129,7 +131,7 @@ function AccordionSection({
         ) : (
           <ChevronRight className='h-4 w-4 text-neutral-500' />
         )}
-      </button>
+      </Button>
       {open && (
         <div className='border-t border-neutral-200 p-4 dark:border-neutral-700'>{children}</div>
       )}
@@ -327,7 +329,8 @@ function SampleSheetViewModalContent({
       panelStyle={{ maxHeight: 'min(90vh, 900px)' }}
       bodyClassName='flex min-h-0 flex-1 flex-col space-y-0 overflow-hidden p-0'
       headerActions={
-        <button
+        <Button
+          variant='ghost'
           type='button'
           onClick={handleDownload}
           disabled={!canDownload}
@@ -337,16 +340,17 @@ function SampleSheetViewModalContent({
         >
           <Download className='h-3.5 w-3.5' />
           Download {downloadFormat}
-        </button>
+        </Button>
       }
       footer={
-        <button
+        <Button
+          variant='ghost'
           type='button'
           onClick={onClose}
           className='rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-[#9dabb9] dark:hover:bg-[#2d3540]'
         >
           Close
-        </button>
+        </Button>
       }
     >
       {sampleSheet && (

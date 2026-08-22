@@ -45,7 +45,8 @@ export function AutoImportFromRedcapModal({
       size='sm'
       footer={
         <div className='flex items-center justify-end gap-2'>
-          <button
+          <Button
+            variant='ghost'
             type='button'
             onClick={onClose}
             disabled={isLoading}
@@ -56,7 +57,7 @@ export function AutoImportFromRedcapModal({
             )}
           >
             Cancel
-          </button>
+          </Button>
           <Button type='button' onClick={handleConfirm} disabled={isLoading}>
             {isLoading ? (
               <>

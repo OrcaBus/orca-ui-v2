@@ -157,7 +157,8 @@ function FileRecordDetailsBody({ file }: { file: S3Record }) {
             <span className='text-caption font-semibold tracking-wider text-neutral-400 uppercase dark:text-neutral-500'>
               S3 Path
             </span>
-            <button
+            <Button
+              variant='ghost'
               type='button'
               onClick={handleCopyS3Uri}
               className='text-caption flex items-center gap-1 text-blue-600 hover:underline dark:text-blue-400'
@@ -173,7 +174,7 @@ function FileRecordDetailsBody({ file }: { file: S3Record }) {
                   Copy
                 </>
               )}
-            </button>
+            </Button>
           </div>
           <p className='text-caption font-mono break-all text-neutral-800 dark:text-neutral-200'>
             s3://{file.bucket}/{file.key}
@@ -279,7 +280,8 @@ function FileRecordDetailsBody({ file }: { file: S3Record }) {
           {isLoading ? <Spinner className='h-4 w-4' /> : <Download />}
           Download
         </Button>
-        <button
+        <Button
+          variant='ghost'
           type='button'
           disabled={isLoading}
           onClick={() => void handleCopyPresignUrl()}
@@ -301,7 +303,7 @@ function FileRecordDetailsBody({ file }: { file: S3Record }) {
               Copy Presigned Download Link
             </>
           )}
-        </button>
+        </Button>
       </div>
     </div>
   );

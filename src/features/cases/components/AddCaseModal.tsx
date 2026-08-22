@@ -1,3 +1,6 @@
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
 import { useEffect } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -167,7 +170,8 @@ export function AddCaseModal({ isOpen, onClose, onSuccess }: AddCaseModalProps) 
       size='xl'
       footer={
         <div className='flex items-center justify-end gap-3'>
-          <button
+          <Button
+            variant='ghost'
             type='button'
             onClick={onClose}
             className={cn(
@@ -178,8 +182,9 @@ export function AddCaseModal({ isOpen, onClose, onSuccess }: AddCaseModalProps) 
             )}
           >
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
+            variant='ghost'
             type='submit'
             form='add-case-form'
             disabled={isSubmitting}
@@ -191,7 +196,7 @@ export function AddCaseModal({ isOpen, onClose, onSuccess }: AddCaseModalProps) 
             )}
           >
             {isSubmitting ? 'Creating...' : 'Create Case'}
-          </button>
+          </Button>
         </div>
       }
     >
@@ -205,7 +210,7 @@ export function AddCaseModal({ isOpen, onClose, onSuccess }: AddCaseModalProps) 
           <label htmlFor='add-case-requestFormId' className={labelCls}>
             Request Form Id
           </label>
-          <input
+          <Input
             id='add-case-requestFormId'
             type='text'
             placeholder='Enter case requestFormId'
@@ -222,26 +227,26 @@ export function AddCaseModal({ isOpen, onClose, onSuccess }: AddCaseModalProps) 
             <label htmlFor='add-case-type' className={labelCls}>
               Type
             </label>
-            <select id='add-case-type' {...register('type')} className={inputCls}>
+            <Select id='add-case-type' {...register('type')} className={inputCls}>
               {TYPE_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
                   {opt.label}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
 
           <div className='space-y-1.5'>
             <label htmlFor='add-case-studyType' className={labelCls}>
               Study Type
             </label>
-            <select id='add-case-studyType' {...register('studyType')} className={inputCls}>
+            <Select id='add-case-studyType' {...register('studyType')} className={inputCls}>
               {STUDY_TYPE_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
                   {opt.label}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
         </div>
 
@@ -251,42 +256,44 @@ export function AddCaseModal({ isOpen, onClose, onSuccess }: AddCaseModalProps) 
           <div className='space-y-2'>
             {linkFields.map((field, idx) => (
               <div key={field.id} className='flex items-center gap-2'>
-                <input
+                <Input
                   type='text'
                   placeholder='Link name'
                   {...register(`links.${idx}.name`)}
                   className={cn(inputCls, 'flex-1')}
                 />
-                <input
+                <Input
                   type='url'
                   placeholder='https://...'
                   {...register(`links.${idx}.url`)}
                   className={cn(inputCls, 'flex-2')}
                 />
-                <button
+                <Button
+                  variant='ghost'
                   type='button'
                   onClick={() => removeLink(idx)}
                   className='shrink-0 rounded px-2 py-1.5 text-sm font-medium text-red-500 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10'
                 >
                   Remove
-                </button>
+                </Button>
               </div>
             ))}
           </div>
-          <button
+          <Button
+            variant='ghost'
             type='button'
             onClick={() => appendLink({ name: '', url: '' })}
             className='flex items-center gap-1 rounded px-2 py-1 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-500/10'
           >
             <Plus className='h-3.5 w-3.5' />
             Add Link
-          </button>
+          </Button>
         </div>
 
         {/* Checkboxes */}
         <div className='flex flex-col gap-3'>
           <label className='flex cursor-pointer items-center gap-2.5'>
-            <input
+            <Input
               type='checkbox'
               {...register('isReportRequired')}
               className='h-4 w-4 rounded border-neutral-300 text-blue-600 focus:ring-blue-500 dark:border-[#2d3540]'
@@ -296,7 +303,7 @@ export function AddCaseModal({ isOpen, onClose, onSuccess }: AddCaseModalProps) 
             </span>
           </label>
           <label className='flex cursor-pointer items-center gap-2.5'>
-            <input
+            <Input
               type='checkbox'
               {...register('isNataAccredited')}
               className='h-4 w-4 rounded border-neutral-300 text-blue-600 focus:ring-blue-500 dark:border-[#2d3540]'
@@ -313,30 +320,32 @@ export function AddCaseModal({ isOpen, onClose, onSuccess }: AddCaseModalProps) 
           <div className='space-y-2'>
             {aliasFields.map((field, idx) => (
               <div key={field.id} className='flex items-center gap-2'>
-                <input
+                <Input
                   type='text'
                   placeholder='Enter alias'
                   {...register(`alias.${idx}.value`)}
                   className={cn(inputCls, 'flex-1')}
                 />
-                <button
+                <Button
+                  variant='ghost'
                   type='button'
                   onClick={() => removeAlias(idx)}
                   className='shrink-0 rounded px-2 py-1.5 text-sm font-medium text-red-500 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10'
                 >
                   Remove
-                </button>
+                </Button>
               </div>
             ))}
           </div>
-          <button
+          <Button
+            variant='ghost'
             type='button'
             onClick={() => appendAlias({ value: '' })}
             className='flex items-center gap-1 rounded px-2 py-1 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-500/10'
           >
             <Plus className='h-3.5 w-3.5' />
             Add Alias
-          </button>
+          </Button>
         </div>
 
         {/* Description */}

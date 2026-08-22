@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/Button';
 import { Loader2, Play } from 'lucide-react';
 import type { LoggingLevel } from '../api/sschecker.api';
 import { FormatTipCard } from './FormatTipCard';
@@ -50,7 +51,8 @@ export function SSCheckerInputsPanel({
           <LoggingLevelSelect value={loggingLevel} onChange={onLoggingLevelChange} />
         </div>
 
-        <button
+        <Button
+          variant='ghost'
           type='button'
           onClick={onCheck}
           disabled={!canCheck}
@@ -71,7 +73,7 @@ export function SSCheckerInputsPanel({
               Check
             </>
           )}
-        </button>
+        </Button>
       </div>
 
       <FormatTipCard />

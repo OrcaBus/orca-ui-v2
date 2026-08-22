@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/Button';
 import { Column, DataTable } from '@/components/tables/DataTable';
 import { useWorkflowTypesListQueryParams } from '../hooks/useWorkflowTypesListQueryParams';
 import { useWorkflowGroupedModel, type WorkflowListModel } from '../../shared/api/workflows.api';
@@ -99,13 +100,14 @@ const WorkflowTypesTable = () => {
         sortable: false,
         render: (wt) => (
           <div className='flex items-center gap-2'>
-            <button
+            <Button
+              variant='ghost'
               onClick={() => openDetail(wt.orcabusId)}
               className='pointer-events-auto cursor-pointer rounded p-1.5 text-neutral-600 transition-colors hover:bg-blue-50 hover:text-blue-600 dark:text-neutral-400 dark:hover:bg-blue-900/20 dark:hover:text-blue-400'
               title='View workflow details & history'
             >
               <Eye className='h-4 w-4' />
-            </button>
+            </Button>
           </div>
         ),
       },

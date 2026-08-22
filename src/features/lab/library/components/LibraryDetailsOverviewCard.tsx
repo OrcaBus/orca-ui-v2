@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/Button';
 import { useState } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { PillTag } from '@/components/ui/PillTag';
@@ -81,14 +82,15 @@ function LinkageErrorState({ onRetry }: { onRetry: () => void }) {
           <div className='text-sm font-medium text-red-800 dark:text-red-300'>
             Unable to load linkage files
           </div>
-          <button
+          <Button
+            variant='ghost'
             type='button'
             onClick={onRetry}
             className='mt-2 inline-flex items-center gap-1.5 rounded-md border border-red-200 bg-white px-2.5 py-1 text-xs font-medium text-red-700 transition-colors hover:bg-red-100 dark:border-red-500/30 dark:bg-transparent dark:text-red-300 dark:hover:bg-red-500/10'
           >
             <RefreshCw className='h-3.5 w-3.5' aria-hidden='true' />
             Retry
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -113,13 +115,14 @@ function FileNameBadge({
     <>
       <Tooltip>
         <TooltipTrigger asChild>
-          <button
+          <Button
+            variant='ghost'
             type='button'
             onClick={() => setIsPreviewOpen(true)}
             className={`inline-flex max-w-full min-w-0 cursor-pointer items-center rounded-full border px-2 py-0.5 text-xs! font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${fileGroupStyles[groupKey]}`}
           >
             <span className='truncate'>{filename}</span>
-          </button>
+          </Button>
         </TooltipTrigger>
         <TooltipContent side='top' align='start' variant='light' size='md'>
           <div className='space-y-2.5'>

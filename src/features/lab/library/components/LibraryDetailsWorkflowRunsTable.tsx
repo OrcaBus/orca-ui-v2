@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/Button';
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router';
 import { FileSearch } from 'lucide-react';
@@ -65,7 +66,8 @@ export function LibraryDetailsWorkflowRunsTable() {
         key: 'name',
         header: 'Workflow Run Name',
         render: (workflowRun) => (
-          <button
+          <Button
+            variant='ghost'
             type='button'
             onClick={() => {
               void navigate(`/runs/workflow-runs/${workflowRun.orcabusId}`);
@@ -73,7 +75,7 @@ export function LibraryDetailsWorkflowRunsTable() {
             className='text-left text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline dark:text-blue-400 dark:hover:text-blue-300'
           >
             {workflowRun.workflowRunName || workflowRun.portalRunId}
-          </button>
+          </Button>
         ),
       },
       {
@@ -108,14 +110,15 @@ export function LibraryDetailsWorkflowRunsTable() {
         key: 'actions',
         header: 'Actions',
         render: (workflowRun) => (
-          <button
+          <Button
+            variant='ghost'
             type='button'
             onClick={() => setPortalRunId(workflowRun.portalRunId)}
             className='inline-flex items-center gap-1.5 rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-xs font-medium text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-[#c1cbd8] dark:hover:bg-[#2d3540]'
           >
             <FileSearch className='h-3.5 w-3.5' aria-hidden='true' />
             View files
-          </button>
+          </Button>
         ),
       },
     ],

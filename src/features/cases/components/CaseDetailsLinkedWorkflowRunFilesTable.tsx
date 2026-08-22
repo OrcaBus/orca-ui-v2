@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/Button';
 import { useState, useMemo } from 'react';
 import { DataTable, type Column } from '@/components/tables/DataTable';
 import { ApiErrorState } from '@/components/ui/ApiErrorState';
@@ -71,7 +72,8 @@ export function CaseDetailsLinkedWorkflowRunFilesTable({
                 {ext}
               </span>
               <div>
-                <button
+                <Button
+                  variant='ghost'
                   type='button'
                   onClick={() => {
                     setSelectedFile(file);
@@ -80,7 +82,7 @@ export function CaseDetailsLinkedWorkflowRunFilesTable({
                   className='text-left text-sm font-medium text-neutral-900 hover:underline dark:text-white'
                 >
                   {name}
-                </button>
+                </Button>
                 {dir && (
                   <Tooltip>
                     <TooltipTrigger asChild>

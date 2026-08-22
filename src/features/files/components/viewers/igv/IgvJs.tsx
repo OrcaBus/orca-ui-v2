@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/Button';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 import { Check, ChevronDown, Loader2 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -282,7 +283,8 @@ export const IgvViewer = ({ s3ObjectId, bucket, s3Key, htsGetBaseUrl }: IgvViewe
                 return (
                   <MenuItem key={genome.id}>
                     {({ active }) => (
-                      <button
+                      <Button
+                        variant='ghost'
                         type='button'
                         onClick={() => handleReferenceGenomeSelect(genome.id)}
                         className={cn(
@@ -295,7 +297,7 @@ export const IgvViewer = ({ s3ObjectId, bucket, s3Key, htsGetBaseUrl }: IgvViewe
                         {isSelected ? (
                           <Check className='h-4 w-4 text-blue-600 dark:text-[#137fec]' />
                         ) : null}
-                      </button>
+                      </Button>
                     )}
                   </MenuItem>
                 );

@@ -1,3 +1,4 @@
+import { Input } from '@/components/ui/Input';
 import { useState, useMemo } from 'react';
 import { useParams } from 'react-router';
 import { Link as LinkIcon, Search } from 'lucide-react';
@@ -98,14 +99,15 @@ export function CaseDetailsLinkWorkflowRunsModal({
             {selectedIds.length} workflow {selectedIds.length === 1 ? 'run' : 'runs'} selected
           </p>
           <div className='flex items-center gap-2'>
-            <button
+            <Button
+              variant='ghost'
               type='button'
               onClick={handleClose}
               disabled={isSubmitting}
               className='rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-[#2d3540] dark:bg-transparent dark:text-neutral-200 dark:hover:bg-[#2d3540]'
             >
               Cancel
-            </button>
+            </Button>
             <Button
               type='button'
               onClick={() => void handleConfirm()}
@@ -124,7 +126,7 @@ export function CaseDetailsLinkWorkflowRunsModal({
       <div className='shrink-0 border-b border-neutral-200 px-6 py-4 dark:border-[#2d3540]'>
         <div className='relative'>
           <Search className='absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-neutral-400 dark:text-[#9dabb9]' />
-          <input
+          <Input
             type='text'
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -155,7 +157,7 @@ export function CaseDetailsLinkWorkflowRunsModal({
                 key={run.orcabusId}
                 className='flex cursor-pointer items-center gap-3 rounded-md border border-neutral-200 p-3 hover:bg-neutral-50 dark:border-neutral-700 dark:hover:bg-[#1e252e]'
               >
-                <input
+                <Input
                   type='checkbox'
                   checked={selectedIds.includes(run.orcabusId)}
                   onChange={() => handleToggle(run.orcabusId)}

@@ -1,4 +1,4 @@
-import type { ComponentProps } from 'react';
+import type { ComponentProps, ReactElement } from 'react';
 
 import { cn } from '@/utils/cn';
 
@@ -7,11 +7,23 @@ export interface SelectOption {
   label: string;
 }
 
-interface SelectProps extends Omit<ComponentProps<'select'>, 'value' | 'onChange'> {
+type NativeSelectProps = ComponentProps<'select'> & {
+  options?: never;
+  placeholder?: never;
+};
+
+type OptionsSelectProps = Omit<ComponentProps<'select'>, 'children' | 'onChange'> & {
   value: string;
   onChange: (value: string) => void;
   options: SelectOption[];
   placeholder?: string;
+  children?: never;
+};
+
+type SelectProps = NativeSelectProps | OptionsSelectProps;
+
+function isOptionsSelect(props: SelectProps): props is OptionsSelectProps {
+  return Array.isArray((props as OptionsSelectProps).options);
 }
 
 /**
@@ -23,34 +35,41 @@ interface SelectProps extends Omit<ComponentProps<'select'>, 'value' | 'onChange
  * own slightly different focus/radius treatment). New forms should be able
  * to use this directly, including with react-hook-form's `register()`.
  */
-export function Select({
-  value,
-  onChange,
-  options,
-  placeholder,
-  className,
-  ...props
-}: SelectProps) {
+export function Select(props: OptionsSelectProps): ReactElement;
+export function Select(props: NativeSelectProps): ReactElement;
+export function Select(props: SelectProps): ReactElement {
+  const selectClassName = cn(
+    'w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 shadow-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-200 dark:focus:border-[#137fec] dark:focus:ring-[#137fec]',
+    props.className
+  );
+
+  if (isOptionsSelect(props)) {
+    const { className: _className, value, onChange, options, placeholder, ...selectProps } = props;
+    return (
+      <select
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className={selectClassName}
+        {...selectProps}
+      >
+        {placeholder && (
+          <option value='' disabled>
+            {placeholder}
+          </option>
+        )}
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    );
+  }
+
+  const { className: _className, children, ...selectProps } = props;
   return (
-    <select
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className={cn(
-        'w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 shadow-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-200 dark:focus:border-[#137fec] dark:focus:ring-[#137fec]',
-        className
-      )}
-      {...props}
-    >
-      {placeholder && (
-        <option value='' disabled>
-          {placeholder}
-        </option>
-      )}
-      {options.map((option) => (
-        <option key={option.value} value={option.value}>
-          {option.label}
-        </option>
-      ))}
+    <select className={selectClassName} {...selectProps}>
+      {children}
     </select>
   );
 }

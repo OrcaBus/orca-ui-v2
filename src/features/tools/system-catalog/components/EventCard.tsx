@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/Button';
 import { useState } from 'react';
 import { Zap, ChevronRight, Pencil, Trash2 } from 'lucide-react';
 import type { EventDef } from '../data/dynamodb-schema';
@@ -42,24 +43,26 @@ export function EventCard({ event, variant, onEdit, onDelete }: EventCardProps) 
         {showActions && (
           <div className='flex shrink-0 items-center gap-0.5' onClick={(e) => e.stopPropagation()}>
             {onEdit && (
-              <button
+              <Button
+                variant='ghost'
                 type='button'
                 onClick={onEdit}
                 className='rounded p-1.5 text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-600 dark:hover:bg-[#2d3540] dark:hover:text-white'
                 title='Edit event'
               >
                 <Pencil className='h-3.5 w-3.5' />
-              </button>
+              </Button>
             )}
             {onDelete && (
-              <button
+              <Button
+                variant='ghost'
                 type='button'
                 onClick={onDelete}
                 className='rounded p-1.5 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10 dark:hover:text-red-400'
                 title='Remove event'
               >
                 <Trash2 className='h-3.5 w-3.5' />
-              </button>
+              </Button>
             )}
           </div>
         )}

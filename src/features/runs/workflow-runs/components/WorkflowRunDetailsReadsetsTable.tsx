@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/Button';
 import { useNavigate } from 'react-router';
 import { SimpleTable, SimpleTableColumn } from '@/components/tables/SimpleTable';
 import { useWorkflowRunDetailsContext } from '../context/WorkflowRunDetailsContext';
@@ -35,14 +36,15 @@ export function WorkflowRunDetailsReadsetsTable() {
       key: 'libraryId',
       header: 'Library ID',
       render: (rs) => (
-        <button
+        <Button
+          variant='ghost'
           onClick={() => {
             void navigate(`/lab/libraries/${rs.libraryOrcabusId}`);
           }}
           className='font-mono text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline dark:text-[#137fec] dark:hover:text-blue-400'
         >
           {rs.libraryId}
-        </button>
+        </Button>
       ),
     },
     {
@@ -53,7 +55,8 @@ export function WorkflowRunDetailsReadsetsTable() {
           <span className='font-mono text-sm text-neutral-600 dark:text-neutral-400'>
             {rs.orcabusId}
           </span>
-          <button
+          <Button
+            variant='ghost'
             type='button'
             onClick={() => void handleCopy(rs.orcabusId, rs.orcabusId)}
             className='rounded p-1 transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800'
@@ -63,7 +66,7 @@ export function WorkflowRunDetailsReadsetsTable() {
             ) : (
               <Copy className='h-3.5 w-3.5 text-neutral-400' />
             )}
-          </button>
+          </Button>
         </div>
       ),
     },

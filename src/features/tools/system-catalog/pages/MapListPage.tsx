@@ -1,3 +1,6 @@
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router';
 import {
@@ -115,7 +118,7 @@ function FilterSelect({
 }) {
   return (
     <div className='relative'>
-      <select
+      <Select
         value={value}
         onChange={(event) => onChange(event.target.value)}
         aria-label={ariaLabel}
@@ -126,7 +129,7 @@ function FilterSelect({
             {option.label}
           </option>
         ))}
-      </select>
+      </Select>
       <div className='pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 text-slate-400 dark:text-[#6b7a8d]'>
         {icon ?? <ChevronDown className='h-4 w-4' />}
       </div>
@@ -217,13 +220,14 @@ export function MapListPage() {
             <div className='text-sm font-medium text-slate-700 dark:text-slate-200'>
               Unable to load system catalog maps.
             </div>
-            <button
+            <Button
+              variant='ghost'
               type='button'
               onClick={() => void refetch()}
               className='mt-4 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:border-blue-300 hover:text-blue-600 dark:border-[#2d3540] dark:bg-[#111418] dark:text-slate-200 dark:hover:border-blue-500/50 dark:hover:text-blue-400'
             >
               Retry
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -239,7 +243,7 @@ export function MapListPage() {
           <div className='mb-6 flex flex-wrap items-center gap-3'>
             <div className='relative min-w-0 flex-1'>
               <Search className='absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-[#6b7a8d]' />
-              <input
+              <Input
                 type='text'
                 placeholder='Search by map name or user...'
                 value={searchQuery}
@@ -250,7 +254,8 @@ export function MapListPage() {
 
             {/* mine / all filter */}
             <div className='flex rounded-lg border border-slate-200 bg-white dark:border-[#2d3540] dark:bg-[#111418]'>
-              <button
+              <Button
+                variant='ghost'
                 type='button'
                 onClick={() => setShowOnlyMine(false)}
                 className={`flex h-9 items-center rounded-l-lg px-3 text-sm font-medium transition-colors ${
@@ -260,8 +265,9 @@ export function MapListPage() {
                 }`}
               >
                 All
-              </button>
-              <button
+              </Button>
+              <Button
+                variant='ghost'
                 type='button'
                 onClick={() => setShowOnlyMine(true)}
                 className={`flex h-9 items-center gap-1.5 rounded-r-lg border-l border-slate-200 px-3 text-sm font-medium transition-colors dark:border-[#2d3540] ${
@@ -272,12 +278,13 @@ export function MapListPage() {
               >
                 <User className='h-3.5 w-3.5' />
                 Mine
-              </button>
+              </Button>
             </div>
 
             {/* view mode: layout grid view and list view */}
             <div className='flex rounded-lg border border-slate-200 bg-white dark:border-[#2d3540] dark:bg-[#111418]'>
-              <button
+              <Button
+                variant='ghost'
                 type='button'
                 onClick={() => setViewMode('grid')}
                 aria-label='Grid view'
@@ -289,8 +296,9 @@ export function MapListPage() {
                 }`}
               >
                 <LayoutGrid className='h-4 w-4' />
-              </button>
-              <button
+              </Button>
+              <Button
+                variant='ghost'
                 type='button'
                 onClick={() => setViewMode('list')}
                 aria-label='List view'
@@ -302,7 +310,7 @@ export function MapListPage() {
                 }`}
               >
                 <List className='h-4 w-4' />
-              </button>
+              </Button>
             </div>
             {/* status filter */}
             <FilterSelect

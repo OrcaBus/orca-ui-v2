@@ -1,3 +1,4 @@
+import { Input } from '@/components/ui/Input';
 import { useState, type Dispatch, type KeyboardEvent, type SetStateAction } from 'react';
 import { Folder, Search, SlidersHorizontal, X, ChevronUp, Filter } from 'lucide-react';
 import { WORKFLOW_PATTERNS, FILE_EXTENSIONS } from '@/utils/constants';
@@ -50,20 +51,22 @@ function OpToggle({ value, onChange }: { value: FilterOp; onChange: (op: FilterO
     'bg-white text-neutral-500 hover:bg-neutral-50 dark:bg-[#1e252e] dark:text-neutral-400 dark:hover:bg-[#252d38]';
   return (
     <div className='inline-flex overflow-hidden rounded border border-neutral-200 dark:border-[#2d3540]'>
-      <button
+      <Button
+        variant='ghost'
         type='button'
         className={`${base} ${value === 'or' ? active : inactive}`}
         onClick={() => onChange('or')}
       >
         OR
-      </button>
-      <button
+      </Button>
+      <Button
+        variant='ghost'
         type='button'
         className={`${base} ${value === 'and' ? active : inactive} border-l border-neutral-200 dark:border-[#2d3540]`}
         onClick={() => onChange('and')}
       >
         AND
-      </button>
+      </Button>
     </div>
   );
 }
@@ -124,7 +127,7 @@ export function FilesAdvancedFilterFields({
           <label htmlFor='adv-portalRunId' className={labelClass}>
             Portal Run ID
           </label>
-          <input
+          <Input
             type='text'
             id='adv-portalRunId'
             value={tempValues.portalRunId}
@@ -164,7 +167,7 @@ export function FilesAdvancedFilterFields({
               {key}
             </PillTag>
           ))}
-          <input
+          <Input
             type='text'
             id='adv-s3Key'
             value={tempValues.keyDraft}
@@ -323,7 +326,7 @@ export function FilesSearchPanel() {
             className='absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-neutral-400 dark:text-[#9dabb9]'
             aria-hidden='true'
           />
-          <input
+          <Input
             ref={inputRef}
             id='files-general-search'
             type='text'
@@ -332,17 +335,19 @@ export function FilesSearchPanel() {
             onChange={handleInputChange}
             className='peer w-full rounded-md border border-slate-200 bg-slate-50 py-2 pr-10 pl-10 text-sm text-neutral-900 placeholder-neutral-400 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-100 dark:placeholder-[#9dabb9] dark:focus:ring-[#137fec]'
           />
-          <button
+          <Button
+            variant='ghost'
             type='button'
             onClick={clearInput}
             className='absolute top-1/2 right-3 -translate-y-1/2 text-neutral-400 peer-placeholder-shown:hidden hover:text-neutral-600 dark:text-[#9dabb9] dark:hover:text-white'
             aria-label='Clear search'
           >
             <X className='h-4 w-4' aria-hidden='true' />
-          </button>
+          </Button>
         </div>
 
-        <button
+        <Button
+          variant='ghost'
           type='button'
           onClick={handleToggleOpen}
           className={`flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors ${
@@ -358,20 +363,21 @@ export function FilesSearchPanel() {
               {activeCount}
             </span>
           )}
-        </button>
+        </Button>
       </div>
 
       {/* Advanced Filters Accordion */}
       {isOpen && (
         <div>
-          <button
+          <Button
+            variant='ghost'
             type='button'
             onClick={() => setIsOpen(false)}
             className='flex w-full items-center gap-1.5 border-t border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:text-slate-900 dark:border-[#2d3540] dark:bg-[#1e252e]/50 dark:text-[#9dabb9] dark:hover:text-white'
           >
             <ChevronUp className='h-4 w-4' />
             Advanced Filters
-          </button>
+          </Button>
 
           <div className='px-4 py-3'>
             {/* Field inputs */}
@@ -404,7 +410,8 @@ export function FilesSearchPanel() {
                   {WORKFLOW_PATTERNS.map((pattern) => {
                     const isActive = tempValues.keys.includes(pattern);
                     return (
-                      <button
+                      <Button
+                        variant='ghost'
                         key={pattern}
                         type='button'
                         onClick={() =>
@@ -421,7 +428,7 @@ export function FilesSearchPanel() {
                         title={`Set S3 key pattern to: ${pattern}`}
                       >
                         {pattern}
-                      </button>
+                      </Button>
                     );
                   })}
                 </div>
@@ -440,7 +447,8 @@ export function FilesSearchPanel() {
                   {FILE_EXTENSIONS.map((extension) => {
                     const isActive = tempValues.keys.includes(extension);
                     return (
-                      <button
+                      <Button
+                        variant='ghost'
                         key={extension}
                         type='button'
                         onClick={() =>
@@ -457,7 +465,7 @@ export function FilesSearchPanel() {
                         title={`Append extension: ${extension}`}
                       >
                         {extension}
-                      </button>
+                      </Button>
                     );
                   })}
                 </div>
@@ -466,13 +474,14 @@ export function FilesSearchPanel() {
 
             {/* Apply / Reset */}
             <div className='mt-4 flex items-center justify-end gap-3 border-t border-dashed border-neutral-100 pt-3 dark:border-[#2d3540]'>
-              <button
+              <Button
+                variant='ghost'
                 type='button'
                 onClick={handleReset}
                 className='px-4 py-2 text-sm text-neutral-600 transition-colors hover:text-neutral-900 dark:text-[#9dabb9] dark:hover:text-white'
               >
                 Reset
-              </button>
+              </Button>
               <Button type='button' onClick={handleApply}>
                 <Filter />
                 Apply Filters
@@ -497,13 +506,14 @@ export function FilesSearchPanel() {
               {`${badge.label}: ${badge.value}`}
             </PillTag>
           ))}
-          <button
+          <Button
+            variant='ghost'
             type='button'
             onClick={handleClearAll}
             className='ml-auto shrink-0 text-xs font-medium text-blue-600 hover:text-blue-800 dark:text-[#137fec] dark:hover:text-blue-300'
           >
             Clear all
-          </button>
+          </Button>
         </div>
       )}
     </div>

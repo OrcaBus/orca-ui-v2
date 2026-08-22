@@ -1,3 +1,4 @@
+import { Input } from '@/components/ui/Input';
 import { useEffect } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -90,13 +91,14 @@ export function WorkflowRunRerunModal({
       size='lg'
       footer={
         <>
-          <button
+          <Button
+            variant='ghost'
             type='button'
             onClick={onClose}
             className='rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-[#9dabb9] dark:hover:bg-[#2d3540]'
           >
             Close
-          </button>
+          </Button>
           {isValid && (
             <Button
               type='submit'
@@ -189,7 +191,7 @@ export function WorkflowRunRerunModal({
                 name='markAsDeprecated'
                 render={({ field }) => (
                   <div className='flex items-start gap-3'>
-                    <input
+                    <Input
                       type='checkbox'
                       id='rerun-mark-deprecated'
                       checked={field.value}

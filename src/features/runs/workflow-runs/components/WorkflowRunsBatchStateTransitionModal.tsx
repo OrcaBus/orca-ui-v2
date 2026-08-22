@@ -1,3 +1,4 @@
+import { Input } from '@/components/ui/Input';
 import { useEffect, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useForm, useWatch } from 'react-hook-form';
@@ -218,8 +219,9 @@ export function WorkflowRunsBatchStateTransitionModal({
       size='lg'
       footer={
         <>
-          <button
-            type='button'
+          <Button
+            variant='ghost'
+
             onClick={onClose}
             className={cn(
               'rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition-colors',
@@ -229,7 +231,7 @@ export function WorkflowRunsBatchStateTransitionModal({
             )}
           >
             Close
-          </button>
+          </Button>
           <Button
             type='submit'
             form='workflow-runs-batch-state-transition-form'
@@ -306,19 +308,20 @@ export function WorkflowRunsBatchStateTransitionModal({
                 <p className='text-sm font-medium text-red-700 dark:text-red-400'>
                   State transition validation could not be loaded.
                 </p>
-                <button
+                <Button
+                  variant='ghost'
                   type='button'
                   onClick={() => void refetchValidationMap()}
                   className='mt-2 text-sm font-medium text-red-700 underline-offset-2 hover:underline dark:text-red-300'
                 >
                   Retry
-                </button>
+                </Button>
               </div>
             </div>
           </div>
         ) : hasSelectableStates ? (
           <div className='space-y-3'>
-            <input type='hidden' {...register('stateName')} />
+            <Input type='hidden' {...register('stateName')} />
             <p className='text-sm font-medium text-neutral-700 dark:text-neutral-300'>
               Target state
             </p>
@@ -327,7 +330,8 @@ export function WorkflowRunsBatchStateTransitionModal({
                 const isSelected = selectedStateName === state.value;
 
                 return (
-                  <button
+                  <Button
+                    variant='ghost'
                     key={state.value}
                     type='button'
                     onClick={() =>
@@ -354,7 +358,7 @@ export function WorkflowRunsBatchStateTransitionModal({
                     <span className='font-medium text-neutral-900 dark:text-slate-100'>
                       {state.label}
                     </span>
-                  </button>
+                  </Button>
                 );
               })}
             </div>

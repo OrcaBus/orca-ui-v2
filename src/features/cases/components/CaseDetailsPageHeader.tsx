@@ -48,14 +48,15 @@ export function CaseDetailsPageHeader() {
               <span className='flex items-center gap-1.5'>
                 Orcabus ID: <span className='font-mono'>{caseDetail?.orcabusId ?? '—'}</span>
                 {caseDetail?.orcabusId && (
-                  <button
+                  <Button
+                    variant='ghost'
                     type='button'
                     onClick={handleCopyOrcabusId}
                     aria-label='Copy Orcabus ID'
                     className='rounded p-0.5 transition-colors hover:bg-neutral-200 dark:hover:bg-[#2d3540]'
                   >
                     <Copy className='h-3.5 w-3.5 text-neutral-400 hover:text-neutral-600 dark:text-[#9dabb9] dark:hover:text-white' />
-                  </button>
+                  </Button>
                 )}
               </span>
             )}

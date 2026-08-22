@@ -1,3 +1,4 @@
+import { Input } from '@/components/ui/Input';
 import { useState, useMemo } from 'react';
 import { useParams } from 'react-router';
 import { Link as LinkIcon, ListFilter, ArrowLeft, Search } from 'lucide-react';
@@ -40,7 +41,8 @@ function WorkflowTypeButton({
   onClick: () => void;
 }) {
   return (
-    <button
+    <Button
+      variant='ghost'
       type='button'
       onClick={onClick}
       className={`w-full border-l-2 px-4 py-3.5 text-left transition-colors ${
@@ -63,7 +65,7 @@ function WorkflowTypeButton({
           </span>
         )}
       </div>
-    </button>
+    </Button>
   );
 }
 
@@ -279,21 +281,22 @@ export function CaseDetailsLinkedWorkflowRunsTab() {
                 </p>
               </div>
               {isFilesView && (
-                <button
+                <Button
+                  variant='ghost'
                   type='button'
                   onClick={() => setSelectedPortalRunId(null)}
                   className='inline-flex shrink-0 items-center gap-1.5 rounded-md border border-neutral-300 bg-white px-3 py-1.5 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-[#c1cbd8] dark:hover:bg-[#2d3540]'
                 >
                   <ArrowLeft className='h-3.5 w-3.5' aria-hidden='true' />
                   Back to workflow runs
-                </button>
+                </Button>
               )}
             </div>
             {/* Search bar — runs view only */}
             {!isFilesView && (
               <div className='relative mt-4'>
                 <Search className='absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-neutral-400 dark:text-[#9dabb9]' />
-                <input
+                <Input
                   type='text'
                   value={runSearch}
                   onChange={(e) => setRunSearch(e.target.value)}

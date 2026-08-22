@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/Button';
 import { ArrowLeft, ListFilter, WorkflowIcon, type LucideIcon } from 'lucide-react';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { FilterBar } from '@/components/tables/FilterBar';
@@ -39,7 +40,8 @@ function WorkflowTypeButton({
   onClick: () => void;
 }) {
   return (
-    <button
+    <Button
+      variant='ghost'
       type='button'
       onClick={onClick}
       className={`w-full border-l-2 px-4 py-3.5 text-left transition-colors ${
@@ -55,7 +57,7 @@ function WorkflowTypeButton({
       >
         {label}
       </div>
-    </button>
+    </Button>
   );
 }
 
@@ -91,13 +93,14 @@ function WorkflowTypeList({
       {isError && (
         <div className='space-y-2 px-4 py-4 text-sm text-neutral-500 dark:text-[#8892a2]'>
           <p>Workflow types could not be loaded.</p>
-          <button
+          <Button
+            variant='ghost'
             type='button'
             onClick={onRetry}
             className='font-medium text-blue-600 hover:underline dark:text-blue-400'
           >
             Retry
-          </button>
+          </Button>
         </div>
       )}
 
@@ -210,14 +213,15 @@ function LibraryDetailsWorkflowRunsTabContent() {
               </p>
             </div>
             {isFilesView && (
-              <button
+              <Button
+                variant='ghost'
                 type='button'
                 onClick={clearPortalRunId}
                 className='inline-flex shrink-0 items-center gap-1.5 rounded-md border border-neutral-300 bg-white px-3 py-1.5 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-[#c1cbd8] dark:hover:bg-[#2d3540]'
               >
                 <ArrowLeft className='h-3.5 w-3.5' aria-hidden='true' />
                 Back to workflow runs
-              </button>
+              </Button>
             )}
           </div>
           <div className='mt-4'>

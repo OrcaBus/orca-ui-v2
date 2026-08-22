@@ -1,3 +1,4 @@
+import { Input } from '@/components/ui/Input';
 import { useState } from 'react';
 import { Zap, Info } from 'lucide-react';
 import { DialogFrame } from '@/components/modals/DialogFrame';
@@ -85,13 +86,14 @@ export function EventModal({
       closeLabel='Close event editor'
       footer={
         <>
-          <button
+          <Button
+            variant='ghost'
             type='button'
             onClick={onClose}
             className='rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-[#2d3540] dark:bg-transparent dark:text-neutral-300 dark:hover:bg-[#2d3540]'
           >
             Cancel
-          </button>
+          </Button>
           <Button type='submit' form={FORM_ID}>
             {shownMode === 'add' ? 'Save Event' : 'Save Changes'}
           </Button>
@@ -106,7 +108,7 @@ export function EventModal({
           >
             Event Name <span className='text-red-500'>*</span>
           </label>
-          <input
+          <Input
             id='event-name'
             type='text'
             placeholder='e.g. Sequencing_Run_Complete'
@@ -123,7 +125,7 @@ export function EventModal({
           >
             Topic
           </label>
-          <input
+          <Input
             id='event-topic'
             type='text'
             placeholder='e.g. orcabus.bcl.converted'
@@ -140,7 +142,7 @@ export function EventModal({
           >
             Condition
           </label>
-          <input
+          <Input
             id='event-condition'
             type='text'
             placeholder="e.g. Status == 'PASS'"
@@ -158,13 +160,14 @@ export function EventModal({
             >
               Payload (JSON)
             </label>
-            <button
+            <Button
+              variant='ghost'
               type='button'
               onClick={formatPayloadJson}
               className='rounded px-2 py-1 text-xs font-medium text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:text-[#9dabb9] dark:hover:bg-[#2d3540] dark:hover:text-white'
             >
               Format
-            </button>
+            </Button>
           </div>
           <textarea
             id='event-payload'

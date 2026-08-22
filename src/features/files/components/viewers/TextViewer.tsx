@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/Button';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { useSuspenseFilePresignedURLModel } from '../../api/files.api';
 import { getMimeType, getPresignedUrlData } from '@/utils/files';
@@ -52,7 +53,8 @@ export const TextViewer = ({ s3ObjectId, s3Key }: Props) => {
             <h3 className='text-sm font-medium text-gray-900 dark:text-gray-100'>Text Preview</h3>
           </div>
           <div className='flex items-center gap-3'>
-            <button
+            <Button
+              variant='ghost'
               onClick={handleCopy}
               className='flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
             >
@@ -67,7 +69,7 @@ export const TextViewer = ({ s3ObjectId, s3Key }: Props) => {
                   <span>Copy</span>
                 </>
               )}
-            </button>
+            </Button>
             <a
               href={url}
               target='_blank'

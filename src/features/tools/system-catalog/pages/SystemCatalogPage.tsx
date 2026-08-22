@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/Button';
 import '@xyflow/react/dist/style.css';
 import { useState, useCallback, useMemo, useEffect, useReducer } from 'react';
 import { useNavigate, useParams } from 'react-router';
@@ -687,13 +688,14 @@ function SystemCatalogContent({ mapId }: { mapId: string }) {
           <div className='font-medium text-slate-700 dark:text-slate-200'>
             Unable to load system catalog map.
           </div>
-          <button
+          <Button
+            variant='ghost'
             type='button'
             onClick={() => void navigate('/tools/system-catalog')}
             className='mt-3 rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-white dark:border-[#2d3540] dark:text-slate-200 dark:hover:bg-[#1e252e]'
           >
             Back to maps
-          </button>
+          </Button>
         </div>
       </div>
     );

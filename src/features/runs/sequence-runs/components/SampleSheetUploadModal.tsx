@@ -1,3 +1,4 @@
+import { Input } from '@/components/ui/Input';
 import { useCallback } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -144,14 +145,15 @@ export function SampleSheetUploadModal({
       closeDisabled={isSubmitting}
       footer={
         <>
-          <button
+          <Button
+            variant='ghost'
             type='button'
             onClick={handleClose}
             disabled={isSubmitting}
             className='rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-[#9dabb9] dark:hover:bg-[#2d3540]'
           >
             Cancel
-          </button>
+          </Button>
           <Button type='submit' form={SAMPLE_SHEET_UPLOAD_FORM_ID} disabled={isSubmitting}>
             {isSubmitting ? (
               <>
@@ -207,14 +209,15 @@ export function SampleSheetUploadModal({
                 <p className='text-xs text-neutral-500 dark:text-neutral-400'>
                   {(file.size / 1024).toFixed(1)} KB
                 </p>
-                <button
+                <Button
+                  variant='ghost'
                   type='button'
                   onClick={handleClearFile}
                   disabled={isSubmitting}
                   className='text-xs text-blue-600 hover:underline dark:text-blue-400'
                 >
                   Choose different file
-                </button>
+                </Button>
               </div>
             ) : (
               <div className='space-y-2'>
@@ -226,7 +229,7 @@ export function SampleSheetUploadModal({
                     className='cursor-pointer text-blue-600 hover:underline dark:text-blue-400'
                   >
                     browse
-                    <input
+                    <Input
                       id={SAMPLE_SHEET_FILE_INPUT_ID}
                       type='file'
                       {...register('file')}

@@ -78,7 +78,8 @@ export const FileIgvDesktopButton = ({ s3ObjectId, bucket, s3Key, className, ico
   return (
     <div className={className}>
       {iconOnly ? (
-        <button
+        <Button
+          variant='ghost'
           type='button'
           onClick={() => void handleOpenInDesktop()}
           disabled={isOpening}
@@ -90,7 +91,7 @@ export const FileIgvDesktopButton = ({ s3ObjectId, bucket, s3Key, className, ico
           ) : (
             <Monitor className='h-4 w-4 text-neutral-600 dark:text-[#8892a2]' />
           )}
-        </button>
+        </Button>
       ) : (
         <Button type='button' onClick={() => void handleOpenInDesktop()} disabled={isOpening}>
           {isOpening ? <Spinner className='size-4' /> : <Monitor className='size-4' />}

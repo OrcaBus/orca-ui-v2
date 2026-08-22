@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/Button';
 import type { ReactNode } from 'react';
 import type { NavigateFunction } from 'react-router';
 import { PillTag, type PillTagVariant } from '@/components/ui/PillTag';
@@ -101,7 +102,8 @@ export function renderClickableId(
   if (!id) return renderEmptyValue();
 
   return (
-    <button
+    <Button
+      variant='ghost'
       type='button'
       onClick={(event) => {
         event.stopPropagation();
@@ -110,7 +112,7 @@ export function renderClickableId(
       className={LINK_CLASS}
     >
       {id}
-    </button>
+    </Button>
   );
 }
 
@@ -136,7 +138,8 @@ export function renderStackedLinks(links: StackedLink[], navigate: NavigateFunct
         }
 
         return (
-          <button
+          <Button
+            variant='ghost'
             key={`${label}-${index}`}
             type='button'
             onClick={(event) => {
@@ -146,7 +149,7 @@ export function renderStackedLinks(links: StackedLink[], navigate: NavigateFunct
             className={STACKED_LINK_CLASS}
           >
             {label}
-          </button>
+          </Button>
         );
       })}
     </div>

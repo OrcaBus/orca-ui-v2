@@ -1,3 +1,4 @@
+import { Select } from '@/components/ui/Select';
 import { useEffect } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -117,13 +118,14 @@ export function EditCaseModal({ isOpen, onClose }: EditCaseModalProps) {
       bodyClassName='min-h-0 flex-1 overflow-y-auto px-6 py-5'
       footer={
         <>
-          <button
+          <Button
+            variant='ghost'
             type='button'
             onClick={onClose}
             className='rounded-lg border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-[#2d3540] dark:bg-[#2d3540] dark:text-slate-200 dark:hover:bg-[#2d3540]/80'
           >
             Cancel
-          </button>
+          </Button>
           <Button type='submit' form='edit-case-form' disabled={isSubmitting}>
             {isSubmitting ? 'Saving...' : 'Save Changes'}
           </Button>
@@ -140,7 +142,7 @@ export function EditCaseModal({ isOpen, onClose }: EditCaseModalProps) {
             >
               Study Type <span className='text-destructive'>*</span>
             </label>
-            <select
+            <Select
               id='edit-studyType'
               {...form.register('studyType')}
               className='w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-200 dark:focus:border-[#137fec] dark:focus:ring-[#137fec]'
@@ -150,7 +152,7 @@ export function EditCaseModal({ isOpen, onClose }: EditCaseModalProps) {
                   {o.label}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
           <div className='space-y-2'>
             <label
@@ -174,14 +176,15 @@ export function EditCaseModal({ isOpen, onClose }: EditCaseModalProps) {
             <label className='text-sm font-medium text-neutral-700 dark:text-neutral-300'>
               Links
             </label>
-            <button
+            <Button
+              variant='ghost'
               type='button'
               onClick={() => appendLink({ key: '', value: '' })}
               className='flex items-center gap-1 rounded-md border border-neutral-300 px-2 py-1 text-xs font-medium text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-[#2d3540] dark:text-neutral-300 dark:hover:bg-[#1e252e]'
             >
               <Plus className='h-3 w-3' />
               Add Link
-            </button>
+            </Button>
           </div>
           <div className='space-y-2'>
             {linkFields.map((field, idx) => (
@@ -200,14 +203,15 @@ export function EditCaseModal({ isOpen, onClose }: EditCaseModalProps) {
                     aria-invalid={!!errors.links?.[idx]?.value}
                     className='flex-1 rounded-lg border-neutral-300 text-sm dark:border-[#2d3540] dark:bg-[#1e252e]'
                   />
-                  <button
+                  <Button
+                    variant='ghost'
                     type='button'
                     onClick={() => removeLink(idx)}
                     aria-label={`Remove link ${idx + 1}`}
                     className='rounded p-1 text-neutral-400 transition-colors hover:text-red-500 dark:hover:text-red-400'
                   >
                     <Trash2 className='h-4 w-4' />
-                  </button>
+                  </Button>
                 </div>
                 {(errors.links?.[idx]?.key || errors.links?.[idx]?.value) && (
                   <p className='text-destructive text-sm'>
@@ -222,7 +226,7 @@ export function EditCaseModal({ isOpen, onClose }: EditCaseModalProps) {
         {/* Checkboxes */}
         <div className='mb-5 space-y-3'>
           <label className='flex cursor-pointer items-center gap-2 text-sm text-neutral-700 dark:text-neutral-300'>
-            <input
+            <Input
               type='checkbox'
               {...form.register('isReportRequired')}
               className='h-4 w-4 rounded border-neutral-300 text-blue-600 focus:ring-blue-500 dark:border-[#2d3540] dark:bg-[#1e252e]'
@@ -230,7 +234,7 @@ export function EditCaseModal({ isOpen, onClose }: EditCaseModalProps) {
             Report Required
           </label>
           <label className='flex cursor-pointer items-center gap-2 text-sm text-neutral-700 dark:text-neutral-300'>
-            <input
+            <Input
               type='checkbox'
               {...form.register('isNataAccredited')}
               className='h-4 w-4 rounded border-neutral-300 text-blue-600 focus:ring-blue-500 dark:border-[#2d3540] dark:bg-[#1e252e]'
@@ -245,14 +249,15 @@ export function EditCaseModal({ isOpen, onClose }: EditCaseModalProps) {
             <label className='text-sm font-medium text-neutral-700 dark:text-neutral-300'>
               Alias
             </label>
-            <button
+            <Button
+              variant='ghost'
               type='button'
               onClick={() => appendAlias({ value: '' })}
               className='flex items-center gap-1 rounded-md border border-neutral-300 px-2 py-1 text-xs font-medium text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-[#2d3540] dark:text-neutral-300 dark:hover:bg-[#1e252e]'
             >
               <Plus className='h-3 w-3' />
               Add Alias
-            </button>
+            </Button>
           </div>
           <div className='space-y-2'>
             {aliasFields.map((field, idx) => (
@@ -262,13 +267,14 @@ export function EditCaseModal({ isOpen, onClose }: EditCaseModalProps) {
                   placeholder='Alias value'
                   className='flex-1 rounded-lg border-neutral-300 text-sm dark:border-[#2d3540] dark:bg-[#1e252e]'
                 />
-                <button
+                <Button
+                  variant='ghost'
                   type='button'
                   onClick={() => removeAlias(idx)}
                   className='rounded p-1 text-neutral-400 transition-colors hover:text-red-500 dark:hover:text-red-400'
                 >
                   <Trash2 className='h-4 w-4' />
-                </button>
+                </Button>
               </div>
             ))}
           </div>

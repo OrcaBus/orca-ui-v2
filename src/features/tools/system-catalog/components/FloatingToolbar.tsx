@@ -1,3 +1,4 @@
+import { Input } from '@/components/ui/Input';
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router';
 import { Button } from '@/components/ui/Button';
@@ -100,21 +101,23 @@ export function FloatingToolbar({
 
         {/* Map name (opens details modal) */}
         {mapName && (
-          <button
+          <Button
+            variant='ghost'
             type='button'
             onClick={onMapNameClick}
             className='max-w-48 truncate rounded-lg px-2 py-1 text-sm font-semibold text-slate-800 transition-colors hover:bg-slate-100 dark:text-white dark:hover:bg-[#1e252e]'
             title='View map details'
           >
             {mapName}
-          </button>
+          </Button>
         )}
 
         <div className='mx-0.5 h-5 w-px bg-slate-200 dark:bg-[#2d3540]' />
 
         {/* Group dropdown */}
         <div ref={groupDropdownRef} className='relative'>
-          <button
+          <Button
+            variant='ghost'
             type='button'
             onClick={() => setIsGroupDropdownOpen((prev) => !prev)}
             className='flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-[#1e252e]'
@@ -131,7 +134,7 @@ export function FloatingToolbar({
               </>
             )}
             <ChevronDown className='h-3 w-3 text-slate-400 dark:text-[#6b7a8d]' />
-          </button>
+          </Button>
 
           {isGroupDropdownOpen && (
             <div className='absolute top-full left-0 mt-1.5 w-64 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl dark:border-[#2d3540] dark:bg-[#111418]'>
@@ -148,7 +151,8 @@ export function FloatingToolbar({
                           : 'text-slate-600 hover:bg-slate-50 dark:text-[#9dabb9] dark:hover:bg-[#1e252e]/60'
                       }`}
                     >
-                      <button
+                      <Button
+                        variant='ghost'
                         type='button'
                         onClick={() => {
                           onSelectGroup(group.id);
@@ -164,12 +168,13 @@ export function FloatingToolbar({
                         <span className='text-xs text-slate-400 dark:text-[#6b7a8d]'>
                           {group.count}
                         </span>
-                      </button>
+                      </Button>
 
                       {/* Edit / Delete icons — visible on hover, hidden for ALL */}
                       {!isAllGroup && (
                         <div className='flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity group-hover/item:opacity-100'>
-                          <button
+                          <Button
+                            variant='ghost'
                             type='button'
                             onClick={(e) => {
                               e.stopPropagation();
@@ -180,8 +185,9 @@ export function FloatingToolbar({
                             title='Edit group'
                           >
                             <Pencil className='h-3 w-3' />
-                          </button>
-                          <button
+                          </Button>
+                          <Button
+                            variant='ghost'
                             type='button'
                             onClick={(e) => {
                               e.stopPropagation();
@@ -192,7 +198,7 @@ export function FloatingToolbar({
                             title='Delete group'
                           >
                             <Trash2 className='h-3 w-3' />
-                          </button>
+                          </Button>
                         </div>
                       )}
                     </div>
@@ -200,7 +206,8 @@ export function FloatingToolbar({
                 })}
               </div>
               <div className='border-t border-slate-100 p-1.5 dark:border-[#2d3540]'>
-                <button
+                <Button
+                  variant='ghost'
                   type='button'
                   onClick={() => {
                     setIsGroupDropdownOpen(false);
@@ -210,7 +217,7 @@ export function FloatingToolbar({
                 >
                   <Plus className='h-3.5 w-3.5' />
                   Add Group
-                </button>
+                </Button>
               </div>
             </div>
           )}
@@ -218,7 +225,8 @@ export function FloatingToolbar({
 
         {/* Active group badge */}
         {activeGroup && activeGroup.id !== 'ALL' && (
-          <button
+          <Button
+            variant='ghost'
             type='button'
             onClick={() => onSelectGroup('ALL')}
             className='flex h-6 items-center gap-1 rounded-full pr-1 pl-2 text-xs font-medium transition-colors'
@@ -229,7 +237,7 @@ export function FloatingToolbar({
           >
             Focused
             <X className='h-3 w-3 opacity-60' />
-          </button>
+          </Button>
         )}
 
         <div className='mx-0.5 h-5 w-px bg-slate-200 dark:bg-[#2d3540]' />
@@ -239,7 +247,7 @@ export function FloatingToolbar({
           {isSearchExpanded ? (
             <div className='relative'>
               <Search className='absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2 text-slate-400 dark:text-[#6b7a8d]' />
-              <input
+              <Input
                 ref={searchInputRef}
                 type='text'
                 placeholder='Search nodes…'
@@ -257,7 +265,8 @@ export function FloatingToolbar({
                 className='h-8 w-48 rounded-lg border border-slate-200 bg-white py-1 pr-7 pl-8 text-sm text-slate-900 transition-all placeholder:text-slate-400 focus:ring-2 focus:ring-blue-200 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-white dark:placeholder:text-[#6b7a8d] dark:focus:ring-blue-900/40'
               />
               {searchQuery && (
-                <button
+                <Button
+                  variant='ghost'
                   type='button'
                   onClick={() => {
                     onSearchChange('');
@@ -267,18 +276,19 @@ export function FloatingToolbar({
                   className='absolute top-1/2 right-2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:text-[#6b7a8d] dark:hover:text-white'
                 >
                   <X className='h-3 w-3' />
-                </button>
+                </Button>
               )}
             </div>
           ) : (
-            <button
+            <Button
+              variant='ghost'
               type='button'
               onClick={() => setIsSearchExpanded(true)}
               className='flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:text-[#6b7a8d] dark:hover:bg-[#1e252e] dark:hover:text-white'
               title='Search nodes'
             >
               <Search className='h-4 w-4' />
-            </button>
+            </Button>
           )}
         </div>
 
@@ -299,26 +309,28 @@ export function FloatingToolbar({
         <div className='mx-0.5 h-5 w-px bg-slate-200 dark:bg-[#2d3540]' />
 
         {/* Auto layout */}
-        <button
+        <Button
+          variant='ghost'
           type='button'
           onClick={onAutoLayout}
           title='Auto layout'
           className='flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:text-[#6b7a8d] dark:hover:bg-[#1e252e] dark:hover:text-white'
         >
           <Network className='h-4 w-4' />
-        </button>
+        </Button>
 
         <div className='mx-0.5 h-5 w-px bg-slate-200 dark:bg-[#2d3540]' />
 
         {/* Make a copy */}
-        <button
+        <Button
+          variant='ghost'
           type='button'
           onClick={onDuplicate}
           title='Make a copy'
           className='flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:text-[#6b7a8d] dark:hover:bg-[#1e252e] dark:hover:text-white'
         >
           <Copy className='h-4 w-4' />
-        </button>
+        </Button>
 
         <div className='mx-0.5 h-5 w-px bg-slate-200 dark:bg-[#2d3540]' />
 

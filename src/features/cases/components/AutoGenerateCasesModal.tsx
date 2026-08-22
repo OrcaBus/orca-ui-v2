@@ -23,14 +23,15 @@ export function AutoGenerateCasesModal({
       closeDisabled={isGenerating}
       footer={
         <>
-          <button
+          <Button
+            variant='ghost'
             type='button'
             onClick={onClose}
             disabled={isGenerating}
             className='rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-[#2d3540] dark:bg-transparent dark:text-neutral-300 dark:hover:bg-[#2d3540]'
           >
             Cancel
-          </button>
+          </Button>
           <Button type='button' onClick={onConfirm} disabled={isGenerating}>
             {isGenerating ? (
               <>

@@ -1,3 +1,4 @@
+import { Select } from '@/components/ui/Select';
 import type { LoggingLevel } from '../api/sschecker.api';
 import { LOGGING_LEVELS } from '../utils/constants';
 
@@ -9,7 +10,7 @@ interface LoggingLevelSelectProps {
 export function LoggingLevelSelect({ value, onChange }: LoggingLevelSelectProps) {
   return (
     <div className='relative'>
-      <select
+      <Select
         value={value}
         onChange={(e) => onChange(e.target.value as LoggingLevel)}
         className='w-full appearance-none rounded-lg border border-neutral-300 bg-white px-3 py-2 pr-8 text-sm text-neutral-900 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100'
@@ -20,7 +21,7 @@ export function LoggingLevelSelect({ value, onChange }: LoggingLevelSelectProps)
             {level}
           </option>
         ))}
-      </select>
+      </Select>
       <div className='pointer-events-none absolute inset-y-0 right-2.5 flex items-center'>
         <svg
           className='h-4 w-4 text-neutral-400'

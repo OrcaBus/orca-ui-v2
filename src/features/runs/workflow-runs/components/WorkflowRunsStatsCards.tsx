@@ -1,10 +1,7 @@
 import { keepPreviousData } from '@tanstack/react-query';
 import { ApiErrorState } from '@/components/ui/ApiErrorState';
 import { StatusCard } from '@/components/ui/StatusCard';
-import {
-  useWorkflowRunStatusCountModel,
-  type WorkflowRunStatusCountModel,
-} from '../../shared/api/workflows.api';
+import { useWorkflowRunStatusCountModel } from '../../shared/api/workflows.api';
 import { toLocalStartOfDay } from '@/utils/timeFormat';
 import { getRunsStatusIcon } from '../../shared/utils/statusIcons';
 import { getStatusFamily } from '@/components/ui/status-config';
@@ -31,6 +28,13 @@ const statusCards: Array<{
   { label: 'Draft', status: 'draft' },
   { label: 'Ongoing', status: 'ongoing' },
 ];
+
+type WorkflowRunsStatusCounts = Record<'all' | WorkflowRunStatus, number>;
+
+function getStatusCount<T extends object>(data: T | null | undefined, key: string): number {
+  const value = data == null ? undefined : data[key as keyof T];
+  return typeof value === 'number' ? value : 0;
+}
 
 export function WorkflowRunsStatsCards({ status, onStatusCardClick }: WorkflowRunsStatsCardsProps) {
   const { search, dateFrom, dateTo, filterValues } = useWorkflowRunListQueryParams();
@@ -59,16 +63,16 @@ export function WorkflowRunsStatsCards({ status, onStatusCardClick }: WorkflowRu
     return <ApiErrorState error={workflowStatusCountsError} className='mb-4' />;
   }
 
-  const counts: Required<WorkflowRunStatusCountModel> = {
-    all: workflowStatusCountsData?.all ?? 0,
-    succeeded: workflowStatusCountsData?.succeeded ?? 0,
-    aborted: workflowStatusCountsData?.aborted ?? 0,
-    failed: workflowStatusCountsData?.failed ?? 0,
-    resolved: workflowStatusCountsData?.resolved ?? 0,
-    draft: workflowStatusCountsData?.draft ?? 0,
-    ongoing: workflowStatusCountsData?.ongoing ?? 0,
-    deprecated: workflowStatusCountsData?.deprecated ?? 0,
-    cancelled: workflowStatusCountsData?.cancelled ?? 0,
+  const counts: WorkflowRunsStatusCounts = {
+    all: getStatusCount(workflowStatusCountsData, 'all'),
+    succeeded: getStatusCount(workflowStatusCountsData, 'succeeded'),
+    aborted: getStatusCount(workflowStatusCountsData, 'aborted'),
+    failed: getStatusCount(workflowStatusCountsData, 'failed'),
+    resolved: getStatusCount(workflowStatusCountsData, 'resolved'),
+    draft: getStatusCount(workflowStatusCountsData, 'draft'),
+    ongoing: getStatusCount(workflowStatusCountsData, 'ongoing'),
+    deprecated: getStatusCount(workflowStatusCountsData, 'deprecated'),
+    cancelled: getStatusCount(workflowStatusCountsData, 'cancelled'),
   };
 
   const showLoadingCards = isLoadingWorkflowStatusCounts && !workflowStatusCountsData;

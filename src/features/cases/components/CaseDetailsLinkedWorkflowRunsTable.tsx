@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/Button';
 import { useNavigate } from 'react-router';
 import { FileSearch, Unlink } from 'lucide-react';
 import { DataTable, type Column } from '@/components/tables/DataTable';
@@ -34,7 +35,8 @@ export function CaseDetailsLinkedWorkflowRunsTable({
       header: 'Run Name',
       sortable: true,
       render: (run) => (
-        <button
+        <Button
+          variant='ghost'
           onClick={(e) => {
             e.stopPropagation();
             void navigate(`/runs/workflow-runs/${run.orcabusId}`);
@@ -42,7 +44,7 @@ export function CaseDetailsLinkedWorkflowRunsTable({
           className='cursor-pointer font-mono text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline dark:text-[#137fec] dark:hover:text-blue-400'
         >
           {run.workflowRunName ?? run.portalRunId}
-        </button>
+        </Button>
       ),
     },
     {
@@ -61,7 +63,8 @@ export function CaseDetailsLinkedWorkflowRunsTable({
       header: 'Portal Run ID',
       sortable: true,
       render: (run) => (
-        <button
+        <Button
+          variant='ghost'
           onClick={(e) => {
             e.stopPropagation();
             onViewFiles(run.portalRunId);
@@ -70,7 +73,7 @@ export function CaseDetailsLinkedWorkflowRunsTable({
           title='View files for this run'
         >
           {run.portalRunId}
-        </button>
+        </Button>
       ),
     },
     {
@@ -88,7 +91,8 @@ export function CaseDetailsLinkedWorkflowRunsTable({
       header: 'Actions',
       render: (run) => (
         <div className='flex items-center gap-1'>
-          <button
+          <Button
+            variant='ghost'
             onClick={(e) => {
               e.stopPropagation();
               onViewFiles(run.portalRunId);
@@ -98,8 +102,9 @@ export function CaseDetailsLinkedWorkflowRunsTable({
             title='View files'
           >
             <FileSearch className='h-4 w-4' />
-          </button>
-          <button
+          </Button>
+          <Button
+            variant='ghost'
             onClick={(e) => {
               e.stopPropagation();
               onUnlink(run);
@@ -110,7 +115,7 @@ export function CaseDetailsLinkedWorkflowRunsTable({
             title='Unlink workflow run'
           >
             <Unlink className='h-4 w-4' />
-          </button>
+          </Button>
         </div>
       ),
     },

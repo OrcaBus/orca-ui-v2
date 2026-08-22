@@ -29,6 +29,7 @@ const caseDetail: CaseDetailModel = {
   userSet: [],
   latestState: null,
   commentSet: [],
+  rnasumReferences: [],
 };
 
 describe('CaseDetailsOverviewCard', () => {

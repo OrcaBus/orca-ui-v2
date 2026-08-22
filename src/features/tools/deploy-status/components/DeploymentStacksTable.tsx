@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/Button';
 import { useCallback, useMemo, useState } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { DataTable, type Column } from '@/components/tables/DataTable';
@@ -66,13 +67,13 @@ export function DeploymentStacksTable() {
         key: 'stackName',
         header: 'Stack Name',
         render: (row) => (
-          <button
-            type='button'
+          <Button
+            variant='ghost'
             onClick={() => openStackDetails(row.stackId)}
-            className='text-left text-sm font-semibold text-blue-700 hover:underline focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none dark:text-blue-400 dark:focus:ring-offset-[#111418]'
+            className='text-left text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline dark:text-blue-400 dark:hover:text-blue-300'
           >
             {row.stackName}
-          </button>
+          </Button>
         ),
       },
       {
@@ -157,14 +158,15 @@ export function DeploymentStacksTable() {
                 </p>
               </div>
             </div>
-            <button
+            <Button
+              variant='ghost'
               type='button'
               onClick={() => void refetchSummaries()}
               className='inline-flex shrink-0 items-center justify-center gap-2 rounded-md border border-amber-300 bg-white/70 px-3 py-1.5 text-xs font-medium transition-colors hover:bg-white focus:ring-2 focus:ring-amber-500 focus:outline-none dark:border-amber-500/30 dark:bg-amber-950/30 dark:hover:bg-amber-950/50'
             >
               <RefreshCw className='h-3.5 w-3.5' aria-hidden='true' />
               Retry details
-            </button>
+            </Button>
           </div>
         ) : null}
 

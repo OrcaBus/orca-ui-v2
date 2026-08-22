@@ -1,3 +1,5 @@
+import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
 import { useState, useEffect } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -167,13 +169,14 @@ export function MapEditModal({
       closeDisabled={isSubmitting}
       footer={
         <div className='flex items-center justify-end gap-3'>
-          <button
+          <Button
+            variant='ghost'
             type='button'
             onClick={handleClose}
             className='rounded-lg px-4 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 dark:text-[#9dabb9] dark:hover:bg-[#1e252e]'
           >
             Cancel
-          </button>
+          </Button>
           <Button type='submit' form='map-edit-form' disabled={!isValid || isSubmitting}>
             <Plus />
             {submitLabel ?? (isEditing ? 'Save Changes' : 'Create Map')}
@@ -194,7 +197,7 @@ export function MapEditModal({
           >
             Map Name <span className='text-red-500'>*</span>
           </label>
-          <input
+          <Input
             id='map-name'
             type='text'
             placeholder='Enter map name'
@@ -215,7 +218,7 @@ export function MapEditModal({
             Status
           </label>
           <div className='relative'>
-            <select
+            <Select
               id='map-status'
               {...register('status')}
               className={inputClassName + ' appearance-none pr-8'}
@@ -225,7 +228,7 @@ export function MapEditModal({
                   {opt.label} — {opt.description}
                 </option>
               ))}
-            </select>
+            </Select>
             <ChevronDown className='pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-slate-400' />
           </div>
         </div>
@@ -264,14 +267,15 @@ export function MapEditModal({
                   <span className='text-slate-900 dark:text-white'>{key}</span>
                   <span className='text-slate-400 dark:text-[#6b7a8d]'>:</span>
                   <span>{value}</span>
-                  <button
+                  <Button
+                    variant='ghost'
                     type='button'
                     onClick={() => removeTag(key)}
                     aria-label={`Remove tag ${key}`}
                     className='ml-0.5 rounded-full p-0.5 text-slate-300 transition-colors hover:bg-slate-200 hover:text-slate-500 dark:text-[#4a5568] dark:hover:bg-[#2d3540] dark:hover:text-white'
                   >
                     <X className='h-3 w-3' />
-                  </button>
+                  </Button>
                 </span>
               ))}
             </div>
@@ -279,7 +283,7 @@ export function MapEditModal({
 
           {/* Add tag inline input */}
           <div className='flex items-center gap-2'>
-            <input
+            <Input
               type='text'
               placeholder='Key'
               value={tagKey}
@@ -292,7 +296,7 @@ export function MapEditModal({
               }}
               className={inputClassName + ' flex-1'}
             />
-            <input
+            <Input
               type='text'
               placeholder='Value'
               value={tagValue}
@@ -305,7 +309,8 @@ export function MapEditModal({
               }}
               className={inputClassName + ' flex-1'}
             />
-            <button
+            <Button
+              variant='ghost'
               type='button'
               onClick={addTag}
               disabled={!tagKey.trim()}
@@ -313,7 +318,7 @@ export function MapEditModal({
               className='flex h-10.5 w-10.5 shrink-0 items-center justify-center rounded-lg border border-slate-200 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 disabled:cursor-not-allowed disabled:opacity-40 dark:border-[#2d3540] dark:hover:bg-[#1e252e] dark:hover:text-white'
             >
               <Plus className='h-4 w-4' />
-            </button>
+            </Button>
           </div>
 
           {/* Raw JSON toggle */}
@@ -323,13 +328,14 @@ export function MapEditModal({
             </summary>
             <div className='mt-1.5'>
               <div className='mb-1 flex items-center justify-end'>
-                <button
+                <Button
+                  variant='ghost'
                   type='button'
                   onClick={formatTagsJson}
                   className='rounded px-2 py-0.5 text-xs font-medium text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:text-[#9dabb9] dark:hover:bg-[#2d3540] dark:hover:text-white'
                 >
                   Format
-                </button>
+                </Button>
               </div>
               <textarea
                 rows={3}
