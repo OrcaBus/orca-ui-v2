@@ -37,6 +37,7 @@ export function CaseDetailsLinkedWorkflowRunsTable({
       render: (run) => (
         <Button
           variant='ghost'
+          size='inline'
           onClick={(e) => {
             e.stopPropagation();
             void navigate(`/runs/workflow-runs/${run.orcabusId}`);
@@ -65,6 +66,7 @@ export function CaseDetailsLinkedWorkflowRunsTable({
       render: (run) => (
         <Button
           variant='ghost'
+          size='inline'
           onClick={(e) => {
             e.stopPropagation();
             onViewFiles(run.portalRunId);
@@ -93,6 +95,7 @@ export function CaseDetailsLinkedWorkflowRunsTable({
         <div className='flex items-center gap-1'>
           <Button
             variant='ghost'
+            size='inline'
             onClick={(e) => {
               e.stopPropagation();
               onViewFiles(run.portalRunId);
@@ -105,6 +108,7 @@ export function CaseDetailsLinkedWorkflowRunsTable({
           </Button>
           <Button
             variant='ghost'
+            size='inline'
             onClick={(e) => {
               e.stopPropagation();
               onUnlink(run);

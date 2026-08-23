@@ -12,9 +12,6 @@ export type TableDensity = 'comfortable' | 'compact';
  * localStorage key.
  */
 export function useTableDensity(): [TableDensity, (next: TableDensity) => void] {
-  const [density, setDensity] = useLocalStorage<TableDensity>(
-    TABLE_DENSITY_STORAGE_KEY,
-    'comfortable'
-  );
+  const [density, setDensity] = useLocalStorage<TableDensity>(TABLE_DENSITY_STORAGE_KEY, 'compact');
   return [density, setDensity];
 }

@@ -10,7 +10,7 @@ import { EMPTY_TABLE_VALUE, type LibraryTableRow } from './tableRows';
 const TEXT_VALUE_CLASS = 'text-sm text-neutral-700 dark:text-[#9dabb9]';
 
 /** Vertical rhythm shared by stacked (multi-value) table cells. */
-const STACKED_ROW_CLASS = 'flex min-h-7 items-center';
+const STACKED_ROW_CLASS = 'flex min-h-6 items-center';
 
 /** Stacked text-cell styling: the row rhythm plus the default text styling. */
 const STACKED_VALUE_CLASS = cn(STACKED_ROW_CLASS, TEXT_VALUE_CLASS);
@@ -104,6 +104,7 @@ export function renderClickableId(
   return (
     <Button
       variant='ghost'
+      size='inline'
       type='button'
       onClick={(event) => {
         event.stopPropagation();
@@ -140,6 +141,7 @@ export function renderStackedLinks(links: StackedLink[], navigate: NavigateFunct
         return (
           <Button
             variant='ghost'
+            size='inline'
             key={`${label}-${index}`}
             type='button'
             onClick={(event) => {

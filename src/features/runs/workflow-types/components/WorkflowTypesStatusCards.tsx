@@ -66,7 +66,7 @@ export function WorkflowTypesStatusCards({
   const total = counts.all;
 
   return (
-    <div className='mb-6 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4'>
+    <div className='mb-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4'>
       {isLoadingWorkflowStatusCounts
         ? statusCards.map((card) => <StatusCard key={card.status} label='' value={0} isLoading />)
         : statusCards.map((card) => {

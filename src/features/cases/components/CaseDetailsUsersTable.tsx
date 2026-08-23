@@ -58,6 +58,7 @@ export function CaseDetailsUsersTable({ users, onRemoveUser }: CaseDetailsUsersT
       render: (link) => (
         <Button
           variant='ghost'
+          size='inline'
           type='button'
           onClick={() => onRemoveUser(link.user.orcabusId, link.user.email)}
           title={`Remove ${link.user.email}`}

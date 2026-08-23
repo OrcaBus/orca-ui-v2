@@ -1,5 +1,6 @@
 import { Tooltip, TooltipTrigger, TooltipContent } from './Tooltip';
 import { FAMILY_CLASSNAMES, normalizeStatusBadgeKey, statusConfig } from './status-config';
+import { cn } from '@/utils/cn';
 
 // Family lookups (getStatusFamily, FAMILY_ACCENT, FAMILY_DOT) and the
 // StatusFamily/StatusBadgeStatus types live in ./status-config, not here —
@@ -26,11 +27,11 @@ export function StatusBadge({ status, size = 'sm', showTooltip = true }: StatusB
 
   const sizes = {
     sm: {
-      badge: 'px-2 py-0.5 text-xs gap-1',
+      badge: 'h-6 gap-1 px-2 text-xs leading-none',
       icon: 'w-3 h-3',
     },
     md: {
-      badge: 'px-2.5 py-1 text-sm gap-1.5',
+      badge: 'h-7 gap-1.5 px-2.5 text-sm leading-none',
       icon: 'w-3.5 h-3.5',
     },
   };
@@ -40,7 +41,7 @@ export function StatusBadge({ status, size = 'sm', showTooltip = true }: StatusB
       tabIndex={showTooltip ? 0 : undefined}
       className={`inline-flex items-center rounded border font-medium outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${className} ${sizes[size].badge}`}
     >
-      <Icon className={`${sizes[size].icon}${shouldAnimate ? 'motion-safe:animate-pulse' : ''}`} />
+      <Icon className={cn(sizes[size].icon, shouldAnimate && 'motion-safe:animate-pulse')} />
       {config.label}
     </span>
   );

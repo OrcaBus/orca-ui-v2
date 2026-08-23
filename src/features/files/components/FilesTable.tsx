@@ -72,6 +72,7 @@ export function FilesTable() {
               <div>
                 <Button
                   variant='ghost'
+                  size='inline'
                   type='button'
                   onClick={() => openDetail(file)}
                   className='text-left text-sm font-medium text-neutral-900 hover:underline dark:text-white'

@@ -52,6 +52,7 @@ const WorkflowRunsTable = () => {
         render: (wf) => (
           <Button
             variant='ghost'
+            size='inline'
             onClick={() => {
               void navigate(`/runs/workflow-runs/${wf.orcabusId}`);
             }}

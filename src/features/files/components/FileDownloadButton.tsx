@@ -35,10 +35,11 @@ export const FileDownloadButton = ({ s3Record }: { s3Record: S3Record }) => {
   return (
     <Button
       variant='ghost'
+      size='tableIcon'
       type='button'
       disabled={isLoading}
       onClick={() => void handleDownload()}
-      className='rounded p-1.5 transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-[#2d3540]'
+      className='transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-[#2d3540]'
       title='Download file'
     >
       {isLoading ? (

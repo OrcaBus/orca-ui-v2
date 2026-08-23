@@ -36,7 +36,7 @@ export function VaultPage() {
   return (
     <>
       <div className='p-6'>
-        <div className='mb-6'>
+        <div className='mb-4'>
           <Tabs tabs={TABS} activeTab={activeTab} onTabChange={setActiveTab} />
         </div>
 

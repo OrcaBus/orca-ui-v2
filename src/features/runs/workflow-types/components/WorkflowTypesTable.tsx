@@ -92,7 +92,7 @@ const WorkflowTypesTable = () => {
         key: 'validationState',
         header: 'Validation State',
         sortable: true,
-        render: (_wt) => <StatusBadge status={_wt?.validationState?.toLowerCase()} />,
+        render: (_wt) => <StatusBadge status={_wt?.validationState?.toLowerCase()} size='sm' />,
       },
       {
         key: 'actions',
@@ -102,8 +102,9 @@ const WorkflowTypesTable = () => {
           <div className='flex items-center gap-2'>
             <Button
               variant='ghost'
+              size='tableIcon'
               onClick={() => openDetail(wt.orcabusId)}
-              className='pointer-events-auto cursor-pointer rounded p-1.5 text-neutral-600 transition-colors hover:bg-blue-50 hover:text-blue-600 dark:text-neutral-400 dark:hover:bg-blue-900/20 dark:hover:text-blue-400'
+              className='pointer-events-auto cursor-pointer text-neutral-600 transition-colors hover:bg-blue-50 hover:text-blue-600 dark:text-neutral-400 dark:hover:bg-blue-900/20 dark:hover:text-blue-400'
               title='View workflow details & history'
             >
               <Eye className='h-4 w-4' />

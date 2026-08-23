@@ -11,7 +11,7 @@ interface Props {
   onViewDetails: () => void;
 }
 
-function MenuItem({
+export function FileMoreActionsMenuItem({
   icon,
   label,
   onClick,
@@ -25,13 +25,16 @@ function MenuItem({
   return (
     <Button
       variant='ghost'
+      size='inline'
       type='button'
       onClick={onClick}
       disabled={disabled}
-      className='flex w-full items-center gap-3 px-4 py-2.5 text-sm text-neutral-700 transition-colors hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50 dark:text-[#9dabb9] dark:hover:bg-[#2d3540]'
+      className='min-h-9 w-full justify-start gap-2.5 rounded-none px-3 py-2 text-left text-sm text-neutral-700 transition-colors hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50 dark:text-[#9dabb9] dark:hover:bg-[#2d3540]'
     >
-      <span className='shrink-0 text-neutral-400 dark:text-neutral-500'>{icon}</span>
-      {label}
+      <span className='flex size-4 shrink-0 items-center justify-center text-neutral-400 dark:text-neutral-500'>
+        {icon}
+      </span>
+      <span className='min-w-0 flex-1 text-left'>{label}</span>
     </Button>
   );
 }
@@ -120,9 +123,10 @@ export function FileMoreActionsDropdown({ s3Record, onViewDetails }: Props) {
     <div ref={dropdownRef} className='relative'>
       <Button
         variant='ghost'
+        size='tableIcon'
         type='button'
         onClick={() => setIsOpen((o) => !o)}
-        className='rounded p-1.5 transition-colors hover:bg-neutral-100 dark:hover:bg-[#2d3540]'
+        className='transition-colors hover:bg-neutral-100 dark:hover:bg-[#2d3540]'
         title='More actions'
         aria-haspopup='true'
         aria-expanded={isOpen}
@@ -131,9 +135,9 @@ export function FileMoreActionsDropdown({ s3Record, onViewDetails }: Props) {
       </Button>
 
       {isOpen && (
-        <div className='absolute top-full right-0 z-50 mt-1 min-w-52 overflow-hidden rounded-lg border border-neutral-200 bg-white py-1 shadow-lg dark:border-[#2d3540] dark:bg-[#1e252e]'>
+        <div className='absolute top-full right-0 z-50 mt-1 flex w-56 flex-col overflow-hidden rounded-lg border border-neutral-200 bg-white py-1 shadow-lg dark:border-[#2d3540] dark:bg-[#1e252e]'>
           {isDownloadable && (
-            <MenuItem
+            <FileMoreActionsMenuItem
               icon={
                 isInlineLoading ? (
                   <Spinner className='h-4 w-4' />
@@ -147,7 +151,7 @@ export function FileMoreActionsDropdown({ s3Record, onViewDetails }: Props) {
             />
           )}
           {isDownloadable && (
-            <MenuItem
+            <FileMoreActionsMenuItem
               icon={
                 isAttachLoading ? (
                   <Spinner className='h-4 w-4' />
@@ -162,7 +166,7 @@ export function FileMoreActionsDropdown({ s3Record, onViewDetails }: Props) {
               disabled={isAttachLoading}
             />
           )}
-          <MenuItem
+          <FileMoreActionsMenuItem
             icon={
               copiedS3Uri ? (
                 <Check className='h-4 w-4 text-green-600' />
@@ -173,7 +177,7 @@ export function FileMoreActionsDropdown({ s3Record, onViewDetails }: Props) {
             label='Copy S3 URI'
             onClick={handleCopyS3Uri}
           />
-          <MenuItem
+          <FileMoreActionsMenuItem
             icon={<Info className='h-4 w-4' />}
             label='View record details'
             onClick={() => {

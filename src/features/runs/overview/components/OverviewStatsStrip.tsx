@@ -39,7 +39,7 @@ export function OverviewStatsStrip({
 
   if (isLoading) {
     return (
-      <div className='mb-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4'>
+      <div className='mb-3 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4'>
         {Array.from({ length: 4 }).map((_, index) => (
           <div
             key={index}

@@ -62,9 +62,9 @@ export function Pagination({
   const pageNumbers = getPageNumbers();
 
   return (
-    <div className='flex items-center justify-between border-t border-neutral-200 px-4 py-3 dark:border-[#2d3540]'>
+    <div className='flex items-center justify-between border-t border-neutral-200 px-3 py-2 dark:border-[#2d3540]'>
       {/* Left side: Rows per page and count */}
-      <div className='flex items-center gap-6'>
+      <div className='flex items-center gap-4'>
         <div className='flex items-center gap-2'>
           <label htmlFor={rowsPerPageId} className='text-sm text-neutral-600 dark:text-[#9dabb9]'>
             Rows per page:

@@ -158,6 +158,19 @@ describe('CaseDetailsLinkedWorkflowRunsTab', () => {
     });
   });
 
+  it('matches the compact, left-aligned Lab workflow type selector', () => {
+    renderTab();
+
+    const allWorkflowTypes = screen.getByRole('button', { name: 'All1' });
+
+    expect(allWorkflowTypes.classList.contains('h-9')).toBe(true);
+    expect(allWorkflowTypes.classList.contains('justify-start')).toBe(true);
+    expect(allWorkflowTypes.classList.contains('rounded-none')).toBe(true);
+    expect(allWorkflowTypes.classList.contains('text-left')).toBe(true);
+    expect(allWorkflowTypes.getAttribute('aria-pressed')).toBe('true');
+    expect(allWorkflowTypes.firstElementChild?.classList.contains('w-full')).toBe(true);
+  });
+
   it('labels file and unlink actions, and requires confirmation after cancellation', async () => {
     const user = userEvent.setup();
     renderTab();

@@ -43,15 +43,17 @@ function WorkflowTypeButton({
   return (
     <Button
       variant='ghost'
+      size='inline'
       type='button'
+      aria-pressed={isSelected}
       onClick={onClick}
-      className={`w-full border-l-2 px-4 py-3.5 text-left transition-colors ${
+      className={`h-9 w-full justify-start rounded-none border-l-2 px-4 py-1.5 text-left transition-colors ${
         isSelected
-          ? 'border-l-blue-400 bg-white dark:bg-[#1e252e]'
+          ? 'border-l-blue-400 bg-white hover:bg-white dark:bg-[#1e252e] dark:hover:bg-[#1e252e]'
           : 'border-l-transparent hover:border-l-gray-400 hover:bg-neutral-100 dark:hover:bg-[#1e252e]'
       }`}
     >
-      <div className='flex items-center justify-between gap-2'>
+      <div className='flex w-full min-w-0 items-center justify-between gap-2'>
         <span
           className={`truncate text-sm font-semibold ${
             isSelected ? 'text-blue-700 dark:text-blue-400' : 'text-neutral-900 dark:text-white'

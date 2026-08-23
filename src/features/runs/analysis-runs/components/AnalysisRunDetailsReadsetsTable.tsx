@@ -38,6 +38,7 @@ export function AnalysisRunDetailsReadsetsTable() {
       render: (rs) => (
         <Button
           variant='ghost'
+          size='inline'
           onClick={() => {
             void navigate(`/lab/libraries/${rs.libraryOrcabusId}`);
           }}
@@ -57,6 +58,7 @@ export function AnalysisRunDetailsReadsetsTable() {
           </span>
           <Button
             variant='ghost'
+            size='inline'
             type='button'
             onClick={() => void handleCopy(rs.orcabusId, rs.orcabusId)}
             className='rounded p-1 transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800'

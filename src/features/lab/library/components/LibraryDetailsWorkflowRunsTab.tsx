@@ -13,6 +13,7 @@ import {
 } from '../hooks/useLibraryDetailsWorkflowRunsQueryParams';
 import { LibraryDetailsWorkflowRunFilesTable } from './LibraryDetailsWorkflowRunFilesTable';
 import { LibraryDetailsWorkflowRunsTable } from './LibraryDetailsWorkflowRunsTable';
+import { WorkflowTypeButton } from './WorkflowTypeButton';
 
 function EmptyPanel({
   icon,
@@ -27,37 +28,6 @@ function EmptyPanel({
     <div className='flex min-h-90 items-center justify-center p-8'>
       <EmptyState icon={icon} title={title} description={description} />
     </div>
-  );
-}
-
-function WorkflowTypeButton({
-  isSelected,
-  label,
-  onClick,
-}: {
-  isSelected: boolean;
-  label: string;
-  onClick: () => void;
-}) {
-  return (
-    <Button
-      variant='ghost'
-      type='button'
-      onClick={onClick}
-      className={`w-full border-l-2 px-4 py-3.5 text-left transition-colors ${
-        isSelected
-          ? 'border-l-blue-400 bg-white dark:bg-[#1e252e]'
-          : 'border-l-transparent hover:border-l-gray-400 hover:bg-neutral-100 dark:hover:bg-[#1e252e]'
-      }`}
-    >
-      <div
-        className={`truncate text-sm font-semibold ${
-          isSelected ? 'text-blue-700 dark:text-blue-400' : 'text-neutral-900 dark:text-white'
-        }`}
-      >
-        {label}
-      </div>
-    </Button>
   );
 }
 

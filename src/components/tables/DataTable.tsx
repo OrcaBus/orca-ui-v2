@@ -15,9 +15,11 @@ import {
 } from 'lucide-react';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 import Skeleton from 'react-loading-skeleton';
+import { AutoHideScrollArea } from '@/components/ui/AutoHideScrollArea';
 import { Pagination } from './Pagination';
 import { usePaginationDefaults, type OptionalPaginationProps } from './useTablePagination';
 import { useTableDensity } from './useTableDensity';
+import { TABLE_DENSITY_CLASSNAMES, TABLE_HEADER_TEXT_CLASSNAME } from './tableStyles';
 import { toast } from 'sonner';
 import { compareStringArrays } from '@/utils/array';
 import { STORAGE_PREFIX } from '@/utils/storage-keys';
@@ -448,8 +450,8 @@ export function DataTable<T>({
   };
 
   const visibleColumnsList = columns.filter((col) => visibleColumns.has(col.key));
-  const densityPadding = density === 'comfortable' ? 'px-4 py-3' : 'px-3 py-2';
-  const headerDensityPadding = density === 'comfortable' ? 'px-4 py-3' : 'px-3 py-2';
+  const densityPadding = TABLE_DENSITY_CLASSNAMES[density].cell;
+  const headerDensityPadding = TABLE_DENSITY_CLASSNAMES[density].header;
 
   const selectedRows = selectable
     ? Array.from(selectedIndices)
@@ -510,7 +512,7 @@ export function DataTable<T>({
     <div className={wrapperClass}>
       {/* Toolbar */}
       {showToolbar && (
-        <div className='flex items-center justify-between border-b border-neutral-200 px-4 py-2 dark:border-[#2d3540]'>
+        <div className='flex items-center justify-between border-b border-neutral-200 px-3 py-1.5 dark:border-[#2d3540]'>
           <div className='text-xs text-neutral-600 dark:text-[#9dabb9]'>
             {totalItems} {totalItems === 1 ? 'item' : 'items'}
             {selectable && selectedIndices.size > 0 && (
@@ -670,7 +672,10 @@ export function DataTable<T>({
       )}
 
       {/* Table */}
-      <div className='max-h-150 scrollbar-thin overflow-x-auto overflow-y-auto'>
+      <AutoHideScrollArea
+        aria-label='Scrollable data table'
+        className='max-h-150 overflow-x-auto overflow-y-auto'
+      >
         <table className='w-full'>
           <thead className='sticky top-0 z-10 border-b border-neutral-200 bg-neutral-50 dark:border-[#2d3540] dark:bg-[#111418]'>
             <tr>
@@ -711,20 +716,20 @@ export function DataTable<T>({
                   <th
                     key={column.key}
                     aria-sort={getAriaSort(column)}
-                    className={`text-xs font-medium whitespace-nowrap text-neutral-700 dark:text-[#9dabb9] ${alignRight ? 'text-right' : 'text-left'} ${!isSortable ? headerDensityPadding : ''}`}
+                    className={`${TABLE_HEADER_TEXT_CLASSNAME} ${alignRight ? 'text-right' : 'text-left'} ${!isSortable ? headerDensityPadding : ''}`}
                   >
                     {isSortable ? (
                       <button
                         type='button'
                         onClick={() => handleSort(column)}
-                        className={`flex w-full cursor-pointer items-center gap-2 font-medium select-none hover:bg-neutral-100 focus-visible:bg-neutral-100 focus-visible:outline-none dark:hover:bg-[#1e252e] dark:focus-visible:bg-[#1e252e] ${alignRight ? 'justify-end text-right' : 'text-left'} ${headerDensityPadding}`}
+                        className={`flex w-full cursor-pointer items-center gap-1.5 select-none hover:bg-neutral-100 focus-visible:bg-neutral-100 focus-visible:outline-none dark:hover:bg-[#1e252e] dark:focus-visible:bg-[#1e252e] ${alignRight ? 'justify-end text-right' : 'text-left'} ${headerDensityPadding}`}
                       >
-                        {column.header}
+                        <span className={TABLE_HEADER_TEXT_CLASSNAME}>{column.header}</span>
                         {getSortIcon(column)}
                       </button>
                     ) : (
                       <div className={`flex items-center gap-2 ${alignRight ? 'justify-end' : ''}`}>
-                        {column.header}
+                        <span className={TABLE_HEADER_TEXT_CLASSNAME}>{column.header}</span>
                       </div>
                     )}
                   </th>
@@ -859,7 +864,7 @@ export function DataTable<T>({
             )}
           </tbody>
         </table>
-      </div>
+      </AutoHideScrollArea>
 
       {/* Pagination - only when paginationProps is provided */}
       {paginationProps && (

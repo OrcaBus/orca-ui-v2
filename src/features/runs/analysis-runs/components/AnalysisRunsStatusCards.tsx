@@ -76,7 +76,7 @@ export function AnalysisRunsStatusCards({
   const total = counts.all;
 
   return (
-    <div className='mb-6 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-6'>
+    <div className='mb-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-6'>
       {isLoadingAnalysisRunStatusCounts
         ? statusCards.map((card) => <StatusCard key={card.status} label='' value={0} isLoading />)
         : statusCards.map((card) => {

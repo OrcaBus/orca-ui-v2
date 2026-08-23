@@ -59,6 +59,7 @@ export function AnalysisRunDetailsLibrariesTable() {
       render: (lib) => (
         <Button
           variant='ghost'
+          size='inline'
           onClick={(e) => {
             e.stopPropagation();
             void navigate(`/lab/libraries/${lib.orcabusId}`);

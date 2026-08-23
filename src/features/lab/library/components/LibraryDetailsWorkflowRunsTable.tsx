@@ -68,6 +68,7 @@ export function LibraryDetailsWorkflowRunsTable() {
         render: (workflowRun) => (
           <Button
             variant='ghost'
+            size='inline'
             type='button'
             onClick={() => {
               void navigate(`/runs/workflow-runs/${workflowRun.orcabusId}`);
@@ -112,9 +113,10 @@ export function LibraryDetailsWorkflowRunsTable() {
         render: (workflowRun) => (
           <Button
             variant='ghost'
+            size='table'
             type='button'
             onClick={() => setPortalRunId(workflowRun.portalRunId)}
-            className='inline-flex items-center gap-1.5 rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-xs font-medium text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-[#c1cbd8] dark:hover:bg-[#2d3540]'
+            className='border border-neutral-300 bg-white text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-[#c1cbd8] dark:hover:bg-[#2d3540]'
           >
             <FileSearch className='h-3.5 w-3.5' aria-hidden='true' />
             View files

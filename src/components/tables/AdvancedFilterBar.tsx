@@ -3,6 +3,7 @@ import { Search, X, SlidersHorizontal, ChevronUp, Filter } from 'lucide-react';
 import { PillTag } from '../ui/PillTag';
 import { MultiSelect } from '../ui/MultiSelect';
 import { Button } from '../ui/Button';
+import { Input } from '../ui/Input';
 import { useDebouncedSearchInput } from '@/hooks/useDebouncedSearchInput';
 
 interface TextFilterField {
@@ -151,14 +152,14 @@ export function AdvancedFilterBar({
     onClearAll?.();
   };
 
-  const gridClass = `grid gap-4 grid-cols-${columns}`;
+  const gridClass = `grid gap-3 grid-cols-${columns}`;
   const filterControlClass =
-    'h-10 w-full rounded-md border border-neutral-300 bg-slate-50 px-3 text-sm text-neutral-900 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-100 dark:focus:ring-[#137fec]';
+    'h-9 w-full rounded-md border border-neutral-300 bg-slate-50 px-3 text-sm text-neutral-900 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-100 dark:focus:ring-[#137fec]';
 
   return (
-    <div className='mb-6 rounded-lg border border-neutral-200 bg-white dark:border-[#2d3540] dark:bg-[#111418]'>
+    <div className='my-3 rounded-lg border border-neutral-200 bg-white dark:border-[#2d3540] dark:bg-[#111418]'>
       {/* Search + More Filters */}
-      <div className='flex items-center gap-3 px-4 py-3'>
+      <div className='flex items-center gap-2 p-2.5'>
         <div className='relative flex-1'>
           <label htmlFor='advanced-filter-search' className='sr-only'>
             Search
@@ -167,14 +168,14 @@ export function AdvancedFilterBar({
             className='absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-neutral-400 dark:text-[#9dabb9]'
             aria-hidden='true'
           />
-          <input
+          <Input
             ref={inputRef}
             id='advanced-filter-search'
             type='text'
             placeholder={searchPlaceholder}
             defaultValue={searchValue}
             onChange={handleInputChange}
-            className='peer w-full rounded-md border border-slate-200 bg-slate-50 py-2 pr-10 pl-10 text-sm text-neutral-900 placeholder-neutral-400 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-100 dark:placeholder-[#9dabb9] dark:focus:ring-[#137fec]'
+            className='peer h-9 border-slate-200 bg-slate-50 pr-9 pl-9 text-sm dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-100 dark:placeholder-[#9dabb9]'
           />
           <button
             type='button'
@@ -188,7 +189,7 @@ export function AdvancedFilterBar({
 
         <button
           onClick={handleToggleOpen}
-          className={`flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors ${
+          className={`flex h-9 items-center gap-2 rounded-md border px-3 text-sm font-medium whitespace-nowrap transition-colors ${
             hasActiveFilters
               ? 'border-primary bg-primary/10 text-primary'
               : 'border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-50 dark:border-[#2d3540] dark:bg-[#111418] dark:text-[#9dabb9] dark:hover:bg-[#1e252e]'
@@ -211,13 +212,13 @@ export function AdvancedFilterBar({
         <div>
           <button
             onClick={() => setIsOpen(false)}
-            className='flex w-full items-center gap-1.5 border-t border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:text-slate-900 dark:border-[#2d3540] dark:bg-[#1e252e]/50 dark:text-[#9dabb9] dark:hover:text-white'
+            className='flex w-full items-center gap-1.5 border-t border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:text-slate-900 dark:border-[#2d3540] dark:bg-[#1e252e]/50 dark:text-[#9dabb9] dark:hover:text-white'
           >
             <ChevronUp className='h-4 w-4' />
             Advanced Filters
           </button>
 
-          <div className='px-4 py-3'>
+          <div className='px-3 py-2.5'>
             <div
               className={gridClass}
               style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}
@@ -266,7 +267,7 @@ export function AdvancedFilterBar({
                         options={field.options}
                         onChange={(next) => handleTempChange(field.key, next.join(','))}
                         placeholder='All'
-                        triggerClassName='h-10 rounded-md border-neutral-300 bg-slate-50 px-3 py-0 text-neutral-900 shadow-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-100'
+                        triggerClassName='h-9 rounded-md border-neutral-300 bg-slate-50 px-3 py-0 text-neutral-900 shadow-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-100'
                       />
                     </div>
                   );
@@ -317,10 +318,10 @@ export function AdvancedFilterBar({
               </div>
             )}
 
-            <div className='mt-4 flex items-center justify-end gap-3 border-t border-dashed border-neutral-100 pt-3 dark:border-[#2d3540]'>
+            <div className='mt-3 flex items-center justify-end gap-2 border-t border-dashed border-neutral-100 pt-2.5 dark:border-[#2d3540]'>
               <button
                 onClick={handleReset}
-                className='px-4 py-2 text-sm text-neutral-600 transition-colors hover:text-neutral-900 dark:text-[#9dabb9] dark:hover:text-white'
+                className='px-3 py-1.5 text-sm text-neutral-600 transition-colors hover:text-neutral-900 dark:text-[#9dabb9] dark:hover:text-white'
               >
                 Reset
               </button>
@@ -335,7 +336,7 @@ export function AdvancedFilterBar({
 
       {/* Active Filter Badges — rendered from props by badge type */}
       {activeFilterBadges.length > 0 && (
-        <div className='flex flex-wrap items-center gap-2 border-t border-slate-200 bg-slate-50 px-4 py-3 dark:border-[#2d3540] dark:bg-[#1e252e]/50'>
+        <div className='flex flex-wrap items-center gap-2 border-t border-slate-200 bg-slate-50 px-3 py-2 dark:border-[#2d3540] dark:bg-[#1e252e]/50'>
           <span className='mr-1 shrink-0 text-xs font-semibold tracking-wide text-slate-500 uppercase dark:text-[#9dabb9]'>
             Active:
           </span>

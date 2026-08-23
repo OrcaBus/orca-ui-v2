@@ -74,6 +74,7 @@ export function CaseDetailsLinkedWorkflowRunFilesTable({
               <div>
                 <Button
                   variant='ghost'
+                  size='inline'
                   type='button'
                   onClick={() => {
                     setSelectedFile(file);

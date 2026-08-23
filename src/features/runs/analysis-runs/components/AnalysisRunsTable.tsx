@@ -38,6 +38,7 @@ const AnalysisRunsTable = () => {
         render: (ar) => (
           <Button
             variant='ghost'
+            size='inline'
             onClick={() => {
               void navigate(`/runs/analysis-runs/${ar.orcabusId}`);
             }}

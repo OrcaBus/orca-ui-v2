@@ -72,6 +72,8 @@ export function LibraryDetailsWorkflowRunFilesTable() {
               </span>
               <div>
                 <Button
+                  variant='ghost'
+                  size='inline'
                   onClick={() => {
                     setSelectedFile(file);
                     setIsDetailOpen(true);

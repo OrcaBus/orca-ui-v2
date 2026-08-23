@@ -291,6 +291,7 @@ export function CaseDetailsLinkedLibrariesTab() {
       render: (lib) => (
         <Button
           variant='ghost'
+          size='inline'
           onClick={(e) => {
             e.stopPropagation();
             void navigate(`/lab/libraries/${lib.orcabusId}`);
@@ -362,6 +363,7 @@ export function CaseDetailsLinkedLibrariesTab() {
       render: (lib) => (
         <Button
           variant='ghost'
+          size='inline'
           onClick={(e) => {
             e.stopPropagation();
             setUnlinkTarget({
