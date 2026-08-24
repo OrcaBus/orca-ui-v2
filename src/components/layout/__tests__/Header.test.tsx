@@ -9,13 +9,25 @@ import {
   type AppShellHeaderConfig,
 } from '@/context/app-shell-context';
 import { EnvironmentContext } from '@/context/environment-context';
-import { NotificationProvider } from '@/context/NotificationProvider';
 import { Header } from '../Header';
 
 // UserMenu now keeps its modals mounted, so ThemeSettingsModal's useTheme() runs
 // even while closed. These layout tests don't exercise theming.
 vi.mock('@/context/theme-context', () => ({
   useTheme: () => ({ theme: 'system', setTheme: vi.fn() }),
+}));
+
+// The header's alert bell fetches failed runs from three APIs. These layout
+// tests render without a QueryClient and only assert header composition.
+vi.mock('@/components/layout/header/notifications/useRunNotifications', () => ({
+  NOTIFICATION_LOOKBACK_DAYS: 30,
+  NOTIFICATION_PREVIEW_COUNT: 10,
+  useRunNotifications: () => ({
+    notifications: [],
+    totalCount: 0,
+    isLoading: false,
+    isError: false,
+  }),
 }));
 
 const authValue: AuthContextValue = {
@@ -50,11 +62,9 @@ function renderHeader(headerConfig: AppShellHeaderConfig) {
     <MemoryRouter>
       <AuthContext.Provider value={authValue}>
         <EnvironmentContext.Provider value={{ environment: 'dev', label: 'Dev' }}>
-          <NotificationProvider>
-            <AppShellContext.Provider value={appShellValue}>
-              <Header />
-            </AppShellContext.Provider>
-          </NotificationProvider>
+          <AppShellContext.Provider value={appShellValue}>
+            <Header />
+          </AppShellContext.Provider>
         </EnvironmentContext.Provider>
       </AuthContext.Provider>
     </MemoryRouter>

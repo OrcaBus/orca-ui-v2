@@ -7,7 +7,6 @@ import { ThemeProvider } from '@/context/ThemeProvider';
 import { AuthProvider } from '@/context/AmplifyAuthProvider';
 import { ReactQueryClientProvider } from '@/context/QueryClientProvider';
 import { EnvironmentProvider } from '@/context/EnvironmentProvider';
-import { NotificationProvider } from '@/context/NotificationProvider';
 import { SkeletonTheme } from 'react-loading-skeleton';
 import { AppShellProvider } from '@/context/AppShellProvider';
 
@@ -18,15 +17,13 @@ export default function App() {
         <AuthProvider>
           <ReactQueryClientProvider>
             <EnvironmentProvider>
-              <NotificationProvider>
-                <AppShellProvider>
-                  <Suspense
-                    fallback={<SpinnerWithText className='min-h-screen' text='Loading page…' />}
-                  >
-                    <RouterProvider router={router} />
-                  </Suspense>
-                </AppShellProvider>
-              </NotificationProvider>
+              <AppShellProvider>
+                <Suspense
+                  fallback={<SpinnerWithText className='min-h-screen' text='Loading page…' />}
+                >
+                  <RouterProvider router={router} />
+                </Suspense>
+              </AppShellProvider>
             </EnvironmentProvider>
           </ReactQueryClientProvider>
         </AuthProvider>
