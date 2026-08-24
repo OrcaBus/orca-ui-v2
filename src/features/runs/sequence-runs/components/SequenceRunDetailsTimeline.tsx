@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import dayjs from 'dayjs';
-import { MessageCircle, Plus, SquarePen, Trash } from 'lucide-react';
+import { MessageCircle, Plus, SquarePen, Trash2 } from 'lucide-react';
 import {
   CommentDialog,
   CustomStateDialog,
@@ -221,7 +221,7 @@ export function SequenceRunDetailsTimeline() {
                 {
                   id: 'delete-comment',
                   label: 'Delete',
-                  icon: <Trash className='h-4 w-4' />,
+                  icon: <Trash2 className='h-4 w-4' />,
                   onClick: () => setDeletingComment(comment),
                 },
               ]

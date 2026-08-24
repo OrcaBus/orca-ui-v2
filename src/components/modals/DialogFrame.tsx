@@ -83,7 +83,7 @@ export function DialogFrame({
           <DialogPanel
             transition
             className={cn(
-              'w-full overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-xl',
+              'w-full overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-lg',
               'transform transition-all duration-200 ease-out',
               'data-closed:translate-y-3 data-closed:scale-[0.98] data-closed:opacity-0',
               'data-leave:duration-150 data-leave:ease-in',
@@ -107,7 +107,7 @@ export function DialogFrame({
                     <div
                       className={cn(
                         'flex h-9 w-9 shrink-0 items-center justify-center rounded-md',
-                        'bg-blue-50 text-blue-600 dark:bg-[#137fec]/10 dark:text-[#137fec]'
+                        'bg-primary/10 text-primary'
                       )}
                     >
                       {icon}
@@ -123,7 +123,7 @@ export function DialogFrame({
                     </div>
 
                     {description && (
-                      <HeadlessDescription className='mt-0.5 text-sm leading-relaxed text-neutral-500 dark:text-[#9dabb9]'>
+                      <HeadlessDescription className='text-muted-foreground mt-0.5 text-sm leading-relaxed'>
                         {description}
                       </HeadlessDescription>
                     )}

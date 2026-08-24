@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/Button';
 import { Trash2, UserPlus } from 'lucide-react';
 import { DataTable, type Column } from '@/components/tables/DataTable';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -55,14 +56,16 @@ export function CaseDetailsUsersTable({ users, onRemoveUser }: CaseDetailsUsersT
       key: 'actions',
       header: '',
       render: (link) => (
-        <button
+        <Button
+          variant='ghost'
+          size='inline'
           type='button'
           onClick={() => onRemoveUser(link.user.orcabusId, link.user.email)}
           title={`Remove ${link.user.email}`}
           className='rounded p-1.5 text-red-500 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10'
         >
           <Trash2 className='h-4 w-4' />
-        </button>
+        </Button>
       ),
     },
   ];

@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/Button';
 import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { IGV_FILETYPE_LIST, isFileSizeAcceptable, isFileViewable } from '@/utils/files';
@@ -24,18 +25,20 @@ export const FilePreviewButton = ({ s3Record }: { s3Record: S3Record }) => {
   return (
     <>
       {canPreview ? (
-        <button
+        <Button
+          variant='ghost'
+          size='tableIcon'
           type='button'
           onClick={() => setIsOpen(true)}
-          className='rounded p-1.5 transition-colors hover:bg-neutral-100 dark:hover:bg-[#2d3540]'
+          className='transition-colors hover:bg-neutral-100 dark:hover:bg-[#2d3540]'
           title='Preview file'
         >
           <Eye className='h-4 w-4 text-neutral-600 dark:text-[#8892a2]' />
-        </button>
+        </Button>
       ) : (
         <Tooltip>
           <TooltipTrigger asChild>
-            <span className='inline-flex cursor-not-allowed rounded p-1.5 opacity-40'>
+            <span className='inline-flex size-6 items-center justify-center rounded p-1 opacity-40'>
               <EyeOff className='h-4 w-4 text-neutral-600 dark:text-[#8892a2]' />
             </span>
           </TooltipTrigger>

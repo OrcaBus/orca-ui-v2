@@ -211,7 +211,7 @@ export function CodeViewer({
                 {title}
               </span>
             )}
-            <span className='rounded border border-slate-700 bg-slate-800 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-slate-300'>
+            <span className='text-caption rounded border border-slate-700 bg-slate-800 px-1.5 py-0.5 font-semibold tracking-wide text-slate-300'>
               {languageLabel}
             </span>
             <span className='text-xs text-slate-500'>

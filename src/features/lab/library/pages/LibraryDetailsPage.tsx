@@ -25,7 +25,7 @@ function LibraryDetailsAppShellHeader() {
       mode: 'detail' as const,
       breadcrumbs: [
         { label: 'Lab', href: '/lab' },
-        { label: 'Libraries', href: '/lab/libraries' },
+        { label: 'Libraries', href: '/lab' },
         {
           label: libraryDetail?.libraryId || 'Loading...',
           isLoading: isLoadingLibraryDetail,

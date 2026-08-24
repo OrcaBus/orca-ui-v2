@@ -129,7 +129,7 @@ export function ModelViewDialog({
       </div>
 
       <div className='shrink-0 border-t border-neutral-200 bg-neutral-50 px-4 py-2 dark:border-[#2d3540] dark:bg-[#1e252e]'>
-        <p className='text-xs text-slate-500 dark:text-[#9dabb9]'>{backgroundNotice}</p>
+        <p className='text-muted-foreground text-xs'>{backgroundNotice}</p>
       </div>
     </DialogFrame>
   );

@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { FileSearch } from 'lucide-react';
 import { ApiErrorState } from '@/components/ui/ApiErrorState';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { Button } from '@/components/ui/Button';
 import { DataTable, type Column } from '@/components/tables/DataTable';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/Tooltip';
 import { DEFAULT_PAGE_SIZE } from '@/utils/constants';
@@ -65,13 +66,14 @@ export function LibraryDetailsWorkflowRunFilesTable() {
           return (
             <div className='flex items-center gap-3'>
               <span
-                className={`inline-flex items-center justify-center rounded px-2 py-0.5 text-[10px] font-bold tracking-wide uppercase ${getFileTypeBadgeStyle(ext)}`}
+                className={`text-caption inline-flex items-center justify-center rounded px-2 py-0.5 font-bold tracking-wide uppercase ${getFileTypeBadgeStyle(ext)}`}
               >
                 {ext}
               </span>
               <div>
-                <button
-                  type='button'
+                <Button
+                  variant='ghost'
+                  size='inline'
                   onClick={() => {
                     setSelectedFile(file);
                     setIsDetailOpen(true);
@@ -79,7 +81,7 @@ export function LibraryDetailsWorkflowRunFilesTable() {
                   className='text-left text-sm font-medium text-neutral-900 hover:underline dark:text-white'
                 >
                   {name}
-                </button>
+                </Button>
                 {dir && (
                   <Tooltip>
                     <TooltipTrigger asChild>

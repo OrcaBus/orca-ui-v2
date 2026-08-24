@@ -101,7 +101,7 @@ function ThemeOption({
       </div>
       <div className='flex-1 text-left'>
         <div className='text-[13px] font-medium text-slate-900 dark:text-white'>{label}</div>
-        <div className='text-[11px] text-slate-500 dark:text-[#9dabb9]'>{description}</div>
+        <div className='text-caption text-muted-foreground'>{description}</div>
       </div>
       {active && (
         <div className='bg-primary flex h-5 w-5 items-center justify-center rounded-full'>

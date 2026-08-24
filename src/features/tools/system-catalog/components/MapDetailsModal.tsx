@@ -70,19 +70,19 @@ export function MapDetailsModal({
         <div className='grid grid-cols-2 gap-3'>
           <div className='flex items-center gap-2.5'>
             <div className='flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 dark:bg-[#1e252e]'>
-              <User className='h-4 w-4 text-slate-500 dark:text-[#9dabb9]' />
+              <User className='text-muted-foreground h-4 w-4' />
             </div>
             <div>
-              <p className='text-xs text-slate-500 dark:text-[#9dabb9]'>Created by</p>
+              <p className='text-muted-foreground text-xs'>Created by</p>
               <p className='font-medium text-slate-900 dark:text-white'>{map.createdBy}</p>
             </div>
           </div>
           <div className='flex items-center gap-2.5'>
             <div className='flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 dark:bg-[#1e252e]'>
-              <User className='h-4 w-4 text-slate-500 dark:text-[#9dabb9]' />
+              <User className='text-muted-foreground h-4 w-4' />
             </div>
             <div>
-              <p className='text-xs text-slate-500 dark:text-[#9dabb9]'>Updated by</p>
+              <p className='text-muted-foreground text-xs'>Updated by</p>
               <p className='font-medium text-slate-900 dark:text-white'>{map.updatedBy}</p>
             </div>
           </div>
@@ -92,10 +92,10 @@ export function MapDetailsModal({
         <div className='grid grid-cols-2 gap-3'>
           <div className='flex items-center gap-2.5'>
             <div className='flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 dark:bg-[#1e252e]'>
-              <Calendar className='h-4 w-4 text-slate-500 dark:text-[#9dabb9]' />
+              <Calendar className='text-muted-foreground h-4 w-4' />
             </div>
             <div>
-              <p className='text-xs text-slate-500 dark:text-[#9dabb9]'>Created</p>
+              <p className='text-muted-foreground text-xs'>Created</p>
               <p className='font-medium text-slate-900 dark:text-white'>
                 {formatDate(map.createdAt)}
               </p>
@@ -103,10 +103,10 @@ export function MapDetailsModal({
           </div>
           <div className='flex items-center gap-2.5'>
             <div className='flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 dark:bg-[#1e252e]'>
-              <Calendar className='h-4 w-4 text-slate-500 dark:text-[#9dabb9]' />
+              <Calendar className='text-muted-foreground h-4 w-4' />
             </div>
             <div>
-              <p className='text-xs text-slate-500 dark:text-[#9dabb9]'>Updated</p>
+              <p className='text-muted-foreground text-xs'>Updated</p>
               <p className='font-medium text-slate-900 dark:text-white'>
                 {formatDate(map.updatedAt)}
               </p>
@@ -119,12 +119,12 @@ export function MapDetailsModal({
           <div className='flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2 dark:bg-[#111418]'>
             <Box className='h-4 w-4 text-slate-400 dark:text-[#9dabb9]' />
             <span className='font-semibold text-slate-900 dark:text-white'>{map.nodeCount}</span>
-            <span className='text-slate-500 dark:text-[#9dabb9]'>nodes</span>
+            <span className='text-muted-foreground'>nodes</span>
           </div>
           <div className='flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2 dark:bg-[#111418]'>
             <NotebookText className='h-4 w-4 text-slate-400 dark:text-[#9dabb9]' />
             <span className='font-semibold text-slate-900 dark:text-white'>{map.edgeCount}</span>
-            <span className='text-slate-500 dark:text-[#9dabb9]'>edges</span>
+            <span className='text-muted-foreground'>edges</span>
           </div>
         </div>
 

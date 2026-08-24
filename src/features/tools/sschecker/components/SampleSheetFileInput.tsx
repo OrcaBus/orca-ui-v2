@@ -1,3 +1,5 @@
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import { useRef, useState } from 'react';
 import { FileText, UploadCloud } from 'lucide-react';
 
@@ -46,13 +48,14 @@ export function SampleSheetFileInput({
             {(selectedFile.size / 1024).toFixed(1)} KB
           </p>
         </div>
-        <button
+        <Button
+          variant='ghost'
           type='button'
           onClick={handleClear}
           className='shrink-0 text-xs text-neutral-500 underline hover:text-neutral-800 dark:hover:text-neutral-200'
         >
           Remove
-        </button>
+        </Button>
       </div>
     );
   }
@@ -86,7 +89,7 @@ export function SampleSheetFileInput({
         drag and drop
       </p>
       <p className='mt-1 text-xs text-neutral-400 dark:text-neutral-500'>CSV or TSV files only</p>
-      <input
+      <Input
         ref={fileInputRef}
         type='file'
         accept='.csv,.tsv'

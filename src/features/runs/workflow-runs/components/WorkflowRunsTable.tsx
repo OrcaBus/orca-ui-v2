@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/Button';
 import {
   Column,
   DataTable,
@@ -49,14 +50,16 @@ const WorkflowRunsTable = () => {
         header: 'Workflow Run Name',
         sortable: true,
         render: (wf) => (
-          <button
+          <Button
+            variant='ghost'
+            size='inline'
             onClick={() => {
               void navigate(`/runs/workflow-runs/${wf.orcabusId}`);
             }}
             className='text-left text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline dark:text-blue-400 dark:hover:text-blue-300'
           >
             {wf.workflowRunName}
-          </button>
+          </Button>
         ),
       },
       {

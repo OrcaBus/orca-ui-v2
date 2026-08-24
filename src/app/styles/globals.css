@@ -2,14 +2,9 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/*
- * Registers the shadcn/ui semantic color names (--primary, --secondary, --border, --ring, …)
- * with Tailwind so it actually generates bg-primary/text-primary-foreground/border-input/ring-ring
- * etc. Tailwind v4 only emits utilities for colors declared inside @theme; a bare `:root { --primary: ... }`
- * is invisible to the utility generator, which silently drops any class built from it (no error, no output).
- * `inline` keeps these as live var() references instead of baking in a static value, so the existing
- * light/dark overrides below (:root vs .dark) keep working per color-scheme.
- */
+/* Registers shadcn/ui's semantic color names with Tailwind's @theme so
+ * bg-primary/border-input/ring-ring etc. actually generate. See DESIGN.md
+ * → Implementation Notes for why this has to be `@theme`, not `:root`. */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -45,6 +40,20 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Same registration issue as the colors above — Tailwind v4's own
+   * built-in --radius-* would otherwise win over :root, so rounded-md/lg
+   * silently rendered stock 6px/8px instead of this app's 8px/10px. */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* Caption tier — names the ~115 arbitrary text-[10px]/[11px] literals
+   * scattered across icon labels, table micro-metadata, and timestamps.
+   * See DESIGN.md → Implementation Notes for the full rationale. */
+  --text-caption: 0.6875rem; /* 11px */
+  --text-caption--line-height: 1.4;
 }
 
 :root {
@@ -62,12 +71,6 @@
   --text-dashboard-title: 1.5rem; /* 24px - Dashboard Title, Bold */
   --text-section-label: 0.875rem; /* 14px - Section Label, Semi-Bold, Uppercase */
   --text-body: 0.8125rem; /* 13px - Body text, Regular */
-
-  /* Spacing scale (from style guide) */
-  --space-xs: 4px;
-  --space-sm: 8px;
-  --space-md: 16px;
-  --space-lg: 24px;
 
   /* Primary action colors (Blue scale from style guide) */
   --color-primary-500: #3b82f6; /* Solid blue (500) */
@@ -133,11 +136,10 @@
   --skeleton-base: var(--color-slate-100);
   --skeleton-highlight: var(--color-slate-200);
 
+  /* Radius scale base — the sm/md/lg/xl steps derived from this are
+   * registered under @theme inline above so Tailwind's rounded-* utilities
+   * actually pick them up. */
   --radius: 0.5rem;
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: var(--radius);
-  --radius-lg: calc(var(--radius) + 2px);
-  --radius-xl: calc(var(--radius) + 4px);
   --sidebar: var(--color-slate-50);
   --sidebar-foreground: var(--color-slate-900);
   --sidebar-primary: var(--color-primary-500);
@@ -359,4 +361,71 @@ select {
 
 .scrollbar-thin::-webkit-scrollbar-corner {
   background: transparent;
+}
+
+/* Keep scrollbars discoverable during interaction without leaving a persistent visual rail. */
+.scrollbar-thin.scrollbar-auto-hide {
+  scrollbar-color: transparent transparent;
+}
+
+.scrollbar-thin.scrollbar-auto-hide:hover,
+.scrollbar-thin.scrollbar-auto-hide:focus-visible,
+.scrollbar-thin.scrollbar-auto-hide:focus-within,
+.scrollbar-thin.scrollbar-auto-hide[data-scrolling='true'] {
+  scrollbar-color: var(--color-slate-300) transparent;
+}
+
+.dark .scrollbar-thin.scrollbar-auto-hide {
+  scrollbar-color: transparent transparent;
+}
+
+.dark .scrollbar-thin.scrollbar-auto-hide:hover,
+.dark .scrollbar-thin.scrollbar-auto-hide:focus-visible,
+.dark .scrollbar-thin.scrollbar-auto-hide:focus-within,
+.dark .scrollbar-thin.scrollbar-auto-hide[data-scrolling='true'] {
+  scrollbar-color: var(--color-border-dark) transparent;
+}
+
+.scrollbar-thin.scrollbar-auto-hide::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  transition: background-color 150ms ease;
+}
+
+.scrollbar-thin.scrollbar-auto-hide:hover::-webkit-scrollbar-thumb,
+.scrollbar-thin.scrollbar-auto-hide:focus-visible::-webkit-scrollbar-thumb,
+.scrollbar-thin.scrollbar-auto-hide:focus-within::-webkit-scrollbar-thumb,
+.scrollbar-thin.scrollbar-auto-hide[data-scrolling='true']::-webkit-scrollbar-thumb {
+  background-color: var(--color-slate-300);
+}
+
+.scrollbar-thin.scrollbar-auto-hide:hover::-webkit-scrollbar-thumb:hover,
+.scrollbar-thin.scrollbar-auto-hide:focus-visible::-webkit-scrollbar-thumb:hover,
+.scrollbar-thin.scrollbar-auto-hide:focus-within::-webkit-scrollbar-thumb:hover,
+.scrollbar-thin.scrollbar-auto-hide[data-scrolling='true']::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-slate-400);
+}
+
+.dark .scrollbar-thin.scrollbar-auto-hide:hover::-webkit-scrollbar-thumb,
+.dark .scrollbar-thin.scrollbar-auto-hide:focus-visible::-webkit-scrollbar-thumb,
+.dark .scrollbar-thin.scrollbar-auto-hide:focus-within::-webkit-scrollbar-thumb,
+.dark .scrollbar-thin.scrollbar-auto-hide[data-scrolling='true']::-webkit-scrollbar-thumb {
+  background-color: var(--color-border-dark);
+}
+
+.dark .scrollbar-thin.scrollbar-auto-hide:hover::-webkit-scrollbar-thumb:hover,
+.dark .scrollbar-thin.scrollbar-auto-hide:focus-visible::-webkit-scrollbar-thumb:hover,
+.dark .scrollbar-thin.scrollbar-auto-hide:focus-within::-webkit-scrollbar-thumb:hover,
+.dark .scrollbar-thin.scrollbar-auto-hide[data-scrolling='true']::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-surface-elevated);
+}
+
+@media (forced-colors: active) {
+  .scrollbar-thin.scrollbar-auto-hide,
+  .dark .scrollbar-thin.scrollbar-auto-hide {
+    scrollbar-color: auto;
+  }
+
+  .scrollbar-thin.scrollbar-auto-hide::-webkit-scrollbar-thumb {
+    background-color: ButtonText !important;
+  }
 }

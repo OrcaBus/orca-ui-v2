@@ -78,19 +78,21 @@ export const FileIgvDesktopButton = ({ s3ObjectId, bucket, s3Key, className, ico
   return (
     <div className={className}>
       {iconOnly ? (
-        <button
+        <Button
+          variant='ghost'
+          size='tableIcon'
           type='button'
           onClick={() => void handleOpenInDesktop()}
           disabled={isOpening}
           title='Add track to IGV desktop'
-          className='rounded p-1.5 transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-[#2d3540]'
+          className='transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-[#2d3540]'
         >
           {isOpening ? (
             <Spinner className='h-4 w-4 text-neutral-600 dark:text-[#8892a2]' />
           ) : (
             <Monitor className='h-4 w-4 text-neutral-600 dark:text-[#8892a2]' />
           )}
-        </button>
+        </Button>
       ) : (
         <Button type='button' onClick={() => void handleOpenInDesktop()} disabled={isOpening}>
           {isOpening ? <Spinner className='size-4' /> : <Monitor className='size-4' />}

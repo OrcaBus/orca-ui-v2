@@ -1,11 +1,9 @@
 import { keepPreviousData } from '@tanstack/react-query';
 import { ApiErrorState } from '@/components/ui/ApiErrorState';
 import { StatusCard } from '@/components/ui/StatusCard';
-import {
-  useAnalysisRunStatusCountModel,
-  type AnalysisRunStatusCountModel,
-} from '../../shared/api/workflows.api';
+import { useAnalysisRunStatusCountModel } from '../../shared/api/workflows.api';
 import { getRunsStatusIcon } from '../../shared/utils/statusIcons';
+import { getStatusFamily } from '@/components/ui/status-config';
 import {
   useAnalysisRunsListQueryParams,
   type AnalysisRunStatus,
@@ -20,15 +18,21 @@ interface AnalysisRunsStatusCardsProps {
 const statusCards: Array<{
   label: string;
   status: Exclude<AnalysisRunStatus, 'draft'>;
-  variant: 'success' | 'error' | 'warning' | 'neutral' | 'info';
 }> = [
-  { label: 'Succeeded', status: 'succeeded', variant: 'success' },
-  { label: 'Failed', status: 'failed', variant: 'error' },
-  { label: 'Aborted', status: 'aborted', variant: 'neutral' },
-  { label: 'Resolved', status: 'resolved', variant: 'info' },
-  { label: 'Deprecated', status: 'deprecated', variant: 'neutral' },
-  { label: 'Ongoing', status: 'ongoing', variant: 'warning' },
+  { label: 'Succeeded', status: 'succeeded' },
+  { label: 'Failed', status: 'failed' },
+  { label: 'Aborted', status: 'aborted' },
+  { label: 'Resolved', status: 'resolved' },
+  { label: 'Deprecated', status: 'deprecated' },
+  { label: 'Ongoing', status: 'ongoing' },
 ];
+
+type AnalysisRunsStatusCounts = Record<'all' | AnalysisRunStatus, number>;
+
+function getStatusCount<T extends object>(data: T | null | undefined, key: string): number {
+  const value = data == null ? undefined : data[key as keyof T];
+  return typeof value === 'number' ? value : 0;
+}
 
 export function AnalysisRunsStatusCards({
   status,
@@ -60,20 +64,19 @@ export function AnalysisRunsStatusCards({
     return <ApiErrorState error={analysisRunStatusCountsError} className='mb-4' />;
   }
 
-  const counts: Required<AnalysisRunStatusCountModel> = {
-    all: analysisRunStatusCountsData?.all ?? 0,
-    succeeded: analysisRunStatusCountsData?.succeeded ?? 0,
-    aborted: analysisRunStatusCountsData?.aborted ?? 0,
-    failed: analysisRunStatusCountsData?.failed ?? 0,
-    resolved: analysisRunStatusCountsData?.resolved ?? 0,
-    ongoing: analysisRunStatusCountsData?.ongoing ?? 0,
-    deprecated: analysisRunStatusCountsData?.deprecated ?? 0,
-    cancelled: analysisRunStatusCountsData?.cancelled ?? 0,
+  const counts: AnalysisRunsStatusCounts = {
+    all: getStatusCount(analysisRunStatusCountsData, 'all'),
+    succeeded: getStatusCount(analysisRunStatusCountsData, 'succeeded'),
+    aborted: getStatusCount(analysisRunStatusCountsData, 'aborted'),
+    failed: getStatusCount(analysisRunStatusCountsData, 'failed'),
+    resolved: getStatusCount(analysisRunStatusCountsData, 'resolved'),
+    ongoing: getStatusCount(analysisRunStatusCountsData, 'ongoing'),
+    deprecated: getStatusCount(analysisRunStatusCountsData, 'deprecated'),
   };
   const total = counts.all;
 
   return (
-    <div className='mb-6 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-6'>
+    <div className='mb-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-6'>
       {isLoadingAnalysisRunStatusCounts
         ? statusCards.map((card) => <StatusCard key={card.status} label='' value={0} isLoading />)
         : statusCards.map((card) => {
@@ -86,7 +89,7 @@ export function AnalysisRunsStatusCards({
                 value={count}
                 percentage={percentage}
                 icon={getRunsStatusIcon(card.status)}
-                variant={card.variant}
+                variant={getStatusFamily(card.status)}
                 selected={status === card.status}
                 onClick={() => onStatusCardClick(card.status)}
               />

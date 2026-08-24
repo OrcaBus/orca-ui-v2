@@ -12,8 +12,11 @@ import {
 } from 'lucide-react';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 import Skeleton from 'react-loading-skeleton';
+import { AutoHideScrollArea } from '@/components/ui/AutoHideScrollArea';
 import { Pagination } from './Pagination';
 import { usePaginationDefaults, type OptionalPaginationProps } from './useTablePagination';
+import { useTableDensity } from './useTableDensity';
+import { TABLE_DENSITY_CLASSNAMES, TABLE_HEADER_TEXT_CLASSNAME } from './tableStyles';
 import { toast } from 'sonner';
 
 export type ExpandableTablePaginationProps = OptionalPaginationProps;
@@ -94,7 +97,7 @@ export function ExpandableTable<T, S>({
     new Set(columns.map((col) => col.key))
   );
   const [showColumnMenu, setShowColumnMenu] = useState(false);
-  const [density, setDensity] = useState<'comfortable' | 'compact'>('comfortable');
+  const [density, setDensity] = useTableDensity();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [pendingActionId, setPendingActionId] = useState<string | null>(null);
   const columnMenuRef = useRef<HTMLDivElement>(null);
@@ -123,12 +126,25 @@ export function ExpandableTable<T, S>({
   const getSortIcon = (columnKey: string) => {
     if (sortKey === columnKey) {
       return sortDirection === 'asc' ? (
-        <ChevronUp className='h-3.5 w-3.5 text-blue-600 dark:text-[#137fec]' />
+        <ChevronUp className='h-3.5 w-3.5 text-blue-600 dark:text-[#137fec]' aria-hidden='true' />
       ) : (
-        <ChevronDown className='h-3.5 w-3.5 text-blue-600 dark:text-[#137fec]' />
+        <ChevronDown className='h-3.5 w-3.5 text-blue-600 dark:text-[#137fec]' aria-hidden='true' />
       );
     }
-    return <ChevronsUpDown className='h-3.5 w-3.5 text-neutral-400 dark:text-[#9dabb9]' />;
+    return (
+      <ChevronsUpDown
+        className='h-3.5 w-3.5 text-neutral-400 dark:text-[#9dabb9]'
+        aria-hidden='true'
+      />
+    );
+  };
+
+  const getAriaSort = (
+    column: ExpandableColumn<T>
+  ): 'ascending' | 'descending' | 'none' | undefined => {
+    if (!column.sortable) return undefined;
+    if (sortKey !== column.key) return 'none';
+    return sortDirection === 'asc' ? 'ascending' : 'descending';
   };
 
   const toggleColumnVisibility = (columnKey: string) => {
@@ -199,9 +215,9 @@ export function ExpandableTable<T, S>({
   const visibleColumnsArray = columns.filter((col) => visibleColumns.has(col.key));
   const totalColSpan = visibleColumnsArray.length + (expandable ? 1 : 0);
 
-  const densityPadding = density === 'comfortable' ? 'px-4 py-3' : 'px-3 py-2';
-  const headerDensityPadding = density === 'comfortable' ? 'px-4 py-3' : 'px-3 py-2';
-  const subCellPadding = density === 'compact' ? 'py-1.5' : 'py-2';
+  const densityPadding = TABLE_DENSITY_CLASSNAMES[density].cell;
+  const headerDensityPadding = TABLE_DENSITY_CLASSNAMES[density].header;
+  const subCellPadding = TABLE_DENSITY_CLASSNAMES[density].subCell;
 
   const wrapperClass = inCard
     ? 'overflow-hidden border-0 bg-transparent dark:bg-transparent'
@@ -211,7 +227,7 @@ export function ExpandableTable<T, S>({
     <div className={wrapperClass}>
       {/* Toolbar */}
       {showToolbar && (
-        <div className='flex items-center justify-between border-b border-neutral-200 px-4 py-2 dark:border-[#2d3540]'>
+        <div className='flex items-center justify-between border-b border-neutral-200 px-3 py-1.5 dark:border-[#2d3540]'>
           <div className='text-xs text-neutral-600 dark:text-[#9dabb9]'>
             {totalItems} {totalItems === 1 ? 'item' : 'items'}
           </div>
@@ -369,7 +385,10 @@ export function ExpandableTable<T, S>({
       )}
 
       {/* Table */}
-      <div className='max-h-150 scrollbar-thin overflow-x-auto overflow-y-auto'>
+      <AutoHideScrollArea
+        aria-label='Scrollable expandable table'
+        className='max-h-150 overflow-x-auto overflow-y-auto'
+      >
         <table className='w-full'>
           <thead className='sticky top-0 z-10 border-b border-neutral-200 bg-neutral-50 dark:border-[#2d3540] dark:bg-[#111418]'>
             <tr>
@@ -377,17 +396,23 @@ export function ExpandableTable<T, S>({
               {visibleColumnsArray.map((column) => (
                 <th
                   key={column.key}
-                  className={`text-left text-xs font-medium whitespace-nowrap text-neutral-700 dark:text-[#9dabb9] ${headerDensityPadding} ${
-                    column.sortable
-                      ? 'cursor-pointer select-none hover:bg-neutral-100 dark:hover:bg-[#1e252e]'
-                      : ''
-                  } ${column.width || ''}`}
-                  onClick={() => column.sortable && handleSort(column.key)}
+                  aria-sort={getAriaSort(column)}
+                  className={`text-left ${TABLE_HEADER_TEXT_CLASSNAME} ${!column.sortable ? headerDensityPadding : ''} ${column.width || ''}`}
                 >
-                  <div className='flex items-center gap-2'>
-                    {column.header}
-                    {column.sortable && getSortIcon(column.key)}
-                  </div>
+                  {column.sortable ? (
+                    <button
+                      type='button'
+                      onClick={() => handleSort(column.key)}
+                      className={`flex w-full cursor-pointer items-center gap-1.5 text-left select-none hover:bg-neutral-100 focus-visible:bg-neutral-100 focus-visible:outline-none dark:hover:bg-[#1e252e] dark:focus-visible:bg-[#1e252e] ${headerDensityPadding}`}
+                    >
+                      <span className={TABLE_HEADER_TEXT_CLASSNAME}>{column.header}</span>
+                      {getSortIcon(column.key)}
+                    </button>
+                  ) : (
+                    <div className='flex items-center gap-2'>
+                      <span className={TABLE_HEADER_TEXT_CLASSNAME}>{column.header}</span>
+                    </div>
+                  )}
                 </th>
               ))}
             </tr>
@@ -433,10 +458,8 @@ export function ExpandableTable<T, S>({
                     {/* Main row */}
                     <tr
                       className={[
-                        'transition-colors',
-                        onRowClick
-                          ? 'cursor-pointer hover:bg-neutral-50 dark:hover:bg-[#1e252e]/50'
-                          : '',
+                        'transition-colors hover:bg-neutral-50 dark:hover:bg-[#1e252e]/50',
+                        onRowClick ? 'cursor-pointer' : '',
                       ].join(' ')}
                       onClick={() => onRowClick?.(item)}
                     >
@@ -531,7 +554,7 @@ export function ExpandableTable<T, S>({
             )}
           </tbody>
         </table>
-      </div>
+      </AutoHideScrollArea>
 
       {/* Pagination - only when paginationProps is provided */}
       {paginationProps && (

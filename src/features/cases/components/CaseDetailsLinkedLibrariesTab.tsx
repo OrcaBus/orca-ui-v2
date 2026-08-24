@@ -1,3 +1,4 @@
+import { Input } from '@/components/ui/Input';
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router';
 import { useParams } from 'react-router';
@@ -16,6 +17,8 @@ import {
 } from '@/features/lab/shared/api/lab.api';
 import { useCaseExternalEntityCreateModel, useCaseUnlinkEntityModel } from '../api/cases.api';
 import { useCaseDetailsContext } from '../context/CaseDetailsContext';
+import { CaseDetailsUnlinkEntityModal } from './CaseDetailsUnlinkEntityModal';
+import { submitCaseUnlink, type CaseUnlinkTarget } from '../utils/caseUnlink';
 
 // ---------------------------------------------------------------------------
 // Link Libraries Modal
@@ -114,7 +117,7 @@ function CaseDetailsLinkLibrariesModal({
         <div className='border-b border-neutral-200 px-6 py-4 dark:border-neutral-700'>
           <div className='relative'>
             <Search className='absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-neutral-400 dark:text-[#9dabb9]' />
-            <input
+            <Input
               type='text'
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -145,7 +148,7 @@ function CaseDetailsLinkLibrariesModal({
                   key={lib.orcabusId}
                   className='flex cursor-pointer items-center gap-3 rounded-md border border-neutral-200 p-3 hover:bg-neutral-50 dark:border-neutral-700 dark:hover:bg-[#1e252e]'
                 >
-                  <input
+                  <Input
                     type='checkbox'
                     checked={selectedIds.includes(lib.orcabusId)}
                     onChange={() => handleToggle(lib.orcabusId)}
@@ -186,13 +189,14 @@ function CaseDetailsLinkLibrariesModal({
               {selectedIds.length} {selectedIds.length === 1 ? 'library' : 'libraries'} selected
             </p>
             <div className='flex items-center gap-2'>
-              <button
+              <Button
+                variant='ghost'
                 onClick={handleClose}
                 disabled={isSubmitting}
                 className='rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 disabled:opacity-50 dark:border-neutral-600 dark:bg-[#111418] dark:text-neutral-200 dark:hover:bg-neutral-700/50'
               >
                 Cancel
-              </button>
+              </Button>
               <Button
                 onClick={() => void handleConfirm()}
                 disabled={selectedIds.length === 0 || isSubmitting}
@@ -220,6 +224,7 @@ export function CaseDetailsLinkedLibrariesTab() {
   const navigate = useNavigate();
 
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
+  const [unlinkTarget, setUnlinkTarget] = useState<CaseUnlinkTarget | null>(null);
 
   // Build a map: libraryOrcabusId → externalEntityOrcabusId (for unlinking).
   // We only care about external entities from the metadata service of type 'library'.
@@ -259,27 +264,20 @@ export function CaseDetailsLinkedLibrariesTab() {
 
   const unlinkMutation = useCaseUnlinkEntityModel();
 
-  const handleUnlink = (libraryOrcabusId: string) => {
-    if (!caseOrcabusId) return;
-    unlinkMutation.mutate(
-      {
-        params: {
-          path: {
-            orcabusId: caseOrcabusId,
-            externalEntityOrcabusId: libraryOrcabusId,
-          },
-        },
+  const handleConfirmUnlink = () => {
+    submitCaseUnlink({
+      caseOrcabusId,
+      target: unlinkTarget,
+      mutate: unlinkMutation.mutate,
+      onSuccess: () => {
+        toast.success('Library unlinked');
+        setUnlinkTarget(null);
+        refresh();
       },
-      {
-        onSuccess: () => {
-          toast.success('Library unlinked');
-          refresh();
-        },
-        onError: () => {
-          toast.error('Failed to unlink library');
-        },
-      }
-    );
+      onError: () => {
+        toast.error('Failed to unlink library');
+      },
+    });
   };
 
   const linkedLibraries = libraryData?.results ?? [];
@@ -291,7 +289,9 @@ export function CaseDetailsLinkedLibrariesTab() {
       header: 'Library ID',
       sortable: true,
       render: (lib) => (
-        <button
+        <Button
+          variant='ghost'
+          size='inline'
           onClick={(e) => {
             e.stopPropagation();
             void navigate(`/lab/libraries/${lib.orcabusId}`);
@@ -299,7 +299,7 @@ export function CaseDetailsLinkedLibrariesTab() {
           className='cursor-pointer font-mono font-medium text-blue-600 hover:text-blue-800 hover:underline dark:text-[#137fec] dark:hover:text-blue-400'
         >
           {lib.libraryId ?? lib.orcabusId}
-        </button>
+        </Button>
       ),
     },
     {
@@ -361,17 +361,23 @@ export function CaseDetailsLinkedLibrariesTab() {
       key: 'actions',
       header: 'Actions',
       render: (lib) => (
-        <button
+        <Button
+          variant='ghost'
+          size='inline'
           onClick={(e) => {
             e.stopPropagation();
-            handleUnlink(lib.orcabusId);
+            setUnlinkTarget({
+              type: 'library',
+              orcabusId: lib.orcabusId,
+              label: lib.libraryId ?? lib.orcabusId,
+            });
           }}
           disabled={unlinkMutation.isPending}
-          className='rounded p-1.5 text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50 dark:text-red-400 dark:hover:bg-red-500/10'
-          title='Unlink library'
+          aria-label={`Unlink library ${lib.libraryId ?? lib.orcabusId}`}
+          className='rounded p-1.5 text-red-600 transition-colors hover:bg-red-50 focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:outline-none disabled:opacity-50 dark:text-red-400 dark:hover:bg-red-500/10'
         >
           <Unlink className='h-4 w-4' />
-        </button>
+        </Button>
       ),
     },
   ];
@@ -408,6 +414,13 @@ export function CaseDetailsLinkedLibrariesTab() {
           setIsLinkModalOpen(false);
           refresh();
         }}
+      />
+      <CaseDetailsUnlinkEntityModal
+        isOpen={unlinkTarget !== null}
+        target={unlinkTarget}
+        isPending={unlinkMutation.isPending}
+        onCancel={() => setUnlinkTarget(null)}
+        onConfirm={handleConfirmUnlink}
       />
     </>
   );

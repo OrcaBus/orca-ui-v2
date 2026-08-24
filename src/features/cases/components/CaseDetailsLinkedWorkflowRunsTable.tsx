@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/Button';
 import { useNavigate } from 'react-router';
 import { FileSearch, Unlink } from 'lucide-react';
 import { DataTable, type Column } from '@/components/tables/DataTable';
@@ -13,7 +14,7 @@ interface CaseDetailsLinkedWorkflowRunsTableProps {
   isLoading: boolean;
   emptyDescription: string;
   onViewFiles: (portalRunId: string) => void;
-  onUnlink: (wfrOrcabusId: string) => void;
+  onUnlink: (run: WorkflowRunListModel) => void;
   unlinkIsPending: boolean;
 }
 
@@ -34,7 +35,9 @@ export function CaseDetailsLinkedWorkflowRunsTable({
       header: 'Run Name',
       sortable: true,
       render: (run) => (
-        <button
+        <Button
+          variant='ghost'
+          size='inline'
           onClick={(e) => {
             e.stopPropagation();
             void navigate(`/runs/workflow-runs/${run.orcabusId}`);
@@ -42,7 +45,7 @@ export function CaseDetailsLinkedWorkflowRunsTable({
           className='cursor-pointer font-mono text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline dark:text-[#137fec] dark:hover:text-blue-400'
         >
           {run.workflowRunName ?? run.portalRunId}
-        </button>
+        </Button>
       ),
     },
     {
@@ -61,7 +64,9 @@ export function CaseDetailsLinkedWorkflowRunsTable({
       header: 'Portal Run ID',
       sortable: true,
       render: (run) => (
-        <button
+        <Button
+          variant='ghost'
+          size='inline'
           onClick={(e) => {
             e.stopPropagation();
             onViewFiles(run.portalRunId);
@@ -70,7 +75,7 @@ export function CaseDetailsLinkedWorkflowRunsTable({
           title='View files for this run'
         >
           {run.portalRunId}
-        </button>
+        </Button>
       ),
     },
     {
@@ -88,27 +93,33 @@ export function CaseDetailsLinkedWorkflowRunsTable({
       header: 'Actions',
       render: (run) => (
         <div className='flex items-center gap-1'>
-          <button
+          <Button
+            variant='ghost'
+            size='inline'
             onClick={(e) => {
               e.stopPropagation();
               onViewFiles(run.portalRunId);
             }}
+            aria-label={`View files for workflow run ${run.workflowRunName ?? run.portalRunId}`}
             className='rounded p-1.5 text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-700 dark:text-[#9dabb9] dark:hover:bg-neutral-800 dark:hover:text-neutral-300'
             title='View files'
           >
             <FileSearch className='h-4 w-4' />
-          </button>
-          <button
+          </Button>
+          <Button
+            variant='ghost'
+            size='inline'
             onClick={(e) => {
               e.stopPropagation();
-              onUnlink(run.orcabusId);
+              onUnlink(run);
             }}
             disabled={unlinkIsPending}
-            className='rounded p-1.5 text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50 dark:text-red-400 dark:hover:bg-red-500/10'
+            aria-label={`Unlink workflow run ${run.workflowRunName ?? run.portalRunId}`}
+            className='rounded p-1.5 text-red-600 transition-colors hover:bg-red-50 focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:outline-none disabled:opacity-50 dark:text-red-400 dark:hover:bg-red-500/10'
             title='Unlink workflow run'
           >
             <Unlink className='h-4 w-4' />
-          </button>
+          </Button>
         </div>
       ),
     },

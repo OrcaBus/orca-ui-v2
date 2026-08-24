@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
-import { FilesAdvancedFilterFields } from '../FilesSearchPanel';
+import { FilesAdvancedFilterFields, FilesKeyOpToggle } from '../FilesSearchPanel';
 import { appendKeyPattern, removeKeyPattern } from '../../utils/keyPatterns';
 
 describe('key pattern helpers', () => {
@@ -19,6 +19,16 @@ describe('key pattern helpers', () => {
 });
 
 describe('FilesAdvancedFilterFields', () => {
+  it('uses a compact segmented control for the S3 key operator', () => {
+    const html = renderToStaticMarkup(<FilesKeyOpToggle value='or' onChange={vi.fn()} />);
+
+    expect(html).toContain('role="group"');
+    expect(html).toContain('aria-label="S3 key pattern matching mode"');
+    expect(html).toContain('aria-pressed="true"');
+    expect(html).toContain('h-7');
+    expect(html).toContain('rounded-none');
+  });
+
   it('places bucket and portal run ID on the first row, with S3 key pattern below them', () => {
     const html = renderToStaticMarkup(
       <FilesAdvancedFilterFields
@@ -40,6 +50,10 @@ describe('FilesAdvancedFilterFields', () => {
     const s3KeyIndex = html.indexOf('S3 Key Pattern');
 
     expect(html).toContain('md:grid-cols-2');
+    expect(html).toContain('space-y-3');
+    expect(html).toContain('gap-3');
+    expect(html).toContain('min-h-9');
+    expect(html).toContain('focus-within:ring-1');
     expect(bucketIndex).toBeGreaterThan(-1);
     expect(portalRunIdIndex).toBeGreaterThan(bucketIndex);
     expect(s3KeyIndex).toBeGreaterThan(portalRunIdIndex);

@@ -47,6 +47,7 @@ const caseDetail: CaseDetailModel = {
   userSet: [],
   latestState: null,
   commentSet: [],
+  rnasumReferences: [],
 };
 
 const baseValues = (overrides: Record<string, unknown> = {}) => ({

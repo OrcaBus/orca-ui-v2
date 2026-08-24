@@ -1,33 +1,32 @@
-import type { PillTagVariant } from '@/components/ui/PillTag';
 import type { CaseStatusEnum } from '../api/cases.api';
 
-export type CaseStatusVisual = {
-  variant: PillTagVariant;
-  label: string;
+/**
+ * Human-readable label per case lifecycle status. Color/icon/tooltip for
+ * these same statuses live in the shared StatusBadge's statusConfig
+ * (src/components/ui/StatusBadge.tsx, hyphenated form — e.g.
+ * 'request_received' here is 'request-received' there). Render a case's
+ * status directly via `<StatusBadge status={rawStatus} />`; this registry
+ * exists only so screens that need to *enumerate* every possible case
+ * status (e.g. the "set custom state" picker) have one exhaustively-typed
+ * source for the label text. Keep the two in sync when a new case status
+ * is added to the backend contract.
+ */
+export const CASE_STATUS_LABELS: Record<CaseStatusEnum, string> = {
+  request_received: 'Request Received',
+  wgts_tumour_sample_received: 'WGTS Tumour Sample Received',
+  wgts_germline_sample_received: 'WGTS Germline Sample Received',
+  cttso_sample_received: 'CTTSO Sample Received',
+  all_sample_received: 'All Sample Received',
+  library_partially_failed: 'Library Partially Failed',
+  sequencing_started: 'Sequencing Started',
+  sequencing_completed: 'Sequencing Completed',
+  bioinformatics_started: 'Bioinformatics Started',
+  bioinformatics_completed: 'Bioinformatics Completed',
+  curation_started: 'Curation Started',
+  curation_completed: 'Curation Completed',
+  locked: 'Locked',
+  unlocked: 'Unlocked',
+  failed: 'Failed',
+  completed: 'Completed',
+  archived: 'Archived',
 };
-
-export const CASE_STATUS_VISUALS: Record<CaseStatusEnum, CaseStatusVisual> = {
-  request_received: { variant: 'blue', label: 'Request Received' },
-  wgts_tumour_sample_received: { variant: 'blue', label: 'WGTS Tumour Sample Received' },
-  wgts_germline_sample_received: { variant: 'blue', label: 'WGTS Germline Sample Received' },
-  cttso_sample_received: { variant: 'blue', label: 'CTTSO Sample Received' },
-  all_sample_received: { variant: 'purple', label: 'All Sample Received' },
-  library_partially_failed: { variant: 'amber', label: 'Library Partially Failed' },
-  sequencing_started: { variant: 'blue', label: 'Sequencing Started' },
-  sequencing_completed: { variant: 'purple', label: 'Sequencing Completed' },
-  bioinformatics_started: { variant: 'blue', label: 'Bioinformatics Started' },
-  bioinformatics_completed: { variant: 'purple', label: 'Bioinformatics Completed' },
-  curation_started: { variant: 'blue', label: 'Curation Started' },
-  curation_completed: { variant: 'purple', label: 'Curation Completed' },
-  locked: { variant: 'neutral', label: 'Locked' },
-  unlocked: { variant: 'neutral', label: 'Unlocked' },
-  failed: { variant: 'red', label: 'Failed' },
-  completed: { variant: 'green', label: 'Completed' },
-  archived: { variant: 'neutral', label: 'Archived' },
-};
-
-const FALLBACK_VISUAL: CaseStatusVisual = { variant: 'neutral', label: 'Unknown' };
-
-export function getCaseStatusVisual(status: string): CaseStatusVisual {
-  return CASE_STATUS_VISUALS[status as CaseStatusEnum] ?? FALLBACK_VISUAL;
-}

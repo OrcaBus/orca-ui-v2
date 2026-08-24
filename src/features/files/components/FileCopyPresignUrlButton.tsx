@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/Button';
 import { useCallback, useState } from 'react';
 import { Check, Link } from 'lucide-react';
 import { Spinner } from '@/components/ui/Spinner';
@@ -31,7 +32,8 @@ export const FileCopyPresignUrlButton = ({ s3Record }: { s3Record: S3Record }) =
   }, [url, refetch]);
 
   return (
-    <button
+    <Button
+      variant='ghost'
       type='button'
       disabled={isLoadingUrl}
       onClick={() => void handleCopyPresignUrl()}
@@ -45,6 +47,6 @@ export const FileCopyPresignUrlButton = ({ s3Record }: { s3Record: S3Record }) =
       ) : (
         <Link className='h-4 w-4 text-neutral-600 dark:text-[#8892a2]' />
       )}
-    </button>
+    </Button>
   );
 };

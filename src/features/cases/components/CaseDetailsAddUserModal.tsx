@@ -1,3 +1,4 @@
+import { Input } from '@/components/ui/Input';
 import { useEffect } from 'react';
 import { useParams } from 'react-router';
 import { useForm } from 'react-hook-form';
@@ -34,7 +35,7 @@ const inputCls =
 
 const labelCls = 'block text-sm font-medium text-neutral-700 dark:text-neutral-300';
 
-const errorCls = 'text-sm font-medium text-red-500 dark:text-red-400';
+const errorCls = 'text-sm font-medium text-destructive';
 
 // ─── component ────────────────────────────────────────────────────────────────
 
@@ -100,7 +101,8 @@ export function CaseDetailsAddUserModal({
       size='sm'
       footer={
         <div className='flex items-center justify-end gap-3'>
-          <button
+          <Button
+            variant='ghost'
             type='button'
             onClick={onClose}
             className={cn(
@@ -111,7 +113,7 @@ export function CaseDetailsAddUserModal({
             )}
           >
             Cancel
-          </button>
+          </Button>
           <Button type='submit' form='add-user-form' disabled={isSubmitting}>
             <UserPlus />
             {isSubmitting ? 'Adding…' : 'Add User'}
@@ -128,7 +130,7 @@ export function CaseDetailsAddUserModal({
           <label htmlFor='add-user-email' className={labelCls}>
             Email <span className='text-red-500'>*</span>
           </label>
-          <input
+          <Input
             id='add-user-email'
             type='email'
             placeholder='user@example.com'
@@ -143,7 +145,7 @@ export function CaseDetailsAddUserModal({
           <label htmlFor='add-user-description' className={labelCls}>
             Description
           </label>
-          <input
+          <Input
             id='add-user-description'
             type='text'
             placeholder='e.g. Case Owner, Case Manager'

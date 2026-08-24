@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/Button';
 import {
   AlertTriangle,
   CheckCircle,
@@ -103,14 +104,15 @@ function SampleSheetPreview({
           {sampleSheet}
         </pre>
         <div className='flex justify-end border-t border-neutral-100 px-5 py-3 dark:border-neutral-800'>
-          <button
+          <Button
+            variant='ghost'
             type='button'
             onClick={onDownload}
             className='inline-flex items-center gap-2 rounded-md border border-neutral-300 px-3 py-1.5 text-xs font-medium text-neutral-700 transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-800'
           >
             <Download className='h-3.5 w-3.5' />
             Download CSV
-          </button>
+          </Button>
         </div>
       </div>
     </details>
@@ -157,7 +159,8 @@ export function SSCheckerResultsLogPanel({
               {validationStatus.label}
             </span>
           )}
-          <button
+          <Button
+            variant='ghost'
             type='button'
             onClick={onCopyLog}
             disabled={!hasLog}
@@ -165,8 +168,9 @@ export function SSCheckerResultsLogPanel({
             className='rounded p-1.5 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-600 disabled:cursor-not-allowed disabled:opacity-30 dark:hover:bg-neutral-800 dark:hover:text-neutral-300'
           >
             <Copy className='h-4 w-4' />
-          </button>
-          <button
+          </Button>
+          <Button
+            variant='ghost'
             type='button'
             onClick={onDownloadLog}
             disabled={!hasLog}
@@ -174,7 +178,7 @@ export function SSCheckerResultsLogPanel({
             className='rounded p-1.5 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-600 disabled:cursor-not-allowed disabled:opacity-30 dark:hover:bg-neutral-800 dark:hover:text-neutral-300'
           >
             <Download className='h-4 w-4' />
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -197,7 +201,8 @@ export function SSCheckerResultsLogPanel({
                 {getErrorMessage(error)}
               </p>
             </div>
-            <button
+            <Button
+              variant='ghost'
               type='button'
               onClick={onRetry}
               disabled={isChecking}
@@ -205,7 +210,7 @@ export function SSCheckerResultsLogPanel({
             >
               <RotateCcw className='h-3.5 w-3.5' />
               Retry
-            </button>
+            </Button>
           </div>
         ) : resultsText ? (
           <div className='px-5 py-4'>

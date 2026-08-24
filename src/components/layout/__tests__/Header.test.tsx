@@ -9,6 +9,7 @@ import {
   type AppShellHeaderConfig,
 } from '@/context/app-shell-context';
 import { EnvironmentContext } from '@/context/environment-context';
+import { NotificationProvider } from '@/context/NotificationProvider';
 import { Header } from '../Header';
 
 // UserMenu now keeps its modals mounted, so ThemeSettingsModal's useTheme() runs
@@ -49,9 +50,11 @@ function renderHeader(headerConfig: AppShellHeaderConfig) {
     <MemoryRouter>
       <AuthContext.Provider value={authValue}>
         <EnvironmentContext.Provider value={{ environment: 'dev', label: 'Dev' }}>
-          <AppShellContext.Provider value={appShellValue}>
-            <Header />
-          </AppShellContext.Provider>
+          <NotificationProvider>
+            <AppShellContext.Provider value={appShellValue}>
+              <Header />
+            </AppShellContext.Provider>
+          </NotificationProvider>
         </EnvironmentContext.Provider>
       </AuthContext.Provider>
     </MemoryRouter>

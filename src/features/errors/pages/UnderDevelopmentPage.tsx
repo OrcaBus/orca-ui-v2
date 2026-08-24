@@ -304,7 +304,7 @@ export function UnderDevelopmentPage({
         <h1 className='mt-7 text-2xl font-bold tracking-tight text-slate-900 dark:text-white'>
           {featureName} page is under development
         </h1>
-        <p className='mx-auto mt-3 max-w-md text-sm leading-6 text-slate-500 dark:text-[#9dabb9]'>
+        <p className='text-muted-foreground mx-auto mt-3 max-w-md text-sm leading-6'>
           {description}
         </p>
 

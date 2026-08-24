@@ -265,12 +265,12 @@ function ResultRow({ item, onClose }: { item: GlobalSearchResult; onClose: () =>
           <div className='truncate text-sm font-semibold text-slate-900 dark:text-slate-100'>
             {item.title}
           </div>
-          <div className='mt-0.5 line-clamp-1 text-xs text-slate-500 dark:text-[#9dabb9]'>
+          <div className='text-muted-foreground mt-0.5 line-clamp-1 text-xs'>
             {item.description}
           </div>
         </div>
         {item.badge && (
-          <span className='shrink-0 rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-slate-500 uppercase dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-[#9dabb9]'>
+          <span className='text-caption shrink-0 rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-semibold tracking-wide text-slate-500 uppercase dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-[#9dabb9]'>
             {item.badge}
           </span>
         )}
@@ -290,7 +290,7 @@ function SearchGroup({ group, onClose }: { group: GlobalSearchGroup; onClose: ()
         {group.sections
           ? group.sections.map((section) => (
               <div key={section.id} className='py-1'>
-                <div className='flex items-center gap-2 px-3 py-1 text-[11px] font-semibold text-slate-400 dark:text-[#9dabb9]/70'>
+                <div className='text-caption flex items-center gap-2 px-3 py-1 font-semibold text-slate-400 dark:text-[#9dabb9]/70'>
                   {section.icon}
                   <span>{section.label}</span>
                 </div>
@@ -351,13 +351,13 @@ export function GlobalSearchModalContent({
         )}
       >
         {!hasQuery && (
-          <div className='text-center text-sm text-slate-500 dark:text-[#9dabb9]'>
+          <div className='text-muted-foreground text-center text-sm'>
             Start typing to search across cases, labs, runs, and files.
           </div>
         )}
 
         {hasQuery && groups.length === 0 && (
-          <div className='text-center text-sm text-slate-500 dark:text-[#9dabb9]'>
+          <div className='text-muted-foreground text-center text-sm'>
             No results found for "{query.trim()}".
           </div>
         )}

@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/Button';
 import { Column, DataTable } from '@/components/tables/DataTable';
 import { useAnalysisRunsListQueryParams } from '../hooks/useAnalysisRunsListQueryParams';
 import { useAnalysisRunListModel, type AnalysisRunListModel } from '../../shared/api/workflows.api';
@@ -35,14 +36,16 @@ const AnalysisRunsTable = () => {
         header: 'Analysis Run Name',
         sortable: true,
         render: (ar) => (
-          <button
+          <Button
+            variant='ghost'
+            size='inline'
             onClick={() => {
               void navigate(`/runs/analysis-runs/${ar.orcabusId}`);
             }}
             className='text-left text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline dark:text-blue-400 dark:hover:text-blue-300'
           >
             {ar.analysisRunName}
-          </button>
+          </Button>
         ),
       },
       //   {

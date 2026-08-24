@@ -1,3 +1,6 @@
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router';
 import {
@@ -64,7 +67,7 @@ function MapCard({ map }: { map: MapSummary }) {
           <NotebookText className='h-5 w-5' />
         </div>
         <span
-          className={`rounded-md border px-2 py-0.5 text-[10px] font-bold tracking-wider ${statusCfg.className}`}
+          className={`text-caption rounded-md border px-2 py-0.5 font-bold tracking-wider ${statusCfg.className}`}
         >
           {statusCfg.label}
         </span>
@@ -73,7 +76,7 @@ function MapCard({ map }: { map: MapSummary }) {
       <h3 className='mb-1.5 text-base font-semibold text-slate-900 group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400'>
         {map.name}
       </h3>
-      <p className='mb-5 line-clamp-2 flex-1 text-sm leading-relaxed text-slate-500 dark:text-[#9dabb9]'>
+      <p className='text-muted-foreground mb-5 line-clamp-2 flex-1 text-sm leading-relaxed'>
         {map.description}
       </p>
 
@@ -85,10 +88,10 @@ function MapCard({ map }: { map: MapSummary }) {
           <div className='truncate text-xs font-medium text-slate-700 dark:text-slate-300'>
             {map.createdBy}
           </div>
-          <div className='text-[10px] text-slate-400 dark:text-[#6b7a8d]'>Author</div>
+          <div className='text-caption text-slate-400 dark:text-[#6b7a8d]'>Author</div>
         </div>
         <div className='text-right'>
-          <div className='text-[10px] font-semibold tracking-wider text-slate-400 uppercase dark:text-[#6b7a8d]'>
+          <div className='text-caption font-semibold tracking-wider text-slate-400 uppercase dark:text-[#6b7a8d]'>
             Last Modified
           </div>
           <div className='text-xs font-medium text-slate-600 dark:text-slate-300'>
@@ -105,17 +108,20 @@ function FilterSelect({
   options,
   icon,
   onChange,
+  ariaLabel,
 }: {
   value: string;
   options: { value: string; label: string }[];
   icon?: React.ReactNode;
   onChange: (value: string) => void;
+  ariaLabel: string;
 }) {
   return (
     <div className='relative'>
-      <select
+      <Select
         value={value}
         onChange={(event) => onChange(event.target.value)}
+        aria-label={ariaLabel}
         className='h-10 appearance-none rounded-lg border border-slate-200 bg-white py-2 pr-9 pl-3 text-sm text-slate-700 transition-colors focus:border-blue-300 focus:ring-2 focus:ring-blue-100 focus:outline-none dark:border-[#2d3540] dark:bg-[#111418] dark:text-slate-300 dark:focus:border-blue-500/50 dark:focus:ring-blue-900/30'
       >
         {options.map((option) => (
@@ -123,7 +129,7 @@ function FilterSelect({
             {option.label}
           </option>
         ))}
-      </select>
+      </Select>
       <div className='pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 text-slate-400 dark:text-[#6b7a8d]'>
         {icon ?? <ChevronDown className='h-4 w-4' />}
       </div>
@@ -195,7 +201,7 @@ export function MapListPage() {
     return (
       <>
         <div className='min-h-screen bg-slate-50 dark:bg-[#101922]'>
-          <div className='mx-auto max-w-6xl px-6 py-8 text-sm text-slate-500 dark:text-[#9dabb9]'>
+          <div className='text-muted-foreground mx-auto max-w-6xl px-6 py-8 text-sm'>
             Loading system catalog maps…
           </div>
         </div>
@@ -214,13 +220,14 @@ export function MapListPage() {
             <div className='text-sm font-medium text-slate-700 dark:text-slate-200'>
               Unable to load system catalog maps.
             </div>
-            <button
+            <Button
+              variant='ghost'
               type='button'
               onClick={() => void refetch()}
               className='mt-4 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:border-blue-300 hover:text-blue-600 dark:border-[#2d3540] dark:bg-[#111418] dark:text-slate-200 dark:hover:border-blue-500/50 dark:hover:text-blue-400'
             >
               Retry
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -236,7 +243,7 @@ export function MapListPage() {
           <div className='mb-6 flex flex-wrap items-center gap-3'>
             <div className='relative min-w-0 flex-1'>
               <Search className='absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-[#6b7a8d]' />
-              <input
+              <Input
                 type='text'
                 placeholder='Search by map name or user...'
                 value={searchQuery}
@@ -247,7 +254,8 @@ export function MapListPage() {
 
             {/* mine / all filter */}
             <div className='flex rounded-lg border border-slate-200 bg-white dark:border-[#2d3540] dark:bg-[#111418]'>
-              <button
+              <Button
+                variant='ghost'
                 type='button'
                 onClick={() => setShowOnlyMine(false)}
                 className={`flex h-9 items-center rounded-l-lg px-3 text-sm font-medium transition-colors ${
@@ -257,8 +265,9 @@ export function MapListPage() {
                 }`}
               >
                 All
-              </button>
-              <button
+              </Button>
+              <Button
+                variant='ghost'
                 type='button'
                 onClick={() => setShowOnlyMine(true)}
                 className={`flex h-9 items-center gap-1.5 rounded-r-lg border-l border-slate-200 px-3 text-sm font-medium transition-colors dark:border-[#2d3540] ${
@@ -269,14 +278,17 @@ export function MapListPage() {
               >
                 <User className='h-3.5 w-3.5' />
                 Mine
-              </button>
+              </Button>
             </div>
 
             {/* view mode: layout grid view and list view */}
             <div className='flex rounded-lg border border-slate-200 bg-white dark:border-[#2d3540] dark:bg-[#111418]'>
-              <button
+              <Button
+                variant='ghost'
                 type='button'
                 onClick={() => setViewMode('grid')}
+                aria-label='Grid view'
+                aria-pressed={viewMode === 'grid'}
                 className={`flex h-9 w-9 items-center justify-center rounded-l-lg transition-colors ${
                   viewMode === 'grid'
                     ? 'bg-slate-100 text-slate-900 dark:bg-[#1e252e] dark:text-white'
@@ -284,10 +296,13 @@ export function MapListPage() {
                 }`}
               >
                 <LayoutGrid className='h-4 w-4' />
-              </button>
-              <button
+              </Button>
+              <Button
+                variant='ghost'
                 type='button'
                 onClick={() => setViewMode('list')}
+                aria-label='List view'
+                aria-pressed={viewMode === 'list'}
                 className={`flex h-9 w-9 items-center justify-center rounded-r-lg border-l border-slate-200 transition-colors dark:border-[#2d3540] ${
                   viewMode === 'list'
                     ? 'bg-slate-100 text-slate-900 dark:bg-[#1e252e] dark:text-white'
@@ -295,7 +310,7 @@ export function MapListPage() {
                 }`}
               >
                 <List className='h-4 w-4' />
-              </button>
+              </Button>
             </div>
             {/* status filter */}
             <FilterSelect
@@ -303,6 +318,7 @@ export function MapListPage() {
               options={STATUS_OPTIONS}
               icon={<SlidersHorizontal className='h-3.5 w-3.5' />}
               onChange={(value) => setStatusFilter(value as MapStatus | 'all')}
+              ariaLabel='Filter by status'
             />
           </div>
 
@@ -329,7 +345,7 @@ export function MapListPage() {
           {filtered.length === 0 && (
             <div className='flex flex-col items-center justify-center py-20 text-center'>
               <Search className='mb-3 h-10 w-10 text-slate-300 dark:text-[#2d3540]' />
-              <div className='text-sm font-medium text-slate-500 dark:text-[#9dabb9]'>
+              <div className='text-muted-foreground text-sm font-medium'>
                 No maps match your filters
               </div>
               <div className='mt-1 text-xs text-slate-400 dark:text-[#6b7a8d]'>
@@ -363,17 +379,15 @@ function MapListRow({ map }: { map: MapSummary }) {
             {map.name}
           </span>
           <span
-            className={`shrink-0 rounded-md border px-1.5 py-0.5 text-[10px] font-bold tracking-wider ${statusCfg.className}`}
+            className={`text-caption shrink-0 rounded-md border px-1.5 py-0.5 font-bold tracking-wider ${statusCfg.className}`}
           >
             {statusCfg.label}
           </span>
         </div>
-        <p className='mt-0.5 truncate text-xs text-slate-500 dark:text-[#9dabb9]'>
-          {map.description}
-        </p>
+        <p className='text-muted-foreground mt-0.5 truncate text-xs'>{map.description}</p>
       </div>
 
-      <div className='flex shrink-0 items-center gap-3 text-xs text-slate-500 dark:text-[#9dabb9]'>
+      <div className='text-muted-foreground flex shrink-0 items-center gap-3 text-xs'>
         <span>{map.nodeCount} nodes</span>
         <span className='text-slate-300 dark:text-[#2d3540]'>·</span>
         <span>{map.createdBy}</span>

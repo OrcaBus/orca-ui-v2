@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/Button';
 import { useState } from 'react';
 import { Copy, Check } from 'lucide-react';
 import { StatusBadge } from '@/components/ui/StatusBadge';
@@ -54,7 +55,8 @@ export function AnalysisRunDetailsPageHeader() {
                 {analysisRunDetail?.orcabusId ?? '—'}
               </span>
               {analysisRunDetail?.orcabusId && (
-                <button
+                <Button
+                  variant='ghost'
                   type='button'
                   onClick={() => void handleCopy(analysisRunDetail.orcabusId, 'orcabus-id')}
                   className='rounded p-1 transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800'
@@ -65,7 +67,7 @@ export function AnalysisRunDetailsPageHeader() {
                   ) : (
                     <Copy className='h-4 w-4 text-neutral-400' />
                   )}
-                </button>
+                </Button>
               )}
             </>
           )}

@@ -5,4 +5,3 @@ export { WorkflowRunDetailsTimeline } from './WorkflowRunDetailsTimeline';
 export { WorkflowRunDetailsLibrariesTable } from './WorkflowRunDetailsLibrariesTable';
 export { WorkflowRunDetailsRunContextTable } from './WorkflowRunDetailsRunContextTable';
 export { WorkflowRunDetailsReadsetsTable } from './WorkflowRunDetailsReadsetsTable';
-export { WorkflowRunDetailsPageBreadcrumb } from './WorkflowRunDetailsPageBreadcrumb';

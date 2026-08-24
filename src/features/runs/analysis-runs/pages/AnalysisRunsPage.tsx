@@ -1,3 +1,4 @@
+import { Input } from '@/components/ui/Input';
 import { useCallback, useMemo } from 'react';
 import { ChartNoAxesColumn } from 'lucide-react';
 import { FilterBar } from '@/components/tables/FilterBar';
@@ -75,7 +76,7 @@ export function AnalysisRunsPage() {
                 <label className='text-sm whitespace-nowrap text-neutral-600 dark:text-neutral-400'>
                   From:
                 </label>
-                <input
+                <Input
                   type='date'
                   value={dateFrom}
                   onChange={(e) => setDateFrom(e.target.value)}
@@ -86,7 +87,7 @@ export function AnalysisRunsPage() {
                 <label className='text-sm whitespace-nowrap text-neutral-600 dark:text-neutral-400'>
                   To:
                 </label>
-                <input
+                <Input
                   type='date'
                   value={dateTo}
                   onChange={(e) => setDateTo(e.target.value)}

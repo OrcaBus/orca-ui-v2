@@ -64,7 +64,7 @@ function SecondarySidebarContent({
         {groups.map((group) => (
           <section key={group.label} className={cn('last:mb-0', collapsed ? 'mb-4' : 'mb-5')}>
             {!collapsed && (
-              <h5 className='px-2.5 text-[10px] font-semibold tracking-[0.08em] text-slate-400 uppercase dark:text-[#9dabb9]/70'>
+              <h5 className='text-caption px-2.5 font-semibold tracking-[0.08em] text-slate-400 uppercase dark:text-[#9dabb9]/70'>
                 {group.label}
               </h5>
             )}
@@ -154,7 +154,7 @@ export function SecondarySidebarMobileNav({
 
         {groups.map((group) => (
           <div key={group.label} className='flex shrink-0 items-center gap-2'>
-            <span className='text-[10px] font-bold tracking-[0.14em] text-slate-400 uppercase dark:text-[#9dabb9]/70'>
+            <span className='text-caption font-bold tracking-[0.14em] text-slate-400 uppercase dark:text-[#9dabb9]/70'>
               {group.label}
             </span>
             {group.items.map((item) => (

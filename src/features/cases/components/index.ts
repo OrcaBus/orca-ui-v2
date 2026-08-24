@@ -7,7 +7,6 @@ export { AutoImportFromRedcapModal } from './AutoImportFromRedcapModal';
 export { SyncHistoryDialog } from './SyncHistoryDialog';
 
 // case details components
-export { CaseDetailsPageBreadcrumb } from './CaseDetailsPageBreadcrumb';
 export { CaseDetailsPageHeader } from './CaseDetailsPageHeader';
 export { EditCaseModal } from './EditCaseModal';
 export { CaseDetailsOverviewCard } from './CaseDetailsOverviewCard';

@@ -1,3 +1,6 @@
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
 import { useCallback, useMemo, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -501,13 +504,14 @@ function SourceStep({
         const checked = option.value === value;
 
         return (
-          <button
+          <Button
+            variant='ghost'
             key={option.value}
             type='button'
             onClick={() => onChange(option.value)}
             disabled={disabled}
             className={cn(
-              'focus:ring-ring min-h-36 rounded-lg border p-4 text-left transition-all focus:ring-2 focus:outline-none',
+              'focus:ring-ring block h-auto min-h-36 w-full rounded-lg border p-4 text-left whitespace-normal transition-all focus:ring-2 focus:outline-none',
               checked
                 ? 'border-primary bg-primary/10 shadow-sm'
                 : 'border-neutral-200 bg-white hover:border-neutral-300 hover:bg-neutral-50 dark:border-[#2d3540] dark:bg-[#111418] dark:hover:border-[#3d4550] dark:hover:bg-[#1e252e]',
@@ -545,7 +549,7 @@ function SourceStep({
                 </p>
               </div>
             </div>
-          </button>
+          </Button>
         );
       })}
     </div>
@@ -606,7 +610,7 @@ function ConfigureStep({
               <p className='text-xs text-neutral-500 dark:text-[#9dabb9]'>
                 Select the Google Sheet tab year to sync from.
               </p>
-              <select
+              <Select
                 id='sync-metadata-year'
                 aria-invalid={!!errors.year}
                 aria-describedby={errors.year ? 'sync-metadata-year-error' : undefined}
@@ -622,12 +626,9 @@ function ConfigureStep({
                     {year}
                   </option>
                 ))}
-              </select>
+              </Select>
               {errors.year && (
-                <p
-                  id='sync-metadata-year-error'
-                  className='text-sm font-medium text-red-500 dark:text-red-400'
-                >
+                <p id='sync-metadata-year-error' className='text-destructive text-sm font-medium'>
                   {errors.year.message}
                 </p>
               )}
@@ -664,7 +665,7 @@ function ConfigureStep({
                 <span className='font-mono font-semibold'>20:30</span> or{' '}
                 <span className='font-mono font-semibold'>20:30,40:50,60</span>
               </p>
-              <input
+              <Input
                 id='sync-metadata-ranges'
                 aria-invalid={!!errors.ranges}
                 aria-describedby={errors.ranges ? 'sync-metadata-ranges-error' : undefined}
@@ -674,10 +675,7 @@ function ConfigureStep({
                 className='w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 shadow-sm placeholder:text-neutral-400 focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-100 dark:placeholder-[#9dabb9] dark:focus:ring-[#137fec]'
               />
               {errors.ranges && (
-                <p
-                  id='sync-metadata-ranges-error'
-                  className='text-sm font-medium text-red-500 dark:text-red-400'
-                >
+                <p id='sync-metadata-ranges-error' className='text-destructive text-sm font-medium'>
                   {errors.ranges.message}
                 </p>
               )}
@@ -705,7 +703,7 @@ function ConfigureStep({
                 <p className='text-xs text-neutral-500 dark:text-[#9dabb9]'>
                   Provide a presigned URL for a metadata CSV file.
                 </p>
-                <input
+                <Input
                   id='sync-metadata-presigned-url'
                   aria-invalid={!!errors.presignedUrl}
                   aria-describedby={
@@ -719,7 +717,7 @@ function ConfigureStep({
                 {errors.presignedUrl && (
                   <p
                     id='sync-metadata-presigned-url-error'
-                    className='text-sm font-medium text-red-500 dark:text-red-400'
+                    className='text-destructive text-sm font-medium'
                   >
                     {errors.presignedUrl.message}
                   </p>
@@ -742,7 +740,7 @@ function ConfigureStep({
                 <p className='text-xs text-neutral-500 dark:text-[#9dabb9]'>
                   Optional reason or comment for the sync.
                 </p>
-                <input
+                <Input
                   id='sync-metadata-reason'
                   aria-invalid={!!errors.reason}
                   aria-describedby={errors.reason ? 'sync-metadata-reason-error' : undefined}
@@ -754,7 +752,7 @@ function ConfigureStep({
                 {errors.reason && (
                   <p
                     id='sync-metadata-reason-error'
-                    className='text-sm font-medium text-red-500 dark:text-red-400'
+                    className='text-destructive text-sm font-medium'
                   >
                     {errors.reason.message}
                   </p>
@@ -863,14 +861,15 @@ function SuccessStep({
             </p>
           </div>
         </div>
-        <button
+        <Button
+          variant='ghost'
           type='button'
           onClick={onClose}
           className='rounded-md p-1 text-emerald-700 transition-colors hover:bg-emerald-100 hover:text-emerald-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:text-emerald-300 dark:hover:bg-emerald-500/20 dark:hover:text-emerald-100'
           aria-label='Close success message'
         >
           <X className='h-4 w-4' />
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -922,31 +921,33 @@ function SyncModalFooter({
 
   if (step === 'success') {
     return (
-      <button type='button' onClick={onCancel} className={secondaryButtonClassName}>
+      <Button variant='ghost' type='button' onClick={onCancel} className={secondaryButtonClassName}>
         Close
-      </button>
+      </Button>
     );
   }
 
   if (step === 'source') {
     return (
       <>
-        <button
+        <Button
+          variant='ghost'
           type='button'
           onClick={onCancel}
           disabled={isBusy}
           className={secondaryButtonClassName}
         >
           Cancel
-        </button>
-        <button
+        </Button>
+        <Button
+          variant='ghost'
           type='button'
           onClick={onContinue}
           disabled={isBusy}
           className={primaryButtonClassName}
         >
           Continue
-        </button>
+        </Button>
       </>
     );
   }
@@ -954,15 +955,17 @@ function SyncModalFooter({
   if (step === 'review') {
     return (
       <>
-        <button
+        <Button
+          variant='ghost'
           type='button'
           onClick={onCancel}
           disabled={isBusy}
           className={secondaryButtonClassName}
         >
           Cancel
-        </button>
-        <button
+        </Button>
+        <Button
+          variant='ghost'
           type='button'
           onClick={onBack}
           disabled={isBusy}
@@ -970,8 +973,9 @@ function SyncModalFooter({
         >
           <ArrowLeft className='h-4 w-4' />
           Back
-        </button>
-        <button
+        </Button>
+        <Button
+          variant='ghost'
           type='button'
           onClick={onConfirmRangeGsheetSync}
           disabled={isSyncing || !hasPreviewData}
@@ -983,7 +987,7 @@ function SyncModalFooter({
             <RefreshCw className='h-4 w-4' />
           )}
           {isSyncing ? 'Syncing...' : 'Confirm & Sync'}
-        </button>
+        </Button>
       </>
     );
   }
@@ -991,7 +995,8 @@ function SyncModalFooter({
   if (syncType === 'gsheet') {
     return (
       <>
-        <button
+        <Button
+          variant='ghost'
           type='button'
           onClick={onBack}
           disabled={isBusy}
@@ -999,8 +1004,9 @@ function SyncModalFooter({
         >
           <ArrowLeft className='h-4 w-4' />
           Back
-        </button>
-        <button
+        </Button>
+        <Button
+          variant='ghost'
           type='button'
           onClick={previewGsheetRange}
           disabled={isBusy || !canPreviewGsheet}
@@ -1016,9 +1022,10 @@ function SyncModalFooter({
             : gsheetHasRanges
               ? 'Preview Records'
               : 'Preview First 10 Rows'}
-        </button>
+        </Button>
         {!gsheetHasRanges && (
-          <button
+          <Button
+            variant='ghost'
             type='button'
             onClick={onDirectGsheetSync}
             disabled={isBusy || !canSyncGsheetDirectlyFromConfig}
@@ -1030,7 +1037,7 @@ function SyncModalFooter({
               <RefreshCw className='h-4 w-4' />
             )}
             {isSyncing ? 'Syncing...' : 'Sync Now'}
-          </button>
+          </Button>
         )}
       </>
     );
@@ -1038,11 +1045,18 @@ function SyncModalFooter({
 
   return (
     <>
-      <button type='button' onClick={onBack} disabled={isBusy} className={secondaryButtonClassName}>
+      <Button
+        variant='ghost'
+        type='button'
+        onClick={onBack}
+        disabled={isBusy}
+        className={secondaryButtonClassName}
+      >
         <ArrowLeft className='h-4 w-4' />
         Back
-      </button>
-      <button
+      </Button>
+      <Button
+        variant='ghost'
         type='button'
         onClick={onPresignedCsvSync}
         disabled={isBusy || !canSyncPresignedCsv}
@@ -1054,7 +1068,7 @@ function SyncModalFooter({
           <RefreshCw className='h-4 w-4' />
         )}
         {isSyncing ? 'Syncing...' : 'Sync'}
-      </button>
+      </Button>
     </>
   );
 }

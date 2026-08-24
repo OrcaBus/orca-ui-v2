@@ -1,3 +1,4 @@
+import { Input } from '@/components/ui/Input';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { useSuspenseFilePresignedURLModel } from '../../api/files.api';
 import { getMimeType, getPresignedUrlData } from '@/utils/files';
@@ -88,7 +89,7 @@ export const TableViewer = ({ s3ObjectId, s3Key }: Props) => {
               <ExternalLink className='h-3 w-3' />
             </a>
             <label className='flex cursor-pointer items-center gap-1.5'>
-              <input
+              <Input
                 type='checkbox'
                 onChange={(e) => setIsTableView(e.target.checked)}
                 checked={isTableView}

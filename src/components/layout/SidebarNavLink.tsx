@@ -68,7 +68,7 @@ export function SidebarNavLink({
           {sublabel ? (
             <div>
               <div>{label}</div>
-              <div className='text-[11px] font-normal text-slate-400 dark:text-[#9dabb9]'>
+              <div className='text-caption font-normal text-slate-400 dark:text-[#9dabb9]'>
                 {sublabel}
               </div>
             </div>

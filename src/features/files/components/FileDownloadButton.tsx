@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/Button';
 import { useCallback } from 'react';
 import { Download } from 'lucide-react';
 import { Spinner } from '@/components/ui/Spinner';
@@ -32,11 +33,13 @@ export const FileDownloadButton = ({ s3Record }: { s3Record: S3Record }) => {
   }, [url, refetch]);
 
   return (
-    <button
+    <Button
+      variant='ghost'
+      size='tableIcon'
       type='button'
       disabled={isLoading}
       onClick={() => void handleDownload()}
-      className='rounded p-1.5 transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-[#2d3540]'
+      className='transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-[#2d3540]'
       title='Download file'
     >
       {isLoading ? (
@@ -44,6 +47,6 @@ export const FileDownloadButton = ({ s3Record }: { s3Record: S3Record }) => {
       ) : (
         <Download className='h-4 w-4 text-neutral-600 dark:text-[#8892a2]' />
       )}
-    </button>
+    </Button>
   );
 };

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { keepPreviousData } from '@tanstack/react-query';
 import dayjs from 'dayjs';
-import { FileBracesCorner, MessageCircle, Plus, SquarePen, Trash } from 'lucide-react';
+import { FileBracesCorner, MessageCircle, Plus, SquarePen, Trash2 } from 'lucide-react';
 import {
   CommentDialog,
   CustomStateDialog,
@@ -175,7 +175,7 @@ export function WorkflowRunDetailsTimeline() {
               {
                 id: 'delete-comment',
                 label: 'Delete',
-                icon: <Trash className='h-4 w-4' />,
+                icon: <Trash2 className='h-4 w-4' />,
                 onClick: () => {
                   setDeletingComment(comment);
                 },

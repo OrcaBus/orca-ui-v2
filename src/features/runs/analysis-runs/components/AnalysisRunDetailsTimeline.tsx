@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { MessageCircle, SquarePen, Trash } from 'lucide-react';
+import { MessageCircle, SquarePen, Trash2 } from 'lucide-react';
 import {
   CommentDialog,
   DeleteCommentDialog,
@@ -89,7 +89,7 @@ export function AnalysisRunDetailsTimeline() {
           {
             id: 'delete-comment',
             label: 'Delete',
-            icon: <Trash className='h-4 w-4' />,
+            icon: <Trash2 className='h-4 w-4' />,
             onClick: () => {
               setDeletingComment(comment);
             },

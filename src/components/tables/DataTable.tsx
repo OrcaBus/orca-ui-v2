@@ -15,8 +15,11 @@ import {
 } from 'lucide-react';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 import Skeleton from 'react-loading-skeleton';
+import { AutoHideScrollArea } from '@/components/ui/AutoHideScrollArea';
 import { Pagination } from './Pagination';
 import { usePaginationDefaults, type OptionalPaginationProps } from './useTablePagination';
+import { useTableDensity } from './useTableDensity';
+import { TABLE_DENSITY_CLASSNAMES, TABLE_HEADER_TEXT_CLASSNAME } from './tableStyles';
 import { toast } from 'sonner';
 import { compareStringArrays } from '@/utils/array';
 import { STORAGE_PREFIX } from '@/utils/storage-keys';
@@ -34,6 +37,11 @@ export interface Column<T> {
   copyable?: boolean;
   /** Custom value extractor for CSV export. When omitted, raw `item[key]` is used. */
   csvValue?: (item: T) => string | number | boolean | null | undefined;
+  /** Column content alignment. Default 'left'; use 'right' for numeric
+   * columns (sizes, counts, durations) so magnitudes are easy to compare
+   * at a glance — the standard dense-table convention this app's tables
+   * didn't have a way to opt into before. */
+  align?: 'left' | 'right';
 }
 
 /** Full pagination props (e.g. from useTablePagination). Partial props are allowed; defaults applied via usePaginationDefaults. */
@@ -239,7 +247,7 @@ export function DataTable<T>({
   loadingRows = 8,
   persistSettings,
 }: DataTableProps<T>) {
-  const [density, setDensity] = useState<'comfortable' | 'compact'>('comfortable');
+  const [density, setDensity] = useTableDensity();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [pendingToolbarActionId, setPendingToolbarActionId] = useState<string | null>(null);
   const persistSettingsKey = persistSettings?.key;
@@ -376,10 +384,26 @@ export function DataTable<T>({
     if (!column.sortable) return null;
     const dir = column.sortDirection;
     if (dir === 'asc')
-      return <ChevronUp className='h-3.5 w-3.5 text-blue-600 dark:text-[#137fec]' />;
+      return (
+        <ChevronUp className='h-3.5 w-3.5 text-blue-600 dark:text-[#137fec]' aria-hidden='true' />
+      );
     if (dir === 'desc')
-      return <ChevronDown className='h-3.5 w-3.5 text-blue-600 dark:text-[#137fec]' />;
-    return <ChevronsUpDown className='h-3.5 w-3.5 text-neutral-400 dark:text-[#9dabb9]' />;
+      return (
+        <ChevronDown className='h-3.5 w-3.5 text-blue-600 dark:text-[#137fec]' aria-hidden='true' />
+      );
+    return (
+      <ChevronsUpDown
+        className='h-3.5 w-3.5 text-neutral-400 dark:text-[#9dabb9]'
+        aria-hidden='true'
+      />
+    );
+  };
+
+  const getAriaSort = (column: Column<T>): 'ascending' | 'descending' | 'none' | undefined => {
+    if (!column.sortable) return undefined;
+    if (column.sortDirection === 'asc') return 'ascending';
+    if (column.sortDirection === 'desc') return 'descending';
+    return 'none';
   };
 
   const getNextSortDirection = (column: Column<T>): 'asc' | 'desc' => {
@@ -426,8 +450,8 @@ export function DataTable<T>({
   };
 
   const visibleColumnsList = columns.filter((col) => visibleColumns.has(col.key));
-  const densityPadding = density === 'comfortable' ? 'px-4 py-3' : 'px-3 py-2';
-  const headerDensityPadding = density === 'comfortable' ? 'px-4 py-3' : 'px-3 py-2';
+  const densityPadding = TABLE_DENSITY_CLASSNAMES[density].cell;
+  const headerDensityPadding = TABLE_DENSITY_CLASSNAMES[density].header;
 
   const selectedRows = selectable
     ? Array.from(selectedIndices)
@@ -488,7 +512,7 @@ export function DataTable<T>({
     <div className={wrapperClass}>
       {/* Toolbar */}
       {showToolbar && (
-        <div className='flex items-center justify-between border-b border-neutral-200 px-4 py-2 dark:border-[#2d3540]'>
+        <div className='flex items-center justify-between border-b border-neutral-200 px-3 py-1.5 dark:border-[#2d3540]'>
           <div className='text-xs text-neutral-600 dark:text-[#9dabb9]'>
             {totalItems} {totalItems === 1 ? 'item' : 'items'}
             {selectable && selectedIndices.size > 0 && (
@@ -648,7 +672,10 @@ export function DataTable<T>({
       )}
 
       {/* Table */}
-      <div className='max-h-150 scrollbar-thin overflow-x-auto overflow-y-auto'>
+      <AutoHideScrollArea
+        aria-label='Scrollable data table'
+        className='max-h-150 overflow-x-auto overflow-y-auto'
+      >
         <table className='w-full'>
           <thead className='sticky top-0 z-10 border-b border-neutral-200 bg-neutral-50 dark:border-[#2d3540] dark:bg-[#111418]'>
             <tr>
@@ -682,22 +709,32 @@ export function DataTable<T>({
                   </div>
                 </th>
               )}
-              {visibleColumnsList.map((column) => (
-                <th
-                  key={column.key}
-                  className={`text-left text-xs font-medium whitespace-nowrap text-neutral-700 dark:text-[#9dabb9] ${headerDensityPadding} ${
-                    column.sortable && column.onSort
-                      ? 'cursor-pointer select-none hover:bg-neutral-100 dark:hover:bg-[#1e252e]'
-                      : ''
-                  }`}
-                  onClick={() => handleSort(column)}
-                >
-                  <div className='flex items-center gap-2'>
-                    {column.header}
-                    {column.sortable && getSortIcon(column)}
-                  </div>
-                </th>
-              ))}
+              {visibleColumnsList.map((column) => {
+                const isSortable = Boolean(column.sortable && column.onSort);
+                const alignRight = column.align === 'right';
+                return (
+                  <th
+                    key={column.key}
+                    aria-sort={getAriaSort(column)}
+                    className={`${TABLE_HEADER_TEXT_CLASSNAME} ${alignRight ? 'text-right' : 'text-left'} ${!isSortable ? headerDensityPadding : ''}`}
+                  >
+                    {isSortable ? (
+                      <button
+                        type='button'
+                        onClick={() => handleSort(column)}
+                        className={`flex w-full cursor-pointer items-center gap-1.5 select-none hover:bg-neutral-100 focus-visible:bg-neutral-100 focus-visible:outline-none dark:hover:bg-[#1e252e] dark:focus-visible:bg-[#1e252e] ${alignRight ? 'justify-end text-right' : 'text-left'} ${headerDensityPadding}`}
+                      >
+                        <span className={TABLE_HEADER_TEXT_CLASSNAME}>{column.header}</span>
+                        {getSortIcon(column)}
+                      </button>
+                    ) : (
+                      <div className={`flex items-center gap-2 ${alignRight ? 'justify-end' : ''}`}>
+                        <span className={TABLE_HEADER_TEXT_CLASSNAME}>{column.header}</span>
+                      </div>
+                    )}
+                  </th>
+                );
+              })}
             </tr>
           </thead>
           <tbody className='divide-y divide-neutral-200 dark:divide-[#2d3540]'>
@@ -738,9 +775,8 @@ export function DataTable<T>({
                   <tr
                     key={`row-${index}`}
                     className={[
-                      onRowClick
-                        ? 'cursor-pointer transition-colors hover:bg-neutral-50 dark:hover:bg-[#1e252e]/50'
-                        : '',
+                      'transition-colors hover:bg-neutral-50 dark:hover:bg-[#1e252e]/50',
+                      onRowClick ? 'cursor-pointer' : '',
                       striped && index % 2 === 1 ? 'bg-neutral-50/80 dark:bg-[#1e252e]/40' : '',
                       isRowSelected ? 'bg-primary/5' : '',
                     ].join(' ')}
@@ -783,13 +819,18 @@ export function DataTable<T>({
                       const copyValue = formatCopyValue(rawValue);
                       const isCopied = copiedCell === cellKey;
 
+                      const alignRight = column.align === 'right';
                       return (
                         <td
                           key={column.key}
-                          className={`text-sm whitespace-nowrap text-neutral-900 dark:text-slate-200 ${densityPadding}`}
+                          className={`text-sm whitespace-nowrap text-neutral-900 dark:text-slate-200 ${alignRight ? 'text-right' : ''} ${densityPadding}`}
                         >
-                          <div className='flex items-center gap-1'>
-                            <span className='min-w-0 flex-1 whitespace-nowrap'>
+                          <div
+                            className={`flex items-center gap-1 ${alignRight ? 'justify-end' : ''}`}
+                          >
+                            <span
+                              className={`min-w-0 flex-1 whitespace-nowrap ${alignRight ? 'text-right' : ''}`}
+                            >
                               {column.render ? column.render(item) : (rawValue as ReactNode)}
                             </span>
                             {column.copyable && (
@@ -823,7 +864,7 @@ export function DataTable<T>({
             )}
           </tbody>
         </table>
-      </div>
+      </AutoHideScrollArea>
 
       {/* Pagination - only when paginationProps is provided */}
       {paginationProps && (

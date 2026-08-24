@@ -95,7 +95,7 @@ export function SignInPage() {
 
             <div className='flex items-center gap-3'>
               <div className='h-px flex-1 bg-slate-800' />
-              <span className='text-[11px] font-medium tracking-wider text-slate-600 uppercase'>
+              <span className='text-caption font-medium tracking-wider text-slate-600 uppercase'>
                 Secure UMCCR SSO
               </span>
               <div className='h-px flex-1 bg-slate-800' />

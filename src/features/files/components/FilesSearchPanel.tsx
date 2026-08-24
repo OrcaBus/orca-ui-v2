@@ -1,3 +1,4 @@
+import { Input } from '@/components/ui/Input';
 import { useState, type Dispatch, type KeyboardEvent, type SetStateAction } from 'react';
 import { Folder, Search, SlidersHorizontal, X, ChevronUp, Filter } from 'lucide-react';
 import { WORKFLOW_PATTERNS, FILE_EXTENSIONS } from '@/utils/constants';
@@ -41,29 +42,46 @@ function createClearedDraft(): AdvancedFilterDraft {
   };
 }
 
-// Compact AND / OR toggle used next to multi-value filter fields
-function OpToggle({ value, onChange }: { value: FilterOp; onChange: (op: FilterOp) => void }) {
+// OR / AND are mutually exclusive modes, so this is a segmented control rather than a switch.
+export function FilesKeyOpToggle({
+  value,
+  onChange,
+}: {
+  value: FilterOp;
+  onChange: (op: FilterOp) => void;
+}) {
   const base =
-    'px-2 py-0.5 text-xs font-medium transition-colors focus:outline-none focus:ring-1 focus:ring-ring';
-  const active = 'bg-primary text-primary-foreground';
+    'h-7 min-w-10 justify-center rounded-none px-2 py-1 text-xs font-medium transition-colors focus-visible:z-10 focus-visible:ring-1';
+  const active =
+    'bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-[#137fec]/15 dark:text-blue-300 dark:hover:bg-[#137fec]/25';
   const inactive =
     'bg-white text-neutral-500 hover:bg-neutral-50 dark:bg-[#1e252e] dark:text-neutral-400 dark:hover:bg-[#252d38]';
   return (
-    <div className='inline-flex overflow-hidden rounded border border-neutral-200 dark:border-[#2d3540]'>
-      <button
+    <div
+      role='group'
+      aria-label='S3 key pattern matching mode'
+      className='inline-flex overflow-hidden rounded-md border border-neutral-200 dark:border-[#2d3540]'
+    >
+      <Button
+        variant='ghost'
+        size='inline'
         type='button'
+        aria-pressed={value === 'or'}
         className={`${base} ${value === 'or' ? active : inactive}`}
         onClick={() => onChange('or')}
       >
         OR
-      </button>
-      <button
+      </Button>
+      <Button
+        variant='ghost'
+        size='inline'
         type='button'
+        aria-pressed={value === 'and'}
         className={`${base} ${value === 'and' ? active : inactive} border-l border-neutral-200 dark:border-[#2d3540]`}
         onClick={() => onChange('and')}
       >
         AND
-      </button>
+      </Button>
     </div>
   );
 }
@@ -105,8 +123,8 @@ export function FilesAdvancedFilterFields({
   };
 
   return (
-    <div className='space-y-4'>
-      <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
+    <div className='space-y-3'>
+      <div className='grid grid-cols-1 gap-3 md:grid-cols-2'>
         {/* Bucket */}
         <div>
           <label className={labelClass} htmlFor='adv-bucket'>
@@ -124,7 +142,7 @@ export function FilesAdvancedFilterFields({
           <label htmlFor='adv-portalRunId' className={labelClass}>
             Portal Run ID
           </label>
-          <input
+          <Input
             type='text'
             id='adv-portalRunId'
             value={tempValues.portalRunId}
@@ -137,19 +155,19 @@ export function FilesAdvancedFilterFields({
 
       {/* S3 Key Pattern */}
       <div>
-        <div className='mb-1.5 flex items-center justify-between'>
+        <div className='mb-1 flex items-center justify-between gap-3'>
           <label
             htmlFor='adv-s3Key'
             className='text-xs font-medium tracking-wide text-neutral-500 uppercase dark:text-[#9dabb9]'
           >
             S3 Key Pattern
           </label>
-          <OpToggle
+          <FilesKeyOpToggle
             value={tempValues.keyOp}
             onChange={(op) => setTempValues((prev) => ({ ...prev, keyOp: op }))}
           />
         </div>
-        <div className='flex min-h-10 w-full flex-wrap items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-2 py-1.5 text-sm text-neutral-900 focus-within:border-transparent focus-within:ring-2 focus-within:ring-blue-500 dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-100 dark:focus-within:ring-[#137fec]'>
+        <div className='focus-within:border-ring focus-within:ring-ring/40 flex min-h-9 w-full flex-wrap items-center gap-1 rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-sm text-neutral-900 focus-within:ring-1 dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-100'>
           {tempValues.keys.map((key, index) => (
             <PillTag
               key={`${key}-${index}`}
@@ -164,7 +182,7 @@ export function FilesAdvancedFilterFields({
               {key}
             </PillTag>
           ))}
-          <input
+          <Input
             type='text'
             id='adv-s3Key'
             value={tempValues.keyDraft}
@@ -172,7 +190,7 @@ export function FilesAdvancedFilterFields({
             onKeyDown={handleKeyDraftKeyDown}
             onBlur={commitKeyDraft}
             placeholder='Enter S3 key pattern (wildcard supported)'
-            className='min-w-64 flex-1 bg-transparent px-1 py-0.5 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none dark:text-slate-100 dark:placeholder-[#9dabb9]'
+            className='h-auto min-h-6 min-w-64 flex-1 rounded-none border-0 bg-transparent px-1 py-0 text-sm text-neutral-900 placeholder-neutral-400 shadow-none focus-visible:border-transparent focus-visible:ring-0 dark:bg-transparent dark:text-slate-100 dark:placeholder-[#9dabb9]'
           />
         </div>
       </div>
@@ -307,14 +325,14 @@ export function FilesSearchPanel() {
   const hasActiveFilters = activeCount > 0;
 
   const inputClass =
-    'h-10 w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-0 text-sm text-neutral-900 shadow-none placeholder-neutral-400 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-100 dark:placeholder-[#9dabb9] dark:focus:ring-[#137fec]';
+    'h-9 w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-0 text-sm text-neutral-900 shadow-none placeholder-neutral-400 focus:border-ring focus:ring-1 focus:ring-ring/40 focus:outline-none focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring/40 dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-100 dark:placeholder-[#9dabb9]';
   const labelClass =
-    'mb-1.5 block text-xs font-medium tracking-wide text-neutral-500 uppercase dark:text-[#9dabb9]';
+    'mb-1 block text-xs font-medium tracking-wide text-neutral-500 uppercase dark:text-[#9dabb9]';
 
   return (
-    <div className='mb-6 rounded-lg border border-neutral-200 bg-white dark:border-[#2d3540] dark:bg-[#111418]'>
+    <div className='mb-4 rounded-lg border border-neutral-200 bg-white dark:border-[#2d3540] dark:bg-[#111418]'>
       {/* Search bar row */}
-      <div className='flex items-center gap-3 px-4 py-3'>
+      <div className='flex items-center gap-2 px-3 py-2.5'>
         <div className='relative flex-1'>
           <label htmlFor='files-general-search' className='sr-only'>
             Search files
@@ -323,26 +341,29 @@ export function FilesSearchPanel() {
             className='absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-neutral-400 dark:text-[#9dabb9]'
             aria-hidden='true'
           />
-          <input
+          <Input
             ref={inputRef}
             id='files-general-search'
             type='text'
             placeholder='Search by portal run ID, bucket, or S3 key…'
             defaultValue={searchValue}
             onChange={handleInputChange}
-            className='peer w-full rounded-md border border-slate-200 bg-slate-50 py-2 pr-10 pl-10 text-sm text-neutral-900 placeholder-neutral-400 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-100 dark:placeholder-[#9dabb9] dark:focus:ring-[#137fec]'
+            className='peer w-full border-slate-200 bg-slate-50 py-0 pr-9 pl-10 text-sm text-neutral-900 placeholder-neutral-400 dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-100 dark:placeholder-[#9dabb9]'
           />
-          <button
+          <Button
+            variant='ghost'
+            size='tableIcon'
             type='button'
             onClick={clearInput}
-            className='absolute top-1/2 right-3 -translate-y-1/2 text-neutral-400 peer-placeholder-shown:hidden hover:text-neutral-600 dark:text-[#9dabb9] dark:hover:text-white'
+            className='absolute top-1/2 right-2 -translate-y-1/2 text-neutral-400 peer-placeholder-shown:hidden hover:text-neutral-600 dark:text-[#9dabb9] dark:hover:text-white'
             aria-label='Clear search'
           >
             <X className='h-4 w-4' aria-hidden='true' />
-          </button>
+          </Button>
         </div>
 
-        <button
+        <Button
+          variant='ghost'
           type='button'
           onClick={handleToggleOpen}
           className={`flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors ${
@@ -358,22 +379,24 @@ export function FilesSearchPanel() {
               {activeCount}
             </span>
           )}
-        </button>
+        </Button>
       </div>
 
       {/* Advanced Filters Accordion */}
       {isOpen && (
         <div>
-          <button
+          <Button
+            variant='ghost'
+            size='inline'
             type='button'
             onClick={() => setIsOpen(false)}
-            className='flex w-full items-center gap-1.5 border-t border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:text-slate-900 dark:border-[#2d3540] dark:bg-[#1e252e]/50 dark:text-[#9dabb9] dark:hover:text-white'
+            className='h-9 w-full justify-start gap-1.5 rounded-none border-t border-slate-200 bg-slate-50 px-3 py-1.5 text-left text-sm font-medium text-slate-700 transition-colors hover:text-slate-900 dark:border-[#2d3540] dark:bg-[#1e252e]/50 dark:text-[#9dabb9] dark:hover:text-white'
           >
             <ChevronUp className='h-4 w-4' />
             Advanced Filters
-          </button>
+          </Button>
 
-          <div className='px-4 py-3'>
+          <div className='px-3 py-3'>
             {/* Field inputs */}
             <FilesAdvancedFilterFields
               tempValues={tempValues}
@@ -383,16 +406,16 @@ export function FilesSearchPanel() {
             />
 
             {/* Shortcut Filters */}
-            <div className='mt-4 border-t border-dashed border-neutral-100 pt-3 dark:border-[#2d3540]'>
-              <div className='mb-3 flex items-center gap-2'>
+            <div className='mt-3 border-t border-dashed border-neutral-100 pt-3 dark:border-[#2d3540]'>
+              <div className='mb-2.5 flex items-center gap-2'>
                 <Folder className='h-4 w-4 text-neutral-500 dark:text-[#9dabb9]' />
                 <h3 className='text-xs font-semibold tracking-wide text-neutral-600 uppercase dark:text-[#9dabb9]'>
                   Shortcut Filters
                 </h3>
               </div>
 
-              <div className='mb-3'>
-                <div className='mb-2 flex items-center gap-2'>
+              <div className='mb-2.5'>
+                <div className='mb-1.5 flex items-center gap-2'>
                   <span className='text-xs font-medium text-neutral-600 dark:text-neutral-400'>
                     Workflow Patterns
                   </span>
@@ -400,11 +423,13 @@ export function FilesSearchPanel() {
                     (click to set S3 key pattern)
                   </span>
                 </div>
-                <div className='flex flex-wrap gap-2'>
+                <div className='flex flex-wrap gap-1.5'>
                   {WORKFLOW_PATTERNS.map((pattern) => {
                     const isActive = tempValues.keys.includes(pattern);
                     return (
-                      <button
+                      <Button
+                        variant='ghost'
+                        size='inline'
                         key={pattern}
                         type='button'
                         onClick={() =>
@@ -413,7 +438,7 @@ export function FilesSearchPanel() {
                             keys: appendKeyPattern(prev.keys, pattern),
                           }))
                         }
-                        className={`rounded-md px-3 py-1.5 font-mono text-xs transition-colors ${
+                        className={`h-7 rounded-md px-2 py-1 font-mono text-xs transition-colors ${
                           isActive
                             ? 'bg-purple-600 text-white'
                             : 'bg-purple-50 text-purple-700 hover:bg-purple-100 dark:bg-purple-950 dark:text-purple-300 dark:hover:bg-purple-900'
@@ -421,14 +446,14 @@ export function FilesSearchPanel() {
                         title={`Set S3 key pattern to: ${pattern}`}
                       >
                         {pattern}
-                      </button>
+                      </Button>
                     );
                   })}
                 </div>
               </div>
 
               <div>
-                <div className='mb-2 flex items-center gap-2'>
+                <div className='mb-1.5 flex items-center gap-2'>
                   <span className='text-xs font-medium text-neutral-600 dark:text-neutral-400'>
                     File Extensions
                   </span>
@@ -436,11 +461,13 @@ export function FilesSearchPanel() {
                     (click to append to pattern)
                   </span>
                 </div>
-                <div className='flex flex-wrap gap-2'>
+                <div className='flex flex-wrap gap-1.5'>
                   {FILE_EXTENSIONS.map((extension) => {
                     const isActive = tempValues.keys.includes(extension);
                     return (
-                      <button
+                      <Button
+                        variant='ghost'
+                        size='inline'
                         key={extension}
                         type='button'
                         onClick={() =>
@@ -449,7 +476,7 @@ export function FilesSearchPanel() {
                             keys: appendKeyPattern(prev.keys, extension),
                           }))
                         }
-                        className={`rounded-md px-3 py-1.5 font-mono text-xs transition-colors ${
+                        className={`h-7 rounded-md px-2 py-1 font-mono text-xs transition-colors ${
                           isActive
                             ? 'bg-emerald-600 text-white'
                             : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-950 dark:text-emerald-300 dark:hover:bg-emerald-900'
@@ -457,7 +484,7 @@ export function FilesSearchPanel() {
                         title={`Append extension: ${extension}`}
                       >
                         {extension}
-                      </button>
+                      </Button>
                     );
                   })}
                 </div>
@@ -465,15 +492,17 @@ export function FilesSearchPanel() {
             </div>
 
             {/* Apply / Reset */}
-            <div className='mt-4 flex items-center justify-end gap-3 border-t border-dashed border-neutral-100 pt-3 dark:border-[#2d3540]'>
-              <button
+            <div className='mt-3 flex items-center justify-end gap-2 border-t border-dashed border-neutral-100 pt-3 dark:border-[#2d3540]'>
+              <Button
+                variant='ghost'
+                size='sm'
                 type='button'
                 onClick={handleReset}
-                className='px-4 py-2 text-sm text-neutral-600 transition-colors hover:text-neutral-900 dark:text-[#9dabb9] dark:hover:text-white'
+                className='text-sm text-neutral-600 transition-colors hover:text-neutral-900 dark:text-[#9dabb9] dark:hover:text-white'
               >
                 Reset
-              </button>
-              <Button type='button' onClick={handleApply}>
+              </Button>
+              <Button size='sm' type='button' onClick={handleApply}>
                 <Filter />
                 Apply Filters
               </Button>
@@ -484,7 +513,7 @@ export function FilesSearchPanel() {
 
       {/* Active Filter Badges */}
       {activeBadges.length > 0 && (
-        <div className='flex flex-wrap items-center gap-2 border-t border-slate-200 bg-slate-50 px-4 py-3 dark:border-[#2d3540] dark:bg-[#1e252e]/50'>
+        <div className='flex flex-wrap items-center gap-1.5 border-t border-slate-200 bg-slate-50 px-3 py-2 dark:border-[#2d3540] dark:bg-[#1e252e]/50'>
           <span className='mr-1 shrink-0 text-xs font-semibold tracking-wide text-slate-500 uppercase dark:text-[#9dabb9]'>
             Active:
           </span>
@@ -497,13 +526,15 @@ export function FilesSearchPanel() {
               {`${badge.label}: ${badge.value}`}
             </PillTag>
           ))}
-          <button
+          <Button
+            variant='ghost'
+            size='inline'
             type='button'
             onClick={handleClearAll}
             className='ml-auto shrink-0 text-xs font-medium text-blue-600 hover:text-blue-800 dark:text-[#137fec] dark:hover:text-blue-300'
           >
             Clear all
-          </button>
+          </Button>
         </div>
       )}
     </div>

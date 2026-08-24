@@ -1,3 +1,4 @@
+import { Input } from '@/components/ui/Input';
 import { useState, useEffect, useRef } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -5,6 +6,7 @@ import { z } from 'zod';
 import { X, ChevronDown, Plus } from 'lucide-react';
 import { DialogFrame } from '@/components/modals/DialogFrame';
 import { Button } from '@/components/ui/Button';
+import { Select } from '@/components/ui/Select';
 import { tryPrettyJson } from '@/utils/json';
 import type { MapEdgeType, MapGroup, ResourceType, WorkflowEngine } from '../data/dynamodb-schema';
 import type { CatalogNodeLookupItem, NodeFormData } from '../types/system-catalog.types';
@@ -167,13 +169,14 @@ export function NodeModal({
       bodyClassName='min-h-0 flex-1 overflow-y-auto px-6 py-4'
       footer={
         <>
-          <button
+          <Button
+            variant='ghost'
             type='button'
             onClick={handleClose}
             className='rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-[#2d3540] dark:bg-transparent dark:text-neutral-300 dark:hover:bg-[#2d3540]'
           >
             Cancel
-          </button>
+          </Button>
           <Button type='submit' form='system-catalog-node-form' disabled={!isValid || isSubmitting}>
             <Plus />
             {isEditing ? 'Save Changes' : 'Add Node'}
@@ -190,7 +193,7 @@ export function NodeModal({
             >
               Node Name <span className='text-red-500'>*</span>
             </label>
-            <input
+            <Input
               id='node-name'
               type='text'
               placeholder='Enter node name'
@@ -209,7 +212,7 @@ export function NodeModal({
             >
               Version
             </label>
-            <input
+            <Input
               id='node-version'
               type='text'
               placeholder='e.g. 1.0.0'
@@ -226,7 +229,7 @@ export function NodeModal({
               Node Type
             </label>
             <div className='relative'>
-              <select
+              <Select
                 id='node-type'
                 {...register('nodeType')}
                 className={inputClassName + ' appearance-none pr-8'}
@@ -236,7 +239,7 @@ export function NodeModal({
                     {option.label}
                   </option>
                 ))}
-              </select>
+              </Select>
               <ChevronDown className='pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-slate-400' />
             </div>
           </div>
@@ -252,29 +255,33 @@ export function NodeModal({
             </label>
             <div className='relative'>
               {selectedNodeType === 'resource' ? (
-                <select
+                <Select
                   id='node-resource-type'
                   {...register('resourceType')}
                   className={inputClassName + ' appearance-none pr-8'}
-                >
-                  {RESOURCE_TYPE_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
+                  value={selectedNodeType === 'resource' ? initialData.resourceType : ''}
+                  options={RESOURCE_TYPE_OPTIONS.map((option) => ({
+                    value: option.value,
+                    label: option.label,
+                  }))}
+                  onChange={(value) =>
+                    setValue('resourceType', value as ResourceType, { shouldValidate: true })
+                  }
+                ></Select>
               ) : (
-                <select
+                <Select
                   id='node-workflow-engine'
                   {...register('workflowEngine')}
                   className={inputClassName + ' appearance-none pr-8'}
-                >
-                  {WORKFLOW_ENGINE_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
+                  value={selectedNodeType === 'workflow' ? initialData.workflowEngine : ''}
+                  options={WORKFLOW_ENGINE_OPTIONS.map((option) => ({
+                    value: option.value,
+                    label: option.label,
+                  }))}
+                  onChange={(value) =>
+                    setValue('workflowEngine', value as WorkflowEngine, { shouldValidate: true })
+                  }
+                ></Select>
               )}
               <ChevronDown className='pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-slate-400' />
             </div>
@@ -294,16 +301,16 @@ export function NodeModal({
                     ? 'Select groups...'
                     : `${selectedGroupIds.length} group${selectedGroupIds.length === 1 ? '' : 's'} selected`}
                 </span>
-                <button
-                  type='button'
+                <Button
                   onClick={(event) => {
                     event.stopPropagation();
                     setIsGroupDropdownOpen((open) => !open);
                   }}
+                  aria-label='Select groups'
                   className='ml-auto shrink-0 rounded-md p-0.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-[#2d3540] dark:hover:text-white'
                 >
                   <Plus className='h-4 w-4' />
-                </button>
+                </Button>
               </div>
 
               {selectedGroupIds.length > 0 && (
@@ -326,7 +333,8 @@ export function NodeModal({
                         <span className='text-sm font-medium text-slate-700 dark:text-slate-300'>
                           {group.name}
                         </span>
-                        <button
+                        <Button
+                          variant='ghost'
                           type='button'
                           onClick={() =>
                             setValue(
@@ -335,10 +343,11 @@ export function NodeModal({
                               { shouldValidate: true }
                             )
                           }
+                          aria-label={`Remove group ${group.name}`}
                           className='rounded-md p-0.5 text-slate-300 transition-colors hover:bg-slate-100 hover:text-slate-500 dark:text-[#4a5568] dark:hover:bg-[#2d3540] dark:hover:text-white'
                         >
                           <X className='h-3 w-3' />
-                        </button>
+                        </Button>
                       </div>
                     );
                   })}
@@ -348,7 +357,8 @@ export function NodeModal({
               {isGroupDropdownOpen && availableGroups.length > 0 && (
                 <div className='absolute top-full right-0 left-0 z-10 mt-1 max-h-48 overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg dark:border-[#2d3540] dark:bg-[#1e252e]'>
                   {availableGroups.map((group) => (
-                    <button
+                    <Button
+                      variant='ghost'
                       key={group.groupId}
                       type='button'
                       onClick={() => {
@@ -361,7 +371,7 @@ export function NodeModal({
                     >
                       <div className='h-2 w-2 rounded-full' style={{ background: group.color }} />
                       {group.name}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               )}
@@ -382,16 +392,18 @@ export function NodeModal({
                     ? 'Select parent nodes...'
                     : `${parentLinks.length} parent node${parentLinks.length === 1 ? '' : 's'} selected`}
                 </span>
-                <button
+                <Button
+                  variant='ghost'
                   type='button'
                   onClick={(event) => {
                     event.stopPropagation();
                     setIsParentDropdownOpen((open) => !open);
                   }}
+                  aria-label='Select parent nodes'
                   className='ml-auto shrink-0 rounded-md p-0.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-[#2d3540] dark:hover:text-white'
                 >
                   <Plus className='h-4 w-4' />
-                </button>
+                </Button>
               </div>
 
               {parentLinks.length > 0 && (
@@ -415,7 +427,7 @@ export function NodeModal({
                           </span>
                         </div>
                         <div className='relative shrink-0'>
-                          <select
+                          <Select
                             value={parentLink.edgeType}
                             onChange={(event) => {
                               setValue(
@@ -438,10 +450,11 @@ export function NodeModal({
                                 {option.label}
                               </option>
                             ))}
-                          </select>
+                          </Select>
                           <ChevronDown className='pointer-events-none absolute top-1/2 right-1.5 h-3 w-3 -translate-y-1/2 text-slate-400' />
                         </div>
-                        <button
+                        <Button
+                          variant='ghost'
                           type='button'
                           onClick={() => {
                             setValue(
@@ -452,10 +465,11 @@ export function NodeModal({
                               { shouldValidate: true }
                             );
                           }}
+                          aria-label={`Remove parent node ${parentNode?.label ?? parentLink.nodeId}`}
                           className='-mr-1 rounded-md p-1 text-slate-300 transition-colors hover:bg-slate-100 hover:text-slate-500 dark:text-[#4a5568] dark:hover:bg-[#2d3540] dark:hover:text-white'
                         >
                           <X className='h-3.5 w-3.5' />
-                        </button>
+                        </Button>
                       </div>
                     );
                   })}
@@ -465,7 +479,8 @@ export function NodeModal({
               {isParentDropdownOpen && availableParents.length > 0 && (
                 <div className='absolute top-full right-0 left-0 z-10 mt-1 max-h-48 overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg dark:border-[#2d3540] dark:bg-[#1e252e]'>
                   {availableParents.map(([nodeId, node]) => (
-                    <button
+                    <Button
+                      variant='ghost'
                       key={nodeId}
                       type='button'
                       onClick={() => {
@@ -486,7 +501,7 @@ export function NodeModal({
                       <span className='shrink-0 text-xs text-slate-400 dark:text-[#6b7a8d]'>
                         {getNodeDetailLabel(node)}
                       </span>
-                    </button>
+                    </Button>
                   ))}
                 </div>
               )}
@@ -501,13 +516,14 @@ export function NodeModal({
               >
                 Config Tags (JSON)
               </label>
-              <button
+              <Button
+                variant='ghost'
                 type='button'
                 onClick={formatConfigJson}
                 className='rounded px-2 py-0.5 text-xs font-medium text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:text-[#9dabb9] dark:hover:bg-[#2d3540] dark:hover:text-white'
               >
                 Format
-              </button>
+              </Button>
             </div>
             <textarea
               id='node-config'
@@ -528,9 +544,7 @@ export function NodeModal({
                 {errors.configJson.message}
               </p>
             )}
-            <p className='mt-1 text-xs text-slate-500 dark:text-[#9dabb9]'>
-              JSON object with string values.
-            </p>
+            <p className='text-muted-foreground mt-1 text-xs'>JSON object with string values.</p>
           </div>
 
           <div className='col-span-2'>

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Upload, FileText } from 'lucide-react';
 import { formatTableDate } from '@/utils/timeFormat';
 import { useSequenceRunDetailsContext } from '../context/SequenceRunDetailsContext';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import {
   useSequenceRunSampleSheetsByInstrumentRunIdModel,
@@ -95,14 +95,16 @@ export function SequenceRunDetailsSampleSheetsTab() {
       header: 'Actions',
       render: (samplesheet) => (
         <div className='flex items-center gap-2'>
-          <button
+          <Button
+            variant='ghost'
+            size='table'
             onClick={() => setViewingSampleSheet(samplesheet)}
-            className='flex items-center gap-1 rounded px-3 py-1.5 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-50 hover:text-blue-800 dark:text-[#137fec] dark:hover:border dark:hover:border-[#137fec]/30 dark:hover:bg-[#137fec]/10 dark:hover:text-blue-300'
+            className='text-blue-600 transition-colors hover:bg-blue-50 hover:text-blue-800 dark:text-[#137fec] dark:hover:border dark:hover:border-[#137fec]/30 dark:hover:bg-[#137fec]/10 dark:hover:text-blue-300'
             title='View Samplesheet'
           >
             <FileText className='h-3.5 w-3.5' />
             View Samplesheet
-          </button>
+          </Button>
         </div>
       ),
     },

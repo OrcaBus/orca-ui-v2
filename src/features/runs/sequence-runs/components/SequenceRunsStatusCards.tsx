@@ -19,7 +19,7 @@ function getSequenceStatusIcon(status: InstrumentRunStatus) {
         <CheckCircle className='h-5 w-5 text-green-500 dark:text-green-400' {...filledIconProps} />
       );
     case 'FAILED':
-      return <XCircle className='h-5 w-5 text-red-500 dark:text-red-400' {...filledIconProps} />;
+      return <XCircle className='text-destructive h-5 w-5' {...filledIconProps} />;
     case 'STARTED':
       return (
         <PlayCircle className='h-5 w-5 text-amber-500 dark:text-amber-400' {...filledIconProps} />
@@ -109,7 +109,7 @@ export function SequenceRunsStatusCards({
     isLoadingSequenceRunStatsStatusCounts && !sequenceRunStatsStatusCountsData;
 
   return (
-    <div className='mb-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-6'>
+    <div className='mb-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-6'>
       {showLoadingCards
         ? statusCards.map((card) => <StatusCard key={card.status} label='' value={0} isLoading />)
         : statusCards.map((card) => {

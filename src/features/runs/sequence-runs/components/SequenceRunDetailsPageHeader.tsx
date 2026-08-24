@@ -1,7 +1,8 @@
+import { Button } from '@/components/ui/Button';
 import { useState } from 'react';
 import { Copy, Check } from 'lucide-react';
 import { toast } from 'sonner';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { useSequenceRunDetailsContext } from '../context/SequenceRunDetailsContext';
@@ -59,7 +60,8 @@ export function SequenceRunDetailsPageHeader() {
                 {instrumentRunId ?? '—'}
               </span>
               {instrumentRunId && (
-                <button
+                <Button
+                  variant='ghost'
                   type='button'
                   onClick={() => void handleCopy(instrumentRunId, 'instrument-run-id')}
                   className='rounded p-1 transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800'
@@ -70,7 +72,7 @@ export function SequenceRunDetailsPageHeader() {
                   ) : (
                     <Copy className='h-4 w-4 text-neutral-400' />
                   )}
-                </button>
+                </Button>
               )}
             </>
           )}

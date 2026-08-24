@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Search, X } from 'lucide-react';
 import { PillTag } from '../ui/PillTag';
+import { Input } from '../ui/Input';
 import { useDebouncedSearchInput } from '@/hooks/useDebouncedSearchInput';
 
 function formatBadgeDisplay(badge: FilterBadge): string {
@@ -63,8 +64,8 @@ export function FilterBar({
   };
 
   return (
-    <div className='my-4 rounded-lg border border-neutral-200 bg-white dark:border-[#2d3540] dark:bg-[#111418]'>
-      <div className='flex items-center gap-3 p-3'>
+    <div className='my-3 rounded-lg border border-neutral-200 bg-white dark:border-[#2d3540] dark:bg-[#111418]'>
+      <div className='flex items-center gap-2 p-2.5'>
         <div className='relative flex-1'>
           <label htmlFor={searchId} className='sr-only'>
             {searchLabel}
@@ -73,14 +74,14 @@ export function FilterBar({
             className='absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-neutral-400 dark:text-[#9dabb9]'
             aria-hidden='true'
           />
-          <input
+          <Input
             ref={inputRef}
             id={searchId}
             type='text'
             defaultValue={searchValue}
             onChange={handleInputChange}
             placeholder={searchPlaceholder}
-            className='peer w-full rounded-md border border-neutral-300 bg-white py-2 pr-10 pl-10 text-sm text-neutral-900 placeholder-neutral-400 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-100 dark:placeholder-[#9dabb9] dark:focus:ring-[#137fec]'
+            className='peer h-9 bg-neutral-50 pr-9 pl-9 text-sm dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-slate-100 dark:placeholder-[#9dabb9]'
           />
           <button
             type='button'
@@ -96,7 +97,7 @@ export function FilterBar({
       </div>
 
       {showBadgesSection && activeFilterBadges && activeFilterBadges.length > 0 && (
-        <div className='flex flex-wrap items-center gap-2 border-t border-slate-200 bg-slate-50 px-4 py-3 dark:border-[#2d3540] dark:bg-[#1e252e]/50'>
+        <div className='flex flex-wrap items-center gap-2 border-t border-slate-200 bg-slate-50 px-3 py-2 dark:border-[#2d3540] dark:bg-[#1e252e]/50'>
           <span className='mr-1 shrink-0 text-xs font-semibold tracking-wide text-slate-500 uppercase dark:text-[#9dabb9]'>
             Active:
           </span>

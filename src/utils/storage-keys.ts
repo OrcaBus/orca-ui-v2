@@ -16,5 +16,11 @@ export const NOTIFICATIONS_LAST_VIEWED_AT_STORAGE_KEY = `${STORAGE_PREFIX}:workf
 /** Last authenticated route (path + query + hash) for redirect-after-login. */
 export const LAST_VISITED_PAGE_STORAGE_KEY = `${STORAGE_PREFIX}:last-visited-page`;
 
+/** Table row density ('comfortable' | 'compact') — a single global
+ * preference shared by every DataTable/ExpandableTable instance, not a
+ * per-table setting (unlike column visibility, which genuinely varies by
+ * table). See components/tables/useTableDensity.ts. */
+export const TABLE_DENSITY_STORAGE_KEY = `${STORAGE_PREFIX}:table-density`;
+
 // Note: the per-table settings key builder (getDataTableSettingsStorageKey)
 // lives in components/tables/DataTable.tsx and builds from STORAGE_PREFIX.

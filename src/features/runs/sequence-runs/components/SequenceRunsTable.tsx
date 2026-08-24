@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/Button';
 import {
   ExpandableColumn,
   ExpandableTable,
@@ -43,7 +44,9 @@ const SequenceRunsTable = () => {
         header: 'Instrument Run ID',
         sortable: true,
         render: (instrumentRun) => (
-          <button
+          <Button
+            variant='ghost'
+            size='inline'
             onClick={(e) => {
               e.stopPropagation();
               void navigate(`/runs/sequence-runs/${instrumentRun.instrumentRunId}`);
@@ -51,14 +54,14 @@ const SequenceRunsTable = () => {
             className='-mx-1 rounded px-1 font-mono text-sm font-medium text-blue-600 transition-colors hover:text-blue-800 hover:underline dark:text-[#137fec] dark:hover:bg-[#137fec]/10 dark:hover:text-blue-300'
           >
             {instrumentRun.instrumentRunId ?? '-'}
-          </button>
+          </Button>
         ),
       },
       {
         key: 'status',
         header: 'Status',
         sortable: true,
-        render: (instrumentRun) => <StatusBadge status={instrumentRun.status} />,
+        render: (instrumentRun) => <StatusBadge status={instrumentRun.status} size='sm' />,
       },
       {
         key: 'startTime',
@@ -85,24 +88,28 @@ const SequenceRunsTable = () => {
         header: 'Actions',
         render: (instrumentRun) => (
           <div className='flex items-center gap-2'>
-            <button
-              className='flex items-center gap-1 rounded px-3 py-1.5 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-50 hover:text-blue-800 dark:text-[#137fec] dark:hover:border dark:hover:border-[#137fec]/30 dark:hover:bg-[#137fec]/10 dark:hover:text-blue-300'
+            <Button
+              variant='ghost'
+              size='table'
+              className='text-blue-600 transition-colors hover:bg-blue-50 hover:text-blue-800 dark:text-[#137fec] dark:hover:border dark:hover:border-[#137fec]/30 dark:hover:bg-[#137fec]/10 dark:hover:text-blue-300'
               title='MultipleQC Report'
             >
               <FileText className='h-3.5 w-3.5' />
               MultiQC
-            </button>
-            <button
+            </Button>
+            <Button
+              variant='ghost'
+              size='table'
               onClick={(e) => {
                 e.stopPropagation();
                 void navigate(`/vault?instrumentRunId=${instrumentRun.instrumentRunId}`);
               }}
-              className='flex items-center gap-1 rounded px-3 py-1.5 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-50 hover:text-blue-800 dark:text-[#137fec] dark:hover:border dark:hover:border-[#137fec]/30 dark:hover:bg-[#137fec]/10 dark:hover:text-blue-300'
+              className='text-blue-600 transition-colors hover:bg-blue-50 hover:text-blue-800 dark:text-[#137fec] dark:hover:border dark:hover:border-[#137fec]/30 dark:hover:bg-[#137fec]/10 dark:hover:text-blue-300'
               title='View in Vault'
             >
               <ExternalLink className='h-3.5 w-3.5' />
               Vault
-            </button>
+            </Button>
           </div>
         ),
       },

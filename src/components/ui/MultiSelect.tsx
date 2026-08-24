@@ -56,11 +56,21 @@ export function MultiSelect({
 
   return (
     <div ref={containerRef} className={cn('relative', className)}>
-      <button
-        type='button'
+      {/* role="button" div, not a <button>: a tag's remove control below
+          needs to be a real, independently-focusable <button>, and buttons
+          cannot nest inside buttons. */}
+      <div
+        role='button'
+        tabIndex={0}
         onClick={() => setIsOpen((prev) => !prev)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            setIsOpen((prev) => !prev);
+          }
+        }}
         className={cn(
-          'flex w-full items-center gap-1 rounded-lg border border-neutral-300 bg-white px-3 py-2 text-left text-sm shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:focus:border-[#137fec] dark:focus:ring-[#137fec]',
+          'flex w-full cursor-pointer items-center gap-1 rounded-lg border border-neutral-300 bg-white px-3 py-2 text-left text-sm shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:focus:border-[#137fec] dark:focus:ring-[#137fec]',
           triggerClassName
         )}
       >
@@ -74,10 +84,14 @@ export function MultiSelect({
                 className='inline-flex max-w-full items-center gap-0.5 rounded bg-blue-50 px-1.5 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-500/10 dark:text-blue-400'
               >
                 <span className='truncate'>{opt.label}</span>
-                <X
-                  className='h-3 w-3 cursor-pointer hover:text-blue-900 dark:hover:text-blue-200'
+                <button
+                  type='button'
+                  aria-label={`Remove ${opt.label}`}
+                  className='rounded hover:text-blue-900 dark:hover:text-blue-200'
                   onClick={(e) => removeValue(opt.value, e)}
-                />
+                >
+                  <X className='h-3 w-3' />
+                </button>
               </span>
             ))
           ) : (
@@ -89,7 +103,7 @@ export function MultiSelect({
         <ChevronDown
           className={`h-4 w-4 shrink-0 text-neutral-400 transition-transform dark:text-[#9dabb9] ${isOpen ? 'rotate-180' : ''}`}
         />
-      </button>
+      </div>
 
       {isOpen && (
         <div className='absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-neutral-200 bg-white shadow-lg dark:border-[#2d3540] dark:bg-[#111418] dark:shadow-black/40'>

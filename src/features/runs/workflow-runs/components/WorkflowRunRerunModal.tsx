@@ -1,3 +1,4 @@
+import { Input } from '@/components/ui/Input';
 import { useEffect } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -90,13 +91,14 @@ export function WorkflowRunRerunModal({
       size='lg'
       footer={
         <>
-          <button
+          <Button
+            variant='ghost'
             type='button'
             onClick={onClose}
             className='rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-[#9dabb9] dark:hover:bg-[#2d3540]'
           >
             Close
-          </button>
+          </Button>
           {isValid && (
             <Button
               type='submit'
@@ -119,7 +121,7 @@ export function WorkflowRunRerunModal({
           /* ── Not eligible for rerun ── */
           <div className='rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-900/50 dark:bg-red-950/20'>
             <div className='flex items-start gap-2.5'>
-              <AlertTriangle className='mt-0.5 h-4 w-4 shrink-0 text-red-500 dark:text-red-400' />
+              <AlertTriangle className='text-destructive mt-0.5 h-4 w-4 shrink-0' />
               <div className='space-y-1'>
                 <p className='text-sm font-medium text-red-700 dark:text-red-400'>
                   This workflow run is not eligible for rerun.
@@ -171,7 +173,7 @@ export function WorkflowRunRerunModal({
                   {errors.dataset && (
                     <p
                       id='workflow-run-rerun-dataset-error'
-                      className='text-sm font-medium text-red-500 dark:text-red-400'
+                      className='text-destructive text-sm font-medium'
                     >
                       {errors.dataset.message}
                     </p>
@@ -189,7 +191,7 @@ export function WorkflowRunRerunModal({
                 name='markAsDeprecated'
                 render={({ field }) => (
                   <div className='flex items-start gap-3'>
-                    <input
+                    <Input
                       type='checkbox'
                       id='rerun-mark-deprecated'
                       checked={field.value}
@@ -225,7 +227,7 @@ export function WorkflowRunRerunModal({
 
             <div className='h-px bg-neutral-100 dark:bg-[#2d3540]' />
 
-            <p className='text-sm font-medium text-red-500 dark:text-red-400'>
+            <p className='text-destructive text-sm font-medium'>
               Are you sure you want to rerun this workflow?
             </p>
           </div>

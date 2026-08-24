@@ -1,3 +1,4 @@
+import { Input } from '@/components/ui/Input';
 import { useState, useMemo } from 'react';
 import { useParams } from 'react-router';
 import { Link as LinkIcon, ListFilter, ArrowLeft, Search } from 'lucide-react';
@@ -11,6 +12,8 @@ import { useCaseDetailsContext } from '../context/CaseDetailsContext';
 import { CaseDetailsLinkWorkflowRunsModal } from './CaseDetailsLinkWorkflowRunsModal';
 import { CaseDetailsLinkedWorkflowRunsTable } from './CaseDetailsLinkedWorkflowRunsTable';
 import { CaseDetailsLinkedWorkflowRunFilesTable } from './CaseDetailsLinkedWorkflowRunFilesTable';
+import { CaseDetailsUnlinkEntityModal } from './CaseDetailsUnlinkEntityModal';
+import { submitCaseUnlink, type CaseUnlinkTarget } from '../utils/caseUnlink';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -38,16 +41,19 @@ function WorkflowTypeButton({
   onClick: () => void;
 }) {
   return (
-    <button
+    <Button
+      variant='ghost'
+      size='inline'
       type='button'
+      aria-pressed={isSelected}
       onClick={onClick}
-      className={`w-full border-l-2 px-4 py-3.5 text-left transition-colors ${
+      className={`h-9 w-full justify-start rounded-none border-l-2 px-4 py-1.5 text-left transition-colors ${
         isSelected
-          ? 'border-l-blue-400 bg-white dark:bg-[#1e252e]'
+          ? 'border-l-blue-400 bg-white hover:bg-white dark:bg-[#1e252e] dark:hover:bg-[#1e252e]'
           : 'border-l-transparent hover:border-l-gray-400 hover:bg-neutral-100 dark:hover:bg-[#1e252e]'
       }`}
     >
-      <div className='flex items-center justify-between gap-2'>
+      <div className='flex w-full min-w-0 items-center justify-between gap-2'>
         <span
           className={`truncate text-sm font-semibold ${
             isSelected ? 'text-blue-700 dark:text-blue-400' : 'text-neutral-900 dark:text-white'
@@ -61,7 +67,7 @@ function WorkflowTypeButton({
           </span>
         )}
       </div>
-    </button>
+    </Button>
   );
 }
 
@@ -77,6 +83,7 @@ export function CaseDetailsLinkedWorkflowRunsTab() {
   const [selectedPortalRunId, setSelectedPortalRunId] = useState<string | null>(null);
   const [runSearch, setRunSearch] = useState('');
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
+  const [unlinkTarget, setUnlinkTarget] = useState<CaseUnlinkTarget | null>(null);
 
   // Collect all linked workflow run orcabusIds from case external entities.
   const wfrOrcabusIdArray = useMemo(() => {
@@ -149,28 +156,21 @@ export function CaseDetailsLinkedWorkflowRunsTab() {
 
   const unlinkMutation = useCaseUnlinkEntityModel();
 
-  const handleUnlink = (wfrOrcabusId: string) => {
-    if (!caseOrcabusId) return;
-    unlinkMutation.mutate(
-      {
-        params: {
-          path: {
-            orcabusId: caseOrcabusId,
-            externalEntityOrcabusId: wfrOrcabusId,
-          },
-        },
+  const handleConfirmUnlink = () => {
+    submitCaseUnlink({
+      caseOrcabusId,
+      target: unlinkTarget,
+      mutate: unlinkMutation.mutate,
+      onSuccess: () => {
+        toast.success('Workflow run unlinked');
+        setUnlinkTarget(null);
+        setSelectedPortalRunId(null);
+        refresh();
       },
-      {
-        onSuccess: () => {
-          toast.success('Workflow run unlinked');
-          if (selectedPortalRunId) setSelectedPortalRunId(null);
-          refresh();
-        },
-        onError: () => {
-          toast.error('Failed to unlink workflow run');
-        },
-      }
-    );
+      onError: () => {
+        toast.error('Failed to unlink workflow run');
+      },
+    });
   };
 
   const handleSelectWorkflowType = (key: string | null) => {
@@ -283,21 +283,22 @@ export function CaseDetailsLinkedWorkflowRunsTab() {
                 </p>
               </div>
               {isFilesView && (
-                <button
+                <Button
+                  variant='ghost'
                   type='button'
                   onClick={() => setSelectedPortalRunId(null)}
                   className='inline-flex shrink-0 items-center gap-1.5 rounded-md border border-neutral-300 bg-white px-3 py-1.5 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-[#2d3540] dark:bg-[#1e252e] dark:text-[#c1cbd8] dark:hover:bg-[#2d3540]'
                 >
                   <ArrowLeft className='h-3.5 w-3.5' aria-hidden='true' />
                   Back to workflow runs
-                </button>
+                </Button>
               )}
             </div>
             {/* Search bar — runs view only */}
             {!isFilesView && (
               <div className='relative mt-4'>
                 <Search className='absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-neutral-400 dark:text-[#9dabb9]' />
-                <input
+                <Input
                   type='text'
                   value={runSearch}
                   onChange={(e) => setRunSearch(e.target.value)}
@@ -328,7 +329,13 @@ export function CaseDetailsLinkedWorkflowRunsTab() {
                       : 'No workflow runs found for this workflow type.'
                 }
                 onViewFiles={setSelectedPortalRunId}
-                onUnlink={handleUnlink}
+                onUnlink={(run) =>
+                  setUnlinkTarget({
+                    type: 'workflow run',
+                    orcabusId: run.orcabusId,
+                    label: run.workflowRunName ?? run.portalRunId,
+                  })
+                }
                 unlinkIsPending={unlinkMutation.isPending}
               />
             )}
@@ -344,6 +351,13 @@ export function CaseDetailsLinkedWorkflowRunsTab() {
           setIsLinkModalOpen(false);
           refresh();
         }}
+      />
+      <CaseDetailsUnlinkEntityModal
+        isOpen={unlinkTarget !== null}
+        target={unlinkTarget}
+        isPending={unlinkMutation.isPending}
+        onCancel={() => setUnlinkTarget(null)}
+        onConfirm={handleConfirmUnlink}
       />
     </>
   );

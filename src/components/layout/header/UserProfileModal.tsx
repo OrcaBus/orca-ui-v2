@@ -41,7 +41,7 @@ function formatDate(timestamp: string | undefined): string {
 function IdentityRow({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
     <div className='flex items-baseline justify-between gap-4 px-4 py-2'>
-      <p className='shrink-0 text-[11px] text-slate-400 dark:text-neutral-500'>{label}</p>
+      <p className='text-caption shrink-0 text-slate-400 dark:text-neutral-500'>{label}</p>
       <p
         className={`min-w-0 truncate text-right text-[12px] text-slate-700 dark:text-slate-300 ${mono ? 'font-mono' : ''}`}
         title={value}
@@ -91,7 +91,7 @@ export function UserProfileModal({ user, groups = [], isOpen, onClose }: UserPro
           <div className='flex items-start gap-3 border-b border-slate-100 px-4 py-3 dark:border-[#2d3540]'>
             <Mail className='mt-0.5 h-4 w-4 shrink-0 text-slate-400 dark:text-[#9dabb9]' />
             <div className='min-w-0 flex-1'>
-              <p className='text-[11px] font-medium tracking-wider text-slate-400 uppercase dark:text-neutral-500'>
+              <p className='text-caption font-medium tracking-wider text-slate-400 uppercase dark:text-neutral-500'>
                 Email
               </p>
               <p className='mt-0.5 text-[13px] text-slate-800 dark:text-slate-200'>
@@ -99,7 +99,7 @@ export function UserProfileModal({ user, groups = [], isOpen, onClose }: UserPro
               </p>
             </div>
             <span
-              className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ${
+              className={`text-caption inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 font-medium ${
                 isEmailVerified
                   ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400'
                   : 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400'
@@ -118,10 +118,10 @@ export function UserProfileModal({ user, groups = [], isOpen, onClose }: UserPro
           <div className='flex items-start gap-3 px-4 py-3'>
             <Fingerprint className='mt-0.5 h-4 w-4 shrink-0 text-slate-400 dark:text-[#9dabb9]' />
             <div className='min-w-0 flex-1'>
-              <p className='text-[11px] font-medium tracking-wider text-slate-400 uppercase dark:text-neutral-500'>
+              <p className='text-caption font-medium tracking-wider text-slate-400 uppercase dark:text-neutral-500'>
                 User ID
               </p>
-              <p className='mt-0.5 font-mono text-[11px] break-all text-slate-600 dark:text-slate-300'>
+              <p className='text-caption mt-0.5 font-mono break-all text-slate-600 dark:text-slate-300'>
                 {sub || '—'}
               </p>
             </div>
@@ -153,7 +153,7 @@ export function UserProfileModal({ user, groups = [], isOpen, onClose }: UserPro
         {/* Identity providers */}
         {identities.length > 0 && (
           <div>
-            <p className='mb-2 text-[11px] font-semibold tracking-wider text-slate-400 uppercase dark:text-neutral-500'>
+            <p className='text-caption mb-2 font-semibold tracking-wider text-slate-400 uppercase dark:text-neutral-500'>
               Connected Accounts
             </p>
             <div className='space-y-2'>
@@ -162,13 +162,13 @@ export function UserProfileModal({ user, groups = [], isOpen, onClose }: UserPro
                   {/* Provider header */}
                   <div className='flex items-center gap-3 border-b border-slate-100 px-4 py-3 dark:border-[#2d3540]'>
                     <div className='flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100 dark:bg-[#2d3540]'>
-                      <Globe className='h-3.5 w-3.5 text-slate-500 dark:text-[#9dabb9]' />
+                      <Globe className='text-muted-foreground h-3.5 w-3.5' />
                     </div>
                     <p className='flex-1 text-[13px] font-medium text-slate-800 dark:text-slate-200'>
                       {id.providerName ?? id.providerType ?? 'Unknown'}
                     </p>
                     {id.primary === 'true' && (
-                      <span className='shrink-0 rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-medium text-blue-600 dark:bg-[#137fec]/10 dark:text-[#137fec]'>
+                      <span className='text-caption shrink-0 rounded-full bg-blue-50 px-2 py-0.5 font-medium text-blue-600 dark:bg-[#137fec]/10 dark:text-[#137fec]'>
                         Primary
                       </span>
                     )}

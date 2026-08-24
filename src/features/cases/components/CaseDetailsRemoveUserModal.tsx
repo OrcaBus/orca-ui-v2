@@ -1,6 +1,7 @@
 import { Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { DialogFrame } from '@/components/modals/DialogFrame';
+import { Button } from '@/components/ui/Button';
 import { useLastPresent } from '@/hooks/useLastPresent';
 import { useCaseRemoveUserModel } from '../api/cases.api';
 
@@ -52,23 +53,23 @@ export function CaseDetailsRemoveUserModal({
       closeDisabled={removeMutation.isPending}
       footer={
         <>
-          <button
+          <Button
             type='button'
+            variant='outline'
             onClick={onClose}
             disabled={removeMutation.isPending}
-            className='rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-[#2d3540] dark:bg-transparent dark:text-neutral-300 dark:hover:bg-[#2d3540]'
           >
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             type='button'
+            variant='destructive'
             onClick={handleConfirm}
             disabled={removeMutation.isPending}
-            className='flex items-center gap-2 rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50'
           >
             <Trash2 className='h-4 w-4' />
             {removeMutation.isPending ? 'Removing…' : 'Remove'}
-          </button>
+          </Button>
         </>
       }
     >

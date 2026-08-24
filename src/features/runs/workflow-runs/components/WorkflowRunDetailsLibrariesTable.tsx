@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/Button';
 import { useNavigate } from 'react-router';
 import {
   DataTable,
@@ -55,7 +56,9 @@ export function WorkflowRunDetailsLibrariesTable() {
       defaultSortDirection: 'desc',
       onSort: (nextDirection) => setOrderBy(orderByParam(nextDirection, 'library_id')),
       render: (lib) => (
-        <button
+        <Button
+          variant='ghost'
+          size='inline'
           onClick={(e) => {
             e.stopPropagation();
             void navigate(`/lab/libraries/${lib.orcabusId}`);
@@ -63,7 +66,7 @@ export function WorkflowRunDetailsLibrariesTable() {
           className='text-left font-mono font-medium text-blue-600 hover:text-blue-800 hover:underline dark:text-[#137fec] dark:hover:text-blue-400'
         >
           {lib.libraryId}
-        </button>
+        </Button>
       ),
     },
     {

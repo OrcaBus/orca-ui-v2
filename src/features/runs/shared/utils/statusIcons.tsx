@@ -1,30 +1,37 @@
 import {
-  CheckCircle,
   XCircle,
-  Ban,
   Archive,
-  Loader,
   ShieldCheck,
   ShieldQuestion,
   CircleDot,
   CircleOff,
   Hash,
-  MessageCircleCheck,
-  NotebookPen,
 } from 'lucide-react';
+import { cn } from '@/utils/cn';
+import {
+  FAMILY_ACCENT,
+  getStatusFamily,
+  normalizeStatusBadgeKey,
+  statusConfig,
+} from '@/components/ui/status-config';
 
 const filledIconProps = { fill: 'currentColor', stroke: 'white', strokeWidth: 1.5 } as const;
 
+// Validation-state icons use the shared family accents while retaining their
+// domain-specific icon and filled treatment. Run-status icons below render
+// directly from the shared status registry.
+
 export function getValidationStateIcon(state: string) {
+  const accent = FAMILY_ACCENT[getStatusFamily(state)];
   switch (state) {
     case 'validated':
-      return <ShieldCheck className='h-5 w-5 text-green-500' {...filledIconProps} />;
+      return <ShieldCheck className={cn('h-5 w-5', accent)} {...filledIconProps} />;
     case 'unvalidated':
-      return <ShieldQuestion className='h-5 w-5 text-amber-500' {...filledIconProps} />;
+      return <ShieldQuestion className={cn('h-5 w-5', accent)} {...filledIconProps} />;
     case 'deprecated':
-      return <Archive className='h-5 w-5 text-purple-500' {...filledIconProps} />;
+      return <Archive className={cn('h-5 w-5', accent)} {...filledIconProps} />;
     case 'failed':
-      return <XCircle className='h-5 w-5 text-red-500' {...filledIconProps} />;
+      return <XCircle className={cn('h-5 w-5', accent)} {...filledIconProps} />;
     default:
       return null;
   }
@@ -53,23 +60,18 @@ export function getWorkflowTypeIcon(type: string) {
 }
 
 export function getRunsStatusIcon(status: string) {
-  switch (status) {
-    case 'succeeded':
-      return <CheckCircle className='h-5 w-5 text-green-500' {...filledIconProps} />;
-    case 'failed':
-      return <XCircle className='h-5 w-5 text-red-500' {...filledIconProps} />;
-    case 'aborted':
-      return <Ban className='h-5 w-5 text-neutral-500' {...filledIconProps} />;
-    case 'resolved':
-      return <MessageCircleCheck className='h-5 w-5 text-cyan-500' {...filledIconProps} />;
-    case 'deprecated':
-      return <Archive className='h-5 w-5 text-purple-500' {...filledIconProps} />;
-    case 'ongoing':
-    case 'running':
-      return <Loader className='h-5 w-5 animate-spin text-blue-500' />;
-    case 'draft':
-      return <NotebookPen className='h-5 w-5 text-blue-500' {...filledIconProps} />;
-    default:
-      return null;
-  }
+  const canonicalStatus = normalizeStatusBadgeKey(status);
+  if (canonicalStatus === 'unknown') return null;
+  const config = statusConfig[canonicalStatus];
+  const Icon = config.icon;
+  const shouldAnimate = 'animate' in config && config.animate;
+  return (
+    <Icon
+      className={cn(
+        'h-5 w-5',
+        shouldAnimate && 'motion-safe:animate-spin',
+        FAMILY_ACCENT[config.family]
+      )}
+    />
+  );
 }

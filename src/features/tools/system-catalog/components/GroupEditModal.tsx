@@ -1,3 +1,5 @@
+import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
 import { useState, useEffect } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -117,13 +119,14 @@ export function GroupEditModal({
       bodyClassName='min-h-0 flex-1 overflow-y-auto px-6 py-4'
       footer={
         <>
-          <button
+          <Button
+            variant='ghost'
             type='button'
             onClick={handleClose}
             className='rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-[#2d3540] dark:bg-transparent dark:text-neutral-300 dark:hover:bg-[#2d3540]'
           >
             Cancel
-          </button>
+          </Button>
           <Button type='submit' form={GROUP_FORM_ID} disabled={!isValid || isSubmitting}>
             <Plus />
             {isEditing ? 'Save Changes' : 'Add Group'}
@@ -140,7 +143,7 @@ export function GroupEditModal({
             >
               Group Name <span className='text-red-500'>*</span>
             </label>
-            <input
+            <Input
               id='group-name'
               type='text'
               placeholder='Enter group name'
@@ -176,7 +179,7 @@ export function GroupEditModal({
               Type
             </label>
             <div className='relative'>
-              <select
+              <Select
                 id='group-type'
                 {...register('type')}
                 className={inputClassName + ' appearance-none pr-8'}
@@ -186,7 +189,7 @@ export function GroupEditModal({
                     {TYPE_LABELS[type]}
                   </option>
                 ))}
-              </select>
+              </Select>
               <ChevronDown className='pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-slate-400' />
             </div>
           </div>
@@ -197,7 +200,8 @@ export function GroupEditModal({
             </label>
             <div className='flex flex-wrap gap-2'>
               {COLOR_PRESETS.map((color) => (
-                <button
+                <Button
+                  variant='ghost'
                   key={color}
                   type='button'
                   onClick={() => setValue('color', color, { shouldValidate: true })}
@@ -216,7 +220,7 @@ export function GroupEditModal({
                 className='h-7 w-7 shrink-0 rounded-full border border-slate-200 dark:border-[#2d3540]'
                 style={{ background: currentColor || '#6366f1' }}
               />
-              <input
+              <Input
                 type='text'
                 placeholder='#6366f1'
                 {...register('color')}
@@ -242,16 +246,18 @@ export function GroupEditModal({
                     ? 'Select nodes...'
                     : `${selectedNodeIds.length} node${selectedNodeIds.length === 1 ? '' : 's'} selected`}
                 </span>
-                <button
+                <Button
+                  variant='ghost'
                   type='button'
                   onClick={(event) => {
                     event.stopPropagation();
                     setIsNodeDropdownOpen((open) => !open);
                   }}
+                  aria-label='Select nodes'
                   className='ml-auto shrink-0 rounded-md p-0.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-[#2d3540] dark:hover:text-white'
                 >
                   <Plus className='h-4 w-4' />
-                </button>
+                </Button>
               </div>
 
               {selectedNodeIds.length > 0 && (
@@ -272,7 +278,8 @@ export function GroupEditModal({
                         <span className='text-sm font-medium text-slate-700 dark:text-slate-300'>
                           {node?.label ?? nodeId}
                         </span>
-                        <button
+                        <Button
+                          variant='ghost'
                           type='button'
                           onClick={() =>
                             setValue(
@@ -281,10 +288,11 @@ export function GroupEditModal({
                               { shouldValidate: true }
                             )
                           }
+                          aria-label={`Remove node ${node?.label ?? nodeId}`}
                           className='rounded-md p-0.5 text-slate-300 transition-colors hover:bg-slate-100 hover:text-slate-500 dark:text-[#4a5568] dark:hover:bg-[#2d3540] dark:hover:text-white'
                         >
                           <X className='h-3 w-3' />
-                        </button>
+                        </Button>
                       </div>
                     );
                   })}
@@ -294,7 +302,8 @@ export function GroupEditModal({
               {isNodeDropdownOpen && availableNodes.length > 0 && (
                 <div className='absolute top-full right-0 left-0 z-10 mt-1 max-h-48 overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg dark:border-[#2d3540] dark:bg-[#1e252e]'>
                   {availableNodes.map(([nodeId, node]) => (
-                    <button
+                    <Button
+                      variant='ghost'
                       key={nodeId}
                       type='button'
                       onClick={() => {
@@ -313,7 +322,7 @@ export function GroupEditModal({
                       <span className='shrink-0 text-xs text-slate-400 dark:text-[#6b7a8d]'>
                         {getNodeDetailLabel(node)}
                       </span>
-                    </button>
+                    </Button>
                   ))}
                 </div>
               )}

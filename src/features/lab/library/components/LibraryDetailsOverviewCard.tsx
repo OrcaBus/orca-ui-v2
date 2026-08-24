@@ -1,12 +1,14 @@
+import { Button } from '@/components/ui/Button';
 import { useState } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
-import { PillTag, type PillTagVariant } from '@/components/ui/PillTag';
+import { PillTag } from '@/components/ui/PillTag';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/Tooltip';
 import { formatBytes, getFileExtension, getFileTypeBadgeStyle } from '@/utils/files';
 import { FilePathSegments } from '@/features/files/components/FilePathSegments';
 import { FilePreviewDrawer } from '@/features/files/components/FilePreviewDrawer';
 import { useLibraryDetails } from '../context/LibraryDetailsContext';
 import { useLibraryLinkageFiles } from '../hooks/useLibraryLinkageFiles';
+import { getQualityVariant } from '../utils/libraryDisplay';
 import type {
   LibraryLinkageFileGroup,
   LibraryLinkageFileGroupKey,
@@ -80,14 +82,15 @@ function LinkageErrorState({ onRetry }: { onRetry: () => void }) {
           <div className='text-sm font-medium text-red-800 dark:text-red-300'>
             Unable to load linkage files
           </div>
-          <button
+          <Button
+            variant='ghost'
             type='button'
             onClick={onRetry}
             className='mt-2 inline-flex items-center gap-1.5 rounded-md border border-red-200 bg-white px-2.5 py-1 text-xs font-medium text-red-700 transition-colors hover:bg-red-100 dark:border-red-500/30 dark:bg-transparent dark:text-red-300 dark:hover:bg-red-500/10'
           >
             <RefreshCw className='h-3.5 w-3.5' aria-hidden='true' />
             Retry
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -112,13 +115,14 @@ function FileNameBadge({
     <>
       <Tooltip>
         <TooltipTrigger asChild>
-          <button
+          <Button
+            variant='ghost'
             type='button'
             onClick={() => setIsPreviewOpen(true)}
             className={`inline-flex max-w-full min-w-0 cursor-pointer items-center rounded-full border px-2 py-0.5 text-xs! font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${fileGroupStyles[groupKey]}`}
           >
             <span className='truncate'>{filename}</span>
-          </button>
+          </Button>
         </TooltipTrigger>
         <TooltipContent side='top' align='start' variant='light' size='md'>
           <div className='space-y-2.5'>
@@ -126,28 +130,28 @@ function FileNameBadge({
               {filename}
             </div>
             <div className='grid grid-cols-[auto_minmax(0,1fr)] items-start gap-x-3 gap-y-1.5'>
-              <span className='text-[11px] text-neutral-500 dark:text-neutral-400'>Type</span>
+              <span className='text-caption text-neutral-500 dark:text-neutral-400'>Type</span>
               <span
-                className={`inline-flex w-fit items-center rounded px-1.5 py-0.5 text-[10px] font-bold uppercase ${getFileTypeBadgeStyle(ext)}`}
+                className={`text-caption inline-flex w-fit items-center rounded px-1.5 py-0.5 font-bold uppercase ${getFileTypeBadgeStyle(ext)}`}
               >
                 {ext}
               </span>
-              <span className='text-[11px] text-neutral-500 dark:text-neutral-400'>Size</span>
-              <span className='text-[11px] text-neutral-700 dark:text-neutral-200'>
+              <span className='text-caption text-neutral-500 dark:text-neutral-400'>Size</span>
+              <span className='text-caption text-neutral-700 dark:text-neutral-200'>
                 {record.size != null ? formatBytes(record.size) : FALLBACK_VALUE}
               </span>
-              <span className='text-[11px] text-neutral-500 dark:text-neutral-400'>Location</span>
+              <span className='text-caption text-neutral-500 dark:text-neutral-400'>Location</span>
               <span className='min-w-0'>
                 {dir ? (
                   <FilePathSegments path={dir} />
                 ) : (
-                  <span className='text-[11px] text-neutral-400 dark:text-neutral-500'>
+                  <span className='text-caption text-neutral-400 dark:text-neutral-500'>
                     {FALLBACK_VALUE}
                   </span>
                 )}
               </span>
             </div>
-            <div className='border-t border-neutral-100 pt-1.5 text-[11px] text-neutral-400 dark:border-neutral-700 dark:text-neutral-500'>
+            <div className='text-caption border-t border-neutral-100 pt-1.5 text-neutral-400 dark:border-neutral-700 dark:text-neutral-500'>
               Click to preview
             </div>
           </div>
@@ -172,7 +176,7 @@ function LinkageFileGroupList({ groups }: { groups: LibraryLinkageFileGroup[] })
             <h4 className='text-xs font-medium text-neutral-600 dark:text-[#9dabb9]'>
               {group.label}
             </h4>
-            <span className='rounded-full bg-neutral-100 px-1.5 py-0.5 text-[10px] font-medium text-neutral-500 dark:bg-[#2d3540] dark:text-[#9dabb9]'>
+            <span className='text-caption rounded-full bg-neutral-100 px-1.5 py-0.5 font-medium text-neutral-500 dark:bg-[#2d3540] dark:text-[#9dabb9]'>
               {group.files.length}
             </span>
           </div>
@@ -349,22 +353,4 @@ function formatDisplayValue(
   }
 
   return displayValue.charAt(0).toUpperCase() + displayValue.slice(1);
-}
-
-function getQualityVariant(quality: string): PillTagVariant {
-  const normalizedQuality = quality.toLowerCase();
-
-  if (normalizedQuality === 'good') {
-    return 'green';
-  }
-
-  if (normalizedQuality === 'borderline') {
-    return 'amber';
-  }
-
-  if (normalizedQuality === 'poor' || normalizedQuality === 'very-poor') {
-    return 'red';
-  }
-
-  return 'neutral';
 }

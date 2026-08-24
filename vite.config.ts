@@ -1,4 +1,5 @@
-import { defineConfig, type PluginOption } from 'vite';
+import { type PluginOption } from 'vite';
+import { configDefaults, defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import checker from 'vite-plugin-checker';
@@ -65,6 +66,9 @@ export default defineConfig({
   },
   preview: {
     port: 3000,
+  },
+  test: {
+    exclude: [...configDefaults.exclude, '**/.pnpm-store/**', '**/.worktrees/**'],
   },
   // App is served under /v2/ in deployed environments.
   base: '/v2/',

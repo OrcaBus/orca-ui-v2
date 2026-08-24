@@ -70,7 +70,7 @@ export function IcaPipelineNode({ data }: NodeProps) {
             <Cloud className='h-5 w-5' style={{ color }} />
           </div>
           <div>
-            <div className='text-[11px] font-bold tracking-wide' style={{ color }}>
+            <div className='text-caption font-bold tracking-wide' style={{ color }}>
               ICA
             </div>
           </div>
@@ -78,11 +78,11 @@ export function IcaPipelineNode({ data }: NodeProps) {
         <div className='text-[13px] leading-tight font-semibold text-slate-900 dark:text-white'>
           {d.label}
         </div>
-        <div className='mt-1 text-[10px] leading-snug text-slate-500 dark:text-slate-400'>
+        <div className='text-caption mt-1 leading-snug text-slate-500 dark:text-slate-400'>
           {d.description.length > 60 ? `${d.description.slice(0, 60)}…` : d.description}
         </div>
         {d.version && (
-          <div className='mt-1 text-[10px] text-slate-400 dark:text-slate-500'>{d.version}</div>
+          <div className='text-caption mt-1 text-slate-400 dark:text-slate-500'>{d.version}</div>
         )}
       </div>
       <NodeHandles />
@@ -121,7 +121,7 @@ export function EventBridgeNode({ data }: NodeProps) {
             <Radio className='h-5 w-5' style={{ color }} />
           </div>
           <div className='text-center'>
-            <div className='text-[10px] font-bold tracking-wider uppercase' style={{ color }}>
+            <div className='text-caption font-bold tracking-wider uppercase' style={{ color }}>
               EventBridge
             </div>
             <div className='text-[13px] leading-tight font-semibold text-slate-900 dark:text-white'>
@@ -157,7 +157,7 @@ export function SqsNode({ data }: NodeProps) {
           >
             <Inbox className='h-4 w-4' style={{ color }} />
           </div>
-          <div className='text-[10px] font-bold tracking-wider uppercase' style={{ color }}>
+          <div className='text-caption font-bold tracking-wider uppercase' style={{ color }}>
             SQS
           </div>
         </div>
@@ -193,7 +193,7 @@ export function S3Node({ data }: NodeProps) {
           >
             <HardDrive className='h-4 w-4' style={{ color }} />
           </div>
-          <div className='text-[10px] font-bold tracking-wider uppercase' style={{ color }}>
+          <div className='text-caption font-bold tracking-wider uppercase' style={{ color }}>
             S3
           </div>
         </div>
@@ -232,7 +232,7 @@ export function RestApiServiceNode({ data }: NodeProps) {
         </div>
 
         {/* REST API badge */}
-        <div className='mt-2 inline-flex items-center gap-1 rounded-full border border-slate-200 px-2 py-0.5 text-[10px] font-medium text-slate-600 dark:border-[#2d3540] dark:text-slate-400'>
+        <div className='text-caption mt-2 inline-flex items-center gap-1 rounded-full border border-slate-200 px-2 py-0.5 font-medium text-slate-600 dark:border-[#2d3540] dark:text-slate-400'>
           REST API
         </div>
 
@@ -290,7 +290,7 @@ export function ExecutionServiceNode({ data }: NodeProps) {
 
         {/* Execution Service badge */}
         <div
-          className='mt-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold'
+          className='text-caption mt-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-semibold'
           style={{ background: `${sfColor}15`, color: sfColor }}
         >
           <Play className='h-2.5 w-2.5' />

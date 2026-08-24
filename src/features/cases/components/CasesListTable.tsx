@@ -1,12 +1,13 @@
+import { Button } from '@/components/ui/Button';
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router';
 import { DataTable, type Column } from '../../../components/tables/DataTable';
 import { ApiErrorState } from '../../../components/ui/ApiErrorState';
 import { PillTag } from '../../../components/ui/PillTag';
+import { StatusBadge } from '@/components/ui/StatusBadge';
 import { DEFAULT_PAGE_SIZE } from '@/utils/constants';
 import { useCasesListQueryParams } from '../hooks/useCasesListQueryParams';
 import { useCaseListModel, type CaseDetailModel } from '../api/cases.api';
-import { getCaseStatusVisual } from '../utils/caseStatus.visuals';
 import { formatCaseText } from '../utils/caseDisplay';
 import { formatCalendarDate } from '@/utils/timeFormat';
 import { orderByParam } from '@/utils/queryParams';
@@ -40,12 +41,14 @@ export function CasesListTable() {
         defaultSortDirection: 'desc',
         onSort: (direction) => setOrderBy(orderByParam(direction, 'request_form_id')),
         render: (case_) => (
-          <button
+          <Button
+            variant='ghost'
+            size='inline'
             onClick={() => void navigate(`/cases/${case_.orcabusId}`)}
             className='text-left text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline dark:text-blue-400 dark:hover:text-blue-300'
           >
             {case_.requestFormId}
-          </button>
+          </Button>
         ),
       },
       {
@@ -129,17 +132,12 @@ export function CasesListTable() {
         key: 'status',
         header: 'Status',
         sortable: false,
-        render: (case_) => {
-          if (!case_.latestState?.status) {
-            return <span className='text-sm text-neutral-400 dark:text-neutral-600'>—</span>;
-          }
-          const { variant, label } = getCaseStatusVisual(case_.latestState.status);
-          return (
-            <PillTag variant={variant} size='sm'>
-              {label}
-            </PillTag>
-          );
-        },
+        render: (case_) =>
+          case_.latestState?.status ? (
+            <StatusBadge status={case_.latestState.status} />
+          ) : (
+            <span className='text-sm text-neutral-400 dark:text-neutral-600'>—</span>
+          ),
       },
       {
         key: 'dueDate',

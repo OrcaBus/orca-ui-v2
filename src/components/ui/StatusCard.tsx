@@ -80,7 +80,7 @@ export function StatusCard({
       } ${leftBorderClasses[variant]} ${onClick ? 'cursor-pointer' : ''}`}
     >
       <div className='mb-3 flex items-center justify-between'>
-        <span className='text-[11px] font-semibold tracking-wider text-neutral-500 uppercase dark:text-[#9dabb9]'>
+        <span className='text-caption font-semibold tracking-wider text-neutral-500 uppercase dark:text-[#9dabb9]'>
           {label}
         </span>
         {icon && <span className='dark:text-[#9dabb9]'>{icon}</span>}
@@ -89,7 +89,7 @@ export function StatusCard({
         <span className='text-2xl font-bold text-neutral-900 dark:text-white'>{value}</span>
         {percentage !== undefined && (
           <span
-            className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${percentageClasses[variant]}`}
+            className={`text-caption rounded-full px-1.5 py-0.5 font-semibold ${percentageClasses[variant]}`}
           >
             {percentage}%
           </span>

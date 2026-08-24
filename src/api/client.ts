@@ -10,6 +10,7 @@ import type {
   UseMutationResult,
 } from '@tanstack/react-query';
 import { authMiddleware } from './auth-middleware';
+import { errorStatusMiddleware } from './error-status-middleware';
 
 /* ---------------------------------- */
 /* Base types                         */
@@ -123,6 +124,7 @@ export class ApiClient<Paths extends PathsRecord> {
   }) {
     this.fetch = createFetchClient<Paths>({ baseUrl: config.baseUrl });
     this.fetch.use(authMiddleware);
+    this.fetch.use(errorStatusMiddleware);
     this.rq = createClient(this.fetch);
     this.pathTransform = config.getPath ?? ((p) => p);
   }

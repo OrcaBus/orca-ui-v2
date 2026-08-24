@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/Button';
 import { useState, useCallback, useMemo } from 'react';
 import { FileSearch } from 'lucide-react';
 import { FileDownloadButton } from './FileDownloadButton';
@@ -64,18 +65,20 @@ export function FilesTable() {
           return (
             <div className='flex items-center gap-3'>
               <span
-                className={`inline-flex items-center justify-center rounded px-2 py-0.5 text-[10px] font-bold tracking-wide uppercase ${getFileTypeBadgeStyle(ext)}`}
+                className={`text-caption inline-flex items-center justify-center rounded px-2 py-0.5 font-bold tracking-wide uppercase ${getFileTypeBadgeStyle(ext)}`}
               >
                 {ext}
               </span>
               <div>
-                <button
+                <Button
+                  variant='ghost'
+                  size='inline'
                   type='button'
                   onClick={() => openDetail(file)}
                   className='text-left text-sm font-medium text-neutral-900 hover:underline dark:text-white'
                 >
                   {name}
-                </button>
+                </Button>
                 {dir && (
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -141,6 +144,7 @@ export function FilesTable() {
         key: 'size',
         header: 'Size',
         sortable: true,
+        align: 'right',
         render: (file) => (
           <span className='text-sm text-neutral-900 dark:text-[#9dabb9]'>
             {file.size != null ? formatBytes(file.size) : '-'}

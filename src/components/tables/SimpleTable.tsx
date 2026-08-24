@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
 import Skeleton from 'react-loading-skeleton';
+import { AutoHideScrollArea } from '@/components/ui/AutoHideScrollArea';
+import { TABLE_HEADER_TEXT_CLASSNAME } from './tableStyles';
 
 export interface SimpleTableColumn<T> {
   key: string;
@@ -41,14 +43,14 @@ export function SimpleTable<T>({
       )}
 
       <div className='overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2d3540]'>
-        <div className='overflow-x-auto'>
+        <AutoHideScrollArea aria-label='Scrollable table' className='overflow-x-auto'>
           <table className='w-full text-sm'>
             <thead className='border-b border-neutral-200 bg-neutral-50 dark:border-[#2d3540] dark:bg-[#111418]'>
               <tr>
                 {columns.map((col) => (
                   <th
                     key={col.key}
-                    className='px-4 py-3 text-left text-xs font-semibold tracking-wider text-neutral-500 uppercase dark:text-[#9dabb9]'
+                    className={`px-3 py-2 text-left ${TABLE_HEADER_TEXT_CLASSNAME}`}
                   >
                     {col.header}
                   </th>
@@ -61,7 +63,7 @@ export function SimpleTable<T>({
                 Array.from({ length: loadingRows }).map((_, rowIdx) => (
                   <tr key={`skeleton-${rowIdx}`}>
                     {columns.map((col) => (
-                      <td key={col.key} className='px-4 py-3'>
+                      <td key={col.key} className='px-3 py-2'>
                         <Skeleton
                           height={14}
                           borderRadius={4}
@@ -91,7 +93,7 @@ export function SimpleTable<T>({
                       return (
                         <td
                           key={col.key}
-                          className='px-4 py-3 text-sm whitespace-nowrap text-neutral-900 dark:text-slate-200'
+                          className='px-3 py-2 text-sm whitespace-nowrap text-neutral-900 dark:text-slate-200'
                         >
                           {col.render ? col.render(item) : (raw as ReactNode)}
                         </td>
@@ -102,7 +104,7 @@ export function SimpleTable<T>({
               )}
             </tbody>
           </table>
-        </div>
+        </AutoHideScrollArea>
       </div>
     </div>
   );

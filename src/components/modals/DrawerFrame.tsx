@@ -34,6 +34,7 @@ export interface DrawerFrameProps {
   headerClassName?: string;
   bodyClassName?: string;
   footerClassName?: string;
+  closeDisabled?: boolean;
 }
 
 const sizeClassName: Record<DrawerFrameSize, string> = {
@@ -76,11 +77,16 @@ export function DrawerFrame({
   headerClassName,
   bodyClassName,
   footerClassName,
+  closeDisabled = false,
 }: DrawerFrameProps) {
   const supportingText = subtitle ?? description;
 
   return (
-    <HeadlessDialog open={isOpen} onClose={onClose} className='relative z-50'>
+    <HeadlessDialog
+      open={isOpen}
+      onClose={closeDisabled ? () => undefined : onClose}
+      className='relative z-50'
+    >
       <DialogBackdrop
         transition
         className={cn(
@@ -101,7 +107,7 @@ export function DrawerFrame({
         <DialogPanel
           transition
           className={cn(
-            'pointer-events-auto flex h-full w-screen transform flex-col bg-white shadow-2xl',
+            'pointer-events-auto flex h-full w-screen transform flex-col bg-white shadow-lg',
             'border-neutral-200 transition-all duration-300 ease-in-out',
             'data-leave:duration-200 data-leave:ease-in',
             'dark:border-[#2d3540] dark:bg-[#111418]',
@@ -123,7 +129,7 @@ export function DrawerFrame({
                 <div
                   className={cn(
                     'flex h-9 w-9 shrink-0 items-center justify-center rounded-md',
-                    'bg-blue-50 text-blue-600 dark:bg-[#137fec]/10 dark:text-[#137fec]'
+                    'bg-primary/10 text-primary'
                   )}
                 >
                   {icon}
@@ -139,7 +145,7 @@ export function DrawerFrame({
                 </div>
 
                 {supportingText && (
-                  <HeadlessDescription className='mt-1 text-sm leading-relaxed text-neutral-500 dark:text-neutral-400'>
+                  <HeadlessDescription className='text-muted-foreground mt-1 text-sm leading-relaxed'>
                     {supportingText}
                   </HeadlessDescription>
                 )}
@@ -152,7 +158,9 @@ export function DrawerFrame({
                 {showCloseButton && (
                   <button
                     type='button'
+                    disabled={closeDisabled}
                     onClick={(e) => {
+                      if (closeDisabled) return;
                       // By calling e.currentTarget.blur() before onClose(), focus moves to <body> before the portal is marked aria-hidden.  Headless UI separately tracks the opener element and restores focus to it after the transition finishes, so focus return still works correctly.
                       e.currentTarget.blur();
                       onClose();
@@ -161,6 +169,7 @@ export function DrawerFrame({
                       'rounded-lg p-2 text-neutral-400 transition-colors',
                       'hover:bg-neutral-100 hover:text-neutral-600',
                       'focus:ring-2 focus:ring-blue-500 focus:outline-none',
+                      'disabled:cursor-not-allowed disabled:opacity-50',
                       'dark:hover:bg-[#1e252e] dark:hover:text-neutral-200'
                     )}
                     aria-label={closeLabel}

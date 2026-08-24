@@ -61,7 +61,7 @@ export function RouteErrorFallbackPage({ featureName }: RouteErrorFallbackPagePr
           <h1 className='mt-2 text-2xl font-semibold text-slate-950 dark:text-white'>
             Unable to load {pageLabel}
           </h1>
-          <p className='mx-auto mt-2 max-w-lg text-sm leading-6 text-slate-500 dark:text-[#9dabb9]'>
+          <p className='text-muted-foreground mx-auto mt-2 max-w-lg text-sm leading-6'>
             The rest of the portal is still available. You can retry this page later.
           </p>
         </div>

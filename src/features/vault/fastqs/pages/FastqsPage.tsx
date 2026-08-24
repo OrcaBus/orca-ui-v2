@@ -72,6 +72,7 @@ export function FastqsPage() {
         key: 'size',
         header: 'Size',
         sortable: true,
+        align: 'right',
         render: (file) => (
           <span className='text-sm text-neutral-900 dark:text-neutral-100'>{file.size}</span>
         ),
@@ -142,7 +143,7 @@ export function FastqsPage() {
 
   return (
     <div>
-      <div className='mb-6 grid grid-cols-1 gap-4 md:grid-cols-4'>
+      <div className='mb-3 grid grid-cols-1 gap-4 md:grid-cols-4'>
         {stats.map((stat, index) => (
           <StatusCard
             key={index}

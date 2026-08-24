@@ -9,12 +9,26 @@ import {
 
 describe('getTimelineStateVisual', () => {
   it.each([
+    ['SUBMITTED', 'neutral-100'],
+    ['RUNNABLE', 'neutral-100'],
+    ['STARTING', 'neutral-100'],
+    ['STARTED', 'blue'],
+    ['CANCELLED', 'neutral-100'],
+    ['CANCELED', 'neutral-100'],
+  ])('uses the registry family for workflow state %s', (status, expectedClassPart) => {
+    expect(getTimelineStateVisual(status).badgeClassName).toContain(expectedClassPart);
+  });
+
+  it.each([
     ['request_received', 'blue'],
     ['sequencing_started', 'blue'],
     ['library_partially_failed', 'amber'],
     ['completed', 'green'],
     ['failed', 'red'],
-    ['archived', 'neutral-200'],
+    // 'archived' aliases to DEPRECATED, which shares the one canonical
+    // neutral-family treatment now (neutral-100) — it used to carry its
+    // own slightly-different neutral-200 shade for no documented reason.
+    ['archived', 'neutral-100'],
   ])('maps case status %s to %s timeline styling', (status, expectedClassPart) => {
     expect(getTimelineStateVisual(status).badgeClassName).toContain(expectedClassPart);
   });
