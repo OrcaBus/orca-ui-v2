@@ -126,6 +126,7 @@ export function WorkflowRunDetailsTimeline() {
           eventId: state.orcabusId,
           eventType: TimelineEventTypes.STATE,
           timestamp: state.timestamp,
+          createdBy: state.createdBy ?? undefined,
           sourceType: isEditableState
             ? TimelineEventSourceTypes.CUSTOM
             : TimelineEventSourceTypes.SYSTEM,
