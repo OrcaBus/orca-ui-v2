@@ -5,7 +5,6 @@ import { describe, expect, it, vi } from 'vitest';
 import type { ReactNode } from 'react';
 import { AuthContext, type AuthContextValue } from '@/context/auth-context';
 import { EnvironmentContext } from '@/context/environment-context';
-import { NotificationProvider } from '@/context/NotificationProvider';
 import { AppShellContext, type AppShellContextValue } from '../../../context/app-shell-context';
 import type { AppShellHeaderConfig } from '../../../context/app-shell-context';
 import type { SecondarySidebarGroup, SecondarySidebarItem } from '../SecondarySidebar';
@@ -25,6 +24,19 @@ vi.mock('@/components/ui/Tooltip', () => ({
 // even while closed. These layout tests don't exercise theming.
 vi.mock('@/context/theme-context', () => ({
   useTheme: () => ({ theme: 'system', setTheme: vi.fn() }),
+}));
+
+// The header's alert bell fetches failed runs from three APIs. These layout
+// tests render without a QueryClient and only assert header composition.
+vi.mock('@/components/layout/header/notifications/useRunNotifications', () => ({
+  NOTIFICATION_LOOKBACK_DAYS: 30,
+  NOTIFICATION_PREVIEW_COUNT: 10,
+  useRunNotifications: () => ({
+    notifications: [],
+    totalCount: 0,
+    isLoading: false,
+    isError: false,
+  }),
 }));
 
 const authValue: AuthContextValue = {
@@ -74,18 +86,13 @@ function renderRoot({
     <MemoryRouter initialEntries={['/runs/overview']}>
       <AuthContext.Provider value={authValue}>
         <EnvironmentContext.Provider value={{ environment: 'dev', label: 'Dev' }}>
-          <NotificationProvider>
-            <AppShellContext.Provider value={contextValue}>
-              <Routes>
-                <Route element={<Root />}>
-                  <Route
-                    path='*'
-                    element={<div data-testid='page-content'>Runs page content</div>}
-                  />
-                </Route>
-              </Routes>
-            </AppShellContext.Provider>
-          </NotificationProvider>
+          <AppShellContext.Provider value={contextValue}>
+            <Routes>
+              <Route element={<Root />}>
+                <Route path='*' element={<div data-testid='page-content'>Runs page content</div>} />
+              </Route>
+            </Routes>
+          </AppShellContext.Provider>
         </EnvironmentContext.Provider>
       </AuthContext.Provider>
     </MemoryRouter>

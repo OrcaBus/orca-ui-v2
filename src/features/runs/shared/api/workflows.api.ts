@@ -148,6 +148,8 @@ export const useSuspensePayloadListModel = createSuspenseQueryHook(workflowApi, 
 
 // analysis run model
 export const useAnalysisRunListModel = createSuspenseQueryHook(workflowApi, '/api/v1/analysisrun/');
+// Non-suspense variant for callers that render their own loading state (e.g. global search).
+export const useAnalysisRunListQueryModel = createQueryHook(workflowApi, '/api/v1/analysisrun/');
 export const useAnalysisRunDetailModel = createQueryHook(
   workflowApi,
   '/api/v1/analysisrun/{orcabusId}/'

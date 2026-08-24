@@ -75,4 +75,32 @@ describe('CaseDetailsOverviewCard', () => {
 
     expect(identifierSection.match(/>—</g)).toHaveLength(3);
   });
+
+  it('renders each RNAsum reference as a list item', () => {
+    useCaseDetailsContextMock.mockReturnValue({
+      caseDetail: { ...caseDetail, rnasumReferences: ['BRCA', 'PANCAN'] },
+      isLoadingCaseDetail: false,
+      caseStatesData: undefined,
+      isLoadingCaseStates: false,
+      refresh: vi.fn(),
+    });
+
+    const html = renderToStaticMarkup(<CaseDetailsOverviewCard />);
+    const referenceSection = html.slice(
+      html.indexOf('RNAsum References'),
+      html.indexOf('Description')
+    );
+
+    expect(referenceSection).toContain('<li>');
+    expect(referenceSection).toContain('BRCA');
+    expect(referenceSection).toContain('PANCAN');
+  });
+
+  it('renders an em dash when there are no RNAsum references', () => {
+    const html = renderToStaticMarkup(<CaseDetailsOverviewCard />);
+    const referenceSection = html.slice(html.indexOf('RNAsum References'), html.indexOf('Links'));
+
+    expect(referenceSection).not.toContain('<li>');
+    expect(referenceSection).toContain('—');
+  });
 });

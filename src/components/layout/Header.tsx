@@ -1,12 +1,10 @@
 import { EnvironmentIndicator } from './header/EnvironmentIndicator';
-import { GlobalSearch } from './header/GlobalSearch';
-import { NotificationsMenu } from './header/NotificationsMenu';
+import { GlobalSearch } from './header/global-search/GlobalSearch';
+import { NotificationsMenu } from './header/notifications/NotificationsMenu';
 import { UserMenu } from './header/UserMenu';
 import { PageBreadcrumb } from '@/components/ui/PageBreadcrumb';
 import { cn } from '@/utils/cn';
 import { useAppShell, type AppShellHeaderConfig } from '@/context/app-shell-context';
-import { useEnvironment } from '@/context/environment-context';
-import { isDevEnvironment } from '@/context/environment-resolver';
 
 interface HeaderProps {
   headerConfig: AppShellHeaderConfig | null;
@@ -55,7 +53,6 @@ function HeaderLeftContent({ headerConfig }: HeaderProps) {
 
 export function Header() {
   const { headerConfig } = useAppShell();
-  const { environment } = useEnvironment();
 
   return (
     <header
@@ -72,13 +69,7 @@ export function Header() {
         <GlobalSearch />
         <EnvironmentIndicator />
 
-        {/* NotificationProvider is still backed entirely by mock data
-            (src/context/NotificationProvider.tsx reads mockWorkflowRuns,
-            same as the dev-gated Vault feature) — showing it in production
-            would mean real users see permanently-fake "failed run" alerts.
-            Gate it the same way Vault gates its own mock-data pages until
-            it's wired to a real API. */}
-        {isDevEnvironment(environment) && <NotificationsMenu />}
+        <NotificationsMenu />
         <UserMenu />
       </div>
     </header>

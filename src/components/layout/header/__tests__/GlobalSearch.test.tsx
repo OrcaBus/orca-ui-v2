@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
-import { GlobalSearch } from '../GlobalSearch';
+import { GlobalSearch } from '../global-search/GlobalSearch';
 
 describe('GlobalSearch', () => {
   it('renders the compact header search trigger and divider', () => {
