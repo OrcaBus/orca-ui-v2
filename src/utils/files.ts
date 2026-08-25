@@ -1,5 +1,29 @@
 import mimeDb from 'mime-db';
 
+/** Scheme prefix on every S3 URI (`s3://bucket/key`). */
+export const S3_URI_PREFIX = 's3://';
+
+/**
+ * Splits an `s3://bucket/key` URI into its bucket and key parts.
+ * Returns `null` when the value is not an S3 URI or names no bucket, so callers
+ * can branch on the result instead of guarding against a throw.
+ *
+ * @example parseS3Uri('s3://my-bucket/results/NA12878.bam')
+ *          // → { bucket: 'my-bucket', key: 'results/NA12878.bam' }
+ * @example parseS3Uri('s3://my-bucket/analysis/')
+ *          // → { bucket: 'my-bucket', key: 'analysis/' }
+ * @example parseS3Uri('not-a-uri') // → null
+ */
+export function parseS3Uri(value: string): { bucket: string; key: string } | null {
+  const trimmed = value.trim();
+  if (!trimmed.startsWith(S3_URI_PREFIX)) return null;
+
+  const [bucket, ...keyParts] = trimmed.slice(S3_URI_PREFIX.length).split('/');
+  if (!bucket) return null;
+
+  return { bucket, key: keyParts.join('/') };
+}
+
 /**
  * Extracts the filename from a full S3 key or file path by stripping all
  * leading path segments. `getFileExtension` calls this internally.

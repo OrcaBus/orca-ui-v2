@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
-import { WorkflowRunRerunModal } from './WorkflowRunRerunModal';
+import { WorkflowRunRerunModal } from '../WorkflowRunRerunModal';
 
 vi.mock('@headlessui/react', () => ({
   Description: ({ children, className }: { children: ReactNode; className?: string }) => (

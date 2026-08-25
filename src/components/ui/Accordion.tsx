@@ -4,7 +4,7 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
+  useId,
   useMemo,
   useState,
   type ComponentProps,
@@ -111,9 +111,13 @@ function Accordion({
 const AccordionItemContext = createContext<{
   value: string;
   isOpen: boolean;
+  triggerId: string;
+  contentId: string;
 }>({
   value: '',
   isOpen: false,
+  triggerId: '',
+  contentId: '',
 });
 
 function AccordionItem({
@@ -124,9 +128,15 @@ function AccordionItem({
 }: ComponentProps<'div'> & { value: string }) {
   const { openItems } = useContext(AccordionContext);
   const isOpen = openItems.includes(value);
+  const id = useId();
+
+  const itemContext = useMemo(
+    () => ({ value, isOpen, triggerId: `${id}-trigger`, contentId: `${id}-content` }),
+    [value, isOpen, id]
+  );
 
   return (
-    <AccordionItemContext.Provider value={{ value, isOpen }}>
+    <AccordionItemContext.Provider value={itemContext}>
       <div
         data-slot='accordion-item'
         data-state={isOpen ? 'open' : 'closed'}
@@ -141,15 +151,17 @@ function AccordionItem({
 
 function AccordionTrigger({ className, children, ...props }: ComponentProps<'button'>) {
   const { toggleItem } = useContext(AccordionContext);
-  const { value, isOpen } = useContext(AccordionItemContext);
+  const { value, isOpen, triggerId, contentId } = useContext(AccordionItemContext);
 
   return (
     <div className='flex'>
       <button
         type='button'
+        id={triggerId}
         data-slot='accordion-trigger'
         data-state={isOpen ? 'open' : 'closed'}
         aria-expanded={isOpen}
+        aria-controls={contentId}
         className={cn(
           'focus-visible:border-ring focus-visible:ring-ring/50 flex flex-1 items-start justify-between gap-4 rounded-md py-4 text-left text-sm font-medium transition-all outline-none hover:underline focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50 [&[data-state=open]>svg]:rotate-180',
           className
@@ -165,31 +177,25 @@ function AccordionTrigger({ className, children, ...props }: ComponentProps<'but
 }
 
 function AccordionContent({ className, children, ...props }: ComponentProps<'div'>) {
-  const { isOpen } = useContext(AccordionItemContext);
-  const [shouldRender, setShouldRender] = useState(isOpen);
+  const { isOpen, triggerId, contentId } = useContext(AccordionItemContext);
 
-  useEffect(() => {
-    if (isOpen) {
-      // This state update is necessary to mount the content for the opening animation.
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setShouldRender(true);
-    }
-  }, [isOpen]);
-
-  if (!shouldRender) return null;
-
+  // Collapsing via `grid-template-rows: 0fr -> 1fr` keeps the open/close purely
+  // CSS-driven, so it works without height measurement and without depending on
+  // an animation actually running to reach the collapsed state.
   return (
     <div
+      id={contentId}
       data-slot='accordion-content'
       data-state={isOpen ? 'open' : 'closed'}
-      className='data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down overflow-hidden text-sm'
+      className='grid overflow-hidden text-sm transition-[grid-template-rows] duration-200 ease-out data-[state=closed]:grid-rows-[0fr] data-[state=open]:grid-rows-[1fr] motion-reduce:transition-none'
       role='region'
-      onAnimationEnd={() => {
-        if (!isOpen) setShouldRender(false);
-      }}
+      aria-labelledby={triggerId}
+      inert={!isOpen}
       {...props}
     >
-      <div className={cn('pt-0 pb-4', className)}>{children}</div>
+      <div className='min-h-0 overflow-hidden'>
+        <div className={cn('pt-0 pb-4', className)}>{children}</div>
+      </div>
     </div>
   );
 }
