@@ -86,3 +86,8 @@ src/api/types/*
 DESIGN.md
 PRODUCT.md
 skills-lock.json
+
+# ignore superpower files
+docs/superpower
+
+
