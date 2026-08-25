@@ -49,16 +49,16 @@ export const RUNS_SECONDARY_NAVIGATION_GROUPS: SecondarySidebarGroup[] = [
         icon: Dna,
       },
       {
-        id: 'workflow-runs',
-        label: 'Workflow Runs',
-        to: '/runs/workflow-runs',
-        icon: CirclePlay,
-      },
-      {
         id: 'analysis-runs',
         label: 'Analysis Runs',
         to: '/runs/analysis-runs',
         icon: ChartNoAxesColumn,
+      },
+      {
+        id: 'workflow-runs',
+        label: 'Workflow Runs',
+        to: '/runs/workflow-runs',
+        icon: CirclePlay,
       },
     ],
   },

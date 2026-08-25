@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Copy, Download, FileBracesCorner } from 'lucide-react';
+import { Link } from 'react-router';
 import { toast } from 'sonner';
 import { DialogFrame } from '@/components/modals/DialogFrame';
 import {
@@ -13,6 +14,7 @@ import { CodeViewer } from '@/components/ui/CodeViewer';
 import { Spinner } from '@/components/ui/Spinner';
 import { Tabs } from '@/components/ui/Tabs';
 import { cn } from '@/utils/cn';
+import { parseS3Uri } from '@/utils/files';
 import { formatLabel, formatTimelineTimestamp, isPrimitive, isRecord } from './timeline.utils';
 import { getTimelineStateVisual } from './timeline.visuals';
 
@@ -45,12 +47,43 @@ export function PayloadJsonView({ formattedJson }: { formattedJson: string }) {
   return <CodeViewer code={formattedJson} language='json' showHeader={false} />;
 }
 
+/**
+ * Renders an S3 URI as a link into the files explorer, pre-filtered to that
+ * bucket and key prefix. Directory URIs (trailing slash) and object URIs both
+ * work because the key is matched as a prefix pattern.
+ *
+ * Opens in a new tab so the payload dialog stays where the user left it.
+ */
+function S3UriLink({ bucket, s3Key, value }: { bucket: string; s3Key: string; value: string }) {
+  return (
+    <Link
+      to={`/files?bucket=${encodeURIComponent(bucket)}&key=${encodeURIComponent(s3Key)}*`}
+      target='_blank'
+      rel='noopener noreferrer'
+      className='wrap-break-words text-sm font-medium text-blue-600 transition-colors hover:text-blue-700 hover:underline focus:ring-2 focus:ring-blue-500/50 focus:outline-hidden dark:text-blue-400 dark:hover:text-blue-300'
+      title={`View files in: ${value} (opens in a new tab)`}
+    >
+      {value}
+    </Link>
+  );
+}
+
 function PayloadValue({ value }: { value: unknown }) {
   if (value === null) {
     return <span className='text-sm text-neutral-400 dark:text-neutral-500'>null</span>;
   }
 
   if (typeof value === 'string') {
+    const s3Uri = parseS3Uri(value);
+
+    if (s3Uri) {
+      return (
+        <div className='max-w-full overflow-hidden'>
+          <S3UriLink bucket={s3Uri.bucket} s3Key={s3Uri.key} value={value} />
+        </div>
+      );
+    }
+
     return (
       <div className='wrap-break-words max-w-full overflow-auto text-sm whitespace-pre-wrap text-neutral-700 dark:text-neutral-300'>
         {value}
@@ -74,7 +107,7 @@ function PayloadValue({ value }: { value: unknown }) {
         <ul className='space-y-1 text-sm text-neutral-700 dark:text-neutral-300'>
           {items.map((item, index) => (
             <li key={index} className='wrap-break-words ml-5 list-disc'>
-              {item === null ? 'null' : String(item)}
+              <PayloadValue value={item} />
             </li>
           ))}
         </ul>
