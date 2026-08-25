@@ -54,8 +54,8 @@ describe('getRunsSecondaryNavigation', () => {
         label: 'Runs',
         items: [
           expect.objectContaining({ id: 'sequence-runs', label: 'Sequence Runs' }),
-          expect.objectContaining({ id: 'workflow-runs', label: 'Workflow Runs' }),
           expect.objectContaining({ id: 'analysis-runs', label: 'Analysis Runs' }),
+          expect.objectContaining({ id: 'workflow-runs', label: 'Workflow Runs' }),
         ],
       }),
       expect.objectContaining({

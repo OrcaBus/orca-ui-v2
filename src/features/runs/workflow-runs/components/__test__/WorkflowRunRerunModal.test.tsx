@@ -14,7 +14,7 @@ vi.mock('@headlessui/react', () => ({
   DialogTitle: ({ children }: { children: ReactNode }) => <h2>{children}</h2>,
 }));
 
-vi.mock('./RNASUMDatasetSelect', () => ({
+vi.mock('../RNASUMDatasetSelect', () => ({
   RNASUMDatasetSelect: () => <div>Dataset selector</div>,
 }));
 
