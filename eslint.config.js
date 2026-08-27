@@ -20,6 +20,7 @@ export default defineConfig([
     '.claude',
     '.cursor',
     '.github/skills',
+    '.github/agents',
   ]),
 
   // Base configs

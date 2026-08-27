@@ -44,6 +44,7 @@ const caseDetail: CaseDetailModel = {
   redcapPayload: {},
   dueDate: '2026-08-31',
   externalEntitySet: [],
+  pendingExternalEntities: [],
   userSet: [],
   latestState: null,
   commentSet: [],
