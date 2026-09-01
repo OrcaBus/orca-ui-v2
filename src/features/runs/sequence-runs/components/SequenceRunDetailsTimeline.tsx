@@ -20,7 +20,8 @@ import { isEmail } from '@/utils/string';
 import { formatBackendDate, formatDateTimeLocalInputValue } from '@/utils/timeFormat';
 import { SpinnerWithText } from '@/components/ui/Spinner';
 import {
-  useSequenceRunStateCreateModel,
+  useSequenceRunStateDeprecateModel,
+  useSequenceRunStateResolveModel,
   useSequenceRunStateUpdateModel,
   useSequenceRunCommentCreateModel,
   useSequenceRunCommentUpdateModel,
@@ -29,55 +30,18 @@ import {
   type SequenceRunCommentModel,
 } from '../../shared/api/sequence.api';
 import { useSequenceRunDetailsContext } from '../context/SequenceRunDetailsContext';
+import {
+  dispatchSequenceRunStateTransition,
+  formatSequenceRunStateLabel,
+  getAvailableSequenceRunStateTransitions,
+  getSequenceRunStateTransitionFeedback,
+  normalizeSequenceRunState,
+  type SequenceRunStateValidationMap,
+} from '../utils/sequenceRunStateTransitions';
 
 // ---------------------------------------------------------------------------
 // Helpers (mirrored from WorkflowRunDetailsTimeline)
 // ---------------------------------------------------------------------------
-
-type ValidationRule =
-  | string[]
-  | {
-      allowed_states?: string[];
-      allowedStates?: string[];
-      excluded_states?: string[];
-      excludedStates?: string[];
-    }
-  | null
-  | undefined;
-
-function normalizeStateValue(value?: string | null): string {
-  return (value ?? '')
-    .trim()
-    .replace(/[\s-]+/g, '_')
-    .toUpperCase();
-}
-
-function formatStateLabel(value: string): string {
-  return value
-    .replace(/[_-]+/g, ' ')
-    .toLowerCase()
-    .replace(/\b\w/g, (char) => char.toUpperCase());
-}
-
-function isStateTransitionAllowed(rule: ValidationRule, currentState?: string | null): boolean {
-  if (!currentState) return true;
-  const currentStateKey = normalizeStateValue(currentState);
-
-  if (Array.isArray(rule)) {
-    return rule.some((s) => normalizeStateValue(s) === currentStateKey);
-  }
-  if (rule && typeof rule === 'object') {
-    const allowedStates = rule.allowed_states ?? rule.allowedStates;
-    const excludedStates = rule.excluded_states ?? rule.excludedStates;
-    if (Array.isArray(allowedStates)) {
-      return allowedStates.some((s) => normalizeStateValue(s) === currentStateKey);
-    }
-    if (Array.isArray(excludedStates)) {
-      return !excludedStates.some((s) => normalizeStateValue(s) === currentStateKey);
-    }
-  }
-  return true;
-}
 
 function _isTimelineStateEvent(event: TimelineEvent | null | undefined): event is TimelineEvent {
   return event?.eventType === TimelineEventTypes.STATE;
@@ -134,29 +98,26 @@ export function SequenceRunDetailsTimeline() {
     return sortEventsByLatestTimestamp(sequenceRunStatesData)[0]?.status ?? null;
   }, [sequenceRunStatesData]);
 
-  const validationMapEntries = useMemo(
-    () => Object.entries((sequenceRunStateValidMapData ?? {}) as Record<string, ValidationRule>),
+  const validationMap = useMemo(
+    () => sequenceRunStateValidMapData as SequenceRunStateValidationMap | undefined,
     [sequenceRunStateValidMapData]
   );
 
   const editableStateKeys = useMemo(
-    () => new Set(validationMapEntries.map(([status]) => normalizeStateValue(status))),
-    [validationMapEntries]
+    () =>
+      new Set<string>(
+        getAvailableSequenceRunStateTransitions(validationMap, []).map(({ value }) => value)
+      ),
+    [validationMap]
   );
 
   const availableStateOptions = useMemo(
-    () =>
-      validationMapEntries
-        .filter(([, rule]) => isStateTransitionAllowed(rule, currentSequenceState))
-        .map(([status]) => ({
-          value: status,
-          label: formatStateLabel(status),
-        }))
-        .sort((a, b) => a.label.localeCompare(b.label)),
-    [currentSequenceState, validationMapEntries]
+    () => getAvailableSequenceRunStateTransitions(validationMap, [currentSequenceState]),
+    [currentSequenceState, validationMap]
   );
 
-  const createSequenceRunState = useSequenceRunStateCreateModel();
+  const deprecateSequenceRunState = useSequenceRunStateDeprecateModel();
+  const resolveSequenceRunState = useSequenceRunStateResolveModel();
   const updateSequenceRunState = useSequenceRunStateUpdateModel();
   const createSequenceRunComment = useSequenceRunCommentCreateModel();
   const updateSequenceRunComment = useSequenceRunCommentUpdateModel();
@@ -169,7 +130,7 @@ export function SequenceRunDetailsTimeline() {
   const sequenceRunTimelineStateData = useMemo<TimelineEvent[]>(
     () =>
       (sequenceRunStatesData ?? []).map((state) => {
-        const isEditableState = editableStateKeys.has(normalizeStateValue(state.status));
+        const isEditableState = editableStateKeys.has(normalizeSequenceRunState(state.status));
         return {
           eventId: state.orcabusId,
           eventType: TimelineEventTypes.STATE,
@@ -265,11 +226,33 @@ export function SequenceRunDetailsTimeline() {
 
   const handleAddCustomState = async (data: AddCustomStateFormData) => {
     if (!sequenceRunOrcabusId) throw new Error('Sequence run identifier is required');
+    if (
+      !availableStateOptions.some(
+        ({ value }) => value === normalizeSequenceRunState(data.stateName)
+      )
+    ) {
+      throw new Error('The selected sequence-run state transition is unavailable');
+    }
 
-    await createSequenceRunState.mutateAsync({
-      params: { path: { orcabusId: sequenceRunOrcabusId } },
-      body: { status: data.stateName, comment: data.comment },
-    });
+    const result = await dispatchSequenceRunStateTransition(
+      data.stateName,
+      {
+        sequenceRunOrcabusIds: [sequenceRunOrcabusId],
+        comment: data.comment,
+      },
+      {
+        DEPRECATED: (body) => deprecateSequenceRunState.mutateAsync({ body }),
+        RESOLVED: (body) => resolveSequenceRunState.mutateAsync({ body }),
+      }
+    );
+
+    // A 207 reports per-run failures in the body rather than as an HTTP error,
+    // so surface it instead of letting the dialog close as a success.
+    const feedback = getSequenceRunStateTransitionFeedback(result);
+    if (feedback.type === 'warning') {
+      refresh();
+      throw new Error(result?.failures?.[0]?.detail ?? feedback.message);
+    }
 
     refresh();
   };
@@ -384,7 +367,12 @@ export function SequenceRunDetailsTimeline() {
         onSubmit={handleEditCustomState}
         availableStates={
           editingState
-            ? [{ value: editingState.status, label: formatStateLabel(editingState.status) }]
+            ? [
+                {
+                  value: editingState.status,
+                  label: formatSequenceRunStateLabel(editingState.status),
+                },
+              ]
             : []
         }
         initialValues={
