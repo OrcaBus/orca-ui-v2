@@ -36,6 +36,7 @@ import {
   getAvailableSequenceRunStateTransitions,
   getSequenceRunStateTransitionFeedback,
   normalizeSequenceRunState,
+  type SequenceRunStateTransitionResult,
   type SequenceRunStateValidationMap,
 } from '../utils/sequenceRunStateTransitions';
 
@@ -45,15 +46,6 @@ import {
 
 function _isTimelineStateEvent(event: TimelineEvent | null | undefined): event is TimelineEvent {
   return event?.eventType === TimelineEventTypes.STATE;
-}
-
-function sortEventsByLatestTimestamp<T extends { timestamp: string }>(events: T[]): T[] {
-  return [...events].sort((a, b) => {
-    const da = dayjs(a.timestamp);
-    const db = dayjs(b.timestamp);
-    if (da.isSame(db)) return 0;
-    return da.isAfter(db) ? -1 : 1;
-  });
 }
 
 // ---------------------------------------------------------------------------
@@ -92,11 +84,9 @@ export function SequenceRunDetailsTimeline() {
 
   const sequenceRunOrcabusId = latestSequenceRun?.orcabusId ?? '';
 
-  // Current state for validation (from the latest state entry)
-  const currentSequenceState = useMemo(() => {
-    if (!sequenceRunStatesData?.length) return null;
-    return sortEventsByLatestTimestamp(sequenceRunStatesData)[0]?.status ?? null;
-  }, [sequenceRunStatesData]);
+  // Validate against the status of the run being transitioned, not the latest
+  // state entry (states are aggregated across every run of the instrument run).
+  const currentSequenceState = latestSequenceRun?.status ?? null;
 
   const validationMap = useMemo(
     () => sequenceRunStateValidMapData as SequenceRunStateValidationMap | undefined,
@@ -234,13 +224,15 @@ export function SequenceRunDetailsTimeline() {
       throw new Error('The selected sequence-run state transition is unavailable');
     }
 
-    const result = await dispatchSequenceRunStateTransition(
+    const result = await dispatchSequenceRunStateTransition<SequenceRunStateTransitionResult>(
       data.stateName,
       {
         sequenceRunOrcabusIds: [sequenceRunOrcabusId],
         comment: data.comment,
       },
       {
+        // 201 and 207 return the same body, so both handlers resolve to the
+        // explicit result type rather than the generated multi-status union.
         DEPRECATED: (body) => deprecateSequenceRunState.mutateAsync({ body }),
         RESOLVED: (body) => resolveSequenceRunState.mutateAsync({ body }),
       }
@@ -251,7 +243,7 @@ export function SequenceRunDetailsTimeline() {
     const feedback = getSequenceRunStateTransitionFeedback(result);
     if (feedback.type === 'warning') {
       refresh();
-      throw new Error(result?.failures?.[0]?.detail ?? feedback.message);
+      throw new Error(result.failures?.[0]?.detail ?? feedback.message);
     }
 
     refresh();

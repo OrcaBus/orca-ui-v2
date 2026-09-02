@@ -1,4 +1,31 @@
-import type { SequenceRunStateTransitionRequestModel } from '../../shared/api/sequence.api';
+/**
+ * Request body of `POST /sequence_run/state/{deprecate,resolve}/`
+ * (`StateTransitionRequestRequest` in the generated schema). Declared here so
+ * callers get a concrete type instead of one inferred through the generated
+ * multi-content-type request union.
+ */
+export interface SequenceRunStateTransitionRequest {
+  sequenceRunOrcabusIds: string[];
+  comment: string;
+}
+
+/** One per-run failure entry (`StateTransitionFailure`). */
+export interface SequenceRunStateTransitionFailure {
+  sequenceRunOrcabusId: string;
+  reason: string;
+  detail: string;
+}
+
+/**
+ * Body returned by a transition endpoint on 201 and 207
+ * (`StateTransitionResponse`).
+ */
+export interface SequenceRunStateTransitionResult {
+  createdCount: number;
+  sequenceRunOrcabusIds: string[];
+  failedCount: number;
+  failures?: SequenceRunStateTransitionFailure[];
+}
 
 /**
  * Transitions the sequence-run manager exposes as dedicated endpoints
@@ -21,7 +48,7 @@ export type SequenceRunStateValidationRule =
 export type SequenceRunStateValidationMap = Record<string, SequenceRunStateValidationRule>;
 
 type SequenceRunStateTransitionHandler<TResult> = (
-  request: SequenceRunStateTransitionRequestModel
+  request: SequenceRunStateTransitionRequest
 ) => Promise<TResult>;
 
 export type SequenceRunStateTransitionHandlers<TResult> = Record<
@@ -137,7 +164,7 @@ export function getAvailableSequenceRunStateTransitions(
 
 export function dispatchSequenceRunStateTransition<TResult>(
   state: string,
-  request: SequenceRunStateTransitionRequestModel,
+  request: SequenceRunStateTransitionRequest,
   handlers: SequenceRunStateTransitionHandlers<TResult>
 ): Promise<TResult> {
   const transition = normalizeSequenceRunState(state);
