@@ -75,6 +75,17 @@ export function formatDetailDate(isoString: string): string {
 }
 
 /**
+ * Format date for compact UI display (e.g. stepper timestamps)
+ * @param isoString - ISO 8601 date string (e.g., "2026-02-05T03:09:00Z")
+ * @returns Formatted string: "05/02/26"
+ */
+export function formatShortDate(isoString: string): string {
+  const d = parseInDisplayZone(isoString);
+  if (!d.isValid()) return isoString;
+  return d.format('DD/MM/YY');
+}
+
+/**
  * Format date for backend/API/storage (UTC ISO 8601)
  * @param date - Date object
  * @returns ISO 8601 string: "2026-02-05T03:09:00Z"

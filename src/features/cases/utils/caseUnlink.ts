@@ -1,4 +1,4 @@
-export type CaseUnlinkEntityType = 'library' | 'workflow run';
+export type CaseUnlinkEntityType = 'library' | 'sample' | 'workflow run' | 'sequence run';
 
 export interface CaseUnlinkTarget {
   type: CaseUnlinkEntityType;

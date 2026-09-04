@@ -1,13 +1,16 @@
-import { useMemo, useRef, useEffect } from 'react';
+import { useCallback, useMemo, useRef, useEffect } from 'react';
 import {
-  CaseDetailsOverviewCard,
-  CaseDetailsPageHeader,
+  CaseHeader,
+  CaseDetailsRail,
+  CaseStatsStrip,
+  LifecycleStepper,
   CaseDetailsTabs,
-  CaseDetailsTimeline,
+  CaseDetailsStatesTable,
   CaseDetailsLinkedLibrariesTab,
-  CaseDetailsLinkedWorkflowRunsTab,
-  CaseDetailsUsersTab,
+  CaseDetailsPendingEntitiesTab,
+  CaseDetailsRunsTab,
 } from '../components';
+import type { CaseStatsStripTab } from '../components/CaseStatsStrip';
 import { useAppShellHeader } from '@/context/app-shell-context';
 import { useCaseDetailsTab, CaseDetailsTabValues } from '../hooks/useCaseDetailsTab';
 import { CaseDetailsProvider, useCaseDetailsContext } from '../context/CaseDetailsContext';
@@ -33,7 +36,24 @@ const CasesDetailsAppShellHeader = () => {
 };
 
 export function CaseDetailsPage() {
-  const { activeTab } = useCaseDetailsTab();
+  const { activeTab, setActiveTab } = useCaseDetailsTab();
+
+  const handleSelectStatsTab = useCallback(
+    (tab: CaseStatsStripTab) => {
+      switch (tab) {
+        case 'metadata':
+          setActiveTab(CaseDetailsTabValues.METADATA);
+          break;
+        case 'runs':
+          setActiveTab(CaseDetailsTabValues.RUNS);
+          break;
+        case 'files':
+          setActiveTab(CaseDetailsTabValues.FILES);
+          break;
+      }
+    },
+    [setActiveTab]
+  );
 
   // Scroll to top of tabs when active tab changes, but only on genuine user-initiated tab changes, not on initial mount or Strict Mode remount.
   const tabsRef = useRef<HTMLDivElement>(null);
@@ -60,21 +80,43 @@ export function CaseDetailsPage() {
     <CaseDetailsProvider>
       <CasesDetailsAppShellHeader />
       <div className='px-6'>
-        <CaseDetailsPageHeader />
+        <CaseHeader />
 
-        <CaseDetailsOverviewCard />
+        <div className='mt-4 grid gap-4 lg:grid-cols-[280px_1fr]'>
+          <CaseDetailsRail columns={1} className='hidden lg:block' />
 
-        <div ref={tabsRef}>
-          <CaseDetailsTabs />
-        </div>
+          <div className='min-w-0'>
+            <CaseDetailsRail className='mb-4 lg:hidden' collapsedByDefault />
 
-        <div>
-          {activeTab === CaseDetailsTabValues.TIMELINES && <CaseDetailsTimeline />}
-          {activeTab === CaseDetailsTabValues.LIBRARIES && <CaseDetailsLinkedLibrariesTab />}
+            <div className='mb-4'>
+              <CaseStatsStrip onSelectTab={handleSelectStatsTab} />
+            </div>
 
-          {activeTab === CaseDetailsTabValues.WORKFLOWS && <CaseDetailsLinkedWorkflowRunsTab />}
+            <div className='mb-4'>
+              <LifecycleStepper />
+            </div>
 
-          {activeTab === CaseDetailsTabValues.USERS && <CaseDetailsUsersTab />}
+            <div ref={tabsRef}>
+              <CaseDetailsTabs />
+            </div>
+
+            <div>
+              {/* {activeTab === CaseDetailsTabValues.OVERVIEW && (
+                <div className='text-sm text-gray-500 dark:text-gray-400'>
+                  Overview coming soon.
+                </div>
+              )} */}
+              {activeTab === CaseDetailsTabValues.METADATA && <CaseDetailsLinkedLibrariesTab />}
+
+              {activeTab === CaseDetailsTabValues.RUNS && <CaseDetailsRunsTab />}
+
+              {activeTab === CaseDetailsTabValues.FILES && (
+                <div className='text-sm text-gray-500 dark:text-gray-400'>Files coming soon.</div>
+              )}
+              {activeTab === CaseDetailsTabValues.PENDING && <CaseDetailsPendingEntitiesTab />}
+              {activeTab === CaseDetailsTabValues.STATES && <CaseDetailsStatesTable />}
+            </div>
+          </div>
         </div>
       </div>
     </CaseDetailsProvider>

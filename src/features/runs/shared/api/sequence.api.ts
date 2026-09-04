@@ -19,6 +19,7 @@ const sequenceRunApi = new ApiClient<paths>({
 
 // export component types for consumers
 export type SequenceRunModel = components['schemas']['SequenceRun'];
+export type SequenceRunListModel = components['schemas']['SequenceRunMin'];
 export type SequenceRunCommentModel = components['schemas']['Comment'];
 export type SequenceRunStateModel = components['schemas']['State'];
 export type SequenceRunSampleSheetModel = components['schemas']['SampleSheet'];

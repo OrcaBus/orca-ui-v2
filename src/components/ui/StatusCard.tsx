@@ -3,7 +3,7 @@ import Skeleton from 'react-loading-skeleton';
 
 interface StatusCardProps {
   label: string;
-  value: number;
+  value: number | string;
   percentage?: number;
   icon?: ReactNode;
   variant?: 'success' | 'error' | 'warning' | 'neutral' | 'info';

@@ -58,6 +58,7 @@ export type CaseStatusEnum = components['schemas']['StatusEnum'];
 export type ExternalServiceEnum = components['schemas']['ExternalServiceEnum'];
 
 export type CaseExternalEntityLinkModel = components['schemas']['CaseExternalEntityLink'];
+export type PendingExternalEntityModel = components['schemas']['PendingExternalEntity'];
 export type CaseUserLinkModel = components['schemas']['CaseUserLink'];
 export type CaseStateModel = components['schemas']['State'];
 export type CaseCommentModel = components['schemas']['Comment'];

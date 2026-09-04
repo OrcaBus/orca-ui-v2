@@ -158,17 +158,17 @@ describe('CaseDetailsLinkedWorkflowRunsTab', () => {
     });
   });
 
-  it('matches the compact, left-aligned Lab workflow type selector', () => {
+  it('shows the existing linked workflow runs without workflow search or type filters', () => {
     renderTab();
 
-    const allWorkflowTypes = screen.getByRole('button', { name: 'All1' });
-
-    expect(allWorkflowTypes.classList.contains('h-9')).toBe(true);
-    expect(allWorkflowTypes.classList.contains('justify-start')).toBe(true);
-    expect(allWorkflowTypes.classList.contains('rounded-none')).toBe(true);
-    expect(allWorkflowTypes.classList.contains('text-left')).toBe(true);
-    expect(allWorkflowTypes.getAttribute('aria-pressed')).toBe('true');
-    expect(allWorkflowTypes.firstElementChild?.classList.contains('w-full')).toBe(true);
+    expect(screen.queryByPlaceholderText(/search by run name or portal run id/i)).toBeNull();
+    expect(screen.queryByRole('button', { name: 'All' })).toBeNull();
+    expect(
+      screen.getByRole('button', { name: 'View files for workflow run Unique workflow run' })
+    ).toBeTruthy();
+    expect(
+      screen.getByRole('button', { name: 'Unlink workflow run Unique workflow run' })
+    ).toBeTruthy();
   });
 
   it('labels file and unlink actions, and requires confirmation after cancellation', async () => {

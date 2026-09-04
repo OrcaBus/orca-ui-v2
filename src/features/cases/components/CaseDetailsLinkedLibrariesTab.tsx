@@ -13,10 +13,12 @@ import { DEFAULT_NON_PAGINATE_PAGE_SIZE } from '@/utils/constants';
 import {
   useQueryMetadataLibraryModel,
   type LibraryDetailType,
+  type SampleDetailType,
   type QualityEnum,
 } from '@/features/lab/shared/api/lab.api';
 import { useCaseExternalEntityCreateModel, useCaseUnlinkEntityModel } from '../api/cases.api';
 import { useCaseDetailsContext } from '../context/CaseDetailsContext';
+import { useCaseLinkedSamples } from '../hooks/useCaseLinkedSamples';
 import { CaseDetailsUnlinkEntityModal } from './CaseDetailsUnlinkEntityModal';
 import { submitCaseUnlink, type CaseUnlinkTarget } from '../utils/caseUnlink';
 
@@ -215,6 +217,102 @@ function CaseDetailsLinkLibrariesModal({
 }
 
 // ---------------------------------------------------------------------------
+// Samples Table
+// ---------------------------------------------------------------------------
+
+interface CaseDetailsSamplesTableProps {
+  onUnlink: (target: CaseUnlinkTarget) => void;
+  unlinkIsPending: boolean;
+}
+
+function CaseDetailsSamplesTable({ onUnlink, unlinkIsPending }: CaseDetailsSamplesTableProps) {
+  const {
+    sampleOrcabusIdArray,
+    linkedSamples,
+    isLoading: isLoadingSamples,
+    isRefetching: isRefetchingSamples,
+    isError: isErrorSamples,
+    error: samplesError,
+    refetch: refetchSamples,
+  } = useCaseLinkedSamples();
+
+  const pagination = useTablePagination(1, 10, linkedSamples.length);
+
+  const columns: Column<SampleDetailType>[] = [
+    {
+      key: 'sampleId',
+      header: 'Sample ID',
+      sortable: true,
+      render: (sample) => (
+        <span className='font-mono text-sm font-medium text-neutral-900 dark:text-neutral-100'>
+          {sample.sampleId ?? sample.orcabusId}
+        </span>
+      ),
+    },
+    {
+      key: 'externalSampleId',
+      header: 'External Sample ID',
+      sortable: true,
+      render: (sample) => (
+        <span className='text-sm text-neutral-700 dark:text-[#9dabb9]'>
+          {typeof sample.externalSampleId === 'string' ? sample.externalSampleId : '-'}
+        </span>
+      ),
+    },
+    {
+      key: 'source',
+      header: 'Source',
+      sortable: true,
+      render: (sample) =>
+        sample.source && typeof sample.source === 'string' ? (
+          <PillTag variant='purple' size='sm'>
+            {sample.source}
+          </PillTag>
+        ) : (
+          <span className='text-neutral-400'>-</span>
+        ),
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      render: (sample) => (
+        <Button
+          variant='ghost'
+          size='inline'
+          onClick={(e) => {
+            e.stopPropagation();
+            onUnlink({
+              type: 'sample',
+              orcabusId: sample.orcabusId,
+              label: sample.sampleId ?? sample.orcabusId,
+            });
+          }}
+          disabled={unlinkIsPending}
+          aria-label={`Unlink sample ${sample.sampleId ?? sample.orcabusId}`}
+          className='rounded p-1.5 text-red-600 transition-colors hover:bg-red-50 focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:outline-none disabled:opacity-50 dark:text-red-400 dark:hover:bg-red-500/10'
+        >
+          <Unlink className='h-4 w-4' />
+        </Button>
+      ),
+    },
+  ];
+
+  if (isErrorSamples) {
+    return <ApiErrorState error={samplesError} onRetry={() => void refetchSamples()} />;
+  }
+
+  return (
+    <DataTable
+      data={linkedSamples}
+      columns={columns}
+      isLoading={isLoadingSamples || isRefetchingSamples}
+      emptyMessage='No samples linked yet.'
+      paginationProps={sampleOrcabusIdArray.length === 0 ? undefined : pagination}
+    />
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Main Tab Component
 // ---------------------------------------------------------------------------
 
@@ -265,17 +363,18 @@ export function CaseDetailsLinkedLibrariesTab() {
   const unlinkMutation = useCaseUnlinkEntityModel();
 
   const handleConfirmUnlink = () => {
+    const entityLabel = unlinkTarget?.type === 'sample' ? 'Sample' : 'Library';
     submitCaseUnlink({
       caseOrcabusId,
       target: unlinkTarget,
       mutate: unlinkMutation.mutate,
       onSuccess: () => {
-        toast.success('Library unlinked');
+        toast.success(`${entityLabel} unlinked`);
         setUnlinkTarget(null);
         refresh();
       },
       onError: () => {
-        toast.error('Failed to unlink library');
+        toast.error(`Failed to unlink ${entityLabel.toLowerCase()}`);
       },
     });
   };
@@ -388,6 +487,16 @@ export function CaseDetailsLinkedLibrariesTab() {
 
   return (
     <>
+      <div className='mb-4'>
+        <h3 className='mb-3 text-sm font-semibold text-neutral-900 dark:text-neutral-100'>
+          Samples
+        </h3>
+        <CaseDetailsSamplesTable
+          onUnlink={setUnlinkTarget}
+          unlinkIsPending={unlinkMutation.isPending}
+        />
+      </div>
+
       <div className='mb-4 flex items-center justify-between'>
         <h3 className='text-sm font-semibold text-neutral-900 dark:text-neutral-100'>
           Linked Libraries

@@ -14,7 +14,16 @@ interface CaseDetailsUnlinkEntityModalProps {
 }
 
 function titleCaseEntity(type: CaseUnlinkTarget['type']) {
-  return type === 'library' ? 'Library' : 'Workflow Run';
+  switch (type) {
+    case 'library':
+      return 'Library';
+    case 'sample':
+      return 'Sample';
+    case 'sequence run':
+      return 'Sequence Run';
+    default:
+      return 'Workflow Run';
+  }
 }
 
 export function CaseDetailsUnlinkEntityModal({

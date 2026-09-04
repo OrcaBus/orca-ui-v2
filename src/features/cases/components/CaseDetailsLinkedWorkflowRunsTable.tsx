@@ -14,8 +14,9 @@ interface CaseDetailsLinkedWorkflowRunsTableProps {
   isLoading: boolean;
   emptyDescription: string;
   onViewFiles: (portalRunId: string) => void;
-  onUnlink: (run: WorkflowRunListModel) => void;
-  unlinkIsPending: boolean;
+  /** Optional unlink affordance. When omitted, no unlink control is rendered (read-only). */
+  onUnlink?: (run: WorkflowRunListModel) => void;
+  unlinkIsPending?: boolean;
 }
 
 export function CaseDetailsLinkedWorkflowRunsTable({
@@ -24,7 +25,7 @@ export function CaseDetailsLinkedWorkflowRunsTable({
   emptyDescription,
   onViewFiles,
   onUnlink,
-  unlinkIsPending,
+  unlinkIsPending = false,
 }: CaseDetailsLinkedWorkflowRunsTableProps) {
   const navigate = useNavigate();
   const pagination = useTablePagination(1, DEFAULT_PAGE_SIZE, runs.length);
@@ -106,20 +107,22 @@ export function CaseDetailsLinkedWorkflowRunsTable({
           >
             <FileSearch className='h-4 w-4' />
           </Button>
-          <Button
-            variant='ghost'
-            size='inline'
-            onClick={(e) => {
-              e.stopPropagation();
-              onUnlink(run);
-            }}
-            disabled={unlinkIsPending}
-            aria-label={`Unlink workflow run ${run.workflowRunName ?? run.portalRunId}`}
-            className='rounded p-1.5 text-red-600 transition-colors hover:bg-red-50 focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:outline-none disabled:opacity-50 dark:text-red-400 dark:hover:bg-red-500/10'
-            title='Unlink workflow run'
-          >
-            <Unlink className='h-4 w-4' />
-          </Button>
+          {onUnlink && (
+            <Button
+              variant='ghost'
+              size='inline'
+              onClick={(e) => {
+                e.stopPropagation();
+                onUnlink(run);
+              }}
+              disabled={unlinkIsPending}
+              aria-label={`Unlink workflow run ${run.workflowRunName ?? run.portalRunId}`}
+              className='rounded p-1.5 text-red-600 transition-colors hover:bg-red-50 focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:outline-none disabled:opacity-50 dark:text-red-400 dark:hover:bg-red-500/10'
+              title='Unlink workflow run'
+            >
+              <Unlink className='h-4 w-4' />
+            </Button>
+          )}
         </div>
       ),
     },
