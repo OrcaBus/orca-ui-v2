@@ -24,7 +24,13 @@ export type SequenceRunStateModel = components['schemas']['State'];
 export type SequenceRunSampleSheetModel = components['schemas']['SampleSheet'];
 export type SequenceRunSampleSheetDetailModel = components['schemas']['SampleSheetWithComment'];
 export type SequenceRunStateValidMapModel =
-  operations['apiV1SequenceGetStatesTransitionValidationMapRetrieve']['responses']['200']['content']['application/json'];
+  operations['apiV1SequenceRunStateTransitionValidationMapRetrieve']['responses']['200']['content']['application/json'];
+export type SequenceRunStateTransitionRequestModel =
+  components['schemas']['StateTransitionRequestRequest'];
+export type SequenceRunStateTransitionResponseModel =
+  components['schemas']['StateTransitionResponse'];
+export type SequenceRunStateTransitionFailureModel =
+  components['schemas']['StateTransitionFailure'];
 export type SequenceRunListByInstrumentRunIdModel =
   components['schemas']['SequenceRunGroupByInstrumentRunId'];
 export type SequenceRunItemListByInstrumentRunIdModel = NonNullable<
@@ -52,13 +58,25 @@ export const useSequenceRunStateListModel = createQueryHook(
   sequenceRunApi,
   '/api/v1/sequence_run/{orcabusId}/state/'
 );
-export const useSequenceRunStateCreateModel = createPostMutationHook(
-  sequenceRunApi,
-  '/api/v1/sequence_run/{orcabusId}/state/'
-);
 export const useSequenceRunStateUpdateModel = createPatchMutationHook(
   sequenceRunApi,
   '/api/v1/sequence_run/{orcabusId}/state/{id}/'
+);
+
+// sequence run state transitions
+// The endpoint determines the target state; each call transitions one or more
+// runs and answers with per-run failures (207) instead of failing outright.
+export const useSequenceRunStateDeprecateModel = createPostMutationHook(
+  sequenceRunApi,
+  '/api/v1/sequence_run/state/deprecate/'
+);
+export const useSequenceRunStateResolveModel = createPostMutationHook(
+  sequenceRunApi,
+  '/api/v1/sequence_run/state/resolve/'
+);
+export const useSequenceRunStateValidMapModel = createQueryHook(
+  sequenceRunApi,
+  '/api/v1/sequence_run/state/get_states_transition_validation_map/'
 );
 
 // sequence run comment
@@ -115,8 +133,4 @@ export const useSequenceRunStatesByInstrumentRunIdModel = createQueryHook(
 export const useSequenceRunSampleSheetsByInstrumentRunIdModel = createQueryHook(
   sequenceRunApi,
   '/api/v1/sequence/{instrumentRunId}/sample_sheets/'
-);
-export const useSequenceRunStateValidMapModel = createQueryHook(
-  sequenceRunApi,
-  '/api/v1/sequence/{instrumentRunId}/get_states_transition_validation_map/'
 );

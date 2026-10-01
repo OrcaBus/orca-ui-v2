@@ -89,10 +89,8 @@ export const SequenceRunDetailsProvider: FC<PropsWithChildren> = ({ children }) 
     reactQuery: { enabled: !!instrumentRunId },
   });
 
-  const { data: sequenceRunStateValidMapData } = useSequenceRunStateValidMapModel({
-    params: { path: { instrumentRunId: instrumentRunId ?? '' } },
-    reactQuery: { enabled: !!instrumentRunId },
-  });
+  // Transition map is sequence-run wide (not scoped to an instrument run).
+  const { data: sequenceRunStateValidMapData } = useSequenceRunStateValidMapModel();
 
   // Latest run with a real status (runs without status are placeholder/edit-only).
   const latestSequenceRun = useMemo(() => {
